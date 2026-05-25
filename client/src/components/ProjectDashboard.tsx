@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Bot, Wrench, Settings, Hexagon, BarChart3, Globe, User,
-  Link, Unlink, Network, Cog, Brain, FileText,
+  Link, Unlink, Network, Cog,
 } from "lucide-react";
 import type { AgentFile } from "../types/agent.types";
 import type { SkillFile, HookConfig, Project } from "../hooks/useProjects";
@@ -231,29 +231,14 @@ function HookRow({ hook }: { hook: HookConfig }) {
   );
 }
 
-// ─── Memory row ───
+// ─── Section sub-header ───
 
-function MemoryRow({
-  agentName,
-  file,
-  selected,
-  onSelect,
-}: {
-  agentName: string;
-  file: { name: string };
-  selected: boolean;
-  onSelect: () => void;
-}) {
+function SectionLabel({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <button
-      onClick={onSelect}
-      className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors ${
-        selected ? "bg-gray-700 text-white" : "text-gray-400 hover:bg-gray-800"
-      }`}
-    >
-      <Brain size={10} className="text-purple-400 shrink-0" />
-      <span className="truncate text-xs">{agentName}/{file.name}</span>
-    </button>
+    <div className="flex items-center gap-1.5 px-3 py-1 mt-1 first:mt-0">
+      {icon}
+      <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">{label}</span>
+    </div>
   );
 }
 
@@ -300,18 +285,11 @@ export default function ProjectDashboard({
 
   const isUserProject = project.id === "user";
 
-  const projectAgents = agents.filter((a: any) => a.scope === "project");
-  const linkedAgents = agents.filter((a: any) => a.scope === "user" && a.linked);
-  const unlinkedAgents = agents.filter((a: any) => a.scope === "user" && !a.linked);
+  const projectAgents = agents.filter((a: any) => a.scope === "project" || (a.scope === "user" && a.linked));
+  const userAgents = agents.filter((a: any) => a.scope === "user" && !a.linked);
 
   const projectSkills = skills.filter((s) => s.scope !== "user");
   const userSkills = skills.filter((s) => s.scope === "user");
-
-  const allMemories = agents
-    .filter((a) => a.memoryFiles.length > 0)
-    .flatMap((a) => a.memoryFiles.map((f) => ({ agentName: a.id, file: f, scope: (a as any).scope })));
-  const projectMemories = allMemories.filter((m) => m.scope === "project" || (m.scope === "user" && (agents.find((a) => a.id === m.agentName) as any)?.linked));
-  const userMemories = allMemories.filter((m) => m.scope === "user" && !(agents.find((a) => a.id === m.agentName) as any)?.linked);
 
   const handleToggleLink = async (agentName: string, currentlyLinked: boolean) => {
     if (currentlyLinked) {
@@ -366,98 +344,69 @@ export default function ProjectDashboard({
       {/* Sidebar with accordions */}
       <div className="w-72 border-r border-gray-800 overflow-y-auto bg-gray-900/30 py-2 px-1">
 
-        {/* ── Project scope (open) ── */}
-        {projectAgents.length > 0 && (
-          <Accordion label="Agents" icon={<Globe size={11} className="text-cyan-400" />} count={projectAgents.length} defaultOpen>
-            {renderAgentList(projectAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction)}
+        {/* ── Agents ── */}
+        <Accordion label="Agents" icon={<Bot size={11} className="text-cyan-400" />} count={agents.length} defaultOpen>
+          {isUserProject ? (
+            renderAgentList(agents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction)
+          ) : (
+            <>
+              {projectAgents.length > 0 && (
+                <>
+                  <SectionLabel icon={<Globe size={10} className="text-cyan-400" />} label="Project" />
+                  {renderAgentList(projectAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, (name) => handleToggleLink(name, true), "unlink")}
+                </>
+              )}
+              {userAgents.length > 0 && (
+                <>
+                  <SectionLabel icon={<User size={10} className="text-gray-500" />} label="User" />
+                  <div className="opacity-60">
+                    {renderAgentList(userAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, (name) => handleToggleLink(name, false), "link")}
+                  </div>
+                </>
+              )}
+            </>
+          )}
+        </Accordion>
+
+        {/* ── Skills ── */}
+        {(projectSkills.length > 0 || userSkills.length > 0) && (
+          <Accordion label="Skills" icon={<Wrench size={11} className="text-green-400" />} count={projectSkills.length + userSkills.length} defaultOpen>
+            {isUserProject ? (
+              skills.map((s) => (
+                <SkillRow key={s.filePath} skill={s} selected={selectedSkill?.filePath === s.filePath} onSelect={handleSelectSkill} />
+              ))
+            ) : (
+              <>
+                {projectSkills.length > 0 && (
+                  <>
+                    <SectionLabel icon={<Globe size={10} className="text-cyan-400" />} label="Project" />
+                    {projectSkills.map((s) => (
+                      <SkillRow key={s.filePath} skill={s} selected={selectedSkill?.filePath === s.filePath} onSelect={handleSelectSkill} />
+                    ))}
+                  </>
+                )}
+                {userSkills.length > 0 && (
+                  <>
+                    <SectionLabel icon={<User size={10} className="text-gray-500" />} label="User" />
+                    <div className="opacity-60">
+                      {userSkills.map((s) => (
+                        <SkillRow key={s.filePath} skill={s} selected={selectedSkill?.filePath === s.filePath} onSelect={handleSelectSkill} />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </>
+            )}
           </Accordion>
         )}
 
-        {linkedAgents.length > 0 && (
-          <Accordion label="Linked Agents" icon={<Link size={11} className="text-green-400" />} count={linkedAgents.length} defaultOpen>
-            {renderAgentList(linkedAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, (name) => handleToggleLink(name, true), "unlink")}
-          </Accordion>
-        )}
-
-        {projectSkills.length > 0 && (
-          <Accordion label="Skills" icon={<Globe size={11} className="text-cyan-400" />} count={projectSkills.length} defaultOpen>
-            {projectSkills.map((s) => (
-              <SkillRow key={s.filePath} skill={s} selected={selectedSkill?.filePath === s.filePath} onSelect={handleSelectSkill} />
-            ))}
-          </Accordion>
-        )}
-
+        {/* ── Hooks ── */}
         {hooks.length > 0 && (
           <Accordion label="Hooks" icon={<Settings size={11} className="text-yellow-400" />} count={hooks.length} defaultOpen>
             {hooks.map((h, i) => <HookRow key={i} hook={h} />)}
           </Accordion>
         )}
 
-        {projectMemories.length > 0 && (
-          <Accordion label="Memories" icon={<Brain size={11} className="text-purple-400" />} count={projectMemories.length} defaultOpen>
-            {projectMemories.map((m) => (
-              <MemoryRow
-                key={`${m.agentName}/${m.file.name}`}
-                agentName={m.agentName}
-                file={m.file}
-                selected={false}
-                onSelect={() => {
-                  const agent = agents.find((a) => a.id === m.agentName);
-                  if (agent) handleSelectAgent(agent);
-                }}
-              />
-            ))}
-          </Accordion>
-        )}
-
-        {/* ── User scope (closed) ── */}
-        {!isUserProject && (
-          <>
-            {unlinkedAgents.length > 0 && (
-              <Accordion label="User Agents" icon={<User size={11} className="text-gray-500" />} count={unlinkedAgents.length} defaultOpen={false}>
-                <div className="opacity-60">
-                  {renderAgentList(unlinkedAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, (name) => handleToggleLink(name, false), "link")}
-                </div>
-              </Accordion>
-            )}
-
-            {userSkills.length > 0 && (
-              <Accordion label="User Skills" icon={<User size={11} className="text-gray-500" />} count={userSkills.length} defaultOpen={false}>
-                <div className="opacity-60">
-                  {userSkills.map((s) => (
-                    <SkillRow key={s.filePath} skill={s} selected={selectedSkill?.filePath === s.filePath} onSelect={handleSelectSkill} />
-                  ))}
-                </div>
-              </Accordion>
-            )}
-
-            {userMemories.length > 0 && (
-              <Accordion label="User Memories" icon={<User size={11} className="text-gray-500" />} count={userMemories.length} defaultOpen={false}>
-                <div className="opacity-60">
-                  {userMemories.map((m) => (
-                    <MemoryRow
-                      key={`${m.agentName}/${m.file.name}`}
-                      agentName={m.agentName}
-                      file={m.file}
-                      selected={false}
-                      onSelect={() => {
-                        const agent = agents.find((a) => a.id === m.agentName);
-                        if (agent) handleSelectAgent(agent);
-                      }}
-                    />
-                  ))}
-                </div>
-              </Accordion>
-            )}
-          </>
-        )}
-
-        {/* User project shows all agents flat */}
-        {isUserProject && (
-          <Accordion label="Agents" icon={<User size={11} className="text-yellow-400" />} count={agents.length} defaultOpen>
-            {renderAgentList(agents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction)}
-          </Accordion>
-        )}
       </div>
 
       {/* Main content */}
