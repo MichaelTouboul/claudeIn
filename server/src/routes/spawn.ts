@@ -12,10 +12,10 @@ router.get("/active", (_req, res) => {
 });
 
 router.post("/", (req, res) => {
-  const { agent_name, mission } = req.body;
+  const { agent_name, mission, cwd } = req.body;
   if (!mission) return res.status(400).json({ error: "mission is required" });
 
-  const session = spawnService.spawnAgent(agent_name || "_main", mission);
+  const session = spawnService.spawnAgent(agent_name || "_main", mission, cwd);
   res.status(201).json(session);
 });
 

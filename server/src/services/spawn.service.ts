@@ -30,7 +30,7 @@ function extractText(event: StreamEvent): string | null {
   return null;
 }
 
-export function spawnAgent(agentName: string, mission: string): SpawnSession {
+export function spawnAgent(agentName: string, mission: string, cwd?: string): SpawnSession {
   const sessionId = randomUUID();
 
   const args = [
@@ -49,6 +49,7 @@ export function spawnAgent(agentName: string, mission: string): SpawnSession {
 
   const proc = spawn("claude", args, {
     stdio: ["pipe", "pipe", "pipe"],
+    cwd: cwd || process.cwd(),
     env: { ...process.env, FORCE_COLOR: "0" },
   });
 

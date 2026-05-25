@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import ProjectSwitcher from "./components/ProjectSwitcher";
 import ProjectDashboard from "./components/ProjectDashboard";
 import AgentChat from "./components/AgentChat";
@@ -7,12 +7,13 @@ import EventConsole from "./components/EventConsole";
 import { useProjects, useDashboard } from "./hooks/useProjects";
 import { useSSE } from "./hooks/useSSE";
 import { useStats } from "./hooks/useStats";
+import { useAppStore } from "./store/useAppStore";
 import { Bot, MessageSquare } from "lucide-react";
-import type { Project } from "./hooks/useProjects";
 
 export default function App() {
   const { projects, loading: projectsLoading } = useProjects();
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const selectedProject = useAppStore((s) => s.selectedProject);
+  const setSelectedProject = useAppStore((s) => s.setSelectedProject);
   const { dashboard, loading: dashLoading, refresh } = useDashboard(selectedProject?.id ?? null);
   const { events, connected, activeAgents, agentContexts } = useSSE();
   const { stats } = useStats(events.length);
@@ -24,10 +25,6 @@ export default function App() {
       agentColorMap.set(a.id, a.frontmatter.color || "cyan");
     }
   }
-
-  const handleProjectSelect = useCallback((p: Project) => {
-    setSelectedProject(p);
-  }, []);
 
   if (projectsLoading) {
     return (
@@ -49,7 +46,7 @@ export default function App() {
         <ProjectSwitcher
           projects={projects}
           selected={selectedProject}
-          onSelect={handleProjectSelect}
+          onSelect={setSelectedProject}
         />
 
         <div className="flex-1" />
@@ -79,7 +76,7 @@ export default function App() {
                 {projects.slice(0, 9).map((p) => (
                   <button
                     key={p.id}
-                    onClick={() => handleProjectSelect(p)}
+                    onClick={() => setSelectedProject(p)}
                     className="text-left bg-gray-800/50 border border-gray-700/50 rounded-xl p-4 hover:border-cyan-500/50 transition-colors"
                   >
                     <div className="text-sm font-medium text-gray-200 mb-1 truncate">{p.name}</div>

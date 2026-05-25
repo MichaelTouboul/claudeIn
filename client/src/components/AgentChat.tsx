@@ -10,6 +10,7 @@ import {
   Shield,
 } from "lucide-react";
 import type { SpawnSession, ChatMessage } from "../types/spawn.types";
+import { useAppStore } from "../store/useAppStore";
 
 const SLASH_COMMANDS = [
   { cmd: "/help", desc: "Get help with Claude Code" },
@@ -155,6 +156,7 @@ export default function AgentChat({
 }: {
   agentName: string;
 }) {
+  const projectPath = useAppStore((s) => s.selectedProject?.path);
   const [session, setSession] = useState<SpawnSession | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [queue, setQueue] = useState<string[]>([]);
@@ -189,7 +191,7 @@ export default function AgentChat({
       fetch("/api/spawn", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agent_name: agentName, mission: next }),
+        body: JSON.stringify({ agent_name: agentName, mission: next, cwd: projectPath }),
       }).then((res) => res.json()).then((data: SpawnSession) => {
         setSession(data);
       }).catch(() => {
@@ -299,7 +301,7 @@ export default function AgentChat({
         const res = await fetch("/api/spawn", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ agent_name: agentName, mission: text }),
+          body: JSON.stringify({ agent_name: agentName, mission: text, cwd: projectPath }),
         });
         const data: SpawnSession = await res.json();
         setSession(data);
