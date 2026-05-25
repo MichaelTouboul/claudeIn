@@ -282,6 +282,16 @@ export default function ProjectDashboard({
   const [view, setView] = useState<MainView>("none");
   const [selectedAgent, setSelectedAgent] = useState<AgentFile | null>(null);
   const [selectedSkill, setSelectedSkill] = useState<SkillFile | null>(null);
+  const [openPanels, setOpenPanels] = useState<Set<string>>(() => new Set(["agents"]));
+
+  const togglePanel = (panel: string) => {
+    setOpenPanels((prev) => {
+      const next = new Set(prev);
+      if (next.has(panel)) next.delete(panel);
+      else next.add(panel);
+      return next;
+    });
+  };
 
   const isUserProject = project.id === "user";
 
@@ -342,36 +352,42 @@ export default function ProjectDashboard({
   return (
     <div className="flex-1 flex h-full">
       {/* Sidebar with accordions */}
-      <div className="w-72 border-r border-gray-800 overflow-y-auto bg-gray-900/30 py-2 px-1">
+      <div className="w-72 border-r border-gray-800 bg-gray-900/30 flex flex-col h-full">
 
-        {/* ── Agents ── */}
-        <Accordion label="Agents" icon={<Bot size={11} className="text-cyan-400" />} count={agents.length} defaultOpen>
-          {isUserProject ? (
-            renderAgentList(agents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction)
-          ) : (
-            <>
-              {projectAgents.length > 0 && (
-                <>
-                  <SectionLabel icon={<Globe size={10} className="text-cyan-400" />} label="Project" />
-                  {renderAgentList(projectAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, (name) => handleToggleLink(name, true), "unlink")}
-                </>
-              )}
-              {userAgents.length > 0 && (
-                <>
-                  <SectionLabel icon={<User size={10} className="text-gray-500" />} label="User" />
-                  <div className="opacity-60">
-                    {renderAgentList(userAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, (name) => handleToggleLink(name, false), "link")}
-                  </div>
-                </>
-              )}
-            </>
-          )}
-        </Accordion>
-
-        {/* ── Skills ── */}
-        {(projectSkills.length > 0 || userSkills.length > 0) && (
-          <Accordion label="Skills" icon={<Wrench size={11} className="text-green-400" />} count={projectSkills.length + userSkills.length} defaultOpen>
-            {isUserProject ? (
+        {/* Open panels fill available space, closed panels stack at bottom */}
+        {([
+          {
+            key: "agents",
+            label: "Agents",
+            icon: <Bot size={11} className="text-cyan-400" />,
+            count: agents.length,
+            content: isUserProject ? (
+              renderAgentList(agents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction)
+            ) : (
+              <>
+                {projectAgents.length > 0 && (
+                  <>
+                    <SectionLabel icon={<Globe size={10} className="text-cyan-400" />} label="Project" />
+                    {renderAgentList(projectAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, (name) => handleToggleLink(name, true), "unlink")}
+                  </>
+                )}
+                {userAgents.length > 0 && (
+                  <>
+                    <SectionLabel icon={<User size={10} className="text-gray-500" />} label="User" />
+                    <div className="opacity-60">
+                      {renderAgentList(userAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, (name) => handleToggleLink(name, false), "link")}
+                    </div>
+                  </>
+                )}
+              </>
+            ),
+          },
+          (projectSkills.length > 0 || userSkills.length > 0) ? {
+            key: "skills",
+            label: "Skills",
+            icon: <Wrench size={11} className="text-green-400" />,
+            count: projectSkills.length + userSkills.length,
+            content: isUserProject ? (
               skills.map((s) => (
                 <SkillRow key={s.filePath} skill={s} selected={selectedSkill?.filePath === s.filePath} onSelect={handleSelectSkill} />
               ))
@@ -396,16 +412,35 @@ export default function ProjectDashboard({
                   </>
                 )}
               </>
-            )}
-          </Accordion>
-        )}
-
-        {/* ── Hooks ── */}
-        {hooks.length > 0 && (
-          <Accordion label="Hooks" icon={<Settings size={11} className="text-yellow-400" />} count={hooks.length} defaultOpen>
-            {hooks.map((h, i) => <HookRow key={i} hook={h} />)}
-          </Accordion>
-        )}
+            ),
+          } : null,
+          hooks.length > 0 ? {
+            key: "hooks",
+            label: "Hooks",
+            icon: <Settings size={11} className="text-yellow-400" />,
+            count: hooks.length,
+            content: hooks.map((h, i) => <HookRow key={i} hook={h} />),
+          } : null,
+        ].filter(Boolean) as { key: string; label: string; icon: React.ReactNode; count: number; content: React.ReactNode }[])
+          .sort((a, b) => {
+            const aOpen = openPanels.has(a.key) ? 0 : 1;
+            const bOpen = openPanels.has(b.key) ? 0 : 1;
+            return aOpen - bOpen;
+          })
+          .map((panel) => (
+            <Accordion
+              key={panel.key}
+              label={panel.label}
+              icon={panel.icon}
+              count={panel.count}
+              open={openPanels.has(panel.key)}
+              onToggle={() => togglePanel(panel.key)}
+              flex
+            >
+              {panel.content}
+            </Accordion>
+          ))
+        }
 
       </div>
 
