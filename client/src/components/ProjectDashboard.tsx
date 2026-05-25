@@ -1,15 +1,17 @@
 import { useState } from "react";
 import {
   Bot, Wrench, Settings, Hexagon, BarChart3, Globe, User,
-  Link, Unlink, Network, Cog,
+  Link, Unlink, Network, Cog, Star,
 } from "lucide-react";
 import type { AgentFile } from "../types/agent.types";
 import type { SkillFile, HookConfig, Project } from "../hooks/useProjects";
+import { useFavorites } from "../hooks/useFavorites";
 import AgentDetail from "./AgentDetail";
 import AgentMesh from "./AgentMesh";
 import CostDashboard from "./CostDashboard";
 import Accordion from "./Accordion";
 import AgentContextMenu from "./AgentContextMenu";
+import ItemContextMenu from "./ItemContextMenu";
 
 type MainView = "agent" | "skill" | "hook" | "mesh" | "costs" | "none";
 
@@ -29,6 +31,7 @@ function OrchestratorTree({
   onAgentAction,
   onToggleLink,
   linkAction,
+  isAgentFavorite,
 }: {
   orchestrator: AgentFile;
   allAgents: AgentFile[];
@@ -37,6 +40,7 @@ function OrchestratorTree({
   onAgentAction: (action: string, agentName: string) => void;
   onToggleLink?: (name: string) => void;
   linkAction?: "link" | "unlink";
+  isAgentFavorite?: (name: string) => boolean;
 }) {
   const agentMap = new Map(allAgents.map((a) => [a.id, a]));
   const subs = orchestrator.subAgents
@@ -54,10 +58,9 @@ function OrchestratorTree({
         >
           <Network size={14} className="text-cyan-400 shrink-0" />
           <span className="truncate text-sm font-medium">{orchestrator.id}</span>
-          <span className="ml-auto text-xs text-gray-500">{orchestrator.frontmatter.model || "inherit"}</span>
         </button>
         <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-          <AgentContextMenu agentName={orchestrator.id} isOrchestrator onAction={onAgentAction} />
+          <AgentContextMenu agentName={orchestrator.id} isOrchestrator isFavorite={isAgentFavorite?.(orchestrator.id)} onAction={onAgentAction} />
         </div>
         {onToggleLink && linkAction && (
           <button
@@ -85,10 +88,9 @@ function OrchestratorTree({
               >
                 <Cog size={11} className="text-gray-500 shrink-0" />
                 <span className="truncate text-xs font-medium">{sub.id}</span>
-                <span className="ml-auto text-xs text-gray-600">{sub.frontmatter.model || "inherit"}</span>
               </button>
               <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                <AgentContextMenu agentName={sub.id} isOrchestrator={false} onAction={onAgentAction} />
+                <AgentContextMenu agentName={sub.id} isOrchestrator={false} isFavorite={isAgentFavorite?.(sub.id)} onAction={onAgentAction} />
               </div>
             </div>
           ))}
@@ -105,6 +107,7 @@ function AgentRow({
   onAgentAction,
   onToggleLink,
   linkAction,
+  isAgentFavorite,
 }: {
   agent: AgentFile;
   selected: boolean;
@@ -112,6 +115,7 @@ function AgentRow({
   onAgentAction: (action: string, agentName: string) => void;
   onToggleLink?: (name: string) => void;
   linkAction?: "link" | "unlink";
+  isAgentFavorite?: (name: string) => boolean;
 }) {
   const dot = colorMap[agent.frontmatter.color || ""] || "bg-gray-500";
   return (
@@ -124,10 +128,9 @@ function AgentRow({
       >
         <span className={`w-2 h-2 rounded-full shrink-0 ${dot}`} />
         <span className="truncate text-sm font-medium">{agent.id}</span>
-        <span className="ml-auto text-xs text-gray-500">{agent.frontmatter.model || "inherit"}</span>
       </button>
       <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-        <AgentContextMenu agentName={agent.id} isOrchestrator={agent.subAgents.length > 0} onAction={onAgentAction} />
+        <AgentContextMenu agentName={agent.id} isOrchestrator={agent.subAgents.length > 0} isFavorite={isAgentFavorite?.(agent.id)} onAction={onAgentAction} />
       </div>
       {onToggleLink && linkAction && (
         <button
@@ -153,6 +156,7 @@ function renderAgentList(
   onAgentAction: (action: string, agentName: string) => void,
   onToggleLink?: (name: string) => void,
   linkAction?: "link" | "unlink",
+  isAgentFavorite?: (name: string) => boolean,
 ) {
   const agentIds = new Set(allAgents.map((a) => a.id));
   const subAgentIds = new Set<string>();
@@ -177,6 +181,7 @@ function renderAgentList(
           onAgentAction={onAgentAction}
           onToggleLink={onToggleLink}
           linkAction={linkAction}
+          isAgentFavorite={isAgentFavorite}
         />
       ))}
       {standalones.map((a) => (
@@ -188,6 +193,7 @@ function renderAgentList(
           onAgentAction={onAgentAction}
           onToggleLink={onToggleLink}
           linkAction={linkAction}
+          isAgentFavorite={isAgentFavorite}
         />
       ))}
     </div>
@@ -199,34 +205,56 @@ function renderAgentList(
 function SkillRow({
   skill,
   selected,
+  isFavorite,
   onSelect,
+  onToggleFavorite,
 }: {
   skill: SkillFile;
   selected: boolean;
+  isFavorite: boolean;
   onSelect: (s: SkillFile) => void;
+  onToggleFavorite: () => void;
 }) {
   return (
-    <button
-      onClick={() => onSelect(skill)}
-      className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors ${
-        selected ? "bg-gray-700 text-white" : "text-gray-300 hover:bg-gray-800"
-      }`}
-    >
-      <Wrench size={11} className="text-green-400 shrink-0" />
-      <span className="truncate text-xs font-medium">{skill.name}</span>
-    </button>
+    <div className="flex items-center group">
+      <button
+        onClick={() => onSelect(skill)}
+        className={`flex-1 flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors ${
+          selected ? "bg-gray-700 text-white" : "text-gray-300 hover:bg-gray-800"
+        }`}
+      >
+        <Wrench size={11} className="text-green-400 shrink-0" />
+        <span className="truncate text-xs font-medium">{skill.name}</span>
+      </button>
+      <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+        <ItemContextMenu isFavorite={isFavorite} onToggleFavorite={onToggleFavorite} />
+      </div>
+    </div>
   );
 }
 
 // ─── Hook row ───
 
-function HookRow({ hook }: { hook: HookConfig }) {
+function HookRow({
+  hook,
+  isFavorite,
+  onToggleFavorite,
+}: {
+  hook: HookConfig;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
+}) {
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 text-xs">
-      <Settings size={10} className="text-yellow-400 shrink-0" />
-      <span className="text-yellow-400 font-mono">{hook.event}</span>
-      <span className="text-gray-600">→</span>
-      <span className="text-gray-400 font-mono truncate">{hook.matcher}</span>
+    <div className="flex items-center group">
+      <div className="flex-1 flex items-center gap-2 px-3 py-1.5 text-xs">
+        <Settings size={10} className="text-yellow-400 shrink-0" />
+        <span className="text-yellow-400 font-mono">{hook.event}</span>
+        <span className="text-gray-600">→</span>
+        <span className="text-gray-400 font-mono truncate">{hook.matcher}</span>
+      </div>
+      <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+        <ItemContextMenu isFavorite={isFavorite} onToggleFavorite={onToggleFavorite} />
+      </div>
     </div>
   );
 }
@@ -246,7 +274,7 @@ function SectionLabel({ icon, label }: { icon: React.ReactNode; label: string })
 
 type SkillTab = "overview" | "prompt" | "files";
 
-function SkillDetail({ skill }: { skill: SkillFile }) {
+function SkillDetail({ skill, isFavorite, onToggleFavorite }: { skill: SkillFile; isFavorite?: boolean; onToggleFavorite?: () => void }) {
   const [tab, setTab] = useState<SkillTab>("overview");
 
   const tabs: { key: SkillTab; label: string }[] = [
@@ -262,6 +290,15 @@ function SkillDetail({ skill }: { skill: SkillFile }) {
         <div className="flex items-center gap-2 mb-1">
           <Wrench size={16} className="text-green-400" />
           <h2 className="text-lg font-bold text-white">{skill.name}</h2>
+          {onToggleFavorite && (
+            <button
+              onClick={onToggleFavorite}
+              className="p-1 rounded hover:bg-gray-800 transition-colors"
+              title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+            >
+              <Star size={16} className={isFavorite ? "text-yellow-400 fill-yellow-400" : "text-gray-600 hover:text-yellow-400"} />
+            </button>
+          )}
           <span className={`text-xs px-2 py-0.5 rounded-full ${
             skill.scope === "user" ? "bg-yellow-500/15 text-yellow-400" : "bg-cyan-500/15 text-cyan-400"
           }`}>
@@ -385,6 +422,7 @@ export default function ProjectDashboard({
   const [selectedAgent, setSelectedAgent] = useState<AgentFile | null>(null);
   const [selectedSkill, setSelectedSkill] = useState<SkillFile | null>(null);
   const [openPanels, setOpenPanels] = useState<Set<string>>(() => new Set(["agents"]));
+  const { isFavorite, toggle: toggleFavorite } = useFavorites(project.id);
 
   const togglePanel = (panel: string) => {
     setOpenPanels((prev) => {
@@ -402,6 +440,11 @@ export default function ProjectDashboard({
 
   const projectSkills = skills.filter((s) => s.scope !== "user");
   const userSkills = skills.filter((s) => s.scope === "user");
+
+  const favAgents = agents.filter((a) => isFavorite("agent", a.id));
+  const favSkills = skills.filter((s) => isFavorite("skill", s.name));
+  const favHooks = hooks.filter((h) => isFavorite("hook", `${h.event}:${h.matcher}`));
+  const hasFavorites = favAgents.length + favSkills.length + favHooks.length > 0;
 
   const handleToggleLink = async (agentName: string, currentlyLinked: boolean) => {
     if (currentlyLinked) {
@@ -436,6 +479,9 @@ export default function ProjectDashboard({
         // TODO: implement add sub-agent modal
         alert(`Add sub-agent to ${agentName} — coming soon`);
         break;
+      case "toggle-favorite":
+        toggleFavorite("agent", agentName);
+        break;
     }
   };
 
@@ -458,26 +504,58 @@ export default function ProjectDashboard({
 
         {/* Open panels fill available space, closed panels stack at bottom */}
         {([
+          hasFavorites ? {
+            key: "favorites",
+            label: "Favorites",
+            icon: <Star size={11} className="text-yellow-400" />,
+            count: favAgents.length + favSkills.length + favHooks.length,
+            content: (
+              <>
+                {favAgents.length > 0 && (
+                  <>
+                    <SectionLabel icon={<Bot size={10} className="text-cyan-400" />} label="Agents" />
+                    {renderAgentList(favAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, undefined, undefined, (n) => isFavorite("agent", n))}
+                  </>
+                )}
+                {favSkills.length > 0 && (
+                  <>
+                    <SectionLabel icon={<Wrench size={10} className="text-green-400" />} label="Skills" />
+                    {favSkills.map((s) => (
+                      <SkillRow key={s.filePath} skill={s} selected={selectedSkill?.filePath === s.filePath} isFavorite onSelect={handleSelectSkill} onToggleFavorite={() => toggleFavorite("skill", s.name)} />
+                    ))}
+                  </>
+                )}
+                {favHooks.length > 0 && (
+                  <>
+                    <SectionLabel icon={<Settings size={10} className="text-yellow-400" />} label="Hooks" />
+                    {favHooks.map((h, i) => (
+                      <HookRow key={i} hook={h} isFavorite onToggleFavorite={() => toggleFavorite("hook", `${h.event}:${h.matcher}`)} />
+                    ))}
+                  </>
+                )}
+              </>
+            ),
+          } : null,
           {
             key: "agents",
             label: "Agents",
             icon: <Bot size={11} className="text-cyan-400" />,
             count: agents.length,
             content: isUserProject ? (
-              renderAgentList(agents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction)
+              renderAgentList(agents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, undefined, undefined, (n) => isFavorite("agent", n))
             ) : (
               <>
                 {projectAgents.length > 0 && (
                   <>
                     <SectionLabel icon={<Globe size={10} className="text-cyan-400" />} label="Project" />
-                    {renderAgentList(projectAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, (name) => handleToggleLink(name, true), "unlink")}
+                    {renderAgentList(projectAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, (name) => handleToggleLink(name, true), "unlink", (n) => isFavorite("agent", n))}
                   </>
                 )}
                 {userAgents.length > 0 && (
                   <>
                     <SectionLabel icon={<User size={10} className="text-gray-500" />} label="User" />
                     <div className="opacity-60">
-                      {renderAgentList(userAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, (name) => handleToggleLink(name, false), "link")}
+                      {renderAgentList(userAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, (name) => handleToggleLink(name, false), "link", (n) => isFavorite("agent", n))}
                     </div>
                   </>
                 )}
@@ -491,7 +569,7 @@ export default function ProjectDashboard({
             count: projectSkills.length + userSkills.length,
             content: isUserProject ? (
               skills.map((s) => (
-                <SkillRow key={s.filePath} skill={s} selected={selectedSkill?.filePath === s.filePath} onSelect={handleSelectSkill} />
+                <SkillRow key={s.filePath} skill={s} selected={selectedSkill?.filePath === s.filePath} isFavorite={isFavorite("skill", s.name)} onSelect={handleSelectSkill} onToggleFavorite={() => toggleFavorite("skill", s.name)} />
               ))
             ) : (
               <>
@@ -499,7 +577,7 @@ export default function ProjectDashboard({
                   <>
                     <SectionLabel icon={<Globe size={10} className="text-cyan-400" />} label="Project" />
                     {projectSkills.map((s) => (
-                      <SkillRow key={s.filePath} skill={s} selected={selectedSkill?.filePath === s.filePath} onSelect={handleSelectSkill} />
+                      <SkillRow key={s.filePath} skill={s} selected={selectedSkill?.filePath === s.filePath} isFavorite={isFavorite("skill", s.name)} onSelect={handleSelectSkill} onToggleFavorite={() => toggleFavorite("skill", s.name)} />
                     ))}
                   </>
                 )}
@@ -508,7 +586,7 @@ export default function ProjectDashboard({
                     <SectionLabel icon={<User size={10} className="text-gray-500" />} label="User" />
                     <div className="opacity-60">
                       {userSkills.map((s) => (
-                        <SkillRow key={s.filePath} skill={s} selected={selectedSkill?.filePath === s.filePath} onSelect={handleSelectSkill} />
+                        <SkillRow key={s.filePath} skill={s} selected={selectedSkill?.filePath === s.filePath} isFavorite={isFavorite("skill", s.name)} onSelect={handleSelectSkill} onToggleFavorite={() => toggleFavorite("skill", s.name)} />
                       ))}
                     </div>
                   </>
@@ -521,10 +599,14 @@ export default function ProjectDashboard({
             label: "Hooks",
             icon: <Settings size={11} className="text-yellow-400" />,
             count: hooks.length,
-            content: hooks.map((h, i) => <HookRow key={i} hook={h} />),
+            content: hooks.map((h, i) => (
+              <HookRow key={i} hook={h} isFavorite={isFavorite("hook", `${h.event}:${h.matcher}`)} onToggleFavorite={() => toggleFavorite("hook", `${h.event}:${h.matcher}`)} />
+            )),
           } : null,
         ].filter(Boolean) as { key: string; label: string; icon: React.ReactNode; count: number; content: React.ReactNode }[])
           .sort((a, b) => {
+            if (a.key === "favorites") return -1;
+            if (b.key === "favorites") return 1;
             const aOpen = openPanels.has(a.key) ? 0 : 1;
             const bOpen = openPanels.has(b.key) ? 0 : 1;
             return aOpen - bOpen;
@@ -571,9 +653,9 @@ export default function ProjectDashboard({
 
         <div className="flex-1 min-h-0 overflow-hidden">
           {view === "agent" && selectedAgent ? (
-            <AgentDetail agent={selectedAgent} onEdit={() => {}} onDelete={() => {}} onRefresh={onRefresh} />
+            <AgentDetail agent={selectedAgent} onEdit={() => {}} onDelete={() => {}} onRefresh={onRefresh} isFavorite={isFavorite("agent", selectedAgent.id)} onToggleFavorite={() => toggleFavorite("agent", selectedAgent.id)} />
           ) : view === "skill" && selectedSkill ? (
-            <SkillDetail skill={selectedSkill} />
+            <SkillDetail skill={selectedSkill} isFavorite={isFavorite("skill", selectedSkill.name)} onToggleFavorite={() => toggleFavorite("skill", selectedSkill.name)} />
           ) : view === "mesh" ? (
             <AgentMesh agents={agents} activeAgents={activeAgents} onSelect={handleSelectAgent} />
           ) : view === "costs" ? (

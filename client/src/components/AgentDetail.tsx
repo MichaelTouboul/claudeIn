@@ -8,6 +8,7 @@ import {
   Settings,
   Database,
   X,
+  Star,
 } from "lucide-react";
 import type { AgentFile } from "../types/agent.types";
 import MemoryViewer from "./MemoryViewer";
@@ -135,11 +136,15 @@ export default function AgentDetail({
   onEdit,
   onDelete,
   onRefresh,
+  isFavorite,
+  onToggleFavorite,
 }: {
   agent: AgentFile;
   onEdit: (a: AgentFile) => void;
   onDelete: (name: string) => void;
   onRefresh: () => void;
+  isFavorite?: boolean;
+  onToggleFavorite?: () => void;
 }) {
   const [tab, setTab] = useState<Tab>("overview");
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -153,6 +158,15 @@ export default function AgentDetail({
             style={{ backgroundColor: `var(--agent-color, #06b6d4)` }}
           />
           <h2 className="text-lg font-bold text-white">{agent.id}</h2>
+          {onToggleFavorite && (
+            <button
+              onClick={onToggleFavorite}
+              className="p-1 rounded hover:bg-gray-800 transition-colors"
+              title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+            >
+              <Star size={16} className={isFavorite ? "text-yellow-400 fill-yellow-400" : "text-gray-600 hover:text-yellow-400"} />
+            </button>
+          )}
           <Badge variant={agent.frontmatter.model === "opus" ? "purple" : "blue"}>
             {agent.frontmatter.model || "inherit"}
           </Badge>

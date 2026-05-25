@@ -1,15 +1,17 @@
 import { useState, useRef, useEffect } from "react";
-import { MoreHorizontal, Edit3, Trash2, Plus, Type } from "lucide-react";
+import { MoreHorizontal, Edit3, Trash2, Plus, Type, Star, StarOff } from "lucide-react";
 
-type Action = "rename" | "edit" | "delete" | "add-sub";
+type Action = "rename" | "edit" | "delete" | "add-sub" | "toggle-favorite";
 
 export default function AgentContextMenu({
   agentName,
   isOrchestrator,
+  isFavorite,
   onAction,
 }: {
   agentName: string;
   isOrchestrator: boolean;
+  isFavorite?: boolean;
   onAction: (action: Action, agentName: string) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -24,6 +26,9 @@ export default function AgentContextMenu({
   }, []);
 
   const items: { action: Action; label: string; icon: React.ReactNode; color?: string }[] = [
+    isFavorite
+      ? { action: "toggle-favorite", label: "Remove favorite", icon: <StarOff size={12} />, color: "text-yellow-400" }
+      : { action: "toggle-favorite", label: "Add to favorites", icon: <Star size={12} />, color: "text-yellow-400" },
     { action: "add-sub", label: "Add sub-agent", icon: <Plus size={12} />, color: "text-cyan-400" },
     { action: "rename", label: "Rename", icon: <Type size={12} /> },
     { action: "edit", label: "Edit", icon: <Edit3 size={12} /> },

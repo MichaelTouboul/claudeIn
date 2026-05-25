@@ -54,6 +54,17 @@ export async function initDb() {
 
     CREATE INDEX IF NOT EXISTS idx_links_project ON agent_project_links(project_id);
     CREATE INDEX IF NOT EXISTS idx_links_agent ON agent_project_links(agent_name);
+
+    CREATE TABLE IF NOT EXISTS favorites (
+      id SERIAL PRIMARY KEY,
+      item_type TEXT NOT NULL CHECK (item_type IN ('agent', 'skill', 'hook')),
+      item_name TEXT NOT NULL,
+      project_id TEXT NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE(item_type, item_name, project_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_favorites_project ON favorites(project_id);
   `);
 }
 
