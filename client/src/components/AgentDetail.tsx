@@ -9,8 +9,10 @@ import {
   Database,
   X,
   Star,
+  Save,
 } from "lucide-react";
-import type { AgentFile } from "../types/agent.types";
+import type { AgentFile, AgentFrontmatter } from "../types/agent.types";
+import { api } from "../services/api";
 import MemoryViewer from "./MemoryViewer";
 import MarkdownBody from "./MarkdownBody";
 
@@ -43,90 +45,171 @@ function Badge({ children, variant }: { children: React.ReactNode; variant: stri
   );
 }
 
-function FrontmatterTable({ agent }: { agent: AgentFile }) {
-  const fm = agent.frontmatter;
-  const tools = Array.isArray(fm.tools)
-    ? fm.tools
-    : typeof fm.tools === "string"
-      ? fm.tools.split(",").map((t) => t.trim())
-      : [];
-  const disallowed = Array.isArray(fm.disallowedTools)
-    ? fm.disallowedTools
-    : typeof fm.disallowedTools === "string"
-      ? fm.disallowedTools.split(",").map((t) => t.trim())
-      : [];
+const MODEL_OPTIONS = ["", "opus", "sonnet", "haiku"];
+const COLOR_OPTIONS = ["", "cyan", "blue", "green", "yellow", "orange", "red", "purple", "pink"];
+const MEMORY_OPTIONS = ["", "project", "user"];
+const PERMISSION_OPTIONS = ["", "default", "plan", "bypassPermissions"];
+const EFFORT_OPTIONS = ["", "low", "medium", "high"];
+const ISOLATION_OPTIONS = ["", "worktree"];
 
-  const rows: [string, React.ReactNode][] = [
-    ["Name", <span className="font-mono text-cyan-300">{fm.name}</span>],
-    ["Model", <Badge variant={fm.model === "opus" ? "purple" : fm.model === "sonnet" ? "blue" : "gray"}>{fm.model || "inherit"}</Badge>],
-    ["Color", fm.color ? <Badge variant={fm.color}>{fm.color}</Badge> : <span className="text-gray-500">—</span>],
-    ["Max Turns", <span>{fm.maxTurns ?? "—"}</span>],
-    ["Memory", fm.memory ? <Badge variant="green">{fm.memory}</Badge> : <span className="text-gray-500">none</span>],
-    ["Permission Mode", <span>{fm.permissionMode ?? "default"}</span>],
-    [
-      "Tools",
-      tools.length > 0 ? (
-        <div className="flex flex-wrap gap-1">
-          {tools.map((t) => (
-            <Badge key={t} variant="cyan">{t}</Badge>
-          ))}
-        </div>
-      ) : (
-        <span className="text-gray-500">all (inherited)</span>
-      ),
-    ],
-    [
-      "Disallowed",
-      disallowed.length > 0 ? (
-        <div className="flex flex-wrap gap-1">
-          {disallowed.map((t) => (
-            <Badge key={t} variant="red">{t}</Badge>
-          ))}
-        </div>
-      ) : (
-        <span className="text-gray-500">—</span>
-      ),
-    ],
-    [
-      "Sub-agents",
-      agent.subAgents.length > 0 ? (
-        <div className="flex flex-wrap gap-1">
-          {agent.subAgents.map((s) => (
-            <Badge key={s} variant="blue">{s}</Badge>
-          ))}
-        </div>
-      ) : (
-        <span className="text-gray-500">—</span>
-      ),
-    ],
-  ];
+type FieldDef = {
+  key: string;
+  label: string;
+  type: "string" | "dropdown" | "number" | "textarea" | "boolean";
+  options?: string[];
+};
 
-  const extraKeys = Object.keys(fm).filter(
-    (k) =>
-      ![
-        "name", "description", "model", "color", "tools", "disallowedTools",
-        "maxTurns", "memory", "permissionMode", "skills", "mcpServers",
-        "background", "effort", "isolation", "initialPrompt", "hooks",
-      ].includes(k)
-  );
-  for (const key of extraKeys) {
-    rows.push([key, <span className="font-mono text-sm">{JSON.stringify(fm[key])}</span>]);
+const FIELDS: FieldDef[] = [
+  { key: "name", label: "Name", type: "string" },
+  { key: "description", label: "Description", type: "textarea" },
+  { key: "model", label: "Model", type: "dropdown", options: MODEL_OPTIONS },
+  { key: "color", label: "Color", type: "dropdown", options: COLOR_OPTIONS },
+  { key: "maxTurns", label: "Max Turns", type: "number" },
+  { key: "memory", label: "Memory", type: "dropdown", options: MEMORY_OPTIONS },
+  { key: "permissionMode", label: "Permission Mode", type: "dropdown", options: PERMISSION_OPTIONS },
+  { key: "effort", label: "Effort", type: "dropdown", options: EFFORT_OPTIONS },
+  { key: "isolation", label: "Isolation", type: "dropdown", options: ISOLATION_OPTIONS },
+  { key: "background", label: "Background", type: "boolean" },
+  { key: "tools", label: "Tools", type: "string" },
+  { key: "disallowedTools", label: "Disallowed Tools", type: "string" },
+];
+
+function fieldDisplayValue(fm: AgentFrontmatter, key: string): React.ReactNode {
+  const val = fm[key];
+  if (val === undefined || val === null || val === "") return <span className="text-gray-500">—</span>;
+
+  if (key === "model") return <Badge variant={val === "opus" ? "purple" : val === "sonnet" ? "blue" : "gray"}>{String(val)}</Badge>;
+  if (key === "color") return <Badge variant={String(val)}>{String(val)}</Badge>;
+  if (key === "memory") return <Badge variant="green">{String(val)}</Badge>;
+  if (key === "background") return <Badge variant={val ? "green" : "gray"}>{val ? "yes" : "no"}</Badge>;
+
+  if (key === "tools" || key === "disallowedTools") {
+    const arr = Array.isArray(val) ? val : typeof val === "string" ? val.split(",").map((t) => t.trim()) : [];
+    if (arr.length === 0) return <span className="text-gray-500">{key === "tools" ? "all (inherited)" : "—"}</span>;
+    return (
+      <div className="flex flex-wrap gap-1">
+        {arr.map((t) => <Badge key={t} variant={key === "tools" ? "cyan" : "red"}>{t}</Badge>)}
+      </div>
+    );
   }
 
+  return <span className="font-mono text-sm">{String(val)}</span>;
+}
+
+function EditField({
+  field,
+  value,
+  onChange,
+}: {
+  field: FieldDef;
+  value: unknown;
+  onChange: (val: unknown) => void;
+}) {
+  const base = "w-full bg-gray-800 border border-cyan-500/50 rounded px-2.5 py-1.5 text-sm text-gray-200 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30";
+
+  if (field.type === "dropdown") {
+    return (
+      <select
+        value={String(value ?? "")}
+        onChange={(e) => onChange(e.target.value || undefined)}
+        className={base}
+      >
+        {field.options!.map((opt) => (
+          <option key={opt} value={opt}>{opt || "— inherit —"}</option>
+        ))}
+      </select>
+    );
+  }
+
+  if (field.type === "number") {
+    return (
+      <input
+        type="number"
+        value={value !== undefined && value !== null ? String(value) : ""}
+        onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
+        className={base}
+        placeholder="—"
+      />
+    );
+  }
+
+  if (field.type === "textarea") {
+    return (
+      <textarea
+        value={String(value ?? "")}
+        onChange={(e) => onChange(e.target.value)}
+        rows={3}
+        className={`${base} resize-y`}
+      />
+    );
+  }
+
+  if (field.type === "boolean") {
+    return (
+      <select
+        value={value ? "true" : "false"}
+        onChange={(e) => onChange(e.target.value === "true")}
+        className={base}
+      >
+        <option value="false">no</option>
+        <option value="true">yes</option>
+      </select>
+    );
+  }
+
+  const strVal = Array.isArray(value) ? value.join(", ") : String(value ?? "");
+  return (
+    <input
+      type="text"
+      value={strVal}
+      onChange={(e) => onChange(e.target.value)}
+      className={base}
+      placeholder="—"
+    />
+  );
+}
+
+function FrontmatterTable({
+  agent,
+  editing,
+  draft,
+  onDraftChange,
+}: {
+  agent: AgentFile;
+  editing: boolean;
+  draft: Partial<AgentFrontmatter>;
+  onDraftChange: (key: string, val: unknown) => void;
+}) {
   return (
     <div className="space-y-4">
-      <p className="text-gray-300 text-sm leading-relaxed">{fm.description}</p>
       <table className="w-full text-sm">
         <tbody>
-          {rows.map(([label, value]) => (
-            <tr key={label} className="border-b border-gray-800">
-              <td className="py-2 pr-4 text-gray-500 font-medium w-36 align-top">{label}</td>
-              <td className="py-2 text-gray-200">{value}</td>
+          {FIELDS.map((field) => (
+            <tr key={field.key} className="border-b border-gray-800">
+              <td className="py-2.5 pr-4 text-gray-500 font-medium w-40 align-top">{field.label}</td>
+              <td className="py-2.5 text-gray-200">
+                {editing ? (
+                  <EditField
+                    field={field}
+                    value={draft[field.key] !== undefined ? draft[field.key] : agent.frontmatter[field.key]}
+                    onChange={(val) => onDraftChange(field.key, val)}
+                  />
+                ) : (
+                  fieldDisplayValue(agent.frontmatter, field.key)
+                )}
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
-      <div className="text-xs text-gray-600 font-mono">{agent.filePath}</div>
+      {!editing && agent.subAgents.length > 0 && (
+        <div className="flex items-center gap-2">
+          <span className="text-gray-500 text-sm font-medium">Sub-agents</span>
+          <div className="flex flex-wrap gap-1">
+            {agent.subAgents.map((s) => <Badge key={s} variant="blue">{s}</Badge>)}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -148,13 +231,47 @@ export default function AgentDetail({
 }) {
   const [tab, setTab] = useState<Tab>("overview");
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState<Partial<AgentFrontmatter>>({});
+  const [saving, setSaving] = useState(false);
+
+  const handleEdit = () => {
+    setDraft({});
+    setEditing(true);
+  };
+
+  const handleCancel = () => {
+    setDraft({});
+    setEditing(false);
+  };
+
+  const handleSave = async () => {
+    if (Object.keys(draft).length === 0) {
+      setEditing(false);
+      return;
+    }
+    setSaving(true);
+    try {
+      await api.updateAgent(agent.id, { frontmatter: draft });
+      setEditing(false);
+      setDraft({});
+      onRefresh();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDraftChange = (key: string, val: unknown) => {
+    setDraft((prev) => ({ ...prev, [key]: val }));
+  };
 
   return (
-    <div className="flex-1 flex flex-col h-full">
-      <div className="border-b border-gray-800 px-6 py-4 flex items-center justify-between">
+    <div className={`flex-1 flex flex-col h-full ${editing ? "ring-2 ring-cyan-500/30 ring-inset rounded-lg" : ""}`}>
+      <div className={`border-b px-6 py-4 ${editing ? "border-cyan-500/30 bg-cyan-500/5" : "border-gray-800"}`}>
+        <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span
-            className={`w-3 h-3 rounded-full bg-agent-${agent.frontmatter.color || "cyan"}`}
+            className={`w-3 h-3 rounded-full`}
             style={{ backgroundColor: `var(--agent-color, #06b6d4)` }}
           />
           <h2 className="text-lg font-bold text-white">{agent.id}</h2>
@@ -170,43 +287,70 @@ export default function AgentDetail({
           <Badge variant={agent.frontmatter.model === "opus" ? "purple" : "blue"}>
             {agent.frontmatter.model || "inherit"}
           </Badge>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => onEdit(agent)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
-          >
-            <Edit3 size={14} />
-            Edit
-          </button>
-          {confirmDelete ? (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-red-400">Confirm?</span>
-              <button
-                onClick={() => {
-                  onDelete(agent.id);
-                  setConfirmDelete(false);
-                }}
-                className="px-3 py-1.5 text-sm bg-red-600 hover:bg-red-500 text-white rounded-lg"
-              >
-                Delete
-              </button>
-              <button onClick={() => setConfirmDelete(false)} className="p-1 text-gray-400 hover:text-white">
-                <X size={14} />
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => setConfirmDelete(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-400 hover:text-red-400 hover:bg-gray-800 rounded-lg transition-colors"
-            >
-              <Trash2 size={14} />
-            </button>
+          {editing && (
+            <span className="text-xs font-medium text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded">EDITING</span>
           )}
         </div>
+        <div className="flex gap-2">
+          {editing ? (
+            <>
+              <button
+                onClick={handleCancel}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+              >
+                <X size={14} />
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg transition-colors disabled:opacity-50"
+              >
+                <Save size={14} />
+                {saving ? "Saving..." : "Save"}
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={handleEdit}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+              >
+                <Edit3 size={14} />
+                Edit
+              </button>
+              {confirmDelete ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-red-400">Confirm?</span>
+                  <button
+                    onClick={() => {
+                      onDelete(agent.id);
+                      setConfirmDelete(false);
+                    }}
+                    className="px-3 py-1.5 text-sm bg-red-600 hover:bg-red-500 text-white rounded-lg"
+                  >
+                    Delete
+                  </button>
+                  <button onClick={() => setConfirmDelete(false)} className="p-1 text-gray-400 hover:text-white">
+                    <X size={14} />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setConfirmDelete(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-400 hover:text-red-400 hover:bg-gray-800 rounded-lg transition-colors"
+                >
+                  <Trash2 size={14} />
+                </button>
+              )}
+            </>
+          )}
+        </div>
+        </div>
+        <div className="text-xs text-gray-600 font-mono mt-1.5">{agent.filePath}</div>
       </div>
 
-      <div className="border-b border-gray-800 px-6 flex gap-1">
+      <div className={`border-b px-6 flex gap-1 ${editing ? "border-cyan-500/30" : "border-gray-800"}`}>
         {TABS.map((t) => (
           <button
             key={t}
@@ -224,7 +368,9 @@ export default function AgentDetail({
       </div>
 
       <div className="flex-1 overflow-y-auto p-6">
-        {tab === "overview" && <FrontmatterTable agent={agent} />}
+        {tab === "overview" && (
+          <FrontmatterTable agent={agent} editing={editing} draft={draft} onDraftChange={handleDraftChange} />
+        )}
         {tab === "prompt" && <MarkdownBody content={agent.body} />}
         {tab === "memory" && <MemoryViewer agent={agent} onRefresh={onRefresh} />}
         {tab === "files" && (

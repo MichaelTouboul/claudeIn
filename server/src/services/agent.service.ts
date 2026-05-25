@@ -48,7 +48,7 @@ async function findAnnexFiles(agentDir: string, agentFileName: string): Promise<
 
   const entries = await fs.readdir(agentDir, { withFileTypes: true });
   for (const entry of entries) {
-    if (entry.isFile() && entry.name !== agentFileName) {
+    if (entry.isFile()) {
       const full = path.join(agentDir, entry.name);
       const content = await fs.readFile(full, "utf-8");
       annexFiles.push({
