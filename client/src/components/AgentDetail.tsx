@@ -232,7 +232,7 @@ export default function AgentDetail({
   isFavorite?: boolean;
   onToggleFavorite?: () => void;
 }) {
-  const [tab, setTab] = useState<Tab>("overview");
+  const [tab, setTab] = useState<Tab>("chat");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<Partial<AgentFrontmatter>>({});

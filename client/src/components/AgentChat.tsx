@@ -5,7 +5,6 @@ import {
   Loader2,
   Bot,
   Wrench,
-  Play,
   Terminal,
   ChevronRight,
   Shield,
@@ -158,41 +157,83 @@ export default function AgentChat({
 }) {
   const [session, setSession] = useState<SpawnSession | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [queue, setQueue] = useState<string[]>([]);
   const [input, setInput] = useState("");
-  const [spawning, setSpawning] = useState(false);
+  const [spawning] = useState(false);
   const [showSlash, setShowSlash] = useState(false);
   const [slashFilter, setSlashFilter] = useState("");
   const [slashIndex, setSlashIndex] = useState(0);
   const [waitingInput, setWaitingInput] = useState(false);
+  const [awaitingResponse, setAwaitingResponse] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const sessionRef = useRef<SpawnSession | null>(null);
+  sessionRef.current = session;
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages.length]);
+  }, [messages.length, queue.length]);
+
+  const pendingUserMsgs = useRef<Set<string>>(new Set());
+
+  const sendNextFromQueue = useCallback(() => {
+    setQueue((prev) => {
+      if (prev.length === 0) return prev;
+      const [next, ...rest] = prev;
+      const msg: ChatMessage = { role: "user", content: next, timestamp: new Date().toISOString() };
+      setMessages((m) => [...m, msg]);
+      pendingUserMsgs.current.add(next);
+      setAwaitingResponse(true);
+      fetch("/api/spawn", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ agent_name: agentName, mission: next }),
+      }).then((res) => res.json()).then((data: SpawnSession) => {
+        setSession(data);
+      }).catch(() => {
+        setAwaitingResponse(false);
+      });
+      return rest;
+    });
+  }, [agentName]);
 
   useEffect(() => {
     const source = new EventSource("/api/events/stream");
     source.onmessage = (e) => {
       try {
         const data = JSON.parse(e.data);
-        if (data.type === "spawn_message" && session && data.sessionId === session.id) {
-          setMessages((prev) => [...prev, data.message]);
+        const s = sessionRef.current;
+        if (data.type === "spawn_message" && s && data.sessionId === s.id) {
+          const msg: ChatMessage = data.message;
+          if (msg.role === "user" && pendingUserMsgs.current.has(msg.content)) {
+            pendingUserMsgs.current.delete(msg.content);
+            return;
+          }
+          setMessages((prev) => [...prev, msg]);
           setWaitingInput(false);
+          if (msg.role === "assistant") {
+            setAwaitingResponse(false);
+            setTimeout(() => sendNextFromQueue(), 100);
+          }
         }
-        if (data.type === "spawn_input_request" && session && data.sessionId === session.id) {
+        if (data.type === "spawn_input_request" && s && data.sessionId === s.id) {
           setWaitingInput(true);
+          setAwaitingResponse(false);
+          setTimeout(() => sendNextFromQueue(), 100);
         }
-        if (data.type === "spawn_exit" && session && data.sessionId === session.id) {
+        if (data.type === "spawn_exit" && s && data.sessionId === s.id) {
           setSession((prev) => prev ? { ...prev, status: data.status } : null);
           setWaitingInput(false);
+          setAwaitingResponse(false);
         }
       } catch {}
     };
     return () => source.close();
-  }, [session?.id]);
+  }, [session?.id, sendNextFromQueue]);
+
+  const isRunning = session?.status === "running";
 
   const lastAssistantMsg = useMemo(() => {
     for (let i = messages.length - 1; i >= 0; i--) {
@@ -205,9 +246,7 @@ export default function AgentChat({
     if (!lastAssistantMsg || !isRunning) return null;
     if (messages.length > 0 && messages[messages.length - 1].role === "user") return null;
     return detectQuickReplies(lastAssistantMsg.content);
-  }, [lastAssistantMsg, messages]);
-
-  const isRunning = session?.status === "running";
+  }, [lastAssistantMsg, messages, isRunning]);
 
   const filteredCommands = SLASH_COMMANDS.filter((c) =>
     c.cmd.toLowerCase().includes(slashFilter.toLowerCase())
@@ -230,46 +269,58 @@ export default function AgentChat({
     inputRef.current?.focus();
   };
 
-  const handleSpawn = useCallback(async () => {
-    if (!input.trim()) return;
-    setSpawning(true);
-    try {
-      const res = await fetch("/api/spawn", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agent_name: agentName, mission: input.trim() }),
-      });
-      const data: SpawnSession = await res.json();
-      setSession(data);
-      setMessages(data.messages || []);
-      setInput("");
-      setShowSlash(false);
-    } finally {
-      setSpawning(false);
-    }
-  }, [input, agentName]);
-
   const handleSend = useCallback(async () => {
-    if (!session || !input.trim()) return;
-    await fetch(`/api/spawn/${session.id}/input`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: input.trim() }),
-    });
+    if (!input.trim()) return;
+    const text = input.trim();
     setInput("");
     setShowSlash(false);
-    setWaitingInput(false);
     inputRef.current?.focus();
-  }, [session, input]);
+
+    if (awaitingResponse) {
+      setQueue((prev) => [...prev, text]);
+      return;
+    }
+
+    const msg: ChatMessage = { role: "user", content: text, timestamp: new Date().toISOString() };
+    setMessages((prev) => [...prev, msg]);
+    setAwaitingResponse(true);
+    setWaitingInput(false);
+
+    if (session && isRunning) {
+      pendingUserMsgs.current.add(text);
+      await fetch(`/api/spawn/${session.id}/input`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+    } else {
+      pendingUserMsgs.current.add(text);
+      try {
+        const res = await fetch("/api/spawn", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ agent_name: agentName, mission: text }),
+        });
+        const data: SpawnSession = await res.json();
+        setSession(data);
+      } catch {
+        setAwaitingResponse(false);
+      }
+    }
+  }, [input, awaitingResponse, session, isRunning, agentName]);
 
   const handleQuickReply = useCallback(async (value: string) => {
     if (!session) return;
+    const msg: ChatMessage = { role: "user", content: value, timestamp: new Date().toISOString() };
+    setMessages((prev) => [...prev, msg]);
+    pendingUserMsgs.current.add(value);
+    setWaitingInput(false);
+    setAwaitingResponse(true);
     await fetch(`/api/spawn/${session.id}/input`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text: value }),
     });
-    setWaitingInput(false);
   }, [session]);
 
   const handleKill = useCallback(async () => {
@@ -302,8 +353,7 @@ export default function AgentChat({
 
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      if (session && isRunning) handleSend();
-      else handleSpawn();
+      handleSend();
     }
   };
 
@@ -371,10 +421,21 @@ export default function AgentChat({
             onQuickReply={handleQuickReply}
           />
         ))}
-        {isRunning && !waitingInput && messages.length > 0 && messages[messages.length - 1].role !== "assistant" && (
+        {isRunning && awaitingResponse && !waitingInput && (
           <div className="flex items-center gap-2 text-gray-600 text-xs ml-5">
             <Loader2 size={10} className="animate-spin" />
             thinking...
+          </div>
+        )}
+        {queue.length > 0 && (
+          <div className="space-y-1 ml-5 mt-1">
+            {queue.map((q, i) => (
+              <div key={i} className="flex items-center gap-2 opacity-40">
+                <ChevronRight size={10} className="text-cyan-400" />
+                <span className="text-xs text-cyan-300 font-mono">{q}</span>
+                <span className="text-[10px] text-gray-600 italic">queued</span>
+              </div>
+            ))}
           </div>
         )}
       </div>
@@ -418,16 +479,14 @@ export default function AgentChat({
             }}
           />
           <button
-            onClick={session && isRunning ? handleSend : handleSpawn}
+            onClick={handleSend}
             disabled={!input.trim() || spawning}
             className="p-1.5 text-cyan-400 hover:text-cyan-300 disabled:text-gray-700 transition-colors shrink-0"
           >
             {spawning ? (
               <Loader2 size={16} className="animate-spin" />
-            ) : session && isRunning ? (
-              <Send size={16} />
             ) : (
-              <Play size={16} />
+              <Send size={16} />
             )}
           </button>
         </div>

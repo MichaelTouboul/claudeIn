@@ -34,6 +34,7 @@ export function spawnAgent(agentName: string, mission: string): SpawnSession {
   const sessionId = randomUUID();
 
   const args = [
+    "--print",
     "--output-format", "stream-json",
     "--verbose",
     "--max-turns", "50",

@@ -333,7 +333,7 @@ function SectionLabel({ icon, label }: { icon: React.ReactNode; label: string })
 type SkillTab = "overview" | "chat" | "prompt" | "files";
 
 function SkillDetail({ skill, isFavorite, onToggleFavorite }: { skill: SkillFile; isFavorite?: boolean; onToggleFavorite?: () => void }) {
-  const [tab, setTab] = useState<SkillTab>("overview");
+  const [tab, setTab] = useState<SkillTab>("chat");
 
   const tabs: { key: SkillTab; label: string }[] = [
     { key: "overview", label: "Overview" },
