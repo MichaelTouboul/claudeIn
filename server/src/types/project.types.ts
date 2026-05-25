@@ -10,11 +10,32 @@ export type Project = {
   skillCount: number;
 };
 
+export type SkillMetadata = {
+  author?: string;
+  version?: string;
+  created?: string;
+  last_reviewed?: string;
+  review_interval_days?: number;
+  [key: string]: unknown;
+};
+
+export type SkillAnnexFile = {
+  name: string;
+  path: string;
+  size: number;
+  isDirectory: boolean;
+};
+
 export type SkillFile = {
   name: string;
   description: string;
   filePath: string;
   scope: "project" | "user";
+  body: string;
+  lineCount: number;
+  license?: string;
+  metadata?: SkillMetadata;
+  annexFiles: SkillAnnexFile[];
 };
 
 export type HookConfig = {

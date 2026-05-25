@@ -244,20 +244,122 @@ function SectionLabel({ icon, label }: { icon: React.ReactNode; label: string })
 
 // ─── Skill detail ───
 
+type SkillTab = "overview" | "prompt" | "files";
+
 function SkillDetail({ skill }: { skill: SkillFile }) {
+  const [tab, setTab] = useState<SkillTab>("overview");
+
+  const tabs: { key: SkillTab; label: string }[] = [
+    { key: "overview", label: "Overview" },
+    { key: "prompt", label: "Prompt" },
+    { key: "files", label: `Files${skill.annexFiles.length > 0 ? ` (${skill.annexFiles.length})` : ""}` },
+  ];
+
   return (
-    <div className="p-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Wrench size={16} className="text-green-400" />
-        <h2 className="text-lg font-bold text-white">{skill.name}</h2>
-        <span className={`text-xs px-2 py-0.5 rounded-full ${
-          skill.scope === "user" ? "bg-yellow-500/15 text-yellow-400" : "bg-cyan-500/15 text-cyan-400"
-        }`}>
-          {skill.scope}
-        </span>
+    <div className="h-full flex flex-col">
+      {/* Header */}
+      <div className="px-6 pt-5 pb-3">
+        <div className="flex items-center gap-2 mb-1">
+          <Wrench size={16} className="text-green-400" />
+          <h2 className="text-lg font-bold text-white">{skill.name}</h2>
+          <span className={`text-xs px-2 py-0.5 rounded-full ${
+            skill.scope === "user" ? "bg-yellow-500/15 text-yellow-400" : "bg-cyan-500/15 text-cyan-400"
+          }`}>
+            {skill.scope}
+          </span>
+        </div>
       </div>
-      <p className="text-sm text-gray-300 mb-4">{skill.description}</p>
+
+      {/* Tabs */}
+      <div className="flex gap-1 px-6 border-b border-gray-800">
+        {tabs.map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
+              tab === t.key
+                ? "border-cyan-400 text-cyan-400"
+                : "border-transparent text-gray-500 hover:text-gray-300"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab content */}
+      <div className="flex-1 min-h-0 overflow-y-auto p-6">
+        {tab === "overview" && <SkillOverview skill={skill} />}
+        {tab === "prompt" && <SkillPrompt skill={skill} />}
+        {tab === "files" && <SkillFiles skill={skill} />}
+      </div>
+    </div>
+  );
+}
+
+function SkillOverview({ skill }: { skill: SkillFile }) {
+  const meta = skill.metadata;
+  const rows: [string, string][] = [
+    ["Description", skill.description],
+    ["Scope", skill.scope],
+    ["Prompt size", `${skill.lineCount} lines`],
+    ...(skill.license ? [["License", skill.license] as [string, string]] : []),
+    ...(meta?.author ? [["Author", meta.author] as [string, string]] : []),
+    ...(meta?.version ? [["Version", meta.version] as [string, string]] : []),
+    ...(meta?.created ? [["Created", meta.created] as [string, string]] : []),
+    ...(meta?.last_reviewed ? [["Last reviewed", meta.last_reviewed] as [string, string]] : []),
+    ...(skill.annexFiles.length > 0 ? [["Annex files", String(skill.annexFiles.length)] as [string, string]] : []),
+  ];
+
+  return (
+    <div className="space-y-4">
+      <table className="w-full text-sm">
+        <tbody>
+          {rows.map(([label, value]) => (
+            <tr key={label} className="border-b border-gray-800/50">
+              <td className="py-2 pr-4 text-gray-500 font-medium w-40">{label}</td>
+              <td className="py-2 text-gray-300">{value}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
       <div className="text-xs text-gray-600 font-mono">{skill.filePath}</div>
+    </div>
+  );
+}
+
+function SkillPrompt({ skill }: { skill: SkillFile }) {
+  return (
+    <div className="bg-gray-800/30 rounded-lg p-6 overflow-x-auto">
+      <pre className="text-sm text-gray-300 whitespace-pre-wrap font-mono leading-relaxed">
+        {skill.body}
+      </pre>
+    </div>
+  );
+}
+
+function SkillFiles({ skill }: { skill: SkillFile }) {
+  if (skill.annexFiles.length === 0) {
+    return <p className="text-sm text-gray-500">No additional files in this skill directory.</p>;
+  }
+
+  const formatSize = (bytes: number) => {
+    if (bytes === 0) return "—";
+    if (bytes < 1024) return `${bytes} B`;
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  };
+
+  return (
+    <div className="space-y-1">
+      {skill.annexFiles.map((f) => (
+        <div key={f.name} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-800/30">
+          <span className={`text-xs ${f.isDirectory ? "text-cyan-400" : "text-gray-400"}`}>
+            {f.isDirectory ? "📁" : "📄"}
+          </span>
+          <span className="text-sm text-gray-300 font-mono flex-1">{f.name}</span>
+          <span className="text-xs text-gray-600">{f.isDirectory ? "dir" : formatSize(f.size)}</span>
+        </div>
+      ))}
     </div>
   );
 }
