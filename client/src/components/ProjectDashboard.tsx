@@ -698,6 +698,7 @@ export default function ProjectDashboard({
               count={panel.count}
               open={openPanels.has(panel.key)}
               onToggle={() => togglePanel(panel.key)}
+              onRefresh={onRefresh}
               flex
             >
               {panel.content}
@@ -732,7 +733,7 @@ export default function ProjectDashboard({
 
         <div className="flex-1 min-h-0 overflow-hidden">
           {view === "agent" && selectedAgent ? (
-            <AgentDetail agent={selectedAgent} onEdit={() => {}} onDelete={() => {}} onRefresh={onRefresh} isFavorite={isFavorite("agent", selectedAgent.id)} onToggleFavorite={() => toggleFavorite("agent", selectedAgent.id)} />
+            <AgentDetail agent={selectedAgent} onEdit={() => {}} onDelete={() => {}} onRefresh={onRefresh} onAgentUpdated={(a) => setSelectedAgent(a)} isFavorite={isFavorite("agent", selectedAgent.id)} onToggleFavorite={() => toggleFavorite("agent", selectedAgent.id)} />
           ) : view === "skill" && selectedSkill ? (
             <SkillDetail skill={selectedSkill} isFavorite={isFavorite("skill", selectedSkill.name)} onToggleFavorite={() => toggleFavorite("skill", selectedSkill.name)} />
           ) : view === "mesh" ? (

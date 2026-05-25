@@ -10,6 +10,7 @@ import {
   X,
   Star,
   Save,
+  RefreshCw,
 } from "lucide-react";
 import type { AgentFile, AgentFrontmatter } from "../types/agent.types";
 import { api } from "../services/api";
@@ -222,6 +223,7 @@ export default function AgentDetail({
   onEdit,
   onDelete,
   onRefresh,
+  onAgentUpdated,
   isFavorite,
   onToggleFavorite,
 }: {
@@ -229,6 +231,7 @@ export default function AgentDetail({
   onEdit: (a: AgentFile) => void;
   onDelete: (name: string) => void;
   onRefresh: () => void;
+  onAgentUpdated?: (agent: AgentFile) => void;
   isFavorite?: boolean;
   onToggleFavorite?: () => void;
 }) {
@@ -237,6 +240,7 @@ export default function AgentDetail({
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<Partial<AgentFrontmatter>>({});
   const [saving, setSaving] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const handleEdit = () => {
     setDraft({});
@@ -248,6 +252,16 @@ export default function AgentDetail({
     setEditing(false);
   };
 
+  const handleRefreshAgent = async () => {
+    setRefreshing(true);
+    try {
+      const updated = await api.getAgent(agent.id);
+      if (updated && onAgentUpdated) onAgentUpdated(updated);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const handleSave = async () => {
     if (Object.keys(draft).length === 0) {
       setEditing(false);
@@ -255,10 +269,10 @@ export default function AgentDetail({
     }
     setSaving(true);
     try {
-      await api.updateAgent(agent.id, { frontmatter: draft });
+      const updated = await api.updateAgent(agent.id, { frontmatter: draft });
       setEditing(false);
       setDraft({});
-      onRefresh();
+      if (onAgentUpdated) onAgentUpdated(updated);
     } finally {
       setSaving(false);
     }
@@ -315,6 +329,14 @@ export default function AgentDetail({
             </>
           ) : (
             <>
+              <button
+                onClick={handleRefreshAgent}
+                disabled={refreshing}
+                className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors disabled:opacity-50"
+                title="Refresh from disk"
+              >
+                <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
+              </button>
               <button
                 onClick={handleEdit}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"

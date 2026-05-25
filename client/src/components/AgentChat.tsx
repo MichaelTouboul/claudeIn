@@ -158,6 +158,7 @@ export default function AgentChat({
 }) {
   const projectPath = useAppStore((s) => s.selectedProject?.path);
   const [session, setSession] = useState<SpawnSession | null>(null);
+  const [claudeSessionId, setClaudeSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [queue, setQueue] = useState<string[]>([]);
   const [input, setInput] = useState("");
@@ -171,6 +172,8 @@ export default function AgentChat({
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const sessionRef = useRef<SpawnSession | null>(null);
   sessionRef.current = session;
+  const claudeSessionIdRef = useRef<string | null>(null);
+  claudeSessionIdRef.current = claudeSessionId;
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -188,18 +191,20 @@ export default function AgentChat({
       setMessages((m) => [...m, msg]);
       pendingUserMsgs.current.add(next);
       setAwaitingResponse(true);
+      const resumeId = claudeSessionIdRef.current;
       fetch("/api/spawn", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ agent_name: agentName, mission: next, cwd: projectPath }),
+        body: JSON.stringify({ agent_name: agentName, mission: next, cwd: projectPath, resume_session_id: resumeId }),
       }).then((res) => res.json()).then((data: SpawnSession) => {
         setSession(data);
+        if (data.claudeSessionId) setClaudeSessionId(data.claudeSessionId);
       }).catch(() => {
         setAwaitingResponse(false);
       });
       return rest;
     });
-  }, [agentName]);
+  }, [agentName, projectPath]);
 
   useEffect(() => {
     const source = new EventSource("/api/events/stream");
@@ -225,8 +230,12 @@ export default function AgentChat({
           setAwaitingResponse(false);
           setTimeout(() => sendNextFromQueue(), 100);
         }
+        if (data.type === "spawn_claude_session" && s && data.sessionId === s.id) {
+          setClaudeSessionId(data.claudeSessionId);
+        }
         if (data.type === "spawn_exit" && s && data.sessionId === s.id) {
           setSession((prev) => prev ? { ...prev, status: data.status } : null);
+          if (data.claudeSessionId) setClaudeSessionId(data.claudeSessionId);
           setWaitingInput(false);
           setAwaitingResponse(false);
         }
@@ -245,10 +254,11 @@ export default function AgentChat({
   }, [messages]);
 
   const quickReplies = useMemo(() => {
-    if (!lastAssistantMsg || !isRunning) return null;
-    if (messages.length > 0 && messages[messages.length - 1].role === "user") return null;
+    if (!lastAssistantMsg) return null;
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg?.role === "user") return null;
     return detectQuickReplies(lastAssistantMsg.content);
-  }, [lastAssistantMsg, messages, isRunning]);
+  }, [lastAssistantMsg, messages]);
 
   const filteredCommands = SLASH_COMMANDS.filter((c) =>
     c.cmd.toLowerCase().includes(slashFilter.toLowerCase())
@@ -301,29 +311,45 @@ export default function AgentChat({
         const res = await fetch("/api/spawn", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ agent_name: agentName, mission: text, cwd: projectPath }),
+          body: JSON.stringify({ agent_name: agentName, mission: text, cwd: projectPath, resume_session_id: claudeSessionId }),
         });
         const data: SpawnSession = await res.json();
         setSession(data);
+        if (data.claudeSessionId) setClaudeSessionId(data.claudeSessionId);
       } catch {
         setAwaitingResponse(false);
       }
     }
-  }, [input, awaitingResponse, session, isRunning, agentName]);
+  }, [input, awaitingResponse, session, isRunning, agentName, projectPath]);
 
   const handleQuickReply = useCallback(async (value: string) => {
-    if (!session) return;
     const msg: ChatMessage = { role: "user", content: value, timestamp: new Date().toISOString() };
     setMessages((prev) => [...prev, msg]);
     pendingUserMsgs.current.add(value);
     setWaitingInput(false);
     setAwaitingResponse(true);
-    await fetch(`/api/spawn/${session.id}/input`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: value }),
-    });
-  }, [session]);
+
+    if (session && isRunning) {
+      await fetch(`/api/spawn/${session.id}/input`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: value }),
+      });
+    } else {
+      try {
+        const res = await fetch("/api/spawn", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ agent_name: agentName, mission: value, cwd: projectPath, resume_session_id: claudeSessionId }),
+        });
+        const data: SpawnSession = await res.json();
+        setSession(data);
+        if (data.claudeSessionId) setClaudeSessionId(data.claudeSessionId);
+      } catch {
+        setAwaitingResponse(false);
+      }
+    }
+  }, [session, isRunning, agentName, projectPath]);
 
   const handleKill = useCallback(async () => {
     if (!session) return;

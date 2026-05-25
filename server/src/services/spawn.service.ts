@@ -30,7 +30,7 @@ function extractText(event: StreamEvent): string | null {
   return null;
 }
 
-export function spawnAgent(agentName: string, mission: string, cwd?: string): SpawnSession {
+export function spawnAgent(agentName: string, mission: string, cwd?: string, resumeSessionId?: string): SpawnSession {
   const sessionId = randomUUID();
 
   const args = [
@@ -40,9 +40,13 @@ export function spawnAgent(agentName: string, mission: string, cwd?: string): Sp
     "--max-turns", "50",
   ];
 
-  const agentFlag = agentName && agentName !== "_main";
-  if (agentFlag) {
-    args.push("--agent", agentName);
+  if (resumeSessionId) {
+    args.push("--resume", resumeSessionId);
+  } else {
+    const agentFlag = agentName && agentName !== "_main";
+    if (agentFlag) {
+      args.push("--agent", agentName);
+    }
   }
 
   args.push(mission);
@@ -63,6 +67,7 @@ export function spawnAgent(agentName: string, mission: string, cwd?: string): Sp
     messages: [
       { role: "user", content: mission, timestamp: new Date().toISOString() },
     ],
+    claudeSessionId: resumeSessionId,
   };
 
   let buffer = "";
@@ -76,6 +81,15 @@ export function spawnAgent(agentName: string, mission: string, cwd?: string): Sp
       if (!line.trim()) continue;
       const event = parseStreamLine(line);
       if (!event) continue;
+
+      if (event.session_id && !session.claudeSessionId) {
+        session.claudeSessionId = event.session_id;
+        broadcast({
+          type: "spawn_claude_session",
+          sessionId,
+          claudeSessionId: event.session_id,
+        });
+      }
 
       handleStreamEvent(sessionId, session, event);
     }
@@ -103,6 +117,7 @@ export function spawnAgent(agentName: string, mission: string, cwd?: string): Sp
       agentName,
       code,
       status: session.status,
+      claudeSessionId: session.claudeSessionId,
     });
 
     ingestEvent({

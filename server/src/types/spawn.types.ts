@@ -6,6 +6,7 @@ export type SpawnSession = {
   pid: number | null;
   startedAt: string;
   messages: ChatMessage[];
+  claudeSessionId?: string;
 };
 
 export type ChatMessage = {
