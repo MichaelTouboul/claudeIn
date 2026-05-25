@@ -15,12 +15,15 @@ import type { AgentFile, AgentFrontmatter } from "../types/agent.types";
 import { api } from "../services/api";
 import MemoryViewer from "./MemoryViewer";
 import MarkdownBody from "./MarkdownBody";
+import AgentChat from "./AgentChat";
+import { Terminal } from "lucide-react";
 
-const TABS = ["overview", "prompt", "memory", "files", "graph"] as const;
+const TABS = ["overview", "chat", "prompt", "memory", "files", "graph"] as const;
 type Tab = (typeof TABS)[number];
 
 const tabIcons: Record<Tab, React.ReactNode> = {
   overview: <Settings size={14} />,
+  chat: <Terminal size={14} />,
   prompt: <FileText size={14} />,
   memory: <Brain size={14} />,
   files: <Database size={14} />,
@@ -350,8 +353,20 @@ export default function AgentDetail({
         <div className="text-xs text-gray-600 font-mono mt-1.5">{agent.filePath}</div>
       </div>
 
-      <div className={`border-b px-6 flex gap-1 ${editing ? "border-cyan-500/30" : "border-gray-800"}`}>
-        {TABS.map((t) => (
+      <div className={`border-b px-6 flex items-center gap-1 ${editing ? "border-cyan-500/30" : "border-gray-800"}`}>
+        <button
+          onClick={() => setTab("chat")}
+          className={`flex items-center gap-1.5 px-3.5 py-1.5 my-1.5 mr-2 text-sm font-medium rounded-lg transition-colors ${
+            tab === "chat"
+              ? "bg-cyan-600 text-white"
+              : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+          }`}
+        >
+          <Terminal size={14} />
+          Chat
+        </button>
+        <div className="w-px h-5 bg-gray-700 mr-1" />
+        {TABS.filter((t) => t !== "chat").map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -367,6 +382,11 @@ export default function AgentDetail({
         ))}
       </div>
 
+      {tab === "chat" ? (
+        <div className="flex-1 min-h-0 p-3">
+          <AgentChat agentName={agent.id} />
+        </div>
+      ) : (
       <div className="flex-1 overflow-y-auto p-6">
         {tab === "overview" && (
           <FrontmatterTable agent={agent} editing={editing} draft={draft} onDraftChange={handleDraftChange} />
@@ -395,6 +415,7 @@ export default function AgentDetail({
           </p>
         )}
       </div>
+      )}
     </div>
   );
 }

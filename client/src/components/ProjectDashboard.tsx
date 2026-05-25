@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Bot, Wrench, Settings, Hexagon, BarChart3, Globe, User,
-  Link, Unlink, Network, Cog, Star,
+  Link, Unlink, Network, Cog, Star, Terminal,
 } from "lucide-react";
 import type { AgentFile } from "../types/agent.types";
 import type { SkillFile, HookConfig, Project } from "../hooks/useProjects";
@@ -12,6 +12,7 @@ import CostDashboard from "./CostDashboard";
 import Accordion from "./Accordion";
 import AgentContextMenu from "./AgentContextMenu";
 import ItemContextMenu from "./ItemContextMenu";
+import AgentChat from "./AgentChat";
 
 type MainView = "agent" | "skill" | "hook" | "mesh" | "costs" | "none";
 
@@ -272,13 +273,14 @@ function SectionLabel({ icon, label }: { icon: React.ReactNode; label: string })
 
 // ─── Skill detail ───
 
-type SkillTab = "overview" | "prompt" | "files";
+type SkillTab = "overview" | "chat" | "prompt" | "files";
 
 function SkillDetail({ skill, isFavorite, onToggleFavorite }: { skill: SkillFile; isFavorite?: boolean; onToggleFavorite?: () => void }) {
   const [tab, setTab] = useState<SkillTab>("overview");
 
   const tabs: { key: SkillTab; label: string }[] = [
     { key: "overview", label: "Overview" },
+    { key: "chat", label: "Chat" },
     { key: "prompt", label: "Prompt" },
     { key: "files", label: `Files${skill.annexFiles.length > 0 ? ` (${skill.annexFiles.length})` : ""}` },
   ];
@@ -308,8 +310,20 @@ function SkillDetail({ skill, isFavorite, onToggleFavorite }: { skill: SkillFile
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 px-6 border-b border-gray-800">
-        {tabs.map((t) => (
+      <div className="flex items-center gap-1 px-6 border-b border-gray-800">
+        <button
+          onClick={() => setTab("chat")}
+          className={`flex items-center gap-1.5 px-3 py-1.5 my-1.5 mr-2 text-xs font-medium rounded-lg transition-colors ${
+            tab === "chat"
+              ? "bg-cyan-600 text-white"
+              : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+          }`}
+        >
+          <Terminal size={12} />
+          Chat
+        </button>
+        <div className="w-px h-4 bg-gray-700 mr-1" />
+        {tabs.filter((t) => t.key !== "chat").map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
@@ -325,11 +339,17 @@ function SkillDetail({ skill, isFavorite, onToggleFavorite }: { skill: SkillFile
       </div>
 
       {/* Tab content */}
-      <div className="flex-1 min-h-0 overflow-y-auto p-6">
-        {tab === "overview" && <SkillOverview skill={skill} />}
-        {tab === "prompt" && <SkillPrompt skill={skill} />}
-        {tab === "files" && <SkillFiles skill={skill} />}
-      </div>
+      {tab === "chat" ? (
+        <div className="flex-1 min-h-0 p-3">
+          <AgentChat agentName={skill.name} />
+        </div>
+      ) : (
+        <div className="flex-1 min-h-0 overflow-y-auto p-6">
+          {tab === "overview" && <SkillOverview skill={skill} />}
+          {tab === "prompt" && <SkillPrompt skill={skill} />}
+          {tab === "files" && <SkillFiles skill={skill} />}
+        </div>
+      )}
     </div>
   );
 }
