@@ -34,7 +34,6 @@ export function spawnAgent(agentName: string, mission: string): SpawnSession {
   const sessionId = randomUUID();
 
   const args = [
-    "--print",
     "--output-format", "stream-json",
     "--verbose",
     "--max-turns", "50",
@@ -178,6 +177,14 @@ function handleStreamEvent(sessionId: string, session: SpawnSession, event: Stre
       session.messages.push(msg);
       broadcast({ type: "spawn_message", sessionId, agentName: session.agentName, message: msg });
     }
+  }
+
+  if (event.type === "input_request" || event.subtype === "input_request") {
+    broadcast({
+      type: "spawn_input_request",
+      sessionId,
+      agentName: session.agentName,
+    });
   }
 }
 

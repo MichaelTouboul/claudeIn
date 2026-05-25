@@ -1,14 +1,14 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import {
   Send,
   Square,
   Loader2,
   Bot,
-  User,
   Wrench,
   Play,
   Terminal,
   ChevronRight,
+  Shield,
 } from "lucide-react";
 import type { SpawnSession, ChatMessage } from "../types/spawn.types";
 
@@ -31,7 +31,61 @@ const SLASH_COMMANDS = [
   { cmd: "/vim", desc: "Toggle vim mode" },
 ];
 
-function MessageRow({ msg }: { msg: ChatMessage }) {
+type QuickReply = { label: string; value: string; variant: "accept" | "deny" | "neutral" };
+
+const PERMISSION_PATTERNS = [
+  /\b(approu|authoriz|permission|autoris|y\/n|oui.*non|yes.*no|allow|approve)\b/i,
+  /\bconfirm/i,
+  /\bon y va\b/i,
+  /\bpeux-tu\b/i,
+  /\bdo you want\b/i,
+  /\bshould I\b/i,
+  /\bwould you like\b/i,
+  /\bvoulez-vous\b/i,
+  /\bveux-tu\b/i,
+];
+
+const QUESTION_PATTERNS = [
+  /\?\s*$/m,
+  /\bchoix\b/i,
+  /\bchoose\b/i,
+  /\bwhich\b.*\?/i,
+  /\bquel\b/i,
+];
+
+function detectQuickReplies(content: string): QuickReply[] | null {
+  const isPermission = PERMISSION_PATTERNS.some((p) => p.test(content));
+  if (isPermission) {
+    return [
+      { label: "Yes", value: "yes", variant: "accept" },
+      { label: "Yes, always", value: "yes, always allow this", variant: "accept" },
+      { label: "No", value: "no", variant: "deny" },
+    ];
+  }
+
+  const isQuestion = QUESTION_PATTERNS.some((p) => p.test(content));
+  if (isQuestion) {
+    return [
+      { label: "Yes", value: "yes", variant: "accept" },
+      { label: "No", value: "no", variant: "deny" },
+    ];
+  }
+
+  return null;
+}
+
+const replyStyles: Record<string, string> = {
+  accept: "bg-green-600/20 text-green-400 border-green-500/30 hover:bg-green-600/30",
+  deny: "bg-red-600/20 text-red-400 border-red-500/30 hover:bg-red-600/30",
+  neutral: "bg-gray-700/50 text-gray-300 border-gray-600/30 hover:bg-gray-700",
+};
+
+function MessageRow({ msg, isLast, quickReplies, onQuickReply }: {
+  msg: ChatMessage;
+  isLast: boolean;
+  quickReplies: QuickReply[] | null;
+  onQuickReply: (value: string) => void;
+}) {
   const isUser = msg.role === "user";
   const isTool = msg.role === "tool";
   const time = new Date(msg.timestamp).toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
@@ -62,14 +116,37 @@ function MessageRow({ msg }: { msg: ChatMessage }) {
     );
   }
 
+  const hasPermission = isLast && quickReplies && PERMISSION_PATTERNS.some((p) => p.test(msg.content));
+
   return (
     <div className="group">
       <div className="flex items-center gap-2 mb-0.5">
-        <Bot size={12} className="text-gray-400" />
-        <span className="text-xs text-gray-400 font-medium">agent</span>
+        {hasPermission ? (
+          <Shield size={12} className="text-yellow-400" />
+        ) : (
+          <Bot size={12} className="text-gray-400" />
+        )}
+        <span className={`text-xs font-medium ${hasPermission ? "text-yellow-400" : "text-gray-400"}`}>
+          {hasPermission ? "authorization" : "agent"}
+        </span>
         <span className="text-xs text-gray-600 opacity-0 group-hover:opacity-100">{time}</span>
       </div>
-      <pre className="text-sm text-gray-200 whitespace-pre-wrap font-mono ml-5 leading-relaxed">{msg.content}</pre>
+      <pre className={`text-sm whitespace-pre-wrap font-mono ml-5 leading-relaxed ${hasPermission ? "text-yellow-200/80" : "text-gray-200"}`}>
+        {msg.content}
+      </pre>
+      {isLast && quickReplies && (
+        <div className="flex flex-wrap gap-2 ml-5 mt-2">
+          {quickReplies.map((r) => (
+            <button
+              key={r.value}
+              onClick={() => onQuickReply(r.value)}
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${replyStyles[r.variant]}`}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -86,6 +163,7 @@ export default function AgentChat({
   const [showSlash, setShowSlash] = useState(false);
   const [slashFilter, setSlashFilter] = useState("");
   const [slashIndex, setSlashIndex] = useState(0);
+  const [waitingInput, setWaitingInput] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -102,14 +180,34 @@ export default function AgentChat({
         const data = JSON.parse(e.data);
         if (data.type === "spawn_message" && session && data.sessionId === session.id) {
           setMessages((prev) => [...prev, data.message]);
+          setWaitingInput(false);
+        }
+        if (data.type === "spawn_input_request" && session && data.sessionId === session.id) {
+          setWaitingInput(true);
         }
         if (data.type === "spawn_exit" && session && data.sessionId === session.id) {
           setSession((prev) => prev ? { ...prev, status: data.status } : null);
+          setWaitingInput(false);
         }
       } catch {}
     };
     return () => source.close();
   }, [session?.id]);
+
+  const lastAssistantMsg = useMemo(() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === "assistant") return messages[i];
+    }
+    return null;
+  }, [messages]);
+
+  const quickReplies = useMemo(() => {
+    if (!lastAssistantMsg || !isRunning) return null;
+    if (messages.length > 0 && messages[messages.length - 1].role === "user") return null;
+    return detectQuickReplies(lastAssistantMsg.content);
+  }, [lastAssistantMsg, messages]);
+
+  const isRunning = session?.status === "running";
 
   const filteredCommands = SLASH_COMMANDS.filter((c) =>
     c.cmd.toLowerCase().includes(slashFilter.toLowerCase())
@@ -160,8 +258,19 @@ export default function AgentChat({
     });
     setInput("");
     setShowSlash(false);
+    setWaitingInput(false);
     inputRef.current?.focus();
   }, [session, input]);
+
+  const handleQuickReply = useCallback(async (value: string) => {
+    if (!session) return;
+    await fetch(`/api/spawn/${session.id}/input`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: value }),
+    });
+    setWaitingInput(false);
+  }, [session]);
 
   const handleKill = useCallback(async () => {
     if (!session) return;
@@ -193,12 +302,10 @@ export default function AgentChat({
 
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      if (session) handleSend();
+      if (session && isRunning) handleSend();
       else handleSpawn();
     }
   };
-
-  const isRunning = session?.status === "running";
 
   return (
     <div className="h-full flex flex-col bg-gray-950 rounded-lg border border-gray-800">
@@ -220,6 +327,11 @@ export default function AgentChat({
               }`}
             >
               {session.status}
+            </span>
+          )}
+          {waitingInput && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium bg-yellow-500/20 text-yellow-400 animate-pulse">
+              awaiting response
             </span>
           )}
         </div>
@@ -251,9 +363,15 @@ export default function AgentChat({
           </div>
         )}
         {messages.map((msg, i) => (
-          <MessageRow key={i} msg={msg} />
+          <MessageRow
+            key={i}
+            msg={msg}
+            isLast={i === messages.length - 1 || (msg.role === "assistant" && i === messages.length - 1)}
+            quickReplies={i === messages.length - 1 && msg.role === "assistant" ? quickReplies : null}
+            onQuickReply={handleQuickReply}
+          />
         ))}
-        {isRunning && messages.length > 0 && messages[messages.length - 1].role !== "assistant" && (
+        {isRunning && !waitingInput && messages.length > 0 && messages[messages.length - 1].role !== "assistant" && (
           <div className="flex items-center gap-2 text-gray-600 text-xs ml-5">
             <Loader2 size={10} className="animate-spin" />
             thinking...
@@ -262,7 +380,7 @@ export default function AgentChat({
       </div>
 
       {/* Input */}
-      <div className="relative border-t border-gray-800 p-3">
+      <div className={`relative border-t p-3 ${waitingInput ? "border-yellow-500/50 bg-yellow-500/5" : "border-gray-800"}`}>
         {/* Slash command popup */}
         {showSlash && filteredCommands.length > 0 && (
           <div className="absolute bottom-full left-3 right-3 mb-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl max-h-48 overflow-y-auto py-1">
@@ -282,7 +400,7 @@ export default function AgentChat({
         )}
 
         <div className="flex gap-2 items-end">
-          <div className="flex items-center text-cyan-500 text-sm shrink-0 pt-1.5">
+          <div className={`flex items-center text-sm shrink-0 pt-1.5 ${waitingInput ? "text-yellow-400" : "text-cyan-500"}`}>
             <ChevronRight size={14} />
           </div>
           <textarea
@@ -290,7 +408,7 @@ export default function AgentChat({
             value={input}
             onChange={(e) => handleInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={session ? "Send a message..." : "Type a prompt or / for commands..."}
+            placeholder={waitingInput ? "Type your response (yes / no / ...)..." : session && isRunning ? "Send a message..." : "Type a prompt or / for commands..."}
             rows={1}
             className="flex-1 bg-transparent text-gray-200 text-sm resize-none focus:outline-none font-mono placeholder-gray-700 leading-relaxed"
             onInput={(e) => {
@@ -300,13 +418,13 @@ export default function AgentChat({
             }}
           />
           <button
-            onClick={session ? handleSend : handleSpawn}
+            onClick={session && isRunning ? handleSend : handleSpawn}
             disabled={!input.trim() || spawning}
             className="p-1.5 text-cyan-400 hover:text-cyan-300 disabled:text-gray-700 transition-colors shrink-0"
           >
             {spawning ? (
               <Loader2 size={16} className="animate-spin" />
-            ) : session ? (
+            ) : session && isRunning ? (
               <Send size={16} />
             ) : (
               <Play size={16} />

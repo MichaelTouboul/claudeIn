@@ -12,14 +12,47 @@ export type LiveEvent = {
   created_at: string;
 };
 
+export type AgentContext = {
+  tokensIn: number;
+  tokensOut: number;
+  costUsd: number;
+  percent: number;
+};
+
+const MODEL_LIMITS: Record<string, number> = {
+  opus: 200_000,
+  sonnet: 200_000,
+  haiku: 200_000,
+};
+const DEFAULT_LIMIT = 200_000;
+
 export function useSSE() {
   const [events, setEvents] = useState<LiveEvent[]>([]);
   const [connected, setConnected] = useState(false);
   const [activeAgents, setActiveAgents] = useState<Set<string>>(new Set());
+  const [agentContexts, setAgentContexts] = useState<Map<string, AgentContext>>(new Map());
   const activeTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
-  const markActive = useCallback((agentName: string) => {
+  const markActive = useCallback((agentName: string, tokensIn: number, tokensOut: number, costUsd: number) => {
     setActiveAgents((prev) => new Set(prev).add(agentName));
+
+    if (tokensIn > 0 || tokensOut > 0) {
+      setAgentContexts((prev) => {
+        const next = new Map(prev);
+        const existing = next.get(agentName) || { tokensIn: 0, tokensOut: 0, costUsd: 0, percent: 0 };
+        const newIn = existing.tokensIn + tokensIn;
+        const newOut = existing.tokensOut + tokensOut;
+        const total = newIn + newOut;
+        const limit = DEFAULT_LIMIT;
+        next.set(agentName, {
+          tokensIn: newIn,
+          tokensOut: newOut,
+          costUsd: existing.costUsd + costUsd,
+          percent: Math.min((total / limit) * 100, 100),
+        });
+        return next;
+      });
+    }
 
     const existing = activeTimers.current.get(agentName);
     if (existing) clearTimeout(existing);
@@ -49,7 +82,7 @@ export function useSSE() {
         if (data.type === "event") {
           const event: LiveEvent = data;
           setEvents((prev) => [event, ...prev].slice(0, 200));
-          markActive(event.agent_name);
+          markActive(event.agent_name, event.tokens_in || 0, event.tokens_out || 0, event.cost_usd || 0);
         }
       } catch {}
     };
@@ -59,5 +92,5 @@ export function useSSE() {
     return () => source.close();
   }, [markActive]);
 
-  return { events, connected, activeAgents };
+  return { events, connected, activeAgents, agentContexts };
 }

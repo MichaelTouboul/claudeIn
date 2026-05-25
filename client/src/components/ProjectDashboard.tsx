@@ -22,6 +22,34 @@ const colorMap: Record<string, string> = {
   purple: "bg-purple-500", pink: "bg-pink-500",
 };
 
+// ─── Context progress bar ───
+
+function formatTokens(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
+  return String(n);
+}
+
+function progressColor(percent: number): string {
+  if (percent >= 90) return "bg-red-500/20";
+  if (percent >= 70) return "bg-yellow-500/20";
+  return "bg-cyan-500/15";
+}
+
+function ContextBar({ percent, tokensIn, tokensOut, costUsd }: { percent: number; tokensIn: number; tokensOut: number; costUsd: number }) {
+  return (
+    <div
+      className="absolute inset-0 rounded-lg pointer-events-none transition-all duration-500"
+      title={`In: ${formatTokens(tokensIn)} · Out: ${formatTokens(tokensOut)} · $${costUsd.toFixed(4)} · ${percent.toFixed(0)}% context`}
+    >
+      <div
+        className={`h-full rounded-lg transition-all duration-500 ${progressColor(percent)}`}
+        style={{ width: `${percent}%` }}
+      />
+    </div>
+  );
+}
+
 // ─── Agent rows ───
 
 function OrchestratorTree({
@@ -33,6 +61,8 @@ function OrchestratorTree({
   onToggleLink,
   linkAction,
   isAgentFavorite,
+  activeAgents,
+  agentContexts,
 }: {
   orchestrator: AgentFile;
   allAgents: AgentFile[];
@@ -42,23 +72,31 @@ function OrchestratorTree({
   onToggleLink?: (name: string) => void;
   linkAction?: "link" | "unlink";
   isAgentFavorite?: (name: string) => boolean;
+  activeAgents?: Set<string>;
+  agentContexts?: Map<string, import("../hooks/useSSE").AgentContext>;
 }) {
   const agentMap = new Map(allAgents.map((a) => [a.id, a]));
   const subs = orchestrator.subAgents
     .map((id) => agentMap.get(id))
     .filter((a): a is AgentFile => !!a);
 
+  const orchActive = activeAgents?.has(orchestrator.id);
+  const orchCtx = agentContexts?.get(orchestrator.id);
+
   return (
     <div className="mb-1">
       <div className="flex items-center group">
         <button
           onClick={() => onSelect(orchestrator)}
-          className={`flex-1 flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+          className={`relative flex-1 flex items-center gap-2 px-3 py-2 rounded-lg transition-colors overflow-hidden ${
             selectedId === orchestrator.id ? "bg-gray-700 text-white" : "text-gray-300 hover:bg-gray-800"
           }`}
         >
-          <Network size={14} className="text-cyan-400 shrink-0" />
-          <span className="truncate text-sm font-medium">{orchestrator.id}</span>
+          {orchActive && orchCtx && orchCtx.percent > 0 && (
+            <ContextBar percent={orchCtx.percent} tokensIn={orchCtx.tokensIn} tokensOut={orchCtx.tokensOut} costUsd={orchCtx.costUsd} />
+          )}
+          <Network size={14} className={`relative shrink-0 ${orchActive ? "text-green-400 animate-pulse" : "text-cyan-400"}`} />
+          <span className="relative truncate text-sm font-medium">{orchestrator.id}</span>
         </button>
         <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
           <AgentContextMenu agentName={orchestrator.id} isOrchestrator isFavorite={isAgentFavorite?.(orchestrator.id)} onAction={onAgentAction} />
@@ -79,22 +117,29 @@ function OrchestratorTree({
       </div>
       {subs.length > 0 && (
         <div className="ml-4 border-l border-gray-800 pl-1 space-y-0.5">
-          {subs.map((sub) => (
+          {subs.map((sub) => {
+            const subActive = activeAgents?.has(sub.id);
+            const subCtx = agentContexts?.get(sub.id);
+            return (
             <div key={sub.id} className="flex items-center group">
               <button
                 onClick={() => onSelect(sub)}
-                className={`flex-1 flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors ${
+                className={`relative flex-1 flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors overflow-hidden ${
                   selectedId === sub.id ? "bg-gray-700 text-white" : "text-gray-400 hover:bg-gray-800"
                 }`}
               >
-                <Cog size={11} className="text-gray-500 shrink-0" />
-                <span className="truncate text-xs font-medium">{sub.id}</span>
+                {subActive && subCtx && subCtx.percent > 0 && (
+                  <ContextBar percent={subCtx.percent} tokensIn={subCtx.tokensIn} tokensOut={subCtx.tokensOut} costUsd={subCtx.costUsd} />
+                )}
+                <Cog size={11} className={`relative shrink-0 ${subActive ? "text-green-400 animate-pulse" : "text-gray-500"}`} />
+                <span className="relative truncate text-xs font-medium">{sub.id}</span>
               </button>
               <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                 <AgentContextMenu agentName={sub.id} isOrchestrator={false} isFavorite={isAgentFavorite?.(sub.id)} onAction={onAgentAction} />
               </div>
             </div>
-          ))}
+          );
+          })}
         </div>
       )}
     </div>
@@ -104,6 +149,8 @@ function OrchestratorTree({
 function AgentRow({
   agent,
   selected,
+  active,
+  context,
   onSelect,
   onAgentAction,
   onToggleLink,
@@ -112,23 +159,27 @@ function AgentRow({
 }: {
   agent: AgentFile;
   selected: boolean;
+  active?: boolean;
+  context?: import("../hooks/useSSE").AgentContext;
   onSelect: (a: AgentFile) => void;
   onAgentAction: (action: string, agentName: string) => void;
   onToggleLink?: (name: string) => void;
   linkAction?: "link" | "unlink";
   isAgentFavorite?: (name: string) => boolean;
 }) {
-  const dot = colorMap[agent.frontmatter.color || ""] || "bg-gray-500";
   return (
     <div className="flex items-center group">
       <button
         onClick={() => onSelect(agent)}
-        className={`flex-1 flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+        className={`relative flex-1 flex items-center gap-2 px-3 py-2 rounded-lg transition-colors overflow-hidden ${
           selected ? "bg-gray-700 text-white" : "text-gray-300 hover:bg-gray-800"
         }`}
       >
-        <span className={`w-2 h-2 rounded-full shrink-0 ${dot}`} />
-        <span className="truncate text-sm font-medium">{agent.id}</span>
+        {active && context && context.percent > 0 && (
+          <ContextBar percent={context.percent} tokensIn={context.tokensIn} tokensOut={context.tokensOut} costUsd={context.costUsd} />
+        )}
+        <span className={`relative w-2 h-2 rounded-full shrink-0 ${active ? "bg-green-400 animate-pulse" : (colorMap[agent.frontmatter.color || ""] || "bg-gray-500")}`} />
+        <span className="relative truncate text-sm font-medium">{agent.id}</span>
       </button>
       <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
         <AgentContextMenu agentName={agent.id} isOrchestrator={agent.subAgents.length > 0} isFavorite={isAgentFavorite?.(agent.id)} onAction={onAgentAction} />
@@ -158,6 +209,8 @@ function renderAgentList(
   onToggleLink?: (name: string) => void,
   linkAction?: "link" | "unlink",
   isAgentFavorite?: (name: string) => boolean,
+  activeAgents?: Set<string>,
+  agentContexts?: Map<string, import("../hooks/useSSE").AgentContext>,
 ) {
   const agentIds = new Set(allAgents.map((a) => a.id));
   const subAgentIds = new Set<string>();
@@ -183,6 +236,8 @@ function renderAgentList(
           onToggleLink={onToggleLink}
           linkAction={linkAction}
           isAgentFavorite={isAgentFavorite}
+          activeAgents={activeAgents}
+          agentContexts={agentContexts}
         />
       ))}
       {standalones.map((a) => (
@@ -190,6 +245,8 @@ function renderAgentList(
           key={a.id}
           agent={a}
           selected={selectedId === a.id}
+          active={activeAgents?.has(a.id)}
+          context={agentContexts?.get(a.id)}
           onSelect={onSelect}
           onAgentAction={onAgentAction}
           onToggleLink={onToggleLink}
@@ -429,6 +486,7 @@ export default function ProjectDashboard({
   skills,
   hooks,
   activeAgents,
+  agentContexts,
   onRefresh,
 }: {
   project: Project;
@@ -436,6 +494,7 @@ export default function ProjectDashboard({
   skills: SkillFile[];
   hooks: HookConfig[];
   activeAgents: Set<string>;
+  agentContexts: Map<string, import("../hooks/useSSE").AgentContext>;
   onRefresh: () => void;
 }) {
   const [view, setView] = useState<MainView>("none");
@@ -534,7 +593,7 @@ export default function ProjectDashboard({
                 {favAgents.length > 0 && (
                   <>
                     <SectionLabel icon={<Bot size={10} className="text-cyan-400" />} label="Agents" />
-                    {renderAgentList(favAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, undefined, undefined, (n) => isFavorite("agent", n))}
+                    {renderAgentList(favAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, undefined, undefined, (n) => isFavorite("agent", n), activeAgents, agentContexts)}
                   </>
                 )}
                 {favSkills.length > 0 && (
@@ -562,20 +621,20 @@ export default function ProjectDashboard({
             icon: <Bot size={11} className="text-cyan-400" />,
             count: agents.length,
             content: isUserProject ? (
-              renderAgentList(agents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, undefined, undefined, (n) => isFavorite("agent", n))
+              renderAgentList(agents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, undefined, undefined, (n) => isFavorite("agent", n), activeAgents, agentContexts)
             ) : (
               <>
                 {projectAgents.length > 0 && (
                   <>
                     <SectionLabel icon={<Globe size={10} className="text-cyan-400" />} label="Project" />
-                    {renderAgentList(projectAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, (name) => handleToggleLink(name, true), "unlink", (n) => isFavorite("agent", n))}
+                    {renderAgentList(projectAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, (name) => handleToggleLink(name, true), "unlink", (n) => isFavorite("agent", n), activeAgents, agentContexts)}
                   </>
                 )}
                 {userAgents.length > 0 && (
                   <>
                     <SectionLabel icon={<User size={10} className="text-gray-500" />} label="User" />
                     <div className="opacity-60">
-                      {renderAgentList(userAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, (name) => handleToggleLink(name, false), "link", (n) => isFavorite("agent", n))}
+                      {renderAgentList(userAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, (name) => handleToggleLink(name, false), "link", (n) => isFavorite("agent", n), activeAgents, agentContexts)}
                     </div>
                   </>
                 )}

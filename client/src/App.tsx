@@ -14,7 +14,7 @@ export default function App() {
   const { projects, loading: projectsLoading } = useProjects();
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const { dashboard, loading: dashLoading, refresh } = useDashboard(selectedProject?.id ?? null);
-  const { events, connected, activeAgents } = useSSE();
+  const { events, connected, activeAgents, agentContexts } = useSSE();
   const { stats } = useStats(events.length);
   const [chatOpen, setChatOpen] = useState(false);
 
@@ -104,6 +104,7 @@ export default function App() {
             skills={dashboard.skills}
             hooks={dashboard.hooks}
             activeAgents={activeAgents}
+            agentContexts={agentContexts}
             onRefresh={refresh}
           />
         ) : null}
