@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: agent-manager-db
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: tastewise
+      POSTGRES_PASSWORD: tastewise
+      POSTGRES_DB: agent_manager
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tastewise -d agent_manager"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
