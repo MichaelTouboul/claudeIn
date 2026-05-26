@@ -8,6 +8,7 @@ import spawnRoutes from "./routes/spawn.js";
 import costRoutes from "./routes/costs.js";
 import projectRoutes from "./routes/projects.js";
 import favoriteRoutes from "./routes/favorites.js";
+import memoryRoutes from "./routes/memory.js";
 import { initDb } from "./services/db.js";
 import { getClientCount } from "./services/sse.js";
 
@@ -25,6 +26,7 @@ app.use("/api/spawn", spawnRoutes);
 app.use("/api/costs", costRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/favorites", favoriteRoutes);
+app.use("/api/memory", memoryRoutes);
 
 app.get("/api/health", (_req, res) => {
   res.json({

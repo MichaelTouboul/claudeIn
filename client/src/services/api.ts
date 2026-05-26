@@ -41,4 +41,16 @@ export const api = {
 
   deleteMemoryFile: (agentName: string, fileName: string) =>
     request<void>(`${BASE}/${agentName}/memory/${fileName}`, { method: "DELETE" }),
+
+  getProjectMemory: (projectId: string) =>
+    request<Array<{ name: string; path: string; content: string; lastModified: string; lines: number; bytes: number }>>(`/api/memory/${projectId}`),
+
+  updateProjectMemoryFile: (projectId: string, fileName: string, content: string) =>
+    request(`/api/memory/${projectId}/${fileName}`, {
+      method: "PUT",
+      body: JSON.stringify({ content }),
+    }),
+
+  deleteProjectMemoryFile: (projectId: string, fileName: string) =>
+    request<void>(`/api/memory/${projectId}/${fileName}`, { method: "DELETE" }),
 };
