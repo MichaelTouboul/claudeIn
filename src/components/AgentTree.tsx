@@ -9,21 +9,40 @@ const colorValues: Record<string, string> = {
   purple: "#a855f7", pink: "#ec4899",
 };
 
-function ContextGauge({ context }: { context: AgentContext }) {
-  const barColor =
-    context.percent >= 90 ? "bg-red-500" :
-    context.percent >= 70 ? "bg-yellow-500" :
-    "bg-cyan-500";
+function gaugeGradient(percent: number): string {
+  if (percent >= 90) return "linear-gradient(90deg, #ef4444 0%, #f87171 100%)";
+  if (percent >= 70) return "linear-gradient(90deg, #eab308 0%, #facc15 100%)";
+  return "linear-gradient(90deg, #06b6d4 0%, #22d3ee 100%)";
+}
 
+function ContextGauge({ context }: { context: AgentContext }) {
   return (
     <div className="flex items-center gap-2 mt-1.5">
-      <div className="flex-1 h-[5px] bg-gray-800/80 rounded-full overflow-hidden backdrop-blur-sm">
+      <div
+        className="flex-1 h-[5px] rounded-full overflow-hidden"
+        style={{ background: 'var(--color-surface-0)' }}
+      >
         <div
-          className={`h-full rounded-full transition-all duration-700 ease-out ${barColor}`}
-          style={{ width: `${context.percent}%` }}
+          className="h-full rounded-full transition-all duration-700 ease-out"
+          style={{
+            width: `${context.percent}%`,
+            background: gaugeGradient(context.percent),
+            boxShadow: context.percent >= 70
+              ? `0 0 6px ${context.percent >= 90 ? 'rgba(239,68,68,0.3)' : 'rgba(234,179,8,0.25)'}`
+              : '0 0 4px rgba(6,182,212,0.2)',
+          }}
         />
       </div>
-      <span className="text-[10px] text-gray-500 font-mono tabular-nums w-8 text-right">
+      <span
+        style={{
+          fontSize: '10px',
+          color: 'var(--color-text-muted)',
+          fontFamily: 'var(--font-mono)',
+          fontFeatureSettings: "'tnum' 1",
+          width: '32px',
+          textAlign: 'right',
+        }}
+      >
         {context.percent.toFixed(0)}%
       </span>
     </div>
@@ -60,47 +79,89 @@ function TreeNode({
   return (
     <button
       onClick={() => onSelect(agent)}
-      className={`w-full text-left px-3 py-2.5 rounded-lg transition-all duration-200 ${
-        selected
-          ? "bg-gray-800/90 ring-1 ring-cyan-500/25 shadow-[0_0_12px_rgba(6,182,212,0.06)]"
-          : "hover:bg-gray-800/40"
-      }`}
-      style={{ paddingLeft: `${12 + depth * 20}px` }}
+      className="w-full text-left rounded-lg transition-all duration-200"
+      style={{
+        paddingLeft: `${12 + depth * 20}px`,
+        paddingRight: '12px',
+        paddingTop: '10px',
+        paddingBottom: '10px',
+        background: selected ? 'var(--color-surface-2)' : undefined,
+        boxShadow: selected ? '0 0 12px rgba(6,182,212,0.06), inset 0 0 0 1px rgba(6,182,212,0.15)' : undefined,
+      }}
+      onMouseEnter={(e) => {
+        if (!selected) e.currentTarget.style.background = 'var(--color-surface-2)';
+      }}
+      onMouseLeave={(e) => {
+        if (!selected) e.currentTarget.style.background = 'transparent';
+      }}
     >
       <div className="flex items-center gap-2">
         {isOrchestrator ? (
-          <Network size={13} className={isActive ? "text-green-400" : "text-cyan-400/70"} />
+          <Network size={13} className={isActive ? "text-green-400" : ""} style={isActive ? undefined : { color: 'rgba(6,182,212,0.5)' }} />
         ) : (
-          <Cog size={11} className={isActive ? "text-green-400" : "text-gray-600"} />
+          <Cog size={11} style={{ color: isActive ? '#4ade80' : 'var(--color-text-muted)' }} />
         )}
 
         <span
-          className={`w-2 h-2 rounded-full shrink-0 transition-all duration-500 ${isActive ? "animate-pulse shadow-[0_0_6px_rgba(74,222,128,0.5)]" : ""}`}
-          style={{ backgroundColor: isActive ? "#4ade80" : color }}
+          className={`w-2 h-2 rounded-full shrink-0 transition-all duration-500 ${isActive ? "animate-pulse" : ""}`}
+          style={{
+            backgroundColor: isActive ? "#4ade80" : color,
+            boxShadow: isActive ? '0 0 6px rgba(74,222,128,0.5)' : undefined,
+          }}
         />
 
-        <span className={`text-sm font-medium truncate transition-colors ${isActive ? "text-white" : "text-gray-300"}`}>
+        <span
+          className="text-sm font-medium truncate transition-colors"
+          style={{ color: isActive ? 'var(--color-text-primary)' : 'var(--color-text-secondary)' }}
+        >
           {agent.id}
         </span>
 
-        <span className="ml-auto text-[10px] text-gray-600 font-mono tabular-nums">{model}</span>
+        <span
+          className="ml-auto"
+          style={{
+            fontSize: '10px',
+            color: 'var(--color-text-muted)',
+            fontFamily: 'var(--font-mono)',
+            fontFeatureSettings: "'tnum' 1",
+          }}
+        >
+          {model}
+        </span>
       </div>
 
       {isActive && context && context.percent > 0 && (
         <div className="ml-6 mt-1">
           <ContextGauge context={context} />
-          <div className="flex items-center gap-3 mt-1 text-[10px] text-gray-500 font-mono tabular-nums">
+          <div
+            className="flex items-center gap-3 mt-1"
+            style={{
+              fontSize: '10px',
+              color: 'var(--color-text-muted)',
+              fontFamily: 'var(--font-mono)',
+              fontFeatureSettings: "'tnum' 1",
+            }}
+          >
             <span>in {formatTokens(context.tokensIn)}</span>
             <span>out {formatTokens(context.tokensOut)}</span>
-            <span className="text-yellow-500/60">${context.costUsd.toFixed(4)}</span>
+            <span style={{ color: 'rgba(234,179,8,0.5)' }}>${context.costUsd.toFixed(4)}</span>
           </div>
         </div>
       )}
 
       {isActive && currentTool && (
         <div className="flex items-center gap-1.5 ml-6 mt-1.5">
-          <Wrench size={9} className="text-yellow-500/70" />
-          <span className="text-[10px] text-yellow-500/70 font-mono truncate">{currentTool}</span>
+          <Wrench size={9} style={{ color: 'rgba(234,179,8,0.6)' }} />
+          <span
+            className="truncate"
+            style={{
+              fontSize: '10px',
+              color: 'rgba(234,179,8,0.6)',
+              fontFamily: 'var(--font-mono)',
+            }}
+          >
+            {currentTool}
+          </span>
         </div>
       )}
     </button>
@@ -150,8 +211,18 @@ export default function AgentTree({
   };
 
   return (
-    <div className="h-full overflow-y-auto bg-gray-950 p-4">
-      <h3 className="text-[10px] font-semibold text-gray-600 uppercase tracking-[0.12em] mb-3 px-3">
+    <div className="h-full overflow-y-auto p-4" style={{ background: 'var(--color-surface-0)' }}>
+      <h3
+        className="mb-3 px-3"
+        style={{
+          fontSize: '10px',
+          fontWeight: 600,
+          color: 'var(--color-text-muted)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.12em',
+          fontFamily: 'var(--font-mono)',
+        }}
+      >
         Agent Hierarchy
       </h3>
 
@@ -167,7 +238,10 @@ export default function AgentTree({
               <div className="flex items-center">
                 <button
                   onClick={() => toggleCollapse(orch.id)}
-                  className="p-1 text-gray-700 hover:text-gray-400 transition-colors"
+                  className="p-1 transition-colors"
+                  style={{ color: 'var(--color-text-muted)' }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-text-secondary)'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = 'var(--color-text-muted)'}
                 >
                   {isCollapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
                 </button>
@@ -185,7 +259,7 @@ export default function AgentTree({
               </div>
 
               {!isCollapsed && subs.length > 0 && (
-                <div className="ml-3 border-l border-gray-800/60">
+                <div className="ml-3" style={{ borderLeft: '1px solid var(--color-border-subtle)' }}>
                   {subs.map((sub) => (
                     <TreeNode
                       key={sub.id}
@@ -205,7 +279,7 @@ export default function AgentTree({
         })}
 
         {standalones.length > 0 && orchestrators.length > 0 && (
-          <div className="border-t border-gray-800/40 my-3" />
+          <div className="my-3" style={{ borderTop: '1px solid var(--color-border-subtle)' }} />
         )}
 
         {standalones.map((a) => (
@@ -223,7 +297,12 @@ export default function AgentTree({
       </div>
 
       {agents.length === 0 && (
-        <p className="text-sm text-gray-700 text-center py-12">No agents found</p>
+        <p
+          className="text-center py-12"
+          style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}
+        >
+          No agents found
+        </p>
       )}
     </div>
   );

@@ -583,7 +583,13 @@ export default function ProjectDashboard({
   return (
     <div className="flex-1 flex h-full">
       {/* Sidebar with accordions */}
-      <div className="w-72 border-r border-gray-800 bg-gray-900/30 flex flex-col h-full">
+      <div
+        className="w-72 flex flex-col h-full"
+        style={{
+          background: 'var(--color-surface-1)',
+          borderRight: '1px solid var(--color-border)',
+        }}
+      >
 
         {/* Open panels fill available space, closed panels stack at bottom */}
         {([
@@ -628,30 +634,39 @@ export default function ProjectDashboard({
               renderAgentList(agents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, undefined, undefined, (n) => isFavorite("agent", n), activeAgents, agentContexts)
             ) : (
               <div>
-                <div className="flex items-center gap-0.5 px-2 mb-2">
+                <div
+                  className="flex items-center gap-px px-2 mb-2 p-0.5 rounded-lg"
+                  style={{ background: 'var(--color-surface-0)', border: '1px solid var(--color-border-subtle)' }}
+                >
                   <button
                     onClick={() => setScopeTab("project")}
-                    className={`flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-md transition-colors ${
-                      scopeTab === "project"
-                        ? "bg-cyan-500/15 text-cyan-400 shadow-[inset_0_0_8px_rgba(6,182,212,0.08)]"
-                        : "text-gray-500 hover:text-gray-300 hover:bg-gray-800/60"
-                    }`}
+                    className="flex-1 flex items-center justify-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-md transition-all duration-200"
+                    style={scopeTab === "project" ? {
+                      background: 'var(--color-accent-dim)',
+                      color: 'var(--color-accent)',
+                      boxShadow: 'inset 0 0 8px rgba(6,182,212,0.08)',
+                    } : {
+                      color: 'var(--color-text-muted)',
+                    }}
                   >
                     <Globe size={10} />
                     Project
-                    <span className="text-[10px] tabular-nums opacity-60">{projectAgents.length}</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontFeatureSettings: "'tnum' 1", fontSize: '10px', opacity: 0.6 }}>{projectAgents.length}</span>
                   </button>
                   <button
                     onClick={() => setScopeTab("user")}
-                    className={`flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-md transition-colors ${
-                      scopeTab === "user"
-                        ? "bg-yellow-500/12 text-yellow-400 shadow-[inset_0_0_8px_rgba(234,179,8,0.06)]"
-                        : "text-gray-500 hover:text-gray-300 hover:bg-gray-800/60"
-                    }`}
+                    className="flex-1 flex items-center justify-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-md transition-all duration-200"
+                    style={scopeTab === "user" ? {
+                      background: 'rgba(234, 179, 8, 0.1)',
+                      color: '#eab308',
+                      boxShadow: 'inset 0 0 8px rgba(234,179,8,0.06)',
+                    } : {
+                      color: 'var(--color-text-muted)',
+                    }}
                   >
                     <User size={10} />
                     User
-                    <span className="text-[10px] tabular-nums opacity-60">{userAgents.length}</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontFeatureSettings: "'tnum' 1", fontSize: '10px', opacity: 0.6 }}>{userAgents.length}</span>
                   </button>
                 </div>
                 {scopeTab === "project" ? (
@@ -763,34 +778,39 @@ export default function ProjectDashboard({
 
       {/* Main content */}
       <div className="flex-1 flex flex-col">
-        <div className="flex items-center gap-1 px-4 py-2 border-b border-gray-800 bg-gray-900/30">
-          <button
-            onClick={() => setView("tree")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-              view === "tree" ? "bg-gray-700 text-white" : "text-gray-500 hover:text-gray-300 hover:bg-gray-800"
-            }`}
-          >
-            <GitBranch size={13} />
-            Tree
-          </button>
-          <button
-            onClick={() => setView("session")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-              view === "session" ? "bg-gray-700 text-white" : "text-gray-500 hover:text-gray-300 hover:bg-gray-800"
-            }`}
-          >
-            <History size={13} />
-            Sessions
-          </button>
-          <button
-            onClick={() => setView("costs")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-              view === "costs" ? "bg-gray-700 text-white" : "text-gray-500 hover:text-gray-300 hover:bg-gray-800"
-            }`}
-          >
-            <BarChart3 size={13} />
-            Costs
-          </button>
+        <div
+          className="flex items-center gap-1 px-4 py-2"
+          style={{
+            borderBottom: '1px solid var(--color-border)',
+            background: 'var(--color-surface-1)',
+          }}
+        >
+          {([
+            { key: "tree" as MainView, icon: <GitBranch size={13} />, label: "Tree" },
+            { key: "session" as MainView, icon: <History size={13} />, label: "Sessions" },
+            { key: "costs" as MainView, icon: <BarChart3 size={13} />, label: "Costs" },
+          ]).map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setView(tab.key)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200"
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '11px',
+                letterSpacing: '0.02em',
+                ...(view === tab.key ? {
+                  background: 'var(--color-surface-3)',
+                  color: 'var(--color-text-primary)',
+                  boxShadow: '0 0 8px rgba(6, 182, 212, 0.06)',
+                } : {
+                  color: 'var(--color-text-muted)',
+                }),
+              }}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          ))}
         </div>
 
         <div className="flex-1 min-h-0 overflow-hidden">
@@ -812,8 +832,24 @@ export default function ProjectDashboard({
           ) : view === "costs" ? (
             <CostDashboard />
           ) : (
-            <div className="h-full flex items-center justify-center text-gray-500 text-sm">
-              Select an item from the sidebar
+            <div className="h-full flex flex-col items-center justify-center gap-3">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{
+                  background: 'var(--color-surface-2)',
+                  border: '1px solid var(--color-border-subtle)',
+                }}
+              >
+                <Bot size={18} style={{ color: 'var(--color-text-muted)' }} />
+              </div>
+              <div className="text-center">
+                <p style={{ color: 'var(--color-text-secondary)', fontSize: '13px', fontWeight: 500 }}>
+                  No item selected
+                </p>
+                <p style={{ color: 'var(--color-text-muted)', fontSize: '11px', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>
+                  Select an agent, skill, or session from the sidebar
+                </p>
+              </div>
             </div>
           )}
         </div>

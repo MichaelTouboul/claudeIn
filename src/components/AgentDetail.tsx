@@ -30,18 +30,28 @@ const tabIcons: Record<Tab, React.ReactNode> = {
 };
 
 function Badge({ children, variant }: { children: React.ReactNode; variant: string }) {
-  const colors: Record<string, string> = {
-    blue: "bg-blue-500/20 text-blue-300",
-    green: "bg-green-500/20 text-green-300",
-    yellow: "bg-yellow-500/20 text-yellow-300",
-    orange: "bg-orange-500/20 text-orange-300",
-    cyan: "bg-cyan-500/20 text-cyan-300",
-    purple: "bg-purple-500/20 text-purple-300",
-    gray: "bg-gray-700 text-gray-300",
-    red: "bg-red-500/20 text-red-300",
+  const colorMap: Record<string, { bg: string; text: string; border: string }> = {
+    blue:   { bg: 'rgba(59,130,246,0.12)',  text: '#93c5fd', border: 'rgba(59,130,246,0.2)' },
+    green:  { bg: 'rgba(34,197,94,0.12)',   text: '#86efac', border: 'rgba(34,197,94,0.2)' },
+    yellow: { bg: 'rgba(234,179,8,0.12)',   text: '#fde047', border: 'rgba(234,179,8,0.2)' },
+    orange: { bg: 'rgba(249,115,22,0.12)',  text: '#fdba74', border: 'rgba(249,115,22,0.2)' },
+    cyan:   { bg: 'var(--color-accent-dim)', text: 'var(--color-accent)', border: 'rgba(6,182,212,0.2)' },
+    purple: { bg: 'rgba(168,85,247,0.12)',  text: '#c4b5fd', border: 'rgba(168,85,247,0.2)' },
+    gray:   { bg: 'var(--color-surface-3)', text: 'var(--color-text-secondary)', border: 'var(--color-border-subtle)' },
+    red:    { bg: 'rgba(248,113,113,0.12)', text: '#fca5a5', border: 'rgba(248,113,113,0.2)' },
   };
+  const c = colorMap[variant] || colorMap.gray;
   return (
-    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${colors[variant] || colors.gray}`}>
+    <span
+      className="px-2 py-0.5 rounded text-xs font-medium"
+      style={{
+        fontFamily: 'var(--font-mono)',
+        background: c.bg,
+        color: c.text,
+        border: `1px solid ${c.border}`,
+        letterSpacing: '0.01em',
+      }}
+    >
       {children}
     </span>
   );
@@ -79,7 +89,7 @@ const FIELDS: FieldDef[] = [
 
 function fieldDisplayValue(fm: AgentFrontmatter, key: string): React.ReactNode {
   const val = fm[key];
-  if (val === undefined || val === null || val === "") return <span className="text-gray-500">—</span>;
+  if (val === undefined || val === null || val === "") return <span style={{ color: 'var(--color-text-muted)' }}>—</span>;
 
   if (key === "model") return <Badge variant={val === "opus" ? "purple" : val === "sonnet" ? "blue" : "gray"}>{String(val)}</Badge>;
   if (key === "color") return <Badge variant={String(val)}>{String(val)}</Badge>;
@@ -88,7 +98,7 @@ function fieldDisplayValue(fm: AgentFrontmatter, key: string): React.ReactNode {
 
   if (key === "tools" || key === "disallowedTools" || key === "subAgents") {
     const arr = Array.isArray(val) ? val : typeof val === "string" ? val.split(",").map((t) => t.trim()).filter(Boolean) : [];
-    if (arr.length === 0) return <span className="text-gray-500">{key === "tools" ? "all (inherited)" : "—"}</span>;
+    if (arr.length === 0) return <span style={{ color: 'var(--color-text-muted)' }}>{key === "tools" ? "all (inherited)" : "—"}</span>;
     const variant = key === "tools" ? "cyan" : key === "subAgents" ? "blue" : "red";
     return (
       <div className="flex flex-wrap gap-1">
@@ -97,7 +107,7 @@ function fieldDisplayValue(fm: AgentFrontmatter, key: string): React.ReactNode {
     );
   }
 
-  return <span className="font-mono text-sm">{String(val)}</span>;
+  return <span className="font-mono text-sm" style={{ color: 'var(--color-text-primary)' }}>{String(val)}</span>;
 }
 
 function EditField({
@@ -109,7 +119,16 @@ function EditField({
   value: unknown;
   onChange: (val: unknown) => void;
 }) {
-  const base = "w-full bg-gray-800 border border-cyan-500/50 rounded px-2.5 py-1.5 text-sm text-gray-200 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30";
+  const base = "w-full rounded px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1";
+  const fieldStyle: React.CSSProperties = {
+    background: 'var(--color-surface-2)',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: 'rgba(6,182,212,0.25)',
+    color: 'var(--color-text-primary)',
+    fontFamily: 'var(--font-mono)',
+    fontSize: '13px',
+  };
 
   if (field.type === "dropdown") {
     return (
@@ -117,6 +136,7 @@ function EditField({
         value={String(value ?? "")}
         onChange={(e) => onChange(e.target.value || undefined)}
         className={base}
+        style={fieldStyle}
       >
         {field.options!.map((opt) => (
           <option key={opt} value={opt}>{opt || "— inherit —"}</option>
@@ -132,6 +152,7 @@ function EditField({
         value={value !== undefined && value !== null ? String(value) : ""}
         onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
         className={base}
+        style={fieldStyle}
         placeholder="—"
       />
     );
@@ -144,6 +165,7 @@ function EditField({
         onChange={(e) => onChange(e.target.value)}
         rows={3}
         className={`${base} resize-y`}
+        style={fieldStyle}
       />
     );
   }
@@ -154,6 +176,7 @@ function EditField({
         value={value ? "true" : "false"}
         onChange={(e) => onChange(e.target.value === "true")}
         className={base}
+        style={fieldStyle}
       >
         <option value="false">no</option>
         <option value="true">yes</option>
@@ -168,6 +191,7 @@ function EditField({
       value={strVal}
       onChange={(e) => onChange(e.target.value)}
       className={base}
+      style={fieldStyle}
       placeholder="—"
     />
   );
@@ -188,10 +212,21 @@ function FrontmatterTable({
     <div className="space-y-4">
       <table className="w-full text-sm">
         <tbody>
-          {FIELDS.map((field) => (
-            <tr key={field.key} className="border-b border-gray-800">
-              <td className="py-2.5 pr-4 text-gray-500 font-medium w-40 align-top">{field.label}</td>
-              <td className="py-2.5 text-gray-200">
+          {FIELDS.map((field, idx) => (
+            <tr
+              key={field.key}
+              style={{
+                borderBottom: '1px solid var(--color-border-subtle)',
+                background: idx % 2 === 1 ? 'var(--color-surface-1)' : 'transparent',
+              }}
+            >
+              <td
+                className="py-2.5 pr-4 font-medium w-40 align-top"
+                style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)', fontSize: '12px', letterSpacing: '0.02em' }}
+              >
+                {field.label}
+              </td>
+              <td className="py-2.5" style={{ color: 'var(--color-text-primary)' }}>
                 {editing ? (
                   <EditField
                     field={field}
@@ -282,15 +317,29 @@ export default function AgentDetail({
   };
 
   return (
-    <div className={`flex-1 flex flex-col h-full ${editing ? "ring-2 ring-cyan-500/30 ring-inset rounded-lg" : ""}`}>
-      <div className={`border-b px-6 py-4 ${editing ? "border-cyan-500/30 bg-cyan-500/5" : "border-gray-800"}`}>
+    <div
+      className={`flex-1 flex flex-col h-full ${editing ? "ring-inset rounded-lg" : ""}`}
+      style={editing ? { boxShadow: 'inset 0 0 0 2px rgba(6,182,212,0.2)' } : undefined}
+    >
+      <div
+        className="border-b px-6 py-4"
+        style={{
+          background: editing ? 'rgba(6,182,212,0.04)' : 'var(--color-surface-1)',
+          borderColor: editing ? 'rgba(6,182,212,0.2)' : 'var(--color-border)',
+        }}
+      >
         <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span
-            className={`w-3 h-3 rounded-full`}
-            style={{ backgroundColor: `var(--agent-color, #06b6d4)` }}
+            className="w-3 h-3 rounded-full"
+            style={{ backgroundColor: `var(--agent-color, var(--color-accent))` }}
           />
-          <h2 className="text-lg font-bold text-white">{agent.id}</h2>
+          <h2
+            className="text-lg font-bold"
+            style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)', letterSpacing: '-0.01em' }}
+          >
+            {agent.id}
+          </h2>
           {onToggleFavorite && (
             <button
               onClick={onToggleFavorite}
@@ -304,7 +353,18 @@ export default function AgentDetail({
             {agent.frontmatter.model || "inherit"}
           </Badge>
           {editing && (
-            <span className="text-xs font-medium text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded">EDITING</span>
+            <span
+              className="text-xs font-medium px-2 py-0.5 rounded"
+              style={{
+                color: 'var(--color-accent)',
+                background: 'var(--color-accent-dim)',
+                fontFamily: 'var(--font-mono)',
+                letterSpacing: '0.05em',
+                border: '1px solid rgba(6,182,212,0.15)',
+              }}
+            >
+              EDITING
+            </span>
           )}
         </div>
         <div className="flex gap-2">
@@ -371,31 +431,39 @@ export default function AgentDetail({
           )}
         </div>
         </div>
-        <div className="text-xs text-gray-600 font-mono mt-1.5">{agent.filePath}</div>
+        <div className="text-xs font-mono mt-1.5" style={{ color: 'var(--color-text-muted)' }}>{agent.filePath}</div>
       </div>
 
-      <div className={`border-b px-6 flex items-center gap-1 ${editing ? "border-cyan-500/30" : "border-gray-800"}`}>
+      <div
+        className="border-b px-6 flex items-center gap-1"
+        style={{
+          borderColor: editing ? 'rgba(6,182,212,0.2)' : 'var(--color-border)',
+          background: 'var(--color-surface-1)',
+        }}
+      >
         <button
           onClick={() => setTab("chat")}
-          className={`flex items-center gap-1.5 px-3.5 py-1.5 my-1.5 mr-2 text-sm font-medium rounded-lg transition-colors ${
-            tab === "chat"
-              ? "bg-cyan-600 text-white"
-              : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-          }`}
+          className="flex items-center gap-1.5 px-3.5 py-1.5 my-1.5 mr-2 text-sm font-medium rounded-lg transition-all duration-150"
+          style={{
+            background: tab === "chat" ? 'var(--color-accent)' : 'var(--color-surface-3)',
+            color: tab === "chat" ? '#fff' : 'var(--color-text-secondary)',
+            boxShadow: tab === "chat" ? '0 0 12px rgba(6,182,212,0.2), 0 1px 3px rgba(0,0,0,0.3)' : 'none',
+            border: tab === "chat" ? 'none' : '1px solid var(--color-border-subtle)',
+          }}
         >
           <Terminal size={14} />
           Chat
         </button>
-        <div className="w-px h-5 bg-gray-700 mr-1" />
+        <div className="w-px h-5 mr-1" style={{ background: 'var(--color-border)' }} />
         {TABS.filter((t) => t !== "chat").map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium border-b-2 transition-colors ${
-              tab === t
-                ? "border-cyan-400 text-cyan-400"
-                : "border-transparent text-gray-500 hover:text-gray-300"
-            }`}
+            className="flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium border-b-2 transition-colors"
+            style={{
+              borderColor: tab === t ? 'var(--color-accent)' : 'transparent',
+              color: tab === t ? 'var(--color-accent)' : 'var(--color-text-muted)',
+            }}
           >
             {tabIcons[t]}
             {t.charAt(0).toUpperCase() + t.slice(1)}
@@ -417,12 +485,16 @@ export default function AgentDetail({
         {tab === "files" && (
           <div className="space-y-4">
             {agent.annexFiles.length === 0 ? (
-              <p className="text-gray-500 text-sm">No annex files</p>
+              <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>No annex files</p>
             ) : (
               agent.annexFiles.map((f) => (
-                <div key={f.path} className="bg-gray-800/50 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-gray-300 mb-2">{f.name}</h3>
-                  <pre className="text-xs text-gray-400 overflow-x-auto whitespace-pre-wrap font-mono">
+                <div
+                  key={f.path}
+                  className="rounded-lg p-4"
+                  style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border-subtle)' }}
+                >
+                  <h3 className="text-sm font-medium mb-2" style={{ color: 'var(--color-text-secondary)', fontFamily: 'var(--font-mono)' }}>{f.name}</h3>
+                  <pre className="text-xs overflow-x-auto whitespace-pre-wrap font-mono" style={{ color: 'var(--color-text-muted)' }}>
                     {f.content}
                   </pre>
                 </div>

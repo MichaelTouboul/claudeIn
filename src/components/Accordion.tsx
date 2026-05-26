@@ -37,28 +37,54 @@ export default function Accordion({
       style={isOpen && flex ? undefined : { flex: "none" }}
     >
       <div
-        className="flex items-center border-b border-gray-800/50 shrink-0"
+        className="flex items-center shrink-0"
+        style={{
+          borderBottom: '1px solid var(--color-border-subtle)',
+          borderLeft: isOpen ? '2px solid var(--color-accent)' : '2px solid transparent',
+          transition: 'border-color 0.2s ease',
+        }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
         <button
           onClick={handleToggle}
-          className="flex-1 flex items-center gap-2 px-2 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-300 hover:bg-gray-800/50 transition-colors"
+          className="flex-1 flex items-center gap-2 px-2 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors"
+          style={{
+            color: hovered ? 'var(--color-text-primary)' : 'var(--color-text-muted)',
+            background: hovered ? 'var(--color-surface-2)' : 'transparent',
+            fontFamily: 'var(--font-sans)',
+          }}
         >
           <ChevronRight
             size={11}
-            className={`transition-transform shrink-0 ${isOpen ? "rotate-90" : ""}`}
+            className="shrink-0"
+            style={{
+              transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+            }}
           />
           {icon}
           <span>{label}</span>
           {count !== undefined && (
-            <span className="text-gray-600 font-normal normal-case">{count}</span>
+            <span
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontFeatureSettings: "'tnum' 1",
+                color: 'var(--color-text-muted)',
+                fontSize: '10px',
+                fontWeight: 400,
+                textTransform: 'none',
+              }}
+            >
+              {count}
+            </span>
           )}
         </button>
         {onRefresh && isOpen && hovered && (
           <button
             onClick={(e) => { e.stopPropagation(); onRefresh(); }}
-            className="p-1 mr-1 text-gray-500 hover:text-gray-200 transition-colors"
+            className="p-1 mr-1 transition-colors"
+            style={{ color: hovered ? 'var(--color-text-secondary)' : 'var(--color-text-muted)' }}
             title={`Refresh ${label.toLowerCase()}`}
           >
             <RefreshCw size={11} />
