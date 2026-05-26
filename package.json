@@ -2,17 +2,17 @@
   "name": "claude-agent-manager",
   "version": "1.0.0",
   "private": true,
-  "workspaces": ["server", "client"],
+  "workspaces": [
+    "server",
+    "client"
+  ],
   "scripts": {
     "start": "./start.sh",
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev": "npm run dev:client",
     "dev:server": "cd server && npm run dev",
     "dev:client": "cd client && npm run dev",
     "build": "npm run build:server && npm run build:client",
     "build:server": "cd server && npm run build",
     "build:client": "cd client && npm run build"
-  },
-  "devDependencies": {
-    "concurrently": "^9.1.0"
   }
 }
