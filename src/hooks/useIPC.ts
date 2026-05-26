@@ -89,6 +89,9 @@ export function useIPC() {
       if (data.type === "spawn_usage") {
         markActive(data.agentName, data.tokensIn || 0, data.tokensOut || 0, 0);
       }
+      if (data.type === "session_activity") {
+        markActive(data.agentName || "unknown", data.tokensIn || 0, data.tokensOut || 0, 0);
+      }
     });
     return cleanup;
   }, [markActive]);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import ProjectSwitcher from "./components/ProjectSwitcher";
 import ProjectDashboard from "./components/ProjectDashboard";
 import GlobalChatModal from "./components/GlobalChatModal";
@@ -18,6 +18,24 @@ export default function App() {
   const { events, connected, activeAgents, agentContexts, currentTools } = useIPC();
   const { stats } = useStats(events.length);
   const [chatOpen, setChatOpen] = useState(false);
+  const prevProjectPath = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (prevProjectPath.current) {
+      window.api.unwatchSessions(prevProjectPath.current);
+    }
+    if (selectedProject) {
+      window.api.watchSessions(selectedProject.path);
+      prevProjectPath.current = selectedProject.path;
+    } else {
+      prevProjectPath.current = null;
+    }
+    return () => {
+      if (prevProjectPath.current) {
+        window.api.unwatchSessions(prevProjectPath.current);
+      }
+    };
+  }, [selectedProject]);
 
   const agentColorMap = new Map<string, string>();
   if (dashboard) {
