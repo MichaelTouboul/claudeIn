@@ -856,23 +856,27 @@ function spawnAgent(agentName, mission, cwd, resumeSessionId) {
 			status: session.status,
 			claudeSessionId: session.claudeSessionId
 		});
-		ingestEvent({
-			agent_name: agentName,
-			session_id: sessionId,
-			event_type: "Stop",
-			payload: { exit_code: code }
-		}).catch(() => {});
+		try {
+			ingestEvent({
+				agent_name: agentName,
+				session_id: sessionId,
+				event_type: "Stop",
+				payload: { exit_code: code }
+			});
+		} catch {}
 	});
 	sessions.set(sessionId, {
 		session,
 		process: proc
 	});
-	ingestEvent({
-		agent_name: agentName,
-		session_id: sessionId,
-		event_type: "SubagentStart",
-		payload: { mission }
-	}).catch(() => {});
+	try {
+		ingestEvent({
+			agent_name: agentName,
+			session_id: sessionId,
+			event_type: "SubagentStart",
+			payload: { mission }
+		});
+	} catch {}
 	broadcast({
 		type: "spawn_start",
 		sessionId,
@@ -915,19 +919,23 @@ function handleStreamEvent(sessionId, session, event) {
 			agentName: session.agentName,
 			message: msg
 		});
+		try {
+			ingestEvent({
+				agent_name: session.agentName,
+				session_id: sessionId,
+				event_type: "PreToolUse",
+				tool_name: toolName
+			});
+		} catch {}
+	}
+	if (event.type === "tool_result") try {
 		ingestEvent({
 			agent_name: session.agentName,
 			session_id: sessionId,
-			event_type: "PreToolUse",
-			tool_name: toolName
-		}).catch(() => {});
-	}
-	if (event.type === "tool_result") ingestEvent({
-		agent_name: session.agentName,
-		session_id: sessionId,
-		event_type: "PostToolUse",
-		tool_name: event.name || void 0
-	}).catch(() => {});
+			event_type: "PostToolUse",
+			tool_name: event.name || void 0
+		});
+	} catch {}
 	if (event.type === "result") {
 		const text = extractText(event);
 		if (text) {
@@ -957,13 +965,15 @@ function handleStreamEvent(sessionId, session, event) {
 			tokensOut,
 			model: event.model || void 0
 		});
-		ingestEvent({
-			agent_name: session.agentName,
-			session_id: sessionId,
-			event_type: "Usage",
-			tokens_in: tokensIn,
-			tokens_out: tokensOut
-		}).catch(() => {});
+		try {
+			ingestEvent({
+				agent_name: session.agentName,
+				session_id: sessionId,
+				event_type: "Usage",
+				tokens_in: tokensIn,
+				tokens_out: tokensOut
+			});
+		} catch {}
 	}
 	if (event.type === "input_request" || event.subtype === "input_request") broadcast({
 		type: "spawn_input_request",
