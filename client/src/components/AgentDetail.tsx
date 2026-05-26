@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import type { AgentFile, AgentFrontmatter } from "../types/agent.types";
 import { api } from "../services/api";
-import MemoryViewer from "./MemoryViewer";
+import MemoryManager from "./MemoryManager";
 import MarkdownBody from "./MarkdownBody";
 import AgentChat from "./AgentChat";
 import { Terminal } from "lucide-react";
@@ -413,7 +413,7 @@ export default function AgentDetail({
           <FrontmatterTable agent={agent} editing={editing} draft={draft} onDraftChange={handleDraftChange} />
         )}
         {tab === "prompt" && <MarkdownBody content={agent.body} />}
-        {tab === "memory" && <MemoryViewer agent={agent} onRefresh={onRefresh} />}
+        {tab === "memory" && <MemoryManager agent={agent} onRefresh={onRefresh} />}
         {tab === "files" && (
           <div className="space-y-4">
             {agent.annexFiles.length === 0 ? (
