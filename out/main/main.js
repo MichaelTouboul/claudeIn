@@ -33,9 +33,11 @@ let gray_matter = require("gray-matter");
 gray_matter = __toESM(gray_matter);
 let child_process = require("child_process");
 let crypto = require("crypto");
+let readline = require("readline");
+readline = __toESM(readline);
 //#region electron/services/db.ts
-var HOME$2 = process.env.HOME || require("os").homedir();
-var DB_DIR = path.default.join(HOME$2, ".claude-agent-manager");
+var HOME$3 = process.env.HOME || require("os").homedir();
+var DB_DIR = path.default.join(HOME$3, ".claude-agent-manager");
 var DB_PATH = path.default.join(DB_DIR, "data.db");
 var db;
 function rowsToObjects(stmt) {
@@ -357,8 +359,8 @@ function registerAgentHandlers() {
 }
 //#endregion
 //#region electron/services/project.service.ts
-var HOME$1 = process.env.HOME;
-var USER_CLAUDE_DIR = path.default.join(HOME$1, ".claude");
+var HOME$2 = process.env.HOME;
+var USER_CLAUDE_DIR = path.default.join(HOME$2, ".claude");
 var SCAN_DEPTH = 3;
 var SKIP_DIRS = new Set([
 	"node_modules",
@@ -400,7 +402,7 @@ async function scanForProjects() {
 				const full = path.default.join(dir, entry.name);
 				if (entry.name === ".claude") {
 					const projectPath = dir;
-					if (seen.has(projectPath) || projectPath === HOME$1) continue;
+					if (seen.has(projectPath) || projectPath === HOME$2) continue;
 					seen.add(projectPath);
 					const claudeDir = full;
 					const agentsDir = path.default.join(claudeDir, "agents");
@@ -423,11 +425,11 @@ async function scanForProjects() {
 			}
 		} catch {}
 	}
-	await walk(HOME$1, 0);
+	await walk(HOME$2, 0);
 	const userProject = {
 		id: "user",
 		name: "User Scope",
-		path: HOME$1,
+		path: HOME$2,
 		claudeDir: USER_CLAUDE_DIR,
 		hasAgents: await exists$1(path.default.join(USER_CLAUDE_DIR, "agents")),
 		hasSkills: await exists$1(path.default.join(USER_CLAUDE_DIR, "skills")),
@@ -1041,8 +1043,8 @@ function registerEventHandlers() {
 }
 //#endregion
 //#region electron/services/memory.service.ts
-var HOME = process.env.HOME;
-var PROJECTS_MEMORY_BASE = path.default.join(HOME, ".claude", "projects");
+var HOME$1 = process.env.HOME;
+var PROJECTS_MEMORY_BASE = path.default.join(HOME$1, ".claude", "projects");
 async function exists(p) {
 	try {
 		await fs_promises.default.access(p);
@@ -1238,6 +1240,237 @@ function registerMissionHandlers() {
 	electron.ipcMain.handle("missions:create", (_e, agentName, title, sessionId) => createMission(agentName, title, sessionId));
 }
 //#endregion
+//#region electron/services/session.service.ts
+var HOME = process.env.HOME || require("os").homedir();
+var PROJECTS_BASE = path.default.join(HOME, ".claude", "projects");
+function getSessionsDir(projectPath) {
+	const encoded = projectPath.replace(/\//g, "-");
+	return path.default.join(PROJECTS_BASE, encoded);
+}
+async function extractMetadata(filePath) {
+	const meta = {};
+	let lineCount = 0;
+	return new Promise((resolve) => {
+		const stream = fs.default.createReadStream(filePath, { encoding: "utf-8" });
+		const rl = readline.default.createInterface({
+			input: stream,
+			crlfDelay: Infinity
+		});
+		rl.on("line", (line) => {
+			lineCount++;
+			try {
+				const obj = JSON.parse(line);
+				if (obj.type === "ai-title" && obj.aiTitle) meta.title = obj.aiTitle;
+				if (obj.type === "agent-setting" && obj.agentSetting) meta.agentName = obj.agentSetting;
+				if (obj.type === "user" && obj.promptId && !meta.firstPrompt) {
+					const content = obj.message?.content;
+					if (typeof content === "string") meta.firstPrompt = content.length > 120 ? content.slice(0, 120) + "…" : content;
+					if (obj.timestamp && !meta.startedAt) meta.startedAt = obj.timestamp;
+					if (obj.gitBranch && !meta.branch) meta.branch = obj.gitBranch;
+				}
+				if (obj.type === "assistant" && obj.message?.model && !meta.model) meta.model = obj.message.model;
+			} catch {}
+			if (lineCount >= 50) {
+				rl.close();
+				stream.destroy();
+			}
+		});
+		rl.on("close", () => resolve(meta));
+		rl.on("error", () => resolve(meta));
+	});
+}
+async function listSessions(projectPath) {
+	const dir = getSessionsDir(projectPath);
+	if (!fs.default.existsSync(dir)) return [];
+	const entries = fs.default.readdirSync(dir).filter((f) => f.endsWith(".jsonl"));
+	const summaries = [];
+	for (const entry of entries) {
+		const filePath = path.default.join(dir, entry);
+		const sessionId = entry.replace(".jsonl", "");
+		let stat;
+		try {
+			stat = fs.default.statSync(filePath);
+		} catch {
+			continue;
+		}
+		const meta = await extractMetadata(filePath);
+		summaries.push({
+			sessionId,
+			filePath,
+			agentName: meta.agentName || null,
+			title: meta.title || null,
+			firstPrompt: meta.firstPrompt || null,
+			messageCount: Math.max(1, Math.round(stat.size / 500)),
+			branch: meta.branch || null,
+			startedAt: meta.startedAt || null,
+			lastActiveAt: stat.mtime.toISOString(),
+			model: meta.model || null,
+			projectDirName: path.default.basename(dir)
+		});
+	}
+	return summaries.sort((a, b) => {
+		const ta = a.lastActiveAt || "";
+		return (b.lastActiveAt || "").localeCompare(ta);
+	});
+}
+async function loadConversation(filePath) {
+	const sessionId = path.default.basename(filePath, ".jsonl");
+	const messages = [];
+	let totalTokensIn = 0;
+	let totalTokensOut = 0;
+	let model = null;
+	return new Promise((resolve) => {
+		const stream = fs.default.createReadStream(filePath, { encoding: "utf-8" });
+		const rl = readline.default.createInterface({
+			input: stream,
+			crlfDelay: Infinity
+		});
+		rl.on("line", (line) => {
+			try {
+				const obj = JSON.parse(line);
+				if (obj.type === "user" && obj.promptId && obj.message) {
+					const content = obj.message.content;
+					if (typeof content === "string") messages.push({
+						role: "user",
+						content,
+						timestamp: obj.timestamp || "",
+						uuid: obj.uuid || ""
+					});
+				}
+				if (obj.type === "assistant" && obj.message) {
+					const contentArr = obj.message.content || [];
+					const textParts = [];
+					const toolNames = [];
+					for (const c of contentArr) {
+						if (c.type === "text" && c.text) textParts.push(c.text);
+						if (c.type === "tool_use" && c.name) toolNames.push(c.name);
+					}
+					if (textParts.length > 0 || toolNames.length > 0) {
+						const usage = obj.message.usage;
+						const tokensIn = usage?.input_tokens || 0;
+						const tokensOut = usage?.output_tokens || 0;
+						totalTokensIn += tokensIn;
+						totalTokensOut += tokensOut;
+						if (obj.message.model && !model) model = obj.message.model;
+						messages.push({
+							role: "assistant",
+							content: textParts.join("\n") || `[tools: ${toolNames.join(", ")}]`,
+							timestamp: obj.timestamp || "",
+							uuid: obj.uuid || "",
+							model: obj.message.model,
+							tokensIn,
+							tokensOut,
+							toolNames: toolNames.length > 0 ? toolNames : void 0
+						});
+					}
+				}
+			} catch {}
+		});
+		rl.on("close", () => {
+			resolve({
+				sessionId,
+				messages,
+				totalTokensIn,
+				totalTokensOut,
+				model
+			});
+		});
+		rl.on("error", () => {
+			resolve({
+				sessionId,
+				messages,
+				totalTokensIn,
+				totalTokensOut,
+				model
+			});
+		});
+	});
+}
+var watchers = /* @__PURE__ */ new Map();
+var fileOffsets = /* @__PURE__ */ new Map();
+function startWatching(projectPath) {
+	const dir = getSessionsDir(projectPath);
+	if (!fs.default.existsSync(dir)) return;
+	if (watchers.has(dir)) return;
+	const files = fs.default.readdirSync(dir).filter((f) => f.endsWith(".jsonl"));
+	for (const f of files) {
+		const fp = path.default.join(dir, f);
+		try {
+			const stat = fs.default.statSync(fp);
+			fileOffsets.set(fp, stat.size);
+		} catch {}
+	}
+	const watcher = fs.default.watch(dir, (_, filename) => {
+		if (!filename || !filename.endsWith(".jsonl")) return;
+		const fp = path.default.join(dir, filename);
+		try {
+			const stat = fs.default.statSync(fp);
+			const lastOffset = fileOffsets.get(fp) || 0;
+			if (stat.size > lastOffset) {
+				const stream = fs.default.createReadStream(fp, {
+					start: lastOffset,
+					encoding: "utf-8"
+				});
+				let buffer = "";
+				stream.on("data", (chunk) => {
+					buffer += chunk;
+					const lines = buffer.split("\n");
+					buffer = lines.pop() || "";
+					for (const line of lines) {
+						if (!line.trim()) continue;
+						try {
+							processNewLine(JSON.parse(line));
+						} catch {}
+					}
+				});
+				stream.on("end", () => {
+					fileOffsets.set(fp, stat.size);
+				});
+			} else if (lastOffset === 0) fileOffsets.set(fp, stat.size);
+		} catch {}
+	});
+	watchers.set(dir, watcher);
+}
+function processNewLine(obj) {
+	const agentName = obj.agentName || obj.agentSetting || null;
+	const sessionId = obj.sessionId || null;
+	if (obj.type === "assistant" && obj.message) {
+		const msg = obj.message;
+		const usage = msg.usage;
+		broadcast({
+			type: "session_activity",
+			sessionId,
+			agentName: agentName || "unknown",
+			tokensIn: usage?.input_tokens || 0,
+			tokensOut: usage?.output_tokens || 0,
+			model: msg.model || void 0
+		});
+	}
+	if (obj.type === "user" && obj.promptId) broadcast({
+		type: "session_activity",
+		sessionId,
+		agentName: agentName || "unknown",
+		event: "user_prompt"
+	});
+}
+function stopWatching(projectPath) {
+	const dir = getSessionsDir(projectPath);
+	const watcher = watchers.get(dir);
+	if (watcher) {
+		watcher.close();
+		watchers.delete(dir);
+	}
+	for (const key of fileOffsets.keys()) if (key.startsWith(dir)) fileOffsets.delete(key);
+}
+//#endregion
+//#region electron/ipc/sessions.ipc.ts
+function registerSessionHandlers() {
+	electron.ipcMain.handle("sessions:list", (_e, projectPath) => listSessions(projectPath));
+	electron.ipcMain.handle("sessions:conversation", (_e, filePath) => loadConversation(filePath));
+	electron.ipcMain.handle("sessions:watch-start", (_e, projectPath) => startWatching(projectPath));
+	electron.ipcMain.handle("sessions:watch-stop", (_e, projectPath) => stopWatching(projectPath));
+}
+//#endregion
 //#region electron/ipc/index.ts
 function registerAllHandlers() {
 	registerAgentHandlers();
@@ -1248,6 +1481,7 @@ function registerAllHandlers() {
 	registerCostHandlers();
 	registerFavoriteHandlers();
 	registerMissionHandlers();
+	registerSessionHandlers();
 }
 //#endregion
 //#region electron/main.ts

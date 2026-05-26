@@ -53,9 +53,11 @@ async function extractMetadata(filePath: string): Promise<Partial<SessionSummary
 
 export async function listSessions(projectPath: string): Promise<SessionSummary[]> {
   const dir = getSessionsDir(projectPath);
+  console.log("[session.service] listSessions path:", projectPath, "-> dir:", dir, "exists:", fs.existsSync(dir));
   if (!fs.existsSync(dir)) return [];
 
   const entries = fs.readdirSync(dir).filter((f) => f.endsWith(".jsonl"));
+  console.log("[session.service] found", entries.length, "jsonl files");
   const summaries: SessionSummary[] = [];
 
   for (const entry of entries) {

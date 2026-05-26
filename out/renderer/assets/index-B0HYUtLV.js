@@ -10029,6 +10029,32 @@ var Activity = createLucideIcon("activity", [["path", {
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
+var ArrowDown = createLucideIcon("arrow-down", [["path", {
+	d: "M12 5v14",
+	key: "s699le"
+}], ["path", {
+	d: "m19 12-7 7-7-7",
+	key: "1idqje"
+}]]);
+/**
+* @license lucide-react v1.16.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
+var ArrowUp = createLucideIcon("arrow-up", [["path", {
+	d: "m5 12 7-7 7 7",
+	key: "hav0vg"
+}], ["path", {
+	d: "M12 19V5",
+	key: "x0mq9r"
+}]]);
+/**
+* @license lucide-react v1.16.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
 var Bot = createLucideIcon("bot", [
 	["path", {
 		d: "M12 8V4H8",
@@ -10383,6 +10409,26 @@ var Globe = createLucideIcon("globe", [
 	["path", {
 		d: "M2 12h20",
 		key: "9i4pu4"
+	}]
+]);
+/**
+* @license lucide-react v1.16.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
+var History = createLucideIcon("history", [
+	["path", {
+		d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8",
+		key: "1357e3"
+	}],
+	["path", {
+		d: "M3 3v5h5",
+		key: "1xhq8a"
+	}],
+	["path", {
+		d: "M12 7v5l4 2",
+		key: "1fdv2h"
 	}]
 ]);
 /**
@@ -10996,6 +11042,38 @@ function useFavorites(projectId) {
 			isFavorite,
 			refresh
 		]),
+		refresh
+	};
+}
+//#endregion
+//#region src/hooks/useSessions.ts
+function useSessions(projectPath) {
+	const [sessions, setSessions] = (0, import_react.useState)([]);
+	const [loading, setLoading] = (0, import_react.useState)(false);
+	const [conversation, setConversation] = (0, import_react.useState)(null);
+	const [conversationLoading, setConversationLoading] = (0, import_react.useState)(false);
+	const refresh = (0, import_react.useCallback)(async () => {
+		if (!projectPath) return;
+		setLoading(true);
+		setSessions(await window.api.getSessionList(projectPath));
+		setLoading(false);
+	}, [projectPath]);
+	(0, import_react.useEffect)(() => {
+		refresh();
+	}, [refresh]);
+	return {
+		sessions,
+		loading,
+		conversation,
+		conversationLoading,
+		selectSession: (0, import_react.useCallback)(async (filePath) => {
+			setConversationLoading(true);
+			setConversation(await window.api.getSessionConversation(filePath));
+			setConversationLoading(false);
+		}, []),
+		clearConversation: (0, import_react.useCallback)(() => {
+			setConversation(null);
+		}, []),
 		refresh
 	};
 }
@@ -12421,7 +12499,7 @@ function ContextGauge({ context }) {
 		})]
 	});
 }
-function formatTokens$3(n) {
+function formatTokens$4(n) {
 	if (n >= 1e6) return `${(n / 1e6).toFixed(1)}M`;
 	if (n >= 1e3) return `${(n / 1e3).toFixed(1)}k`;
 	return String(n);
@@ -12464,8 +12542,8 @@ function TreeNode({ agent, depth, isActive, context, currentTool, selected, onSe
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ContextGauge, { context }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-center gap-3 mt-1 text-[10px] text-gray-500 font-mono tabular-nums",
 					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["in ", formatTokens$3(context.tokensIn)] }),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["out ", formatTokens$3(context.tokensOut)] }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["in ", formatTokens$4(context.tokensIn)] }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["out ", formatTokens$4(context.tokensOut)] }),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 							className: "text-yellow-500/60",
 							children: ["$", context.costUsd.toFixed(4)]
@@ -37917,7 +37995,7 @@ var PERIODS = [
 		days: 90
 	}
 ];
-function formatTokens$2(n) {
+function formatTokens$3(n) {
 	if (n >= 1e6) return `${(n / 1e6).toFixed(1)}M`;
 	if (n >= 1e3) return `${(n / 1e3).toFixed(1)}K`;
 	return String(n);
@@ -37965,7 +38043,7 @@ function CustomTooltip({ active, payload, label }) {
 			children: [
 				p.name,
 				": ",
-				typeof p.value === "number" && p.name.includes("$") ? `$${p.value.toFixed(4)}` : formatTokens$2(p.value)
+				typeof p.value === "number" && p.name.includes("$") ? `$${p.value.toFixed(4)}` : formatTokens$3(p.value)
 			]
 		}, p.name))]
 	});
@@ -38047,27 +38125,27 @@ function CostDashboard() {
 						icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DollarSign, { size: 16 }),
 						label: "Cost today",
 						value: `$${summary.cost_today.toFixed(2)}`,
-						sub: `${formatTokens$2(parseInt(summary.tokens_in_today) + parseInt(summary.tokens_out_today))} tokens`,
+						sub: `${formatTokens$3(parseInt(summary.tokens_in_today) + parseInt(summary.tokens_out_today))} tokens`,
 						color: "text-green-400"
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BigStat, {
 						icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DollarSign, { size: 16 }),
 						label: `Cost ${period}d`,
 						value: `$${(periodSummary.cost || 0).toFixed(2)}`,
-						sub: `${formatTokens$2(parseInt(periodSummary.tokens_in || "0") + parseInt(periodSummary.tokens_out || "0"))} tokens`,
+						sub: `${formatTokens$3(parseInt(periodSummary.tokens_in || "0") + parseInt(periodSummary.tokens_out || "0"))} tokens`,
 						color: "text-cyan-400"
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BigStat, {
 						icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Zap, { size: 16 }),
 						label: "Tokens in (period)",
-						value: formatTokens$2(parseInt(periodSummary.tokens_in || "0")),
+						value: formatTokens$3(parseInt(periodSummary.tokens_in || "0")),
 						sub: "Input tokens",
 						color: "text-blue-400"
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BigStat, {
 						icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TrendingUp, { size: 16 }),
 						label: "Tokens out (period)",
-						value: formatTokens$2(parseInt(periodSummary.tokens_out || "0")),
+						value: formatTokens$3(parseInt(periodSummary.tokens_out || "0")),
 						sub: "Output tokens",
 						color: "text-yellow-400"
 					})
@@ -38098,7 +38176,7 @@ function CostDashboard() {
 										fill: "#6b7280",
 										fontSize: 10
 									},
-									tickFormatter: formatTokens$2
+									tickFormatter: formatTokens$3
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Tooltip, { content: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomTooltip, {}) }),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Area, {
@@ -38252,11 +38330,11 @@ function CostDashboard() {
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
 									className: "text-right text-cyan-400",
-									children: formatTokens$2(parseInt(a.tokens_in))
+									children: formatTokens$3(parseInt(a.tokens_in))
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
 									className: "text-right text-blue-400",
-									children: formatTokens$2(parseInt(a.tokens_out))
+									children: formatTokens$3(parseInt(a.tokens_out))
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
 									className: "text-right",
@@ -38270,7 +38348,7 @@ function CostDashboard() {
 											})
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 											className: "text-gray-300 w-16 text-right",
-											children: formatTokens$2(total)
+											children: formatTokens$3(total)
 										})]
 									})
 								}),
@@ -38288,6 +38366,187 @@ function CostDashboard() {
 				})]
 			})
 		]
+	});
+}
+//#endregion
+//#region src/components/SessionList.tsx
+function timeAgo(iso) {
+	if (!iso) return "";
+	const diff = Date.now() - new Date(iso).getTime();
+	const mins = Math.floor(diff / 6e4);
+	if (mins < 1) return "now";
+	if (mins < 60) return `${mins}m`;
+	const hours = Math.floor(mins / 60);
+	if (hours < 24) return `${hours}h`;
+	return `${Math.floor(hours / 24)}d`;
+}
+function SessionList({ sessions, selectedId, onSelect }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "space-y-0.5",
+		children: [sessions.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+			onClick: () => onSelect(s),
+			className: `w-full text-left px-3 py-2 rounded-lg transition-all duration-200 ${selectedId === s.sessionId ? "bg-gray-800/90 ring-1 ring-purple-500/25 shadow-[0_0_12px_rgba(168,85,247,0.04)]" : "hover:bg-gray-800/40"}`,
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center gap-2",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bot, {
+							size: 11,
+							className: s.agentName ? "text-cyan-400/60" : "text-gray-600"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-xs font-medium text-gray-300 truncate",
+							children: s.agentName || "no agent"
+						}),
+						s.model && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-[9px] text-gray-600 font-mono",
+							children: s.model.split("-").pop()
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+							className: "ml-auto text-[10px] text-gray-600 flex items-center gap-1 tabular-nums shrink-0",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { size: 9 }), timeAgo(s.lastActiveAt)]
+						})
+					]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "mt-0.5 text-[11px] text-gray-500 truncate pl-5",
+					children: s.title || s.firstPrompt || s.sessionId.slice(0, 8)
+				}),
+				s.branch && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center gap-1 mt-0.5 pl-5",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(GitBranch, {
+						size: 9,
+						className: "text-gray-700"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-[10px] text-gray-600 truncate",
+						children: s.branch
+					})]
+				})
+			]
+		}, s.sessionId)), sessions.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+			className: "text-xs text-gray-600 text-center py-6",
+			children: "No sessions found"
+		})]
+	});
+}
+//#endregion
+//#region src/components/SessionViewer.tsx
+function formatTokens$2(n) {
+	if (n >= 1e6) return `${(n / 1e6).toFixed(1)}M`;
+	if (n >= 1e3) return `${(n / 1e3).toFixed(1)}k`;
+	return String(n);
+}
+function SessionViewer({ conversation, loading }) {
+	const scrollRef = (0, import_react.useRef)(null);
+	if (loading) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "h-full flex items-center justify-center text-gray-500 text-sm",
+		children: "Loading conversation..."
+	});
+	if (!conversation) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "h-full flex items-center justify-center text-gray-700 text-sm",
+		children: "Select a session to view"
+	});
+	const scrollTo = (pos) => {
+		if (scrollRef.current) scrollRef.current.scrollTop = pos === "top" ? 0 : scrollRef.current.scrollHeight;
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "h-full flex flex-col",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "px-6 py-3 border-b border-gray-800/80 flex items-center gap-3",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bot, {
+					size: 14,
+					className: "text-purple-400"
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "text-sm font-medium text-white",
+					children: conversation.sessionId.slice(0, 8)
+				}),
+				conversation.model && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "text-[10px] bg-blue-500/15 text-blue-400 px-1.5 py-0.5 rounded",
+					children: conversation.model
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+					className: "text-[10px] text-gray-500 font-mono tabular-nums ml-auto",
+					children: [
+						formatTokens$2(conversation.totalTokensIn),
+						" in · ",
+						formatTokens$2(conversation.totalTokensOut),
+						" out · ",
+						conversation.messages.length,
+						" msgs"
+					]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center gap-0.5 ml-2",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: () => scrollTo("top"),
+						className: "p-1 text-gray-600 hover:text-gray-300 transition-colors",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { size: 12 })
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: () => scrollTo("bottom"),
+						className: "p-1 text-gray-600 hover:text-gray-300 transition-colors",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { size: 12 })
+					})]
+				})
+			]
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			ref: scrollRef,
+			className: "flex-1 overflow-y-auto px-6 py-4 space-y-4 font-mono",
+			children: [conversation.messages.map((msg, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "group",
+				children: msg.role === "user" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center gap-2 mb-0.5",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, {
+						size: 12,
+						className: "text-cyan-400"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-xs text-cyan-400 font-medium",
+						children: "you"
+					})]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", {
+					className: "text-sm text-cyan-300 whitespace-pre-wrap ml-5 leading-relaxed",
+					children: msg.content
+				})] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-2 mb-0.5",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bot, {
+								size: 12,
+								className: "text-gray-400"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-xs text-gray-400 font-medium",
+								children: "assistant"
+							}),
+							msg.tokensIn != null && msg.tokensIn > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+								className: "text-[10px] text-gray-600 ml-auto tabular-nums",
+								children: [
+									formatTokens$2(msg.tokensIn),
+									"↓ ",
+									formatTokens$2(msg.tokensOut || 0),
+									"↑"
+								]
+							})
+						]
+					}),
+					msg.toolNames && msg.toolNames.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "flex flex-wrap gap-1.5 ml-5 mb-1",
+						children: msg.toolNames.map((t, j) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+							className: "flex items-center gap-1 text-[10px] text-yellow-500/60",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wrench, { size: 9 }), t]
+						}, j))
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", {
+						className: "text-sm text-gray-200 whitespace-pre-wrap ml-5 leading-relaxed",
+						children: msg.content
+					})
+				] })
+			}, i)), conversation.messages.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "text-gray-600 text-sm text-center py-8",
+				children: "No messages in this session"
+			})]
+		})]
 	});
 }
 //#endregion
@@ -38854,7 +39113,9 @@ function ProjectDashboard({ project, agents, skills, hooks, activeAgents, agentC
 	const [selectedSkill, setSelectedSkill] = (0, import_react.useState)(null);
 	const [openPanels, setOpenPanels] = (0, import_react.useState)(() => new Set(["agents"]));
 	const [scopeTab, setScopeTab] = (0, import_react.useState)("project");
+	const [selectedSessionId, setSelectedSessionId] = (0, import_react.useState)(null);
 	const { isFavorite, toggle: toggleFavorite } = useFavorites(project.id);
+	const { sessions, loading: sessionsLoading, conversation, conversationLoading, selectSession } = useSessions(project.path);
 	const togglePanel = (panel) => {
 		setOpenPanels((prev) => {
 			const next = new Set(prev);
@@ -39051,6 +39312,29 @@ function ProjectDashboard({ project, agents, skills, hooks, activeAgents, agentC
 						}, s.filePath))
 					})] })] })
 				} : null,
+				{
+					key: "sessions",
+					label: "Sessions",
+					icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(History, {
+						size: 11,
+						className: "text-purple-400"
+					}),
+					count: sessions.length,
+					content: sessionsLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-xs text-gray-600 text-center py-4",
+						children: "Loading sessions..."
+					}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SessionList, {
+						sessions,
+						selectedId: selectedSessionId,
+						onSelect: (s) => {
+							setSelectedSessionId(s.sessionId);
+							selectSession(s.filePath);
+							setSelectedAgent(null);
+							setSelectedSkill(null);
+							setView("session");
+						}
+					})
+				},
 				hooks.length > 0 ? {
 					key: "hooks",
 					label: "Hooks",
@@ -39083,15 +39367,23 @@ function ProjectDashboard({ project, agents, skills, hooks, activeAgents, agentC
 			className: "flex-1 flex flex-col",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex items-center gap-1 px-4 py-2 border-b border-gray-800 bg-gray-900/30",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-					onClick: () => setView("tree"),
-					className: `flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${view === "tree" ? "bg-gray-700 text-white" : "text-gray-500 hover:text-gray-300 hover:bg-gray-800"}`,
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(GitBranch, { size: 13 }), "Tree"]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-					onClick: () => setView("costs"),
-					className: `flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${view === "costs" ? "bg-gray-700 text-white" : "text-gray-500 hover:text-gray-300 hover:bg-gray-800"}`,
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChartColumn, { size: 13 }), "Costs"]
-				})]
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						onClick: () => setView("tree"),
+						className: `flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${view === "tree" ? "bg-gray-700 text-white" : "text-gray-500 hover:text-gray-300 hover:bg-gray-800"}`,
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(GitBranch, { size: 13 }), "Tree"]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						onClick: () => setView("session"),
+						className: `flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${view === "session" ? "bg-gray-700 text-white" : "text-gray-500 hover:text-gray-300 hover:bg-gray-800"}`,
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(History, { size: 13 }), "Sessions"]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						onClick: () => setView("costs"),
+						className: `flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${view === "costs" ? "bg-gray-700 text-white" : "text-gray-500 hover:text-gray-300 hover:bg-gray-800"}`,
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChartColumn, { size: 13 }), "Costs"]
+					})
+				]
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 				className: "flex-1 min-h-0 overflow-hidden",
 				children: view === "agent" && selectedAgent ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AgentDetail, {
@@ -39113,6 +39405,9 @@ function ProjectDashboard({ project, agents, skills, hooks, activeAgents, agentC
 					currentTools,
 					selectedId: selectedAgent?.id ?? null,
 					onSelect: handleSelectAgent
+				}) : view === "session" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SessionViewer, {
+					conversation,
+					loading: conversationLoading
 				}) : view === "costs" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CostDashboard, {}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 					className: "h-full flex items-center justify-center text-gray-500 text-sm",
 					children: "Select an item from the sidebar"
@@ -39453,6 +39748,7 @@ function useIPC() {
 				markActive(event.agent_name, event.tokens_in || 0, event.tokens_out || 0, event.cost_usd || 0, event.tool_name || void 0);
 			}
 			if (data.type === "spawn_usage") markActive(data.agentName, data.tokensIn || 0, data.tokensOut || 0, 0);
+			if (data.type === "session_activity") markActive(data.agentName || "unknown", data.tokensIn || 0, data.tokensOut || 0, 0);
 		});
 	}, [markActive]);
 	return {
@@ -39494,6 +39790,17 @@ function App() {
 	const { events, connected, activeAgents, agentContexts, currentTools } = useIPC();
 	const { stats } = useStats(events.length);
 	const [chatOpen, setChatOpen] = (0, import_react.useState)(false);
+	const prevProjectPath = (0, import_react.useRef)(null);
+	(0, import_react.useEffect)(() => {
+		if (prevProjectPath.current) window.api.unwatchSessions(prevProjectPath.current);
+		if (selectedProject) {
+			window.api.watchSessions(selectedProject.path);
+			prevProjectPath.current = selectedProject.path;
+		} else prevProjectPath.current = null;
+		return () => {
+			if (prevProjectPath.current) window.api.unwatchSessions(prevProjectPath.current);
+		};
+	}, [selectedProject]);
 	const agentColorMap = /* @__PURE__ */ new Map();
 	if (dashboard) for (const a of dashboard.agents) agentColorMap.set(a.id, a.frontmatter.color || "cyan");
 	if (projectsLoading) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {

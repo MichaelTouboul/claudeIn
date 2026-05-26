@@ -34,6 +34,10 @@ electron.contextBridge.exposeInMainWorld("api", {
 	getFavorites: (projectId) => electron.ipcRenderer.invoke("favorites:list", projectId),
 	addFavorite: (projectId, type, name) => electron.ipcRenderer.invoke("favorites:add", projectId, type, name),
 	removeFavorite: (projectId, type, name) => electron.ipcRenderer.invoke("favorites:remove", projectId, type, name),
+	getSessionList: (projectPath) => electron.ipcRenderer.invoke("sessions:list", projectPath),
+	getSessionConversation: (filePath) => electron.ipcRenderer.invoke("sessions:conversation", filePath),
+	watchSessions: (projectPath) => electron.ipcRenderer.invoke("sessions:watch-start", projectPath),
+	unwatchSessions: (projectPath) => electron.ipcRenderer.invoke("sessions:watch-stop", projectPath),
 	onEvent: (cb) => {
 		const handler = (_e, data) => cb(data);
 		electron.ipcRenderer.on("push-event", handler);

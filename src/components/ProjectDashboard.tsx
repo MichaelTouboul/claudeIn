@@ -505,7 +505,7 @@ export default function ProjectDashboard({
   const [view, setView] = useState<MainView>("none");
   const [selectedAgent, setSelectedAgent] = useState<AgentFile | null>(null);
   const [selectedSkill, setSelectedSkill] = useState<SkillFile | null>(null);
-  const [openPanels, setOpenPanels] = useState<Set<string>>(() => new Set(["agents"]));
+  const [openPanels, setOpenPanels] = useState<Set<string>>(() => new Set(["agents", "sessions"]));
   const [scopeTab, setScopeTab] = useState<"project" | "user">("project");
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const { isFavorite, toggle: toggleFavorite } = useFavorites(project.id);
