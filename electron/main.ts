@@ -14,7 +14,7 @@ function createWindow() {
     titleBarStyle: "hiddenInset",
     backgroundColor: "#030712",
     webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
+      preload: path.join(__dirname, "../preload/preload.js"),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: false,
@@ -24,7 +24,7 @@ function createWindow() {
   if (process.env.ELECTRON_RENDERER_URL) {
     mainWindow.loadURL(process.env.ELECTRON_RENDERER_URL);
   } else {
-    mainWindow.loadFile(path.join(__dirname, "../dist/index.html"));
+    mainWindow.loadFile(path.join(__dirname, "../../out/renderer/index.html"));
   }
 
   mainWindow.on("closed", () => {
