@@ -1,12 +1,13 @@
 import { useState } from "react";
 import {
   Bot, Wrench, Settings, BarChart3, Globe, User,
-  Link, Unlink, Network, Cog, Star, Terminal,
+  Link, Unlink, Network, Cog, Star, Terminal, GitBranch,
 } from "lucide-react";
 import type { AgentFile } from "../types/agent.types";
 import type { SkillFile, HookConfig, Project } from "../hooks/useProjects";
 import { useFavorites } from "../hooks/useFavorites";
 import AgentDetail from "./AgentDetail";
+import AgentTree from "./AgentTree";
 import CostDashboard from "./CostDashboard";
 import Accordion from "./Accordion";
 import AgentContextMenu from "./AgentContextMenu";
@@ -740,6 +741,15 @@ export default function ProjectDashboard({
       <div className="flex-1 flex flex-col">
         <div className="flex items-center gap-1 px-4 py-2 border-b border-gray-800 bg-gray-900/30">
           <button
+            onClick={() => setView("tree")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+              view === "tree" ? "bg-gray-700 text-white" : "text-gray-500 hover:text-gray-300 hover:bg-gray-800"
+            }`}
+          >
+            <GitBranch size={13} />
+            Tree
+          </button>
+          <button
             onClick={() => setView("costs")}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
               view === "costs" ? "bg-gray-700 text-white" : "text-gray-500 hover:text-gray-300 hover:bg-gray-800"
@@ -755,6 +765,14 @@ export default function ProjectDashboard({
             <AgentDetail agent={selectedAgent} onEdit={() => {}} onDelete={() => {}} onRefresh={onRefresh} onAgentUpdated={(a) => setSelectedAgent(a)} isFavorite={isFavorite("agent", selectedAgent.id)} onToggleFavorite={() => toggleFavorite("agent", selectedAgent.id)} />
           ) : view === "skill" && selectedSkill ? (
             <SkillDetail skill={selectedSkill} isFavorite={isFavorite("skill", selectedSkill.name)} onToggleFavorite={() => toggleFavorite("skill", selectedSkill.name)} />
+          ) : view === "tree" ? (
+            <AgentTree
+              agents={agents}
+              activeAgents={activeAgents}
+              agentContexts={agentContexts}
+              selectedId={selectedAgent?.id ?? null}
+              onSelect={handleSelectAgent}
+            />
           ) : view === "costs" ? (
             <CostDashboard />
           ) : (
