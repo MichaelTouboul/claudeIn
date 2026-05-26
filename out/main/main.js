@@ -1281,8 +1281,10 @@ async function extractMetadata(filePath) {
 }
 async function listSessions(projectPath) {
 	const dir = getSessionsDir(projectPath);
+	console.log("[session.service] listSessions path:", projectPath, "-> dir:", dir, "exists:", fs.default.existsSync(dir));
 	if (!fs.default.existsSync(dir)) return [];
 	const entries = fs.default.readdirSync(dir).filter((f) => f.endsWith(".jsonl"));
+	console.log("[session.service] found", entries.length, "jsonl files");
 	const summaries = [];
 	for (const entry of entries) {
 		const filePath = path.default.join(dir, entry);
