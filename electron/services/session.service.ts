@@ -169,6 +169,29 @@ export async function loadConversation(filePath: string): Promise<SessionConvers
 
 const watchers = new Map<string, fs.FSWatcher>();
 const fileOffsets = new Map<string, number>();
+const sessionAgentCache = new Map<string, string>();
+
+function getAgentForFile(filePath: string): string {
+  if (sessionAgentCache.has(filePath)) return sessionAgentCache.get(filePath)!;
+
+  try {
+    const content = fs.readFileSync(filePath, "utf-8");
+    const lines = content.split("\n").slice(0, 20);
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      try {
+        const obj = JSON.parse(line);
+        if (obj.type === "agent-setting" && obj.agentSetting) {
+          sessionAgentCache.set(filePath, obj.agentSetting);
+          return obj.agentSetting;
+        }
+      } catch {}
+    }
+  } catch {}
+
+  sessionAgentCache.set(filePath, "unknown");
+  return "unknown";
+}
 
 export function startWatching(projectPath: string): void {
   const dir = getSessionsDir(projectPath);
@@ -204,7 +227,7 @@ export function startWatching(projectPath: string): void {
           for (const line of lines) {
             if (!line.trim()) continue;
             try {
-              processNewLine(JSON.parse(line));
+              processNewLine(JSON.parse(line), fp);
             } catch {}
           }
         });
@@ -221,8 +244,8 @@ export function startWatching(projectPath: string): void {
   watchers.set(dir, watcher);
 }
 
-function processNewLine(obj: Record<string, unknown>): void {
-  const agentName = (obj as any).agentName || (obj as any).agentSetting || null;
+function processNewLine(obj: Record<string, unknown>, filePath: string): void {
+  const agentName = getAgentForFile(filePath);
   const sessionId = (obj as any).sessionId || null;
 
   if (obj.type === "assistant" && (obj as any).message) {
@@ -231,7 +254,7 @@ function processNewLine(obj: Record<string, unknown>): void {
     broadcast({
       type: "session_activity",
       sessionId,
-      agentName: agentName || "unknown",
+      agentName,
       tokensIn: usage?.input_tokens || 0,
       tokensOut: usage?.output_tokens || 0,
       model: msg.model || undefined,
@@ -242,7 +265,7 @@ function processNewLine(obj: Record<string, unknown>): void {
     broadcast({
       type: "session_activity",
       sessionId,
-      agentName: agentName || "unknown",
+      agentName,
       event: "user_prompt",
     });
   }
@@ -258,5 +281,8 @@ export function stopWatching(projectPath: string): void {
 
   for (const key of fileOffsets.keys()) {
     if (key.startsWith(dir)) fileOffsets.delete(key);
+  }
+  for (const key of sessionAgentCache.keys()) {
+    if (key.startsWith(dir)) sessionAgentCache.delete(key);
   }
 }
