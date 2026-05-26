@@ -6,6 +6,7 @@ import { registerMemoryHandlers } from "./memory.ipc";
 import { registerCostHandlers } from "./costs.ipc";
 import { registerFavoriteHandlers } from "./favorites.ipc";
 import { registerMissionHandlers } from "./missions.ipc";
+import { registerSessionHandlers } from "./sessions.ipc";
 
 export function registerAllHandlers(): void {
   registerAgentHandlers();
@@ -16,4 +17,5 @@ export function registerAllHandlers(): void {
   registerCostHandlers();
   registerFavoriteHandlers();
   registerMissionHandlers();
+  registerSessionHandlers();
 }

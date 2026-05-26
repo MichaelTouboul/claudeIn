@@ -41,6 +41,11 @@ interface Window {
     addFavorite: (projectId: string, type: string, name: string) => Promise<void>;
     removeFavorite: (projectId: string, type: string, name: string) => Promise<void>;
 
+    getSessionList: (projectPath: string) => Promise<unknown[]>;
+    getSessionConversation: (filePath: string) => Promise<unknown>;
+    watchSessions: (projectPath: string) => Promise<void>;
+    unwatchSessions: (projectPath: string) => Promise<void>;
+
     onEvent: (cb: (data: unknown) => void) => () => void;
   };
 }

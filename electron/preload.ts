@@ -49,6 +49,11 @@ contextBridge.exposeInMainWorld("api", {
   removeFavorite: (projectId: string, type: string, name: string) =>
     ipcRenderer.invoke("favorites:remove", projectId, type, name),
 
+  getSessionList: (projectPath: string) => ipcRenderer.invoke("sessions:list", projectPath),
+  getSessionConversation: (filePath: string) => ipcRenderer.invoke("sessions:conversation", filePath),
+  watchSessions: (projectPath: string) => ipcRenderer.invoke("sessions:watch-start", projectPath),
+  unwatchSessions: (projectPath: string) => ipcRenderer.invoke("sessions:watch-stop", projectPath),
+
   onEvent: (cb: (data: unknown) => void) => {
     const handler = (_e: unknown, data: unknown) => cb(data);
     ipcRenderer.on("push-event", handler);
