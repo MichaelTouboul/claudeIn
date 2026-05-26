@@ -1,20 +1,19 @@
 import { useState } from "react";
 import {
-  Bot, Wrench, Settings, Hexagon, BarChart3, Globe, User,
+  Bot, Wrench, Settings, BarChart3, Globe, User,
   Link, Unlink, Network, Cog, Star, Terminal,
 } from "lucide-react";
 import type { AgentFile } from "../types/agent.types";
 import type { SkillFile, HookConfig, Project } from "../hooks/useProjects";
 import { useFavorites } from "../hooks/useFavorites";
 import AgentDetail from "./AgentDetail";
-import AgentMesh from "./AgentMesh";
 import CostDashboard from "./CostDashboard";
 import Accordion from "./Accordion";
 import AgentContextMenu from "./AgentContextMenu";
 import ItemContextMenu from "./ItemContextMenu";
 import AgentChat from "./AgentChat";
 
-type MainView = "agent" | "skill" | "hook" | "mesh" | "costs" | "none";
+type MainView = "agent" | "skill" | "hook" | "tree" | "costs" | "none";
 
 const colorMap: Record<string, string> = {
   cyan: "bg-cyan-500", blue: "bg-blue-500", green: "bg-green-500",
@@ -712,15 +711,6 @@ export default function ProjectDashboard({
       <div className="flex-1 flex flex-col">
         <div className="flex items-center gap-1 px-4 py-2 border-b border-gray-800 bg-gray-900/30">
           <button
-            onClick={() => setView("mesh")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-              view === "mesh" ? "bg-gray-700 text-white" : "text-gray-500 hover:text-gray-300 hover:bg-gray-800"
-            }`}
-          >
-            <Hexagon size={13} />
-            Mesh
-          </button>
-          <button
             onClick={() => setView("costs")}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
               view === "costs" ? "bg-gray-700 text-white" : "text-gray-500 hover:text-gray-300 hover:bg-gray-800"
@@ -736,8 +726,6 @@ export default function ProjectDashboard({
             <AgentDetail agent={selectedAgent} onEdit={() => {}} onDelete={() => {}} onRefresh={onRefresh} onAgentUpdated={(a) => setSelectedAgent(a)} isFavorite={isFavorite("agent", selectedAgent.id)} onToggleFavorite={() => toggleFavorite("agent", selectedAgent.id)} />
           ) : view === "skill" && selectedSkill ? (
             <SkillDetail skill={selectedSkill} isFavorite={isFavorite("skill", selectedSkill.name)} onToggleFavorite={() => toggleFavorite("skill", selectedSkill.name)} />
-          ) : view === "mesh" ? (
-            <AgentMesh agents={agents} activeAgents={activeAgents} onSelect={handleSelectAgent} />
           ) : view === "costs" ? (
             <CostDashboard />
           ) : (

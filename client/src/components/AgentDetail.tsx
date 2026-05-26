@@ -4,7 +4,6 @@ import {
   Trash2,
   Brain,
   FileText,
-  GitBranch,
   Settings,
   Database,
   X,
@@ -19,7 +18,7 @@ import MarkdownBody from "./MarkdownBody";
 import AgentChat from "./AgentChat";
 import { Terminal } from "lucide-react";
 
-const TABS = ["overview", "chat", "prompt", "memory", "files", "graph"] as const;
+const TABS = ["overview", "chat", "prompt", "memory", "files"] as const;
 type Tab = (typeof TABS)[number];
 
 const tabIcons: Record<Tab, React.ReactNode> = {
@@ -28,7 +27,6 @@ const tabIcons: Record<Tab, React.ReactNode> = {
   prompt: <FileText size={14} />,
   memory: <Brain size={14} />,
   files: <Database size={14} />,
-  graph: <GitBranch size={14} />,
 };
 
 function Badge({ children, variant }: { children: React.ReactNode; variant: string }) {
@@ -431,11 +429,6 @@ export default function AgentDetail({
               ))
             )}
           </div>
-        )}
-        {tab === "graph" && (
-          <p className="text-gray-500 text-sm">
-            Graph view — select from the top-level Graph tab to see all agents.
-          </p>
         )}
       </div>
       )}
