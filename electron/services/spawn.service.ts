@@ -120,22 +120,22 @@ export function spawnAgent(agentName: string, mission: string, cwd?: string, res
       claudeSessionId: session.claudeSessionId,
     });
 
-    ingestEvent({
+    try { ingestEvent({
       agent_name: agentName,
       session_id: sessionId,
       event_type: "Stop",
       payload: { exit_code: code },
-    }).catch(() => {});
+    }); } catch {}
   });
 
   sessions.set(sessionId, { session, process: proc });
 
-  ingestEvent({
+  try { ingestEvent({
     agent_name: agentName,
     session_id: sessionId,
     event_type: "SubagentStart",
     payload: { mission },
-  }).catch(() => {});
+  }); } catch {}
 
   broadcast({
     type: "spawn_start",
@@ -170,21 +170,21 @@ function handleStreamEvent(sessionId: string, session: SpawnSession, event: Stre
     session.messages.push(msg);
     broadcast({ type: "spawn_message", sessionId, agentName: session.agentName, message: msg });
 
-    ingestEvent({
+    try { ingestEvent({
       agent_name: session.agentName,
       session_id: sessionId,
       event_type: "PreToolUse",
       tool_name: toolName,
-    }).catch(() => {});
+    }); } catch {}
   }
 
   if (event.type === "tool_result") {
-    ingestEvent({
+    try { ingestEvent({
       agent_name: session.agentName,
       session_id: sessionId,
       event_type: "PostToolUse",
       tool_name: event.name || undefined,
-    }).catch(() => {});
+    }); } catch {}
   }
 
   if (event.type === "result") {
@@ -210,13 +210,13 @@ function handleStreamEvent(sessionId: string, session: SpawnSession, event: Stre
       model: event.model || undefined,
     });
 
-    ingestEvent({
+    try { ingestEvent({
       agent_name: session.agentName,
       session_id: sessionId,
       event_type: "Usage",
       tokens_in: tokensIn,
       tokens_out: tokensOut,
-    }).catch(() => {});
+    }); } catch {}
   }
 
   if (event.type === "input_request" || event.subtype === "input_request") {
