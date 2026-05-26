@@ -1281,10 +1281,8 @@ async function extractMetadata(filePath) {
 }
 async function listSessions(projectPath) {
 	const dir = getSessionsDir(projectPath);
-	console.log("[session.service] listSessions path:", projectPath, "-> dir:", dir, "exists:", fs.default.existsSync(dir));
 	if (!fs.default.existsSync(dir)) return [];
 	const entries = fs.default.readdirSync(dir).filter((f) => f.endsWith(".jsonl"));
-	console.log("[session.service] found", entries.length, "jsonl files");
 	const summaries = [];
 	for (const entry of entries) {
 		const filePath = path.default.join(dir, entry);
@@ -1390,6 +1388,25 @@ async function loadConversation(filePath) {
 }
 var watchers = /* @__PURE__ */ new Map();
 var fileOffsets = /* @__PURE__ */ new Map();
+var sessionAgentCache = /* @__PURE__ */ new Map();
+function getAgentForFile(filePath) {
+	if (sessionAgentCache.has(filePath)) return sessionAgentCache.get(filePath);
+	try {
+		const lines = fs.default.readFileSync(filePath, "utf-8").split("\n").slice(0, 20);
+		for (const line of lines) {
+			if (!line.trim()) continue;
+			try {
+				const obj = JSON.parse(line);
+				if (obj.type === "agent-setting" && obj.agentSetting) {
+					sessionAgentCache.set(filePath, obj.agentSetting);
+					return obj.agentSetting;
+				}
+			} catch {}
+		}
+	} catch {}
+	sessionAgentCache.set(filePath, "unknown");
+	return "unknown";
+}
 function startWatching(projectPath) {
 	const dir = getSessionsDir(projectPath);
 	if (!fs.default.existsSync(dir)) return;
@@ -1421,7 +1438,7 @@ function startWatching(projectPath) {
 					for (const line of lines) {
 						if (!line.trim()) continue;
 						try {
-							processNewLine(JSON.parse(line));
+							processNewLine(JSON.parse(line), fp);
 						} catch {}
 					}
 				});
@@ -1433,8 +1450,8 @@ function startWatching(projectPath) {
 	});
 	watchers.set(dir, watcher);
 }
-function processNewLine(obj) {
-	const agentName = obj.agentName || obj.agentSetting || null;
+function processNewLine(obj, filePath) {
+	const agentName = getAgentForFile(filePath);
 	const sessionId = obj.sessionId || null;
 	if (obj.type === "assistant" && obj.message) {
 		const msg = obj.message;
@@ -1442,7 +1459,7 @@ function processNewLine(obj) {
 		broadcast({
 			type: "session_activity",
 			sessionId,
-			agentName: agentName || "unknown",
+			agentName,
 			tokensIn: usage?.input_tokens || 0,
 			tokensOut: usage?.output_tokens || 0,
 			model: msg.model || void 0
@@ -1451,7 +1468,7 @@ function processNewLine(obj) {
 	if (obj.type === "user" && obj.promptId) broadcast({
 		type: "session_activity",
 		sessionId,
-		agentName: agentName || "unknown",
+		agentName,
 		event: "user_prompt"
 	});
 }
@@ -1463,6 +1480,7 @@ function stopWatching(projectPath) {
 		watchers.delete(dir);
 	}
 	for (const key of fileOffsets.keys()) if (key.startsWith(dir)) fileOffsets.delete(key);
+	for (const key of sessionAgentCache.keys()) if (key.startsWith(dir)) sessionAgentCache.delete(key);
 }
 //#endregion
 //#region electron/ipc/sessions.ipc.ts

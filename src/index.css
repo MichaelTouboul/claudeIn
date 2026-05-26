@@ -3,13 +3,96 @@
 @source "../src/**/*.{ts,tsx}";
 @source "../src/index.html";
 
+/* --- JetBrains Mono for code, IBM Plex Sans for UI --- */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
 @layer base {
+  :root {
+    --color-surface-0: #06080c;
+    --color-surface-1: #0a0e14;
+    --color-surface-2: #111620;
+    --color-surface-3: #181e2a;
+    --color-border: #1e2636;
+    --color-border-subtle: #151b26;
+    --color-text-primary: #e2e8f0;
+    --color-text-secondary: #8892a4;
+    --color-text-muted: #4a5568;
+    --color-accent: #06b6d4;
+    --color-accent-dim: rgba(6, 182, 212, 0.12);
+    --color-active: #4ade80;
+    --color-danger: #f87171;
+    --font-sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+  }
+
   * {
     scrollbar-width: thin;
-    scrollbar-color: #374151 transparent;
+    scrollbar-color: #1e2636 transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: #1e2636;
+    border-radius: 3px;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: #2a3548;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: var(--color-surface-0);
+    color: var(--color-text-primary);
+  }
+
+  pre, code, .font-mono {
+    font-family: var(--font-mono) !important;
+    font-feature-settings: 'liga' 1, 'calt' 1;
+  }
+
+  ::selection {
+    background: rgba(6, 182, 212, 0.25);
+    color: #fff;
   }
 }
 
+/* --- Subtle noise texture overlay --- */
+@layer utilities {
+  .surface-grain {
+    position: relative;
+  }
+  .surface-grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.015;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .glow-cyan {
+    box-shadow: 0 0 16px rgba(6, 182, 212, 0.08), 0 0 4px rgba(6, 182, 212, 0.04);
+  }
+
+  .glow-active {
+    box-shadow: 0 0 12px rgba(74, 222, 128, 0.12), 0 0 3px rgba(74, 222, 128, 0.06);
+  }
+
+  .border-glow {
+    border-color: rgba(6, 182, 212, 0.2);
+    box-shadow: inset 0 1px 0 rgba(6, 182, 212, 0.05);
+  }
+}
+
+/* --- Agent color vars --- */
 .agent-color-cyan { --agent-color: #06b6d4; }
 .agent-color-blue { --agent-color: #3b82f6; }
 .agent-color-green { --agent-color: #22c55e; }
@@ -18,3 +101,13 @@
 .agent-color-red { --agent-color: #ef4444; }
 .agent-color-purple { --agent-color: #a855f7; }
 .agent-color-pink { --agent-color: #ec4899; }
+
+/* --- Top bar native drag region --- */
+.titlebar-drag {
+  -webkit-app-region: drag;
+}
+.titlebar-drag button,
+.titlebar-drag select,
+.titlebar-drag input {
+  -webkit-app-region: no-drag;
+}

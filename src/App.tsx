@@ -46,19 +46,22 @@ export default function App() {
 
   if (projectsLoading) {
     return (
-      <div className="h-full flex items-center justify-center bg-gray-950 text-gray-500">
-        Scanning for projects...
+      <div className="h-full flex items-center justify-center text-[var(--color-text-muted)]" style={{ background: 'var(--color-surface-0)' }}>
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin" />
+          <span className="text-xs font-mono tracking-wider uppercase">Scanning projects</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col bg-gray-950 text-gray-200">
+    <div className="h-full flex flex-col surface-grain" style={{ background: 'var(--color-surface-0)', color: 'var(--color-text-primary)' }}>
       {/* Top bar */}
-      <div className="flex items-center gap-4 px-4 py-2.5 border-b border-gray-800 bg-gray-900">
-        <div className="flex items-center gap-2">
-          <Bot size={18} className="text-cyan-400" />
-          <span className="text-sm font-bold text-white tracking-wide">Agent Manager</span>
+      <div className="titlebar-drag flex items-center gap-4 pl-20 pr-4 py-2" style={{ background: 'var(--color-surface-1)', borderBottom: '1px solid var(--color-border)' }}>
+        <div className="flex items-center gap-2.5">
+          <Bot size={16} className="text-[var(--color-accent)]" />
+          <span className="text-[13px] font-semibold tracking-[0.02em]" style={{ fontFamily: 'var(--font-mono)' }}>Agent Manager</span>
         </div>
 
         <ProjectSwitcher
@@ -73,9 +76,10 @@ export default function App() {
 
         <button
           onClick={() => setChatOpen(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md text-[var(--color-accent)] transition-all duration-200 hover:bg-[var(--color-accent-dim)] glow-cyan"
+          style={{ border: '1px solid rgba(6, 182, 212, 0.25)' }}
         >
-          <MessageSquare size={13} />
+          <MessageSquare size={12} />
           Chat
         </button>
       </div>
@@ -84,24 +88,38 @@ export default function App() {
       <div className="flex-1 min-h-0 flex flex-col">
         {!selectedProject ? (
           <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <Bot size={48} className="text-gray-700 mx-auto mb-4" />
-              <p className="text-gray-400 text-lg mb-2">Select a project</p>
-              <p className="text-gray-600 text-sm mb-6">
-                {projects.length} projects found on this machine
+            <div className="text-center max-w-3xl mx-auto px-8">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-5" style={{ background: 'var(--color-accent-dim)', border: '1px solid rgba(6, 182, 212, 0.15)' }}>
+                <Bot size={24} className="text-[var(--color-accent)]" />
+              </div>
+              <h1 className="text-xl font-semibold mb-1.5 tracking-tight">Select a project</h1>
+              <p className="text-sm mb-8" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
+                {projects.length} projects detected
               </p>
-              <div className="grid grid-cols-3 gap-3 max-w-2xl">
+              <div className="grid grid-cols-3 gap-2.5">
                 {projects.slice(0, 9).map((p) => (
                   <button
                     key={p.id}
                     onClick={() => setSelectedProject(p)}
-                    className="text-left bg-gray-800/50 border border-gray-700/50 rounded-xl p-4 hover:border-cyan-500/50 transition-colors"
+                    className="text-left rounded-lg p-4 transition-all duration-200 hover:translate-y-[-1px] group"
+                    style={{
+                      background: 'var(--color-surface-2)',
+                      border: '1px solid var(--color-border)',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = 'rgba(6, 182, 212, 0.3)';
+                      e.currentTarget.style.boxShadow = '0 4px 20px rgba(6, 182, 212, 0.06)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--color-border)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
                   >
-                    <div className="text-sm font-medium text-gray-200 mb-1 truncate">{p.name}</div>
-                    <div className="text-xs text-gray-500 truncate">{p.path}</div>
-                    <div className="flex gap-3 mt-2 text-xs text-gray-600">
-                      {p.agentCount > 0 && <span>{p.agentCount} agents</span>}
-                      {p.skillCount > 0 && <span>{p.skillCount} skills</span>}
+                    <div className="text-[13px] font-medium mb-1 truncate group-hover:text-[var(--color-accent)] transition-colors">{p.name}</div>
+                    <div className="text-[11px] truncate mb-2.5" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>{p.path}</div>
+                    <div className="flex gap-3 text-[11px]" style={{ color: 'var(--color-text-secondary)' }}>
+                      {p.agentCount > 0 && <span className="font-mono tabular-nums">{p.agentCount} <span style={{ color: 'var(--color-text-muted)' }}>agents</span></span>}
+                      {p.skillCount > 0 && <span className="font-mono tabular-nums">{p.skillCount} <span style={{ color: 'var(--color-text-muted)' }}>skills</span></span>}
                     </div>
                   </button>
                 ))}

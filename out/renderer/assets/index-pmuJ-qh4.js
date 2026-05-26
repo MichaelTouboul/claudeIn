@@ -39111,7 +39111,7 @@ function ProjectDashboard({ project, agents, skills, hooks, activeAgents, agentC
 	const [view, setView] = (0, import_react.useState)("none");
 	const [selectedAgent, setSelectedAgent] = (0, import_react.useState)(null);
 	const [selectedSkill, setSelectedSkill] = (0, import_react.useState)(null);
-	const [openPanels, setOpenPanels] = (0, import_react.useState)(() => new Set(["agents"]));
+	const [openPanels, setOpenPanels] = (0, import_react.useState)(() => new Set(["agents", "sessions"]));
 	const [scopeTab, setScopeTab] = (0, import_react.useState)("project");
 	const [selectedSessionId, setSelectedSessionId] = (0, import_react.useState)(null);
 	const { isFavorite, toggle: toggleFavorite } = useFavorites(project.id);
@@ -39804,22 +39804,38 @@ function App() {
 	const agentColorMap = /* @__PURE__ */ new Map();
 	if (dashboard) for (const a of dashboard.agents) agentColorMap.set(a.id, a.frontmatter.color || "cyan");
 	if (projectsLoading) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "h-full flex items-center justify-center bg-gray-950 text-gray-500",
-		children: "Scanning for projects..."
+		className: "h-full flex items-center justify-center text-[var(--color-text-muted)]",
+		style: { background: "var(--color-surface-0)" },
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "flex flex-col items-center gap-3",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-8 h-8 border-2 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				className: "text-xs font-mono tracking-wider uppercase",
+				children: "Scanning projects"
+			})]
+		})
 	});
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "h-full flex flex-col bg-gray-950 text-gray-200",
+		className: "h-full flex flex-col surface-grain",
+		style: {
+			background: "var(--color-surface-0)",
+			color: "var(--color-text-primary)"
+		},
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex items-center gap-4 px-4 py-2.5 border-b border-gray-800 bg-gray-900",
+				className: "titlebar-drag flex items-center gap-4 pl-20 pr-4 py-2",
+				style: {
+					background: "var(--color-surface-1)",
+					borderBottom: "1px solid var(--color-border)"
+				},
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-2",
+						className: "flex items-center gap-2.5",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bot, {
-							size: 18,
-							className: "text-cyan-400"
+							size: 16,
+							className: "text-[var(--color-accent)]"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-sm font-bold text-white tracking-wide",
+							className: "text-[13px] font-semibold tracking-[0.02em]",
+							style: { fontFamily: "var(--font-mono)" },
 							children: "Agent Manager"
 						})]
 					}),
@@ -39836,8 +39852,9 @@ function App() {
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						onClick: () => setChatOpen(true),
-						className: "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white transition-colors",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageSquare, { size: 13 }), "Chat"]
+						className: "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md text-[var(--color-accent)] transition-all duration-200 hover:bg-[var(--color-accent-dim)] glow-cyan",
+						style: { border: "1px solid rgba(6, 182, 212, 0.25)" },
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageSquare, { size: 12 }), "Chat"]
 					})
 				]
 			}),
@@ -39846,37 +39863,85 @@ function App() {
 				children: [!selectedProject ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 					className: "flex-1 flex items-center justify-center",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "text-center",
+						className: "text-center max-w-3xl mx-auto px-8",
 						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bot, {
-								size: 48,
-								className: "text-gray-700 mx-auto mb-4"
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-5",
+								style: {
+									background: "var(--color-accent-dim)",
+									border: "1px solid rgba(6, 182, 212, 0.15)"
+								},
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bot, {
+									size: 24,
+									className: "text-[var(--color-accent)]"
+								})
 							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-gray-400 text-lg mb-2",
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+								className: "text-xl font-semibold mb-1.5 tracking-tight",
 								children: "Select a project"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-								className: "text-gray-600 text-sm mb-6",
-								children: [projects.length, " projects found on this machine"]
+								className: "text-sm mb-8",
+								style: {
+									color: "var(--color-text-muted)",
+									fontFamily: "var(--font-mono)"
+								},
+								children: [projects.length, " projects detected"]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "grid grid-cols-3 gap-3 max-w-2xl",
+								className: "grid grid-cols-3 gap-2.5",
 								children: projects.slice(0, 9).map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 									onClick: () => setSelectedProject(p),
-									className: "text-left bg-gray-800/50 border border-gray-700/50 rounded-xl p-4 hover:border-cyan-500/50 transition-colors",
+									className: "text-left rounded-lg p-4 transition-all duration-200 hover:translate-y-[-1px] group",
+									style: {
+										background: "var(--color-surface-2)",
+										border: "1px solid var(--color-border)"
+									},
+									onMouseEnter: (e) => {
+										e.currentTarget.style.borderColor = "rgba(6, 182, 212, 0.3)";
+										e.currentTarget.style.boxShadow = "0 4px 20px rgba(6, 182, 212, 0.06)";
+									},
+									onMouseLeave: (e) => {
+										e.currentTarget.style.borderColor = "var(--color-border)";
+										e.currentTarget.style.boxShadow = "none";
+									},
 									children: [
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-											className: "text-sm font-medium text-gray-200 mb-1 truncate",
+											className: "text-[13px] font-medium mb-1 truncate group-hover:text-[var(--color-accent)] transition-colors",
 											children: p.name
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-											className: "text-xs text-gray-500 truncate",
+											className: "text-[11px] truncate mb-2.5",
+											style: {
+												color: "var(--color-text-muted)",
+												fontFamily: "var(--font-mono)"
+											},
 											children: p.path
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "flex gap-3 mt-2 text-xs text-gray-600",
-											children: [p.agentCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [p.agentCount, " agents"] }), p.skillCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [p.skillCount, " skills"] })]
+											className: "flex gap-3 text-[11px]",
+											style: { color: "var(--color-text-secondary)" },
+											children: [p.agentCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+												className: "font-mono tabular-nums",
+												children: [
+													p.agentCount,
+													" ",
+													/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+														style: { color: "var(--color-text-muted)" },
+														children: "agents"
+													})
+												]
+											}), p.skillCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+												className: "font-mono tabular-nums",
+												children: [
+													p.skillCount,
+													" ",
+													/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+														style: { color: "var(--color-text-muted)" },
+														children: "skills"
+													})
+												]
+											})]
 										})
 									]
 								}, p.id))
