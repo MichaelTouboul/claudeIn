@@ -1,4 +1,4 @@
-import Database from "better-sqlite3";
+import initSqlJs from "sql.js";
 import path from "path";
 import fs from "fs";
 
@@ -6,20 +6,92 @@ const HOME = process.env.HOME || require("os").homedir();
 const DB_DIR = path.join(HOME, ".claude-agent-manager");
 const DB_PATH = path.join(DB_DIR, "data.db");
 
-let db: Database.Database;
+let db: any;
 
-export function getDb(): Database.Database {
-  if (!db) throw new Error("Database not initialized. Call initDb() first.");
-  return db;
+export interface PreparedStatement {
+  all(...params: unknown[]): Record<string, unknown>[];
+  get(...params: unknown[]): Record<string, unknown> | undefined;
+  run(...params: unknown[]): void;
 }
 
-export function initDb(): void {
-  fs.mkdirSync(DB_DIR, { recursive: true });
-  db = new Database(DB_PATH);
-  db.pragma("journal_mode = WAL");
-  db.pragma("foreign_keys = ON");
+export interface DbWrapper {
+  prepare(sql: string): PreparedStatement;
+  exec(sql: string): void;
+}
 
-  db.exec(`
+function rowsToObjects(stmt: any): Record<string, unknown>[] {
+  const cols = stmt.getColumnNames();
+  const results: Record<string, unknown>[] = [];
+  while (stmt.step()) {
+    const row = stmt.get();
+    const obj: Record<string, unknown> = {};
+    for (let i = 0; i < cols.length; i++) {
+      obj[cols[i]] = row[i];
+    }
+    results.push(obj);
+  }
+  stmt.free();
+  return results;
+}
+
+function createWrapper(sqldb: any): DbWrapper {
+  return {
+    prepare(sql: string): PreparedStatement {
+      return {
+        all(...params: unknown[]): Record<string, unknown>[] {
+          const stmt = sqldb.prepare(sql);
+          if (params.length > 0) stmt.bind(params);
+          const results = rowsToObjects(stmt);
+          save();
+          return results;
+        },
+        get(...params: unknown[]): Record<string, unknown> | undefined {
+          const stmt = sqldb.prepare(sql);
+          if (params.length > 0) stmt.bind(params);
+          const results = rowsToObjects(stmt);
+          save();
+          return results[0];
+        },
+        run(...params: unknown[]): void {
+          sqldb.run(sql, params);
+          save();
+        },
+      };
+    },
+    exec(sql: string): void {
+      sqldb.exec(sql);
+      save();
+    },
+  };
+}
+
+let wrapper: DbWrapper;
+
+function save(): void {
+  const data = db.export();
+  fs.writeFileSync(DB_PATH, Buffer.from(data));
+}
+
+export function getDb(): DbWrapper {
+  if (!wrapper) throw new Error("Database not initialized. Call initDb() first.");
+  return wrapper;
+}
+
+export async function initDb(): Promise<void> {
+  fs.mkdirSync(DB_DIR, { recursive: true });
+
+  const SQL = await initSqlJs();
+
+  if (fs.existsSync(DB_PATH)) {
+    const fileBuffer = fs.readFileSync(DB_PATH);
+    db = new SQL.Database(fileBuffer);
+  } else {
+    db = new SQL.Database();
+  }
+
+  wrapper = createWrapper(db);
+
+  wrapper.exec(`
     CREATE TABLE IF NOT EXISTS events (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       agent_name TEXT NOT NULL,

@@ -20,7 +20,7 @@ export function ingestEvent(event: HookEvent) {
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
   );
 
-  const result = stmt.run(
+  stmt.run(
     event.agent_name,
     event.session_id || null,
     event.event_type,
@@ -32,8 +32,8 @@ export function ingestEvent(event: HookEvent) {
   );
 
   const stored = db
-    .prepare("SELECT * FROM events WHERE id = ?")
-    .get(result.lastInsertRowid);
+    .prepare("SELECT * FROM events WHERE id = last_insert_rowid()")
+    .get();
 
   if (event.session_id) {
     db.prepare(

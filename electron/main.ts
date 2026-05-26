@@ -32,8 +32,8 @@ function createWindow() {
   });
 }
 
-app.whenReady().then(() => {
-  initDb();
+app.whenReady().then(async () => {
+  await initDb();
   registerAllHandlers();
   createWindow();
 

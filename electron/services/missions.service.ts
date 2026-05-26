@@ -5,15 +5,15 @@ export function createMission(
   title: string,
   sessionId?: string
 ) {
-  const result = getDb()
+  getDb()
     .prepare(
       "INSERT INTO missions (agent_name, title, session_id) VALUES (?, ?, ?)"
     )
     .run(agentName, title, sessionId || null);
 
   return getDb()
-    .prepare("SELECT * FROM missions WHERE id = ?")
-    .get(result.lastInsertRowid);
+    .prepare("SELECT * FROM missions WHERE id = last_insert_rowid()")
+    .get();
 }
 
 export function getMissions(limit = 50, status?: string) {

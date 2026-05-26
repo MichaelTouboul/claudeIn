@@ -23,8 +23,8 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 let electron = require("electron");
 let path = require("path");
 path = __toESM(path);
-let better_sqlite3 = require("better-sqlite3");
-better_sqlite3 = __toESM(better_sqlite3);
+let sql_js = require("sql.js");
+sql_js = __toESM(sql_js);
 let fs = require("fs");
 fs = __toESM(fs);
 let fs_promises = require("fs/promises");
@@ -38,16 +38,66 @@ var HOME$2 = process.env.HOME || require("os").homedir();
 var DB_DIR = path.default.join(HOME$2, ".claude-agent-manager");
 var DB_PATH = path.default.join(DB_DIR, "data.db");
 var db;
-function getDb() {
-	if (!db) throw new Error("Database not initialized. Call initDb() first.");
-	return db;
+function rowsToObjects(stmt) {
+	const cols = stmt.getColumnNames();
+	const results = [];
+	while (stmt.step()) {
+		const row = stmt.get();
+		const obj = {};
+		for (let i = 0; i < cols.length; i++) obj[cols[i]] = row[i];
+		results.push(obj);
+	}
+	stmt.free();
+	return results;
 }
-function initDb() {
+function createWrapper(sqldb) {
+	return {
+		prepare(sql) {
+			return {
+				all(...params) {
+					const stmt = sqldb.prepare(sql);
+					if (params.length > 0) stmt.bind(params);
+					const results = rowsToObjects(stmt);
+					save();
+					return results;
+				},
+				get(...params) {
+					const stmt = sqldb.prepare(sql);
+					if (params.length > 0) stmt.bind(params);
+					const results = rowsToObjects(stmt);
+					save();
+					return results[0];
+				},
+				run(...params) {
+					sqldb.run(sql, params);
+					save();
+				}
+			};
+		},
+		exec(sql) {
+			sqldb.exec(sql);
+			save();
+		}
+	};
+}
+var wrapper;
+function save() {
+	const data = db.export();
+	fs.default.writeFileSync(DB_PATH, Buffer.from(data));
+}
+function getDb() {
+	if (!wrapper) throw new Error("Database not initialized. Call initDb() first.");
+	return wrapper;
+}
+async function initDb() {
 	fs.default.mkdirSync(DB_DIR, { recursive: true });
-	db = new better_sqlite3.default(DB_PATH);
-	db.pragma("journal_mode = WAL");
-	db.pragma("foreign_keys = ON");
-	db.exec(`
+	const SQL = await (0, sql_js.default)();
+	if (fs.default.existsSync(DB_PATH)) {
+		const fileBuffer = fs.default.readFileSync(DB_PATH);
+		db = new SQL.Database(fileBuffer);
+	} else db = new SQL.Database();
+	wrapper = createWrapper(db);
+	wrapper.exec(`
     CREATE TABLE IF NOT EXISTS events (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       agent_name TEXT NOT NULL,
@@ -667,9 +717,9 @@ function broadcast(data) {
 //#region electron/services/events.service.ts
 function ingestEvent(event) {
 	const db = getDb();
-	const result = db.prepare(`INSERT INTO events (agent_name, session_id, event_type, tool_name, payload, tokens_in, tokens_out, cost_usd)
+	db.prepare(`INSERT INTO events (agent_name, session_id, event_type, tool_name, payload, tokens_in, tokens_out, cost_usd)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run(event.agent_name, event.session_id || null, event.event_type, event.tool_name || null, JSON.stringify(event.payload || {}), event.tokens_in || 0, event.tokens_out || 0, event.cost_usd || 0);
-	const stored = db.prepare("SELECT * FROM events WHERE id = ?").get(result.lastInsertRowid);
+	const stored = db.prepare("SELECT * FROM events WHERE id = last_insert_rowid()").get();
 	if (event.session_id) db.prepare(`UPDATE missions SET
         tokens_in_total = tokens_in_total + ?,
         tokens_out_total = tokens_out_total + ?,
@@ -1154,8 +1204,8 @@ function registerFavoriteHandlers() {
 //#endregion
 //#region electron/services/missions.service.ts
 function createMission(agentName, title, sessionId) {
-	const result = getDb().prepare("INSERT INTO missions (agent_name, title, session_id) VALUES (?, ?, ?)").run(agentName, title, sessionId || null);
-	return getDb().prepare("SELECT * FROM missions WHERE id = ?").get(result.lastInsertRowid);
+	getDb().prepare("INSERT INTO missions (agent_name, title, session_id) VALUES (?, ?, ?)").run(agentName, title, sessionId || null);
+	return getDb().prepare("SELECT * FROM missions WHERE id = last_insert_rowid()").get();
 }
 function getMissions(limit = 50, status) {
 	if (status) return getDb().prepare("SELECT * FROM missions WHERE status = ? ORDER BY started_at DESC LIMIT ?").all(status, limit);
@@ -1201,7 +1251,7 @@ function createWindow() {
 		titleBarStyle: "hiddenInset",
 		backgroundColor: "#030712",
 		webPreferences: {
-			preload: path.default.join(__dirname, "../preload/index.js"),
+			preload: path.default.join(__dirname, "../preload/preload.js"),
 			contextIsolation: true,
 			nodeIntegration: false,
 			sandbox: false
@@ -1213,8 +1263,8 @@ function createWindow() {
 		mainWindow = null;
 	});
 }
-electron.app.whenReady().then(() => {
-	initDb();
+electron.app.whenReady().then(async () => {
+	await initDb();
 	registerAllHandlers();
 	createWindow();
 	electron.app.on("activate", () => {
