@@ -76,6 +76,7 @@ const FIELDS: FieldDef[] = [
   { key: "background", label: "Background", type: "boolean" },
   { key: "tools", label: "Tools", type: "string" },
   { key: "disallowedTools", label: "Disallowed Tools", type: "string" },
+  { key: "subAgents", label: "Sub-agents", type: "string" },
 ];
 
 function fieldDisplayValue(fm: AgentFrontmatter, key: string): React.ReactNode {
@@ -87,12 +88,13 @@ function fieldDisplayValue(fm: AgentFrontmatter, key: string): React.ReactNode {
   if (key === "memory") return <Badge variant="green">{String(val)}</Badge>;
   if (key === "background") return <Badge variant={val ? "green" : "gray"}>{val ? "yes" : "no"}</Badge>;
 
-  if (key === "tools" || key === "disallowedTools") {
-    const arr = Array.isArray(val) ? val : typeof val === "string" ? val.split(",").map((t) => t.trim()) : [];
+  if (key === "tools" || key === "disallowedTools" || key === "subAgents") {
+    const arr = Array.isArray(val) ? val : typeof val === "string" ? val.split(",").map((t) => t.trim()).filter(Boolean) : [];
     if (arr.length === 0) return <span className="text-gray-500">{key === "tools" ? "all (inherited)" : "—"}</span>;
+    const variant = key === "tools" ? "cyan" : key === "subAgents" ? "blue" : "red";
     return (
       <div className="flex flex-wrap gap-1">
-        {arr.map((t) => <Badge key={t} variant={key === "tools" ? "cyan" : "red"}>{t}</Badge>)}
+        {arr.map((t) => <Badge key={t} variant={variant}>{t}</Badge>)}
       </div>
     );
   }
@@ -206,14 +208,6 @@ function FrontmatterTable({
           ))}
         </tbody>
       </table>
-      {!editing && agent.subAgents.length > 0 && (
-        <div className="flex items-center gap-2">
-          <span className="text-gray-500 text-sm font-medium">Sub-agents</span>
-          <div className="flex flex-wrap gap-1">
-            {agent.subAgents.map((s) => <Badge key={s} variant="blue">{s}</Badge>)}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -269,7 +263,14 @@ export default function AgentDetail({
     }
     setSaving(true);
     try {
-      const updated = await api.updateAgent(agent.id, { frontmatter: draft });
+      const payload = { ...draft };
+      for (const key of ["tools", "disallowedTools", "subAgents"]) {
+        if (typeof payload[key] === "string") {
+          const arr = (payload[key] as string).split(",").map((s) => s.trim()).filter(Boolean);
+          payload[key] = arr.length > 0 ? arr : undefined;
+        }
+      }
+      const updated = await api.updateAgent(agent.id, { frontmatter: payload });
       setEditing(false);
       setDraft({});
       if (onAgentUpdated) onAgentUpdated(updated);

@@ -215,7 +215,9 @@ async function findAgentsInDir(dir: string, scope: "user" | "project"): Promise<
             frontmatter: fm,
             body: content.trim(),
             status: "created",
-            subAgents: extractSubAgents(content),
+            subAgents: Array.isArray(fm.subAgents) && fm.subAgents.length > 0
+              ? fm.subAgents
+              : extractSubAgents(content),
             memoryFiles,
             annexFiles,
           });

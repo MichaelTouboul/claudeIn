@@ -116,7 +116,9 @@ function parseAgent(filePath: string, raw: string): AgentFile | null {
       frontmatter,
       body: content.trim(),
       status: "created",
-      subAgents: extractSubAgents(content),
+      subAgents: Array.isArray(frontmatter.subAgents) && frontmatter.subAgents.length > 0
+        ? frontmatter.subAgents
+        : extractSubAgents(content),
       memoryFiles: [],
       annexFiles: [],
     };

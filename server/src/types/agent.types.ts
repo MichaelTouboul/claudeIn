@@ -8,6 +8,7 @@ export type AgentFrontmatter = {
   maxTurns?: number;
   memory?: string;
   permissionMode?: string;
+  subAgents?: string[];
   skills?: string[];
   mcpServers?: string[];
   background?: boolean;
