@@ -1,7 +1,7 @@
 import { useState } from "react";
 import ProjectSwitcher from "./components/ProjectSwitcher";
 import ProjectDashboard from "./components/ProjectDashboard";
-import AgentChat from "./components/AgentChat";
+import GlobalChatModal from "./components/GlobalChatModal";
 import StatsBar from "./components/StatsBar";
 import EventConsole from "./components/EventConsole";
 import { useProjects, useDashboard } from "./hooks/useProjects";
@@ -110,20 +110,7 @@ export default function App() {
         <EventConsole events={events} agentColorMap={agentColorMap} />
       </div>
 
-      {chatOpen && (
-        <div className="fixed inset-0 z-50 flex">
-          <div className="flex-1 bg-black/50" onClick={() => setChatOpen(false)} />
-          <div className="w-[560px] bg-gray-950 border-l border-gray-800 flex flex-col">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
-              <span className="text-sm font-bold text-white">Claude Code</span>
-              <button onClick={() => setChatOpen(false)} className="text-gray-400 hover:text-white text-lg leading-none">&times;</button>
-            </div>
-            <div className="flex-1 min-h-0 p-3">
-              <AgentChat agentName="_main" />
-            </div>
-          </div>
-        </div>
-      )}
+      {chatOpen && <GlobalChatModal onClose={() => setChatOpen(false)} />}
     </div>
   );
 }
