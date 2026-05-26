@@ -487,6 +487,7 @@ export default function ProjectDashboard({
   hooks,
   activeAgents,
   agentContexts,
+  currentTools,
   onRefresh,
 }: {
   project: Project;
@@ -495,6 +496,7 @@ export default function ProjectDashboard({
   hooks: HookConfig[];
   activeAgents: Set<string>;
   agentContexts: Map<string, import("../hooks/useSSE").AgentContext>;
+  currentTools?: Map<string, string>;
   onRefresh: () => void;
 }) {
   const [view, setView] = useState<MainView>("none");
@@ -770,6 +772,7 @@ export default function ProjectDashboard({
               agents={agents}
               activeAgents={activeAgents}
               agentContexts={agentContexts}
+              currentTools={currentTools}
               selectedId={selectedAgent?.id ?? null}
               onSelect={handleSelectAgent}
             />

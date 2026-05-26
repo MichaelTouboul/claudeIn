@@ -196,6 +196,29 @@ function handleStreamEvent(sessionId: string, session: SpawnSession, event: Stre
     }
   }
 
+  const usage = event.usage || event.message?.usage;
+  if (usage) {
+    const tokensIn = usage.input_tokens || 0;
+    const tokensOut = usage.output_tokens || 0;
+
+    broadcast({
+      type: "spawn_usage",
+      sessionId,
+      agentName: session.agentName,
+      tokensIn,
+      tokensOut,
+      model: event.model || undefined,
+    });
+
+    ingestEvent({
+      agent_name: session.agentName,
+      session_id: sessionId,
+      event_type: "Usage",
+      tokens_in: tokensIn,
+      tokens_out: tokensOut,
+    }).catch(() => {});
+  }
+
   if (event.type === "input_request" || event.subtype === "input_request") {
     broadcast({
       type: "spawn_input_request",

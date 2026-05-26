@@ -15,7 +15,7 @@ export default function App() {
   const selectedProject = useAppStore((s) => s.selectedProject);
   const setSelectedProject = useAppStore((s) => s.setSelectedProject);
   const { dashboard, loading: dashLoading, refresh } = useDashboard(selectedProject?.id ?? null);
-  const { events, connected, activeAgents, agentContexts } = useSSE();
+  const { events, connected, activeAgents, agentContexts, currentTools } = useSSE();
   const { stats } = useStats(events.length);
   const [chatOpen, setChatOpen] = useState(false);
 
@@ -102,6 +102,7 @@ export default function App() {
             hooks={dashboard.hooks}
             activeAgents={activeAgents}
             agentContexts={agentContexts}
+            currentTools={currentTools}
             onRefresh={refresh}
           />
         ) : null}

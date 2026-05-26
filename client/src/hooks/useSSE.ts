@@ -19,11 +19,6 @@ export type AgentContext = {
   percent: number;
 };
 
-const MODEL_LIMITS: Record<string, number> = {
-  opus: 200_000,
-  sonnet: 200_000,
-  haiku: 200_000,
-};
 const DEFAULT_LIMIT = 200_000;
 
 export function useSSE() {
@@ -31,9 +26,10 @@ export function useSSE() {
   const [connected, setConnected] = useState(false);
   const [activeAgents, setActiveAgents] = useState<Set<string>>(new Set());
   const [agentContexts, setAgentContexts] = useState<Map<string, AgentContext>>(new Map());
+  const [currentTools, setCurrentTools] = useState<Map<string, string>>(new Map());
   const activeTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
-  const markActive = useCallback((agentName: string, tokensIn: number, tokensOut: number, costUsd: number) => {
+  const markActive = useCallback((agentName: string, tokensIn: number, tokensOut: number, costUsd: number, toolName?: string) => {
     setActiveAgents((prev) => new Set(prev).add(agentName));
 
     if (tokensIn > 0 || tokensOut > 0) {
@@ -43,13 +39,20 @@ export function useSSE() {
         const newIn = existing.tokensIn + tokensIn;
         const newOut = existing.tokensOut + tokensOut;
         const total = newIn + newOut;
-        const limit = DEFAULT_LIMIT;
         next.set(agentName, {
           tokensIn: newIn,
           tokensOut: newOut,
           costUsd: existing.costUsd + costUsd,
-          percent: Math.min((total / limit) * 100, 100),
+          percent: Math.min((total / DEFAULT_LIMIT) * 100, 100),
         });
+        return next;
+      });
+    }
+
+    if (toolName) {
+      setCurrentTools((prev) => {
+        const next = new Map(prev);
+        next.set(agentName, toolName);
         return next;
       });
     }
@@ -62,6 +65,11 @@ export function useSSE() {
       setTimeout(() => {
         setActiveAgents((prev) => {
           const next = new Set(prev);
+          next.delete(agentName);
+          return next;
+        });
+        setCurrentTools((prev) => {
+          const next = new Map(prev);
           next.delete(agentName);
           return next;
         });
@@ -82,7 +90,10 @@ export function useSSE() {
         if (data.type === "event") {
           const event: LiveEvent = data;
           setEvents((prev) => [event, ...prev].slice(0, 200));
-          markActive(event.agent_name, event.tokens_in || 0, event.tokens_out || 0, event.cost_usd || 0);
+          markActive(event.agent_name, event.tokens_in || 0, event.tokens_out || 0, event.cost_usd || 0, event.tool_name || undefined);
+        }
+        if (data.type === "spawn_usage") {
+          markActive(data.agentName, data.tokensIn || 0, data.tokensOut || 0, 0);
         }
       } catch {}
     };
@@ -92,5 +103,5 @@ export function useSSE() {
     return () => source.close();
   }, [markActive]);
 
-  return { events, connected, activeAgents, agentContexts };
+  return { events, connected, activeAgents, agentContexts, currentTools };
 }
