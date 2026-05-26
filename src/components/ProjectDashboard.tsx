@@ -1,20 +1,23 @@
 import { useState } from "react";
 import {
   Bot, Wrench, Settings, BarChart3, Globe, User,
-  Link, Unlink, Network, Cog, Star, Terminal, GitBranch,
+  Link, Unlink, Network, Cog, Star, Terminal, GitBranch, History,
 } from "lucide-react";
 import type { AgentFile } from "../types/agent.types";
 import type { SkillFile, HookConfig, Project } from "../hooks/useProjects";
 import { useFavorites } from "../hooks/useFavorites";
+import { useSessions } from "../hooks/useSessions";
 import AgentDetail from "./AgentDetail";
 import AgentTree from "./AgentTree";
 import CostDashboard from "./CostDashboard";
+import SessionList from "./SessionList";
+import SessionViewer from "./SessionViewer";
 import Accordion from "./Accordion";
 import AgentContextMenu from "./AgentContextMenu";
 import ItemContextMenu from "./ItemContextMenu";
 import AgentChat from "./AgentChat";
 
-type MainView = "agent" | "skill" | "hook" | "tree" | "costs" | "none";
+type MainView = "agent" | "skill" | "hook" | "tree" | "costs" | "session" | "none";
 
 const colorMap: Record<string, string> = {
   cyan: "bg-cyan-500", blue: "bg-blue-500", green: "bg-green-500",
@@ -504,7 +507,9 @@ export default function ProjectDashboard({
   const [selectedSkill, setSelectedSkill] = useState<SkillFile | null>(null);
   const [openPanels, setOpenPanels] = useState<Set<string>>(() => new Set(["agents"]));
   const [scopeTab, setScopeTab] = useState<"project" | "user">("project");
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const { isFavorite, toggle: toggleFavorite } = useFavorites(project.id);
+  const { sessions, loading: sessionsLoading, conversation, conversationLoading, selectSession } = useSessions(project.path);
 
   const togglePanel = (panel: string) => {
     setOpenPanels((prev) => {
@@ -700,6 +705,27 @@ export default function ProjectDashboard({
               </>
             ),
           } : null,
+          {
+            key: "sessions",
+            label: "Sessions",
+            icon: <History size={11} className="text-purple-400" />,
+            count: sessions.length,
+            content: sessionsLoading ? (
+              <p className="text-xs text-gray-600 text-center py-4">Loading sessions...</p>
+            ) : (
+              <SessionList
+                sessions={sessions}
+                selectedId={selectedSessionId}
+                onSelect={(s) => {
+                  setSelectedSessionId(s.sessionId);
+                  selectSession(s.filePath);
+                  setSelectedAgent(null);
+                  setSelectedSkill(null);
+                  setView("session");
+                }}
+              />
+            ),
+          },
           hooks.length > 0 ? {
             key: "hooks",
             label: "Hooks",
@@ -748,6 +774,15 @@ export default function ProjectDashboard({
             Tree
           </button>
           <button
+            onClick={() => setView("session")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+              view === "session" ? "bg-gray-700 text-white" : "text-gray-500 hover:text-gray-300 hover:bg-gray-800"
+            }`}
+          >
+            <History size={13} />
+            Sessions
+          </button>
+          <button
             onClick={() => setView("costs")}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
               view === "costs" ? "bg-gray-700 text-white" : "text-gray-500 hover:text-gray-300 hover:bg-gray-800"
@@ -772,6 +807,8 @@ export default function ProjectDashboard({
               selectedId={selectedAgent?.id ?? null}
               onSelect={handleSelectAgent}
             />
+          ) : view === "session" ? (
+            <SessionViewer conversation={conversation} loading={conversationLoading} />
           ) : view === "costs" ? (
             <CostDashboard />
           ) : (
