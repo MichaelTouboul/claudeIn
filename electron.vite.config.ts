@@ -1,13 +1,13 @@
 import { defineConfig } from "electron-vite";
 import react from "@vitejs/plugin-react";
-import path from "path";
+import { resolve } from "path";
 
 export default defineConfig({
   main: {
     build: {
       outDir: "dist-electron",
       lib: {
-        entry: "electron/main.ts",
+        entry: resolve(__dirname, "electron/main.ts"),
       },
     },
   },
@@ -15,22 +15,22 @@ export default defineConfig({
     build: {
       outDir: "dist-electron",
       lib: {
-        entry: "electron/preload.ts",
+        entry: resolve(__dirname, "electron/preload.ts"),
       },
     },
   },
   renderer: {
     root: "src",
     build: {
-      outDir: path.resolve(__dirname, "dist"),
+      outDir: resolve(__dirname, "dist"),
       rollupOptions: {
-        input: path.resolve(__dirname, "src/index.html"),
+        input: resolve(__dirname, "src/index.html"),
       },
     },
     plugins: [react()],
     resolve: {
       alias: {
-        "@": path.resolve(__dirname, "src"),
+        "@": resolve(__dirname, "src"),
       },
     },
   },
