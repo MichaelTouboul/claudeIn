@@ -500,6 +500,7 @@ export default function ProjectDashboard({
   const [selectedAgent, setSelectedAgent] = useState<AgentFile | null>(null);
   const [selectedSkill, setSelectedSkill] = useState<SkillFile | null>(null);
   const [openPanels, setOpenPanels] = useState<Set<string>>(() => new Set(["agents"]));
+  const [scopeTab, setScopeTab] = useState<"project" | "user">("project");
   const { isFavorite, toggle: toggleFavorite } = useFavorites(project.id);
 
   const togglePanel = (panel: string) => {
@@ -622,22 +623,50 @@ export default function ProjectDashboard({
             content: isUserProject ? (
               renderAgentList(agents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, undefined, undefined, (n) => isFavorite("agent", n), activeAgents, agentContexts)
             ) : (
-              <>
-                {projectAgents.length > 0 && (
-                  <>
-                    <SectionLabel icon={<Globe size={10} className="text-cyan-400" />} label="Project" />
-                    {renderAgentList(projectAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, (name) => handleToggleLink(name, true), "unlink", (n) => isFavorite("agent", n), activeAgents, agentContexts)}
-                  </>
-                )}
-                {userAgents.length > 0 && (
-                  <>
-                    <SectionLabel icon={<User size={10} className="text-gray-500" />} label="User" />
-                    <div className="opacity-60">
-                      {renderAgentList(userAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, (name) => handleToggleLink(name, false), "link", (n) => isFavorite("agent", n), activeAgents, agentContexts)}
+              <div>
+                <div className="flex items-center gap-0.5 px-2 mb-2">
+                  <button
+                    onClick={() => setScopeTab("project")}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-md transition-colors ${
+                      scopeTab === "project"
+                        ? "bg-cyan-500/15 text-cyan-400 shadow-[inset_0_0_8px_rgba(6,182,212,0.08)]"
+                        : "text-gray-500 hover:text-gray-300 hover:bg-gray-800/60"
+                    }`}
+                  >
+                    <Globe size={10} />
+                    Project
+                    <span className="text-[10px] tabular-nums opacity-60">{projectAgents.length}</span>
+                  </button>
+                  <button
+                    onClick={() => setScopeTab("user")}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-md transition-colors ${
+                      scopeTab === "user"
+                        ? "bg-yellow-500/12 text-yellow-400 shadow-[inset_0_0_8px_rgba(234,179,8,0.06)]"
+                        : "text-gray-500 hover:text-gray-300 hover:bg-gray-800/60"
+                    }`}
+                  >
+                    <User size={10} />
+                    User
+                    <span className="text-[10px] tabular-nums opacity-60">{userAgents.length}</span>
+                  </button>
+                </div>
+                {scopeTab === "project" ? (
+                  projectAgents.length > 0 ? (
+                    renderAgentList(projectAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, (name) => handleToggleLink(name, true), "unlink", (n) => isFavorite("agent", n), activeAgents, agentContexts)
+                  ) : (
+                    <div className="px-3 py-6 text-center">
+                      <p className="text-xs text-gray-500 mb-1.5">No project agents</p>
+                      <p className="text-[10px] text-gray-600 leading-relaxed">Link user agents or create agents in <code className="text-cyan-500/80 bg-cyan-500/8 px-1 py-0.5 rounded">.claude/agents/</code></p>
                     </div>
-                  </>
+                  )
+                ) : (
+                  userAgents.length > 0 ? (
+                    renderAgentList(userAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, (name) => handleToggleLink(name, false), "link", (n) => isFavorite("agent", n), activeAgents, agentContexts)
+                  ) : (
+                    <p className="px-3 py-6 text-xs text-gray-500 text-center">No user agents</p>
+                  )
                 )}
-              </>
+              </div>
             ),
           },
           (projectSkills.length > 0 || userSkills.length > 0) ? {

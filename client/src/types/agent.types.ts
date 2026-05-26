@@ -30,6 +30,8 @@ export type AgentFile = {
   subAgents: string[];
   memoryFiles: MemoryFile[];
   annexFiles: AnnexFile[];
+  scope?: "user" | "project";
+  linked?: boolean;
 };
 
 export type MemoryFile = {
