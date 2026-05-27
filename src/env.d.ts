@@ -45,6 +45,7 @@ interface Window {
     getSessionConversation: (filePath: string) => Promise<unknown>;
     watchSessions: (projectPath: string) => Promise<void>;
     unwatchSessions: (projectPath: string) => Promise<void>;
+    openFilePicker: () => Promise<string[]>;
 
     onEvent: (cb: (data: unknown) => void) => () => void;
   };

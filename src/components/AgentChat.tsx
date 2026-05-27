@@ -8,6 +8,7 @@ import {
   Terminal,
   ChevronRight,
   Shield,
+  Paperclip,
 } from "lucide-react";
 import type { SpawnSession, ChatMessage } from "../types/spawn.types";
 import { useAppStore } from "../store/useAppStore";
@@ -306,6 +307,17 @@ export default function AgentChat({
     }
   }, [input, awaitingResponse, session, isRunning, agentName, projectPath]);
 
+  const handleAttach = useCallback(async () => {
+    const paths = await window.api.openFilePicker();
+    if (paths.length > 0) {
+      setInput((prev) => {
+        const prefix = prev && !prev.endsWith("\n") ? prev + "\n" : prev;
+        return prefix + paths.join("\n");
+      });
+      inputRef.current?.focus();
+    }
+  }, []);
+
   const handleQuickReply = useCallback(async (value: string) => {
     const msg: ChatMessage = { role: "user", content: value, timestamp: new Date().toISOString() };
     setMessages((prev) => [...prev, msg]);
@@ -481,6 +493,13 @@ export default function AgentChat({
               el.style.height = Math.min(el.scrollHeight, 120) + "px";
             }}
           />
+          <button
+            onClick={handleAttach}
+            className="p-1.5 text-gray-500 hover:text-gray-300 transition-colors shrink-0"
+            title="Attach file"
+          >
+            <Paperclip size={16} />
+          </button>
           <button
             onClick={handleSend}
             disabled={!input.trim() || spawning}

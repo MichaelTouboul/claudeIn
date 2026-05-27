@@ -53,6 +53,7 @@ contextBridge.exposeInMainWorld("api", {
   getSessionConversation: (filePath: string) => ipcRenderer.invoke("sessions:conversation", filePath),
   watchSessions: (projectPath: string) => ipcRenderer.invoke("sessions:watch-start", projectPath),
   unwatchSessions: (projectPath: string) => ipcRenderer.invoke("sessions:watch-stop", projectPath),
+  openFilePicker: () => ipcRenderer.invoke("dialog:open-file"),
 
   onEvent: (cb: (data: unknown) => void) => {
     const handler = (_e: unknown, data: unknown) => cb(data);

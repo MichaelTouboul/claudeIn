@@ -96,21 +96,20 @@ export async function listSessions(projectPath: string): Promise<SessionSummary[
 // --- Conversation loading (on demand) ---
 
 export async function loadConversation(filePath: string): Promise<SessionConversation> {
-  console.log("[session] loadConversation:", filePath);
   const sessionId = path.basename(filePath, ".jsonl");
   const messages: SessionMessage[] = [];
   let totalTokensIn = 0;
   let totalTokensOut = 0;
   let model: string | null = null;
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     if (!fs.existsSync(filePath)) {
-      console.log("[session] file not found:", filePath);
       resolve({ sessionId, messages, totalTokensIn, totalTokensOut, model });
       return;
     }
     const stream = fs.createReadStream(filePath, { encoding: "utf-8" });
     const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
+    const pendingToolNames: string[] = [];
 
     rl.on("line", (line) => {
       try {
@@ -138,24 +137,32 @@ export async function loadConversation(filePath: string): Promise<SessionConvers
             if (c.type === "tool_use" && c.name) toolNames.push(c.name);
           }
 
+          const usage = obj.message.usage;
+          const tokensIn = usage?.input_tokens || 0;
+          const tokensOut = usage?.output_tokens || 0;
+
           if (textParts.length > 0 || toolNames.length > 0) {
-            const usage = obj.message.usage;
-            const tokensIn = usage?.input_tokens || 0;
-            const tokensOut = usage?.output_tokens || 0;
             totalTokensIn += tokensIn;
             totalTokensOut += tokensOut;
-
             if (obj.message.model && !model) model = obj.message.model;
+          }
 
+          if (textParts.length === 0 && toolNames.length > 0) {
+            // Tool-only turn — accumulate, do not emit a message
+            pendingToolNames.push(...toolNames);
+          } else if (textParts.length > 0) {
+            // Text turn — attach any accumulated tool names from prior tool-only turns
+            const combinedTools = [...pendingToolNames, ...toolNames];
+            pendingToolNames.length = 0;
             messages.push({
               role: "assistant",
-              content: textParts.join("\n") || `[tools: ${toolNames.join(", ")}]`,
+              content: textParts.join("\n"),
               timestamp: obj.timestamp || "",
               uuid: obj.uuid || "",
               model: obj.message.model,
               tokensIn,
               tokensOut,
-              toolNames: toolNames.length > 0 ? toolNames : undefined,
+              toolNames: combinedTools.length > 0 ? combinedTools : undefined,
             });
           }
         }
@@ -163,11 +170,18 @@ export async function loadConversation(filePath: string): Promise<SessionConvers
     });
 
     rl.on("close", () => {
-      console.log("[session] loaded", messages.length, "messages");
+      if (pendingToolNames.length > 0) {
+        messages.push({
+          role: "assistant",
+          content: "",
+          timestamp: "",
+          uuid: "",
+          toolNames: pendingToolNames,
+        });
+      }
       resolve({ sessionId, messages, totalTokensIn, totalTokensOut, model });
     });
-    rl.on("error", (err) => {
-      console.log("[session] error:", err);
+    rl.on("error", (_err) => {
       resolve({ sessionId, messages, totalTokensIn, totalTokensOut, model });
     });
   });
