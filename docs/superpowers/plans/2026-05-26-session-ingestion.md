@@ -882,3 +882,65 @@ Add between Tree and Costs buttons:
 git add src/components/ProjectDashboard.tsx
 git commit -m "feat: integrate sessions panel and viewer into ProjectDashboard"
 ```
+
+---
+
+## Phase 4: Session Viewer Polish
+
+### Task 11: Auto-scroll to bottom on session load
+
+**Files:**
+- Modify: `src/components/SessionViewer.tsx`
+
+The session should open scrolled to the latest messages (bottom), matching Claude Code's terminal behavior.
+
+- [ ] **Step 1:** Add a `useEffect` that scrolls to bottom when `conversation` changes
+- [ ] **Step 2:** Commit
+
+### Task 12: Filter noise from conversations
+
+**Files:**
+- Modify: `electron/services/session.service.ts` (`loadConversation`)
+
+Tool-only messages (git fetch output, rebase progress, file reads) create noise. Only show messages with actual text content. Tool names stay as collapsed badges but stdout/stderr is hidden.
+
+- [ ] **Step 1:** In `loadConversation`, skip assistant messages that contain ONLY `tool_use` entries (no `text` content). These become a single collapsed line "tools: Bash, Read, Edit" instead of full output.
+- [ ] **Step 2:** Commit
+
+### Task 13: Attach files via native file picker
+
+**Files:**
+- Modify: `electron/preload.ts` — expose `openFilePicker`
+- Create: `electron/ipc/dialog.ipc.ts` — IPC handler for `dialog.showOpenDialog()`
+- Modify: `electron/ipc/index.ts` — register handler
+- Modify: `src/env.d.ts` — add type
+- Modify: `src/components/AgentChat.tsx` — add `+` button next to input
+
+Uses Electron's native `dialog.showOpenDialog()` to pick files, photos, or folders. The selected path is inserted into the chat input. For images, the path is sent to Claude Code which reads them via the Read tool.
+
+- [ ] **Step 1:** Create `dialog.ipc.ts` with `openFilePicker` handler
+- [ ] **Step 2:** Expose in preload and env.d.ts
+- [ ] **Step 3:** Add `+` button in AgentChat input area
+- [ ] **Step 4:** Commit
+
+### Task 14: Display images inline in conversations
+
+**Files:**
+- Modify: `src/components/SessionViewer.tsx`
+- Modify: `src/components/AgentChat.tsx`
+
+When a message contains a path to an image file (`.png`, `.jpg`, `.jpeg`, `.webp`, `.gif`, `.svg`), render it as an `<img>` element with `max-width: 300px`. Detect image paths via regex in message content.
+
+- [ ] **Step 1:** Create an `InlineImage` component that takes a file path and renders it
+- [ ] **Step 2:** In message rendering, detect image paths and replace with `<InlineImage>`
+- [ ] **Step 3:** Commit
+
+### Task 15: Floating scroll-to-bottom button
+
+**Files:**
+- Modify: `src/components/SessionViewer.tsx`
+
+Show a floating button at the bottom-right of the conversation when the user scrolls up. Clicking it scrolls to the latest message. Hides when already at the bottom.
+
+- [ ] **Step 1:** Track scroll position, show/hide floating button
+- [ ] **Step 2:** Commit
