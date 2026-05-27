@@ -1,5 +1,5 @@
-import { Bot, ChevronRight, Wrench, ArrowUp, ArrowDown } from "lucide-react";
-import { useRef, useEffect } from "react";
+import { Bot, ChevronRight, Wrench, ArrowUp, ArrowDown, ChevronsDown } from "lucide-react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import type { SessionConversation } from "../hooks/useSessions";
 import { renderContentWithImages } from "./InlineImage";
 
@@ -17,6 +17,14 @@ export default function SessionViewer({
   loading: boolean;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [showScrollBtn, setShowScrollBtn] = useState(false);
+
+  const handleScroll = useCallback(() => {
+    if (!scrollRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+    // Show button when scrolled more than 200px from bottom
+    setShowScrollBtn(scrollHeight - scrollTop - clientHeight > 200);
+  }, []);
 
   useEffect(() => {
     if (scrollRef.current && conversation) {
@@ -102,61 +110,81 @@ export default function SessionViewer({
         </div>
       </div>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-4 space-y-4 font-mono">
-        {conversation.messages.map((msg, i) => (
-          <div key={i} className="group">
-            {msg.role === "user" ? (
-              <div>
-                <div className="flex items-center gap-2 mb-0.5">
-                  <ChevronRight size={12} style={{ color: 'var(--color-accent)' }} />
-                  <span className="text-xs font-medium" style={{ color: 'var(--color-accent)' }}>you</span>
-                </div>
-                <pre
-                  className="text-sm whitespace-pre-wrap ml-5 leading-relaxed"
-                  style={{ color: '#67e8f9' }}
-                >
-                  {renderContentWithImages(msg.content)}
-                </pre>
-              </div>
-            ) : (
-              <div>
-                <div className="flex items-center gap-2 mb-0.5">
-                  <Bot size={12} style={{ color: 'var(--color-text-secondary)' }} />
-                  <span className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>assistant</span>
-                  {msg.tokensIn != null && msg.tokensIn > 0 && (
-                    <span
-                      className="text-[10px] ml-auto"
-                      style={{ color: 'var(--color-text-muted)', fontVariantNumeric: 'tabular-nums' }}
-                    >
-                      {formatTokens(msg.tokensIn)}↓ {formatTokens(msg.tokensOut || 0)}↑
-                    </span>
-                  )}
-                </div>
-                {msg.toolNames && msg.toolNames.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 ml-5 mb-1">
-                    {msg.toolNames.map((t, j) => (
-                      <span
-                        key={j}
-                        className="flex items-center gap-1 text-[10px]"
-                        style={{ color: 'rgba(250,204,21,0.5)' }}
-                      >
-                        <Wrench size={9} />{t}
-                      </span>
-                    ))}
+      <div className="relative flex-1 min-h-0">
+        <div ref={scrollRef} onScroll={handleScroll} className="h-full overflow-y-auto px-6 py-4 space-y-4 font-mono">
+          {conversation.messages.map((msg, i) => (
+            <div key={i} className="group">
+              {msg.role === "user" ? (
+                <div>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <ChevronRight size={12} style={{ color: 'var(--color-accent)' }} />
+                    <span className="text-xs font-medium" style={{ color: 'var(--color-accent)' }}>you</span>
                   </div>
-                )}
-                <pre
-                  className="text-sm whitespace-pre-wrap ml-5 leading-relaxed"
-                  style={{ color: 'var(--color-text-primary)' }}
-                >
-                  {renderContentWithImages(msg.content)}
-                </pre>
-              </div>
-            )}
-          </div>
-        ))}
-        {conversation.messages.length === 0 && (
-          <p className="text-sm text-center py-8" style={{ color: 'var(--color-text-muted)' }}>No messages in this session</p>
+                  <pre
+                    className="text-sm whitespace-pre-wrap ml-5 leading-relaxed"
+                    style={{ color: '#67e8f9' }}
+                  >
+                    {renderContentWithImages(msg.content)}
+                  </pre>
+                </div>
+              ) : (
+                <div>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <Bot size={12} style={{ color: 'var(--color-text-secondary)' }} />
+                    <span className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>assistant</span>
+                    {msg.tokensIn != null && msg.tokensIn > 0 && (
+                      <span
+                        className="text-[10px] ml-auto"
+                        style={{ color: 'var(--color-text-muted)', fontVariantNumeric: 'tabular-nums' }}
+                      >
+                        {formatTokens(msg.tokensIn)}↓ {formatTokens(msg.tokensOut || 0)}↑
+                      </span>
+                    )}
+                  </div>
+                  {msg.toolNames && msg.toolNames.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 ml-5 mb-1">
+                      {msg.toolNames.map((t, j) => (
+                        <span
+                          key={j}
+                          className="flex items-center gap-1 text-[10px]"
+                          style={{ color: 'rgba(250,204,21,0.5)' }}
+                        >
+                          <Wrench size={9} />{t}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <pre
+                    className="text-sm whitespace-pre-wrap ml-5 leading-relaxed"
+                    style={{ color: 'var(--color-text-primary)' }}
+                  >
+                    {renderContentWithImages(msg.content)}
+                  </pre>
+                </div>
+              )}
+            </div>
+          ))}
+          {conversation.messages.length === 0 && (
+            <p className="text-sm text-center py-8" style={{ color: 'var(--color-text-muted)' }}>No messages in this session</p>
+          )}
+        </div>
+
+        {/* Floating scroll-to-bottom button */}
+        {showScrollBtn && (
+          <button
+            onClick={() => {
+              scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+            }}
+            className="absolute bottom-4 right-4 p-2 rounded-full shadow-lg transition-all hover:scale-110"
+            style={{
+              background: 'var(--color-surface-2)',
+              border: '1px solid var(--color-border)',
+              color: 'var(--color-text-secondary)',
+            }}
+            title="Scroll to bottom"
+          >
+            <ChevronsDown size={16} />
+          </button>
         )}
       </div>
     </div>
