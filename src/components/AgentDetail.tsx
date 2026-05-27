@@ -372,7 +372,10 @@ export default function AgentDetail({
             <>
               <button
                 onClick={handleCancel}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-all duration-150"
+                style={{ color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-text-primary)'; e.currentTarget.style.background = 'var(--color-surface-3)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-secondary)'; e.currentTarget.style.background = 'transparent'; }}
               >
                 <X size={14} />
                 Cancel
@@ -380,7 +383,8 @@ export default function AgentDetail({
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg transition-colors disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-white rounded-md transition-all duration-150 disabled:opacity-40 glow-cyan"
+                style={{ background: 'var(--color-accent)', fontFamily: 'var(--font-mono)' }}
               >
                 <Save size={14} />
                 {saving ? "Saving..." : "Save"}
@@ -391,38 +395,54 @@ export default function AgentDetail({
               <button
                 onClick={handleRefreshAgent}
                 disabled={refreshing}
-                className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors disabled:opacity-50"
+                className="p-1.5 rounded-md transition-all duration-150 disabled:opacity-40"
+                style={{ color: 'var(--color-text-muted)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-text-primary)'; e.currentTarget.style.background = 'var(--color-surface-3)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-muted)'; e.currentTarget.style.background = 'transparent'; }}
                 title="Refresh from disk"
               >
                 <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
               </button>
               <button
                 onClick={handleEdit}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-all duration-150"
+                style={{ color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-text-primary)'; e.currentTarget.style.background = 'var(--color-surface-3)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-secondary)'; e.currentTarget.style.background = 'transparent'; }}
               >
                 <Edit3 size={14} />
                 Edit
               </button>
               {confirmDelete ? (
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-red-400">Confirm?</span>
+                  <span className="text-xs" style={{ color: 'var(--color-danger)', fontFamily: 'var(--font-mono)' }}>Confirm?</span>
                   <button
                     onClick={() => {
                       onDelete(agent.id);
                       setConfirmDelete(false);
                     }}
-                    className="px-3 py-1.5 text-sm bg-red-600 hover:bg-red-500 text-white rounded-lg"
+                    className="px-3 py-1.5 text-sm text-white rounded-md transition-colors"
+                    style={{ background: '#dc2626', fontFamily: 'var(--font-mono)' }}
                   >
                     Delete
                   </button>
-                  <button onClick={() => setConfirmDelete(false)} className="p-1 text-gray-400 hover:text-white">
+                  <button
+                    onClick={() => setConfirmDelete(false)}
+                    className="p-1 transition-colors"
+                    style={{ color: 'var(--color-text-muted)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-text-primary)'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = 'var(--color-text-muted)'}
+                  >
                     <X size={14} />
                   </button>
                 </div>
               ) : (
                 <button
                   onClick={() => setConfirmDelete(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-400 hover:text-red-400 hover:bg-gray-800 rounded-lg transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-all duration-150"
+                  style={{ color: 'var(--color-text-muted)' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.background = 'rgba(248,113,113,0.08)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-muted)'; e.currentTarget.style.background = 'transparent'; }}
                 >
                   <Trash2 size={14} />
                 </button>

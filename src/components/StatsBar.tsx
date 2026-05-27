@@ -13,64 +13,28 @@ export default function StatsBar({
   if (!stats) return null;
 
   return (
-    <div className="flex items-center gap-4 text-xs">
+    <div className="flex items-center gap-4 text-xs" style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
       <div className="flex items-center gap-1.5">
         <span
-          className={`w-2 h-2 rounded-full ${connected ? "bg-green-400 animate-pulse" : "bg-red-400"}`}
+          className={`w-1.5 h-1.5 rounded-full ${connected ? "animate-pulse" : ""}`}
+          style={{ background: connected ? 'var(--color-active)' : 'var(--color-danger)' }}
         />
-        <span className="text-gray-500">{connected ? "Live" : "Disconnected"}</span>
+        <span style={{ color: 'var(--color-text-muted)', fontSize: '11px' }}>{connected ? "Live" : "Off"}</span>
       </div>
 
-      <Stat
-        icon={<Activity size={12} />}
-        label="Active"
-        value={String(activeCount)}
-        color="text-cyan-400"
-      />
-      <Stat
-        icon={<Radio size={12} />}
-        label="Events today"
-        value={stats.events_today}
-        color="text-blue-400"
-      />
-      <Stat
-        icon={<Zap size={12} />}
-        label="Tokens"
-        value={formatTokens(parseInt(stats.total_tokens_in) + parseInt(stats.total_tokens_out))}
-        color="text-yellow-400"
-      />
-      <Stat
-        icon={<DollarSign size={12} />}
-        label="Today"
-        value={`$${stats.cost_today.toFixed(2)}`}
-        color="text-green-400"
-      />
-      <Stat
-        icon={<DollarSign size={12} />}
-        label="Total"
-        value={`$${stats.total_cost.toFixed(2)}`}
-        color="text-gray-400"
-      />
+      <Stat icon={<Activity size={11} />} value={String(activeCount)} color="var(--color-accent)" />
+      <Stat icon={<Radio size={11} />} value={stats.events_today} color="#60a5fa" />
+      <Stat icon={<Zap size={11} />} value={formatTokens(parseInt(stats.total_tokens_in) + parseInt(stats.total_tokens_out))} color="#facc15" />
+      <Stat icon={<DollarSign size={11} />} value={`$${stats.cost_today.toFixed(2)}`} color="var(--color-active)" />
     </div>
   );
 }
 
-function Stat({
-  icon,
-  label,
-  value,
-  color,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  color: string;
-}) {
+function Stat({ icon, value, color }: { icon: React.ReactNode; value: string; color: string }) {
   return (
-    <div className="flex items-center gap-1.5">
-      <span className={color}>{icon}</span>
-      <span className="text-gray-500">{label}</span>
-      <span className={`font-semibold ${color}`}>{value}</span>
+    <div className="flex items-center gap-1" style={{ color }}>
+      <span style={{ opacity: 0.7 }}>{icon}</span>
+      <span className="font-medium" style={{ fontSize: '11px' }}>{value}</span>
     </div>
   );
 }
