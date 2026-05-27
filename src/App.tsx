@@ -15,7 +15,7 @@ export default function App() {
   const selectedProject = useAppStore((s) => s.selectedProject);
   const setSelectedProject = useAppStore((s) => s.setSelectedProject);
   const { dashboard, loading: dashLoading, refresh } = useDashboard(selectedProject?.id ?? null);
-  const { events, connected, activeAgents, agentContexts, currentTools } = useIPC();
+  const { events, connected, activeAgents, agentContexts, currentTools, waitingAgents } = useIPC();
   const { stats } = useStats(events.length);
   const [chatOpen, setChatOpen] = useState(false);
   const prevProjectPath = useRef<string | null>(null);
@@ -139,6 +139,7 @@ export default function App() {
             activeAgents={activeAgents}
             agentContexts={agentContexts}
             currentTools={currentTools}
+            waitingAgents={waitingAgents}
             onRefresh={refresh}
           />
         ) : null}

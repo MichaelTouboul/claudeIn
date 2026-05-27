@@ -27,6 +27,7 @@ export function useIPC() {
   const [activeAgents, setActiveAgents] = useState<Set<string>>(new Set());
   const [agentContexts, setAgentContexts] = useState<Map<string, AgentContext>>(new Map());
   const [currentTools, setCurrentTools] = useState<Map<string, string>>(new Map());
+  const [waitingAgents, setWaitingAgents] = useState<Set<string>>(new Set());
   const activeTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   const markActive = useCallback((agentName: string, tokensIn: number, tokensOut: number, costUsd: number, toolName?: string) => {
@@ -88,13 +89,37 @@ export function useIPC() {
       }
       if (data.type === "spawn_usage") {
         markActive(data.agentName, data.tokensIn || 0, data.tokensOut || 0, 0);
+        if (data.agentName) {
+          setWaitingAgents((prev) => {
+            const next = new Set(prev);
+            next.delete(data.agentName);
+            return next;
+          });
+        }
       }
       if (data.type === "session_activity") {
         markActive(data.agentName || "unknown", data.tokensIn || 0, data.tokensOut || 0, 0);
+        if (data.agentName) {
+          setWaitingAgents((prev) => {
+            const next = new Set(prev);
+            next.delete(data.agentName);
+            return next;
+          });
+        }
+      }
+      if (data.type === "spawn_input_request" && data.agentName) {
+        setWaitingAgents((prev) => new Set(prev).add(data.agentName));
+      }
+      if (data.type === "spawn_exit" && data.agentName) {
+        setWaitingAgents((prev) => {
+          const next = new Set(prev);
+          next.delete(data.agentName);
+          return next;
+        });
       }
     });
     return cleanup;
   }, [markActive]);
 
-  return { events, connected, activeAgents, agentContexts, currentTools };
+  return { events, connected, activeAgents, agentContexts, currentTools, waitingAgents };
 }
