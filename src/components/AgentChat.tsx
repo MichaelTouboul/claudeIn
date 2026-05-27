@@ -363,6 +363,17 @@ export default function AgentChat({
     await window.api.killSession(session.id);
   }, [session]);
 
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isRunning && awaitingResponse) {
+        e.preventDefault();
+        handleKill();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [isRunning, awaitingResponse, handleKill]);
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (showSlash && filteredCommands.length > 0) {
       if (e.key === "ArrowDown") {
@@ -457,9 +468,18 @@ export default function AgentChat({
           />
         ))}
         {isRunning && awaitingResponse && !waitingInput && (
-          <div className="flex items-center gap-2 text-gray-600 text-xs ml-5">
-            <Loader2 size={10} className="animate-spin" />
-            thinking...
+          <div className="flex flex-col items-center gap-2 py-2">
+            <div className="flex items-center gap-2 text-gray-600 text-xs">
+              <Loader2 size={10} className="animate-spin" />
+              thinking...
+            </div>
+            <button
+              onClick={handleKill}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors text-gray-400 border-gray-700 hover:text-red-400 hover:border-red-500/50 hover:bg-red-500/10"
+            >
+              <Square size={10} />
+              Stop generating
+            </button>
           </div>
         )}
         {queue.length > 0 && (
