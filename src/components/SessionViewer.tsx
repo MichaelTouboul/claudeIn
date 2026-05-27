@@ -1,6 +1,7 @@
 import { Bot, ChevronRight, Wrench, ArrowUp, ArrowDown } from "lucide-react";
 import { useRef, useEffect } from "react";
 import type { SessionConversation } from "../hooks/useSessions";
+import { renderContentWithImages } from "./InlineImage";
 
 function formatTokens(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
@@ -114,7 +115,7 @@ export default function SessionViewer({
                   className="text-sm whitespace-pre-wrap ml-5 leading-relaxed"
                   style={{ color: '#67e8f9' }}
                 >
-                  {msg.content}
+                  {renderContentWithImages(msg.content)}
                 </pre>
               </div>
             ) : (
@@ -148,7 +149,7 @@ export default function SessionViewer({
                   className="text-sm whitespace-pre-wrap ml-5 leading-relaxed"
                   style={{ color: 'var(--color-text-primary)' }}
                 >
-                  {msg.content}
+                  {renderContentWithImages(msg.content)}
                 </pre>
               </div>
             )}

@@ -97,3 +97,21 @@ Analyze agent usage patterns and suggest optimizations:
 - "This agent uses Opus but only calls Read/Grep — Haiku would suffice"
 - "This sub-agent exceeds 80% context regularly — add maxTurns"
 - "This memory has 180 lines — approaching truncation limit"
+
+---
+
+## Stop Thinking Button (Chat)
+**Status:** Planned (Task 16 in session ingestion plan)
+**Complexity:** Low
+**Added:** 2026-05-27
+
+Show a prominent "Stop generating" button in the AgentChat message area when the agent is thinking. Currently there's only a small "Stop" link in the terminal header bar which is easy to miss. The new button should be centered below the "thinking..." indicator, highly visible, and wire to the existing `handleKill` function.
+
+---
+
+## Session Resume from SessionViewer
+**Status:** Planned (Task 17 in session ingestion plan)
+**Complexity:** Medium
+**Added:** 2026-05-27
+
+When browsing past sessions in the SessionViewer, there's no way to continue the conversation. Add a prompt input at the bottom of the viewer that resumes the session by spawning a new Claude Code process with `--resume` / `resume_session_id`. The user can type a follow-up message and the session picks up where it left off, transitioning to the AgentChat view.

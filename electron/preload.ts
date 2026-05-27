@@ -54,6 +54,7 @@ contextBridge.exposeInMainWorld("api", {
   watchSessions: (projectPath: string) => ipcRenderer.invoke("sessions:watch-start", projectPath),
   unwatchSessions: (projectPath: string) => ipcRenderer.invoke("sessions:watch-stop", projectPath),
   openFilePicker: () => ipcRenderer.invoke("dialog:open-file"),
+  readImageAsDataUrl: (filePath: string) => ipcRenderer.invoke("dialog:read-image", filePath),
 
   onEvent: (cb: (data: unknown) => void) => {
     const handler = (_e: unknown, data: unknown) => cb(data);

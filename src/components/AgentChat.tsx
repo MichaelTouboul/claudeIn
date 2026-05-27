@@ -9,9 +9,11 @@ import {
   ChevronRight,
   Shield,
   Paperclip,
+  X,
 } from "lucide-react";
 import type { SpawnSession, ChatMessage } from "../types/spawn.types";
 import { useAppStore } from "../store/useAppStore";
+import { renderContentWithImages } from "./InlineImage";
 
 const SLASH_COMMANDS = [
   { cmd: "/help", desc: "Get help with Claude Code" },
@@ -99,7 +101,7 @@ function MessageRow({ msg, isLast, quickReplies, onQuickReply }: {
           <span className="text-xs text-cyan-400 font-medium">you</span>
           <span className="text-xs text-gray-600 opacity-0 group-hover:opacity-100">{time}</span>
         </div>
-        <pre className="text-sm text-cyan-300 whitespace-pre-wrap font-mono ml-5 leading-relaxed">{msg.content}</pre>
+        <pre className="text-sm text-cyan-300 whitespace-pre-wrap font-mono ml-5 leading-relaxed">{renderContentWithImages(msg.content)}</pre>
       </div>
     );
   }
@@ -112,7 +114,7 @@ function MessageRow({ msg, isLast, quickReplies, onQuickReply }: {
           <span className="text-xs text-yellow-500 font-mono">{msg.toolName || "tool"}</span>
           <span className="text-xs text-gray-600 opacity-0 group-hover:opacity-100">{time}</span>
         </div>
-        <pre className="text-xs text-gray-500 whitespace-pre-wrap font-mono leading-relaxed max-h-32 overflow-y-auto">{msg.content}</pre>
+        <pre className="text-xs text-gray-500 whitespace-pre-wrap font-mono leading-relaxed max-h-32 overflow-y-auto">{renderContentWithImages(msg.content)}</pre>
       </div>
     );
   }
@@ -133,7 +135,7 @@ function MessageRow({ msg, isLast, quickReplies, onQuickReply }: {
         <span className="text-xs text-gray-600 opacity-0 group-hover:opacity-100">{time}</span>
       </div>
       <pre className={`text-sm whitespace-pre-wrap font-mono ml-5 leading-relaxed ${hasPermission ? "text-yellow-200/80" : "text-gray-200"}`}>
-        {msg.content}
+        {renderContentWithImages(msg.content)}
       </pre>
       {isLast && quickReplies && (
         <div className="flex flex-wrap gap-2 ml-5 mt-2">
@@ -169,6 +171,7 @@ export default function AgentChat({
   const [slashIndex, setSlashIndex] = useState(0);
   const [waitingInput, setWaitingInput] = useState(false);
   const [awaitingResponse, setAwaitingResponse] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<Array<{ path: string; dataUrl: string | null }>>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const sessionRef = useRef<SpawnSession | null>(null);
@@ -276,46 +279,62 @@ export default function AgentChat({
   };
 
   const handleSend = useCallback(async () => {
-    if (!input.trim()) return;
+    if (!input.trim() && attachedFiles.length === 0) return;
     const text = input.trim();
+
+    // Combine input text with attached file paths
+    const filePaths = attachedFiles.map((f) => f.path).join("\n");
+    const fullText = filePaths ? (text ? text + "\n" + filePaths : filePaths) : text;
+
     setInput("");
+    setAttachedFiles([]);
     setShowSlash(false);
     inputRef.current?.focus();
 
     if (awaitingResponse) {
-      setQueue((prev) => [...prev, text]);
+      setQueue((prev) => [...prev, fullText]);
       return;
     }
 
-    const msg: ChatMessage = { role: "user", content: text, timestamp: new Date().toISOString() };
+    const msg: ChatMessage = { role: "user", content: fullText, timestamp: new Date().toISOString() };
     setMessages((prev) => [...prev, msg]);
     setAwaitingResponse(true);
     setWaitingInput(false);
 
     if (session && isRunning) {
-      pendingUserMsgs.current.add(text);
-      await window.api.sendInput(session.id, text);
+      pendingUserMsgs.current.add(fullText);
+      await window.api.sendInput(session.id, fullText);
     } else {
-      pendingUserMsgs.current.add(text);
+      pendingUserMsgs.current.add(fullText);
       try {
-        const data = await window.api.spawn({ agent_name: agentName, mission: text, cwd: projectPath, resume_session_id: claudeSessionId || undefined });
+        const data = await window.api.spawn({ agent_name: agentName, mission: fullText, cwd: projectPath, resume_session_id: claudeSessionId || undefined });
         setSession(data as SpawnSession);
         if ((data as SpawnSession).claudeSessionId) setClaudeSessionId((data as SpawnSession).claudeSessionId!);
       } catch {
         setAwaitingResponse(false);
       }
     }
-  }, [input, awaitingResponse, session, isRunning, agentName, projectPath]);
+  }, [input, attachedFiles, awaitingResponse, session, isRunning, agentName, projectPath]);
 
   const handleAttach = useCallback(async () => {
     const paths = await window.api.openFilePicker();
-    if (paths.length > 0) {
-      setInput((prev) => {
-        const prefix = prev && !prev.endsWith("\n") ? prev + "\n" : prev;
-        return prefix + paths.join("\n");
-      });
-      inputRef.current?.focus();
+    if (paths.length === 0) return;
+
+    const imageExts = [".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"];
+    const newFiles: Array<{ path: string; dataUrl: string | null }> = [];
+
+    for (const p of paths) {
+      const ext = p.slice(p.lastIndexOf(".")).toLowerCase();
+      if (imageExts.includes(ext)) {
+        const dataUrl = await window.api.readImageAsDataUrl(p);
+        newFiles.push({ path: p, dataUrl });
+      } else {
+        newFiles.push({ path: p, dataUrl: null });
+      }
     }
+
+    setAttachedFiles((prev) => [...prev, ...newFiles]);
+    inputRef.current?.focus();
   }, []);
 
   const handleQuickReply = useCallback(async (value: string) => {
@@ -323,6 +342,7 @@ export default function AgentChat({
     setMessages((prev) => [...prev, msg]);
     pendingUserMsgs.current.add(value);
     setWaitingInput(false);
+    setAttachedFiles([]);
     setAwaitingResponse(true);
 
     if (session && isRunning) {
@@ -457,6 +477,46 @@ export default function AgentChat({
 
       {/* Input */}
       <div className={`relative border-t p-3 ${waitingInput ? "border-yellow-500/50 bg-yellow-500/5" : "border-gray-800"}`}>
+        {/* Attached files preview */}
+        {attachedFiles.length > 0 && (
+          <div className="flex flex-wrap gap-2 px-3 pt-2 pb-1">
+            {attachedFiles.map((file, i) => (
+              <div key={i} className="relative group/attach">
+                {file.dataUrl ? (
+                  <img
+                    src={file.dataUrl}
+                    alt={file.path.split("/").pop() || ""}
+                    className="rounded-lg"
+                    style={{
+                      maxWidth: "80px",
+                      maxHeight: "80px",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                    }}
+                  />
+                ) : (
+                  <div
+                    className="flex items-center gap-1 text-[11px] px-2 py-1 rounded-lg"
+                    style={{
+                      background: "rgba(255,255,255,0.05)",
+                      color: "#9ca3af",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                    }}
+                  >
+                    <Paperclip size={10} />
+                    <span className="truncate max-w-[120px]">{file.path.split("/").pop()}</span>
+                  </div>
+                )}
+                <button
+                  onClick={() => setAttachedFiles((prev) => prev.filter((_, j) => j !== i))}
+                  className="absolute -top-1.5 -right-1.5 p-0.5 rounded-full opacity-0 group-hover/attach:opacity-100 transition-opacity"
+                  style={{ background: "#374151", color: "#d1d5db" }}
+                >
+                  <X size={10} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
         {/* Slash command popup */}
         {showSlash && filteredCommands.length > 0 && (
           <div className="absolute bottom-full left-3 right-3 mb-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl max-h-48 overflow-y-auto py-1">
@@ -502,7 +562,7 @@ export default function AgentChat({
           </button>
           <button
             onClick={handleSend}
-            disabled={!input.trim() || spawning}
+            disabled={(!input.trim() && attachedFiles.length === 0) || spawning}
             className="p-1.5 text-cyan-400 hover:text-cyan-300 disabled:text-gray-700 transition-colors shrink-0"
           >
             {spawning ? (

@@ -46,6 +46,7 @@ interface Window {
     watchSessions: (projectPath: string) => Promise<void>;
     unwatchSessions: (projectPath: string) => Promise<void>;
     openFilePicker: () => Promise<string[]>;
+    readImageAsDataUrl: (filePath: string) => Promise<string | null>;
 
     onEvent: (cb: (data: unknown) => void) => () => void;
   };

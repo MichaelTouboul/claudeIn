@@ -944,3 +944,26 @@ Show a floating button at the bottom-right of the conversation when the user scr
 
 - [ ] **Step 1:** Track scroll position, show/hide floating button
 - [ ] **Step 2:** Commit
+
+### Task 16: Stop button to interrupt agent thinking
+
+**Files:**
+- Modify: `src/components/AgentChat.tsx`
+
+When the agent is "thinking" (awaitingResponse is true and session is running), show a visible Stop/Cancel button in the message area (not just the small "Stop" in the header). The button sends a kill signal to the running session. Inspired by ChatGPT's "Stop generating" button.
+
+- [ ] **Step 1:** Add a centered "Stop" button that appears below the "thinking..." indicator when `awaitingResponse && isRunning`
+- [ ] **Step 2:** Wire it to `handleKill`
+- [ ] **Step 3:** Commit
+
+### Task 17: Add prompt input to SessionViewer for session resume
+
+**Files:**
+- Modify: `src/components/SessionViewer.tsx`
+- Modify: `src/components/ProjectDashboard.tsx` (pass callbacks)
+
+The SessionViewer currently shows a read-only conversation history with no way to continue it. When viewing a past session, add a prompt input at the bottom (similar to AgentChat's input) that spawns a new Claude Code session with `resume_session_id` set to the viewed session's ID. This lets the user pick up where a previous conversation left off.
+
+- [ ] **Step 1:** Add a text input + send button at the bottom of SessionViewer
+- [ ] **Step 2:** On submit, call `window.api.spawn({ resume_session_id, mission: text, ... })` and transition to AgentChat view with the resumed session
+- [ ] **Step 3:** Commit
