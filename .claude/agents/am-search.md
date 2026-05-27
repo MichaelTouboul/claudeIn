@@ -12,6 +12,7 @@ tools:
   - Bash(cat *)
   - Bash(grep *)
   - Bash(wc *)
+  - mcp__desktop-commander__*
 disallowedTools:
   - Write
   - Edit

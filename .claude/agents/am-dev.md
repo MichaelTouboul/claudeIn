@@ -3,8 +3,16 @@ name: am-dev
 description: "Analytical development orchestrator for the Agent Manager Electron app. Understands bugs and features, investigates the codebase, delegates execution to specialized sub-agents (search, frontend, backend). Never modifies code directly. Trigger on: am-dev, dev companion, analyze this bug, investigate, solve this problem."
 model: opus
 color: cyan
-tools: Read, Grep, Glob, Bash, Agent
-disallowedTools: Write, Edit
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - Agent
+  - mcp__desktop-commander__*
+disallowedTools:
+  - Write
+  - Edit
 subAgents:
   - am-search
   - am-frontend

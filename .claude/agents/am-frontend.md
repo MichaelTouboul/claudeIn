@@ -13,6 +13,7 @@ tools:
   - Bash(ls *)
   - Bash(git status)
   - Bash(git diff *)
+  - mcp__playwright__*
 disallowedTools:
   - Agent
 maxTurns: 30
