@@ -1,5 +1,5 @@
 import { Bot, ChevronRight, Wrench, ArrowUp, ArrowDown } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import type { SessionConversation } from "../hooks/useSessions";
 
 function formatTokens(n: number): string {
@@ -16,6 +16,14 @@ export default function SessionViewer({
   loading: boolean;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollRef.current && conversation) {
+      setTimeout(() => {
+        if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      }, 50);
+    }
+  }, [conversation?.sessionId]);
 
   if (loading) {
     return (

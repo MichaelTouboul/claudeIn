@@ -96,13 +96,19 @@ export async function listSessions(projectPath: string): Promise<SessionSummary[
 // --- Conversation loading (on demand) ---
 
 export async function loadConversation(filePath: string): Promise<SessionConversation> {
+  console.log("[session] loadConversation:", filePath);
   const sessionId = path.basename(filePath, ".jsonl");
   const messages: SessionMessage[] = [];
   let totalTokensIn = 0;
   let totalTokensOut = 0;
   let model: string | null = null;
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
+    if (!fs.existsSync(filePath)) {
+      console.log("[session] file not found:", filePath);
+      resolve({ sessionId, messages, totalTokensIn, totalTokensOut, model });
+      return;
+    }
     const stream = fs.createReadStream(filePath, { encoding: "utf-8" });
     const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
 
@@ -157,9 +163,11 @@ export async function loadConversation(filePath: string): Promise<SessionConvers
     });
 
     rl.on("close", () => {
+      console.log("[session] loaded", messages.length, "messages");
       resolve({ sessionId, messages, totalTokensIn, totalTokensOut, model });
     });
-    rl.on("error", () => {
+    rl.on("error", (err) => {
+      console.log("[session] error:", err);
       resolve({ sessionId, messages, totalTokensIn, totalTokensOut, model });
     });
   });
