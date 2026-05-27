@@ -17,7 +17,7 @@ import AgentContextMenu from "./AgentContextMenu";
 import ItemContextMenu from "./ItemContextMenu";
 import AgentChat from "./AgentChat";
 
-type MainView = "agent" | "skill" | "hook" | "tree" | "costs" | "session" | "none";
+type MainView = "agent" | "skill" | "hook" | "tree" | "costs" | "session" | "chat" | "none";
 
 const colorMap: Record<string, string> = {
   cyan: "bg-cyan-500", blue: "bg-blue-500", green: "bg-green-500",
@@ -510,6 +510,7 @@ export default function ProjectDashboard({
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const { isFavorite, toggle: toggleFavorite } = useFavorites(project.id);
   const { sessions, loading: sessionsLoading, conversation, conversationLoading, selectSession } = useSessions(project.path);
+  const [resumeChat, setResumeChat] = useState<{ agentName: string; sessionId: string; message: string } | null>(null);
 
   const togglePanel = (panel: string) => {
     setOpenPanels((prev) => {
@@ -578,6 +579,13 @@ export default function ProjectDashboard({
     setSelectedSkill(s);
     setSelectedAgent(null);
     setView("skill");
+  };
+
+  const handleSessionResume = (sessionId: string, message: string) => {
+    const session = sessions.find((s) => s.sessionId === sessionId);
+    const agentName = session?.agentName || "claude";
+    setResumeChat({ agentName, sessionId, message });
+    setView("chat");
   };
 
   return (
@@ -828,7 +836,9 @@ export default function ProjectDashboard({
               onSelect={handleSelectAgent}
             />
           ) : view === "session" ? (
-            <SessionViewer conversation={conversation} loading={conversationLoading} />
+            <SessionViewer conversation={conversation} loading={conversationLoading} onResume={handleSessionResume} />
+          ) : view === "chat" && resumeChat ? (
+            <AgentChat agentName={resumeChat.agentName} resumeSessionId={resumeChat.sessionId} initialMessage={resumeChat.message} />
           ) : view === "costs" ? (
             <CostDashboard />
           ) : (

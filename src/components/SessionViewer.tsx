@@ -1,4 +1,4 @@
-import { Bot, ChevronRight, Wrench, ArrowUp, ArrowDown, ChevronsDown } from "lucide-react";
+import { Bot, ChevronRight, Wrench, ArrowUp, ArrowDown, ChevronsDown, Send } from "lucide-react";
 import { useRef, useEffect, useState, useCallback } from "react";
 import type { SessionConversation } from "../hooks/useSessions";
 import { renderContentWithImages } from "./InlineImage";
@@ -12,12 +12,16 @@ function formatTokens(n: number): string {
 export default function SessionViewer({
   conversation,
   loading,
+  onResume,
 }: {
   conversation: SessionConversation | null;
   loading: boolean;
+  onResume?: (sessionId: string, message: string) => void;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
+  const [resumeInput, setResumeInput] = useState("");
+  const resumeInputRef = useRef<HTMLTextAreaElement>(null);
 
   const handleScroll = useCallback(() => {
     if (!scrollRef.current) return;
@@ -187,6 +191,56 @@ export default function SessionViewer({
           </button>
         )}
       </div>
+
+      {/* Resume input */}
+      {onResume && conversation && (
+        <div
+          className="px-4 py-3 border-t"
+          style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface-1)' }}
+        >
+          <div className="flex gap-2 items-end">
+            <div className="flex items-center text-sm shrink-0 pt-1.5" style={{ color: 'var(--color-accent)' }}>
+              <ChevronRight size={14} />
+            </div>
+            <textarea
+              ref={resumeInputRef}
+              value={resumeInput}
+              onChange={(e) => setResumeInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  if (resumeInput.trim()) {
+                    onResume(conversation.sessionId, resumeInput.trim());
+                    setResumeInput("");
+                  }
+                }
+              }}
+              placeholder="Continue this session..."
+              rows={1}
+              className="flex-1 bg-transparent text-sm resize-none focus:outline-none placeholder-gray-700 leading-relaxed"
+              style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
+              onInput={(e) => {
+                const el = e.currentTarget;
+                el.style.height = "auto";
+                el.style.height = Math.min(el.scrollHeight, 120) + "px";
+              }}
+            />
+            <button
+              onClick={() => {
+                if (resumeInput.trim()) {
+                  onResume(conversation.sessionId, resumeInput.trim());
+                  setResumeInput("");
+                }
+              }}
+              disabled={!resumeInput.trim()}
+              className="p-1.5 transition-colors shrink-0"
+              style={{ color: resumeInput.trim() ? 'var(--color-accent)' : 'var(--color-text-muted)' }}
+            >
+              <Send size={16} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

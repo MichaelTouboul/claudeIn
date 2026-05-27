@@ -156,8 +156,12 @@ function MessageRow({ msg, isLast, quickReplies, onQuickReply }: {
 
 export default function AgentChat({
   agentName,
+  resumeSessionId,
+  initialMessage,
 }: {
   agentName: string;
+  resumeSessionId?: string;
+  initialMessage?: string;
 }) {
   const projectPath = useAppStore((s) => s.selectedProject?.path);
   const [session, setSession] = useState<SpawnSession | null>(null);
@@ -240,6 +244,31 @@ export default function AgentChat({
     });
     return cleanup;
   }, [sendNextFromQueue]);
+
+  const autoSentRef = useRef(false);
+
+  useEffect(() => {
+    if (autoSentRef.current) return;
+    if (!initialMessage || !resumeSessionId || !projectPath) return;
+    autoSentRef.current = true;
+
+    setClaudeSessionId(resumeSessionId);
+    const msg: ChatMessage = { role: "user", content: initialMessage, timestamp: new Date().toISOString() };
+    setMessages([msg]);
+    pendingUserMsgs.current.add(initialMessage);
+    setAwaitingResponse(true);
+    window.api.spawn({
+      agent_name: agentName || undefined,
+      mission: initialMessage,
+      cwd: projectPath,
+      resume_session_id: resumeSessionId,
+    }).then((data: any) => {
+      setSession(data as SpawnSession);
+      if ((data as SpawnSession).claudeSessionId) setClaudeSessionId((data as SpawnSession).claudeSessionId!);
+    }).catch(() => {
+      setAwaitingResponse(false);
+    });
+  }, [initialMessage, resumeSessionId, projectPath, agentName]);
 
   const isRunning = session?.status === "running";
 
@@ -468,18 +497,9 @@ export default function AgentChat({
           />
         ))}
         {isRunning && awaitingResponse && !waitingInput && (
-          <div className="flex flex-col items-center gap-2 py-2">
-            <div className="flex items-center gap-2 text-gray-600 text-xs">
-              <Loader2 size={10} className="animate-spin" />
-              thinking...
-            </div>
-            <button
-              onClick={handleKill}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors text-gray-400 border-gray-700 hover:text-red-400 hover:border-red-500/50 hover:bg-red-500/10"
-            >
-              <Square size={10} />
-              Stop generating
-            </button>
+          <div className="flex items-center gap-2 text-gray-600 text-xs ml-5">
+            <Loader2 size={10} className="animate-spin" />
+            thinking...
           </div>
         )}
         {queue.length > 0 && (
