@@ -53,13 +53,91 @@ function renderFormattedText(text: string, keyOffset: number = 0): React.ReactNo
   return <>{parts}</>;
 }
 
+function CodeBlock({ language, code }: { language: string; code: string }) {
+  return (
+    <span className="block my-2">
+      <span
+        className="block rounded-lg overflow-hidden"
+        style={{
+          background: 'rgba(0,0,0,0.4)',
+          border: '1px solid rgba(255,255,255,0.08)',
+        }}
+      >
+        {language && (
+          <span
+            className="block px-3 py-1 text-[10px] font-medium"
+            style={{
+              color: 'rgba(255,255,255,0.4)',
+              borderBottom: '1px solid rgba(255,255,255,0.06)',
+              fontFamily: 'var(--font-mono)',
+            }}
+          >
+            {language}
+          </span>
+        )}
+        <span
+          className="block px-3 py-2 overflow-x-auto"
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: '12px',
+            lineHeight: '1.5',
+            color: '#e2e8f0',
+            whiteSpace: 'pre',
+          }}
+        >
+          {code}
+        </span>
+      </span>
+    </span>
+  );
+}
+
 export function renderContentWithImages(content: string): React.ReactNode {
+  if (!content) return content;
+
+  // First: split by fenced code blocks
+  const CODE_BLOCK_REGEX = /```(\w*)\n([\s\S]*?)```/g;
+  const segments: Array<{ type: "text"; value: string } | { type: "code"; language: string; code: string }> = [];
+  let lastIdx = 0;
+  let codeMatch: RegExpExecArray | null;
+
+  while ((codeMatch = CODE_BLOCK_REGEX.exec(content)) !== null) {
+    if (codeMatch.index > lastIdx) {
+      segments.push({ type: "text", value: content.slice(lastIdx, codeMatch.index) });
+    }
+    segments.push({ type: "code", language: codeMatch[1] || "", code: codeMatch[2] });
+    lastIdx = CODE_BLOCK_REGEX.lastIndex;
+  }
+  if (lastIdx < content.length) {
+    segments.push({ type: "text", value: content.slice(lastIdx) });
+  }
+
+  // If no code blocks found, just process as text
+  if (segments.length === 1 && segments[0].type === "text") {
+    return processTextSegment(segments[0].value);
+  }
+
+  // Process each segment
+  const result: React.ReactNode[] = [];
+  let key = 0;
+  for (const seg of segments) {
+    if (seg.type === "code") {
+      result.push(<CodeBlock key={`cb${key++}`} language={seg.language} code={seg.code} />);
+    } else {
+      result.push(processTextSegment(seg.value, key));
+      key += 100; // leave room for keys
+    }
+  }
+  return <>{result}</>;
+}
+
+function processTextSegment(content: string, keyOffset: number = 0): React.ReactNode {
   if (!content) return content;
 
   const lines = content.split("\n");
   const result: React.ReactNode[] = [];
   let hasTransform = false;
-  let key = 0;
+  let key = keyOffset;
 
   for (let i = 0; i < lines.length; i++) {
     if (i > 0) result.push("\n");
