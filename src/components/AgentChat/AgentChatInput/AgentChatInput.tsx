@@ -3,6 +3,7 @@ import { type RefObject } from 'react';
 import { ChevronRight, Loader2, Paperclip, Send, X } from 'lucide-react';
 
 import type { SpawnSession } from '@/types/spawn.types';
+import { Button } from '@/components/_ui/Button';
 import type { SlashCommand } from '../slashCommands';
 
 export type AttachedFile = { path: string; dataUrl: string | null };
@@ -123,24 +124,21 @@ export function AgentChatInput({
             el.style.height = Math.min(el.scrollHeight, 120) + "px";
           }}
         />
-        <button
-          onClick={onAttach}
-          className="p-1.5 text-fg-muted hover:text-fg transition-colors shrink-0"
-          title="Attach file"
-        >
+        <Button intent="ghost" size="icon" onClick={onAttach} title="Attach file">
           <Paperclip size={16} />
-        </button>
-        <button
+        </Button>
+        <Button
+          intent="ghost"
+          size="icon"
           onClick={onSend}
           disabled={(!input.trim() && attachedFiles.length === 0) || spawning}
-          className="p-1.5 text-accent hover:text-accent disabled:text-fg-subtle transition-colors shrink-0"
         >
           {spawning ? (
             <Loader2 size={16} className="animate-spin" />
           ) : (
             <Send size={16} />
           )}
-        </button>
+        </Button>
       </div>
     </div>
   );

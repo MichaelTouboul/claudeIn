@@ -3,6 +3,7 @@ import { ChevronRight, ChevronDown } from 'lucide-react';
 
 import type { AgentFile } from '@/types/agent.types';
 import type { AgentContext } from '@/hooks/useIPC';
+import { Button } from '@/components/_ui/Button';
 import { TreeNode } from './TreeNode/TreeNode';
 
 export type AgentTreeProps = {
@@ -75,15 +76,9 @@ export function AgentTree({
           return (
             <div key={orch.id}>
               <div className="flex items-center">
-                <button
-                  onClick={() => toggleCollapse(orch.id)}
-                  className="p-1 transition-colors"
-                  style={{ color: 'var(--color-text-muted)' }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-text-secondary)'}
-                  onMouseLeave={(e) => e.currentTarget.style.color = 'var(--color-text-muted)'}
-                >
+                <Button intent="ghost" size="icon" onClick={() => toggleCollapse(orch.id)}>
                   {isCollapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
-                </button>
+                </Button>
                 <div className="flex-1 min-w-0">
                   <TreeNode
                     agent={orch}

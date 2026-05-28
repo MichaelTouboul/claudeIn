@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X, Minus, MessageSquare } from "lucide-react";
 import { AgentChat } from '@/components/AgentChat/AgentChat';
+import { Button } from '@/components/_ui/Button';
 
 export type GlobalChatModalProps = {
   onClose: () => void;
@@ -99,25 +100,12 @@ export function GlobalChatModal({
             </span>
           </div>
           <div className="flex items-center gap-0.5">
-            <button
-              onClick={() => setMinimized(true)}
-              className="p-2 rounded-lg transition-colors"
-              style={{ color: 'var(--color-text-muted)' }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-text-primary)'; e.currentTarget.style.background = 'var(--color-surface-2)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-muted)'; e.currentTarget.style.background = 'transparent'; }}
-              title="Minimize"
-            >
+            <Button intent="ghost" size="icon" onClick={() => setMinimized(true)} title="Minimize">
               <Minus size={14} />
-            </button>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-lg transition-colors"
-              style={{ color: 'var(--color-text-muted)' }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-text-primary)'; e.currentTarget.style.background = 'var(--color-surface-2)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-muted)'; e.currentTarget.style.background = 'transparent'; }}
-            >
+            </Button>
+            <Button intent="ghost" size="icon" onClick={onClose}>
               <X size={14} />
-            </button>
+            </Button>
           </div>
         </div>
 

@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 
 import type { AgentFile, MemoryFile } from "@/types/agent.types";
+import { Button } from "@/components/_ui/Button";
 import { api } from "@/services/api";
 
 const MAX_LINES = 200;
@@ -131,20 +132,20 @@ function MemoryFileCard({
           <div className="flex items-center gap-2 my-2">
             {editing ? (
               <>
-                <button onClick={save} disabled={saving} className="text-xs text-active hover:text-active flex items-center gap-1 transition-colors">
+                <Button intent="ghost" size="sm" onClick={save} disabled={saving}>
                   <Save size={11} />{saving ? "Saving..." : "Save"}
-                </button>
-                <button onClick={() => { setContent(file.content); setEditing(false); }} className="text-xs text-fg-muted hover:text-fg flex items-center gap-1 transition-colors">
+                </Button>
+                <Button intent="ghost" size="sm" onClick={() => { setContent(file.content); setEditing(false); }}>
                   <X size={11} />Cancel
-                </button>
+                </Button>
               </>
             ) : (
               <>
-                <button onClick={() => setEditing(true)} className="text-xs text-fg-muted hover:text-accent transition-colors">edit</button>
+                <Button intent="ghost" size="sm" onClick={() => setEditing(true)}>edit</Button>
                 {!isIndex && (
-                  <button onClick={remove} className="text-xs text-fg-subtle hover:text-danger flex items-center gap-1 transition-colors">
+                  <Button intent="danger" size="icon" onClick={remove}>
                     <Trash2 size={10} />
-                  </button>
+                  </Button>
                 )}
               </>
             )}
@@ -225,13 +226,10 @@ export function MemoryManager({
             {agent.memoryFiles.length} files
           </span>
         </div>
-        <button
-          onClick={() => setCreating(true)}
-          className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-accent hover:bg-accent/10 rounded-lg transition-colors"
-        >
+        <Button intent="ghost" size="sm" onClick={() => setCreating(true)}>
           <Plus size={12} />
           New topic
-        </button>
+        </Button>
       </div>
 
       {creating && (
@@ -244,16 +242,17 @@ export function MemoryManager({
               className="flex-1 bg-surface-1/80 border border-border/60 text-fg text-sm rounded px-3 py-1.5 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/20 font-mono"
               autoFocus
             />
-            <button
+            <Button
+              intent="primary"
+              size="sm"
               onClick={handleCreate}
               disabled={saving || !newFileName.trim()}
-              className="px-3 py-1.5 text-xs bg-accent hover:bg-accent text-white rounded transition-colors disabled:opacity-40"
             >
               {saving ? "Creating..." : "Create"}
-            </button>
-            <button onClick={() => setCreating(false)} className="p-1 text-fg-muted hover:text-white transition-colors">
+            </Button>
+            <Button intent="ghost" size="icon" onClick={() => setCreating(false)}>
               <X size={14} />
-            </button>
+            </Button>
           </div>
           <textarea
             value={newContent}

@@ -2,6 +2,7 @@ import { Network, Cog, Link, Unlink } from "lucide-react";
 
 import type { AgentFile } from '@/types/agent.types';
 import type { AgentContext } from '@/hooks/useIPC';
+import { Button } from '@/components/_ui/Button';
 import { AgentContextMenu } from '@/components/AgentContextMenu/AgentContextMenu';
 import { ContextBar } from '../ContextBar/ContextBar';
 
@@ -57,17 +58,15 @@ export function OrchestratorTree({
           <AgentContextMenu agentName={orchestrator.id} isOrchestrator isFavorite={isAgentFavorite?.(orchestrator.id)} onAction={onAgentAction} />
         </div>
         {onToggleLink && linkAction && (
-          <button
+          <Button
+            intent={linkAction === "link" ? "ghost" : "danger"}
+            size="icon"
             onClick={() => onToggleLink(orchestrator.id)}
-            className={`p-1.5 mr-1 rounded shrink-0 transition-colors ${
-              linkAction === "link"
-                ? "text-fg-subtle hover:text-active hover:bg-active/10"
-                : "text-active/60 hover:text-danger hover:bg-danger/10"
-            }`}
             title={linkAction === "link" ? "Link orchestrator + sub-agents" : "Unlink all"}
+            className="mr-1"
           >
             {linkAction === "link" ? <Link size={12} /> : <Unlink size={12} />}
-          </button>
+          </Button>
         )}
       </div>
       {subs.length > 0 && (

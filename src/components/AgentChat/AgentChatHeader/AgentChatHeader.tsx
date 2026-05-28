@@ -1,6 +1,7 @@
 import { Square, Terminal } from 'lucide-react';
 
 import type { SpawnSession } from '@/types/spawn.types';
+import { Button } from '@/components/_ui/Button';
 
 export type AgentChatHeaderProps = {
   agentName: string;
@@ -38,13 +39,10 @@ export function AgentChatHeader({ agentName, session, isRunning, waitingInput, o
         ) : null}
       </div>
       {isRunning ? (
-        <button
-          onClick={onKill}
-          className="flex items-center gap-1 px-2 py-0.5 text-xs text-danger hover:bg-danger/10 rounded"
-        >
+        <Button intent="danger" size="sm" onClick={onKill}>
           <Square size={10} />
           Stop
-        </button>
+        </Button>
       ) : null}
     </div>
   );

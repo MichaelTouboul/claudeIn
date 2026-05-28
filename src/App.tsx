@@ -4,6 +4,7 @@ import { ProjectDashboard } from '@/components/ProjectDashboard/ProjectDashboard
 import { GlobalChatModal } from "@/components/GlobalChatModal/GlobalChatModal";
 import { StatsBar } from "@/components/StatsBar/StatsBar";
 import { EventConsole } from "@/components/EventConsole/EventConsole";
+import { Button } from "@/components/_ui/Button";
 import { useProjects, useDashboard } from "./hooks/useProjects";
 import { useIPC } from "./hooks/useIPC";
 import { useStats } from "./hooks/useStats";
@@ -74,14 +75,16 @@ export default function App() {
 
         <StatsBar stats={stats} activeCount={activeAgents.size} connected={connected} />
 
-        <button
+        <Button
+          intent="outline"
+          size="sm"
           onClick={() => setChatOpen(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md text-accent transition-all duration-200 hover:bg-accent-dim glow-cyan"
-          style={{ border: '1px solid rgba(6, 182, 212, 0.25)' }}
+          className="glow-cyan text-accent"
+          style={{ fontFamily: 'var(--font-mono)', border: '1px solid rgba(6, 182, 212, 0.25)' }}
         >
           <MessageSquare size={12} />
           Chat
-        </button>
+        </Button>
       </div>
 
       {/* Main content */}

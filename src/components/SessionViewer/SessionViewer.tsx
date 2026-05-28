@@ -2,6 +2,7 @@ import { Bot, ChevronRight, Wrench, ArrowUp, ArrowDown, ChevronsDown, Send } fro
 import { useRef, useEffect, useState, useCallback } from "react";
 
 import type { SessionConversation } from "@/hooks/useSessions";
+import { Button } from "@/components/_ui/Button";
 import { renderContentWithImages } from '@/components/_ui/InlineImage';
 
 function formatTokens(n: number): string {
@@ -96,24 +97,12 @@ export function SessionViewer({
           {formatTokens(conversation.totalTokensIn)} in · {formatTokens(conversation.totalTokensOut)} out · {conversation.messages.length} msgs
         </span>
         <div className="flex items-center gap-0.5 ml-2">
-          <button
-            onClick={() => scrollTo("top")}
-            className="p-1 rounded transition-colors"
-            style={{ color: 'var(--color-text-muted)' }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-text-secondary)', e.currentTarget.style.background = 'var(--color-surface-2)')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-text-muted)', e.currentTarget.style.background = 'transparent')}
-          >
+          <Button intent="ghost" size="icon" onClick={() => scrollTo("top")} title="Scroll to top">
             <ArrowUp size={12} />
-          </button>
-          <button
-            onClick={() => scrollTo("bottom")}
-            className="p-1 rounded transition-colors"
-            style={{ color: 'var(--color-text-muted)' }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-text-secondary)', e.currentTarget.style.background = 'var(--color-surface-2)')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-text-muted)', e.currentTarget.style.background = 'transparent')}
-          >
+          </Button>
+          <Button intent="ghost" size="icon" onClick={() => scrollTo("bottom")} title="Scroll to bottom">
             <ArrowDown size={12} />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -228,7 +217,9 @@ export function SessionViewer({
                 el.style.height = Math.min(el.scrollHeight, 120) + "px";
               }}
             />
-            <button
+            <Button
+              intent="ghost"
+              size="icon"
               onClick={() => {
                 if (resumeInput.trim()) {
                   onResume(conversation.sessionId, resumeInput.trim());
@@ -236,11 +227,9 @@ export function SessionViewer({
                 }
               }}
               disabled={!resumeInput.trim()}
-              className="p-1.5 transition-colors shrink-0"
-              style={{ color: resumeInput.trim() ? 'var(--color-accent)' : 'var(--color-text-muted)' }}
             >
               <Send size={16} />
-            </button>
+            </Button>
           </div>
         </div>
       )}
