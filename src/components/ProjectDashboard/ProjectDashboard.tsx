@@ -1,22 +1,27 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, type ReactNode } from "react";
 import {
   Bot, Wrench, Settings, BarChart3, Globe, User,
   Link, Unlink, Network, Cog, Star, Terminal, GitBranch, History, MessageSquare,
 } from "lucide-react";
 
-import type { AgentFile } from "../types/agent.types";
-import type { SkillFile, HookConfig, Project } from "../hooks/useProjects";
-import { useFavorites } from "../hooks/useFavorites";
-import { useSessions } from "../hooks/useSessions";
+import type { AgentFile } from '@/types/agent.types';
+import type { SkillFile, HookConfig, Project } from '@/hooks/useProjects';
+import type { AgentContext } from '@/hooks/useIPC';
+import { useFavorites } from '@/hooks/useFavorites';
+import { useSessions } from '@/hooks/useSessions';
 import { AgentDetail } from '@/components/AgentDetail/AgentDetail';
 import { AgentTree } from '@/components/AgentTree/AgentTree';
 import { CostDashboard } from '@/components/CostDashboard/CostDashboard';
-import { SessionList } from "@/components/SessionList/SessionList";
-import { SessionViewer } from "@/components/SessionViewer/SessionViewer";
+import { SessionList } from '@/components/SessionList/SessionList';
+import { SessionViewer } from '@/components/SessionViewer/SessionViewer';
 import { Accordion } from '@/components/_ui/Accordion';
-import { AgentContextMenu } from "@/components/AgentContextMenu/AgentContextMenu";
-import { ItemContextMenu } from "@/components/ItemContextMenu/ItemContextMenu";
+import { AgentContextMenu } from '@/components/AgentContextMenu/AgentContextMenu';
+import { ItemContextMenu } from '@/components/ItemContextMenu/ItemContextMenu';
 import { AgentChat } from '@/components/AgentChat/AgentChat';
+import type { MainView, OpenChat, SkillTab } from './types';
+import { colorMap } from './utils';
+import { ContextBar } from './ContextBar/ContextBar';
+import { SectionLabel } from './SectionLabel/SectionLabel';
 
 // Inject animation keyframes
 if (typeof document !== "undefined" && !document.getElementById("chat-animations")) {
@@ -32,49 +37,17 @@ if (typeof document !== "undefined" && !document.getElementById("chat-animations
   document.head.appendChild(style);
 }
 
-type MainView = "agent" | "skill" | "hook" | "tree" | "costs" | "session" | "chat" | "none";
-
-type OpenChat = {
-  id: string;
-  agentName: string;
-  title: string;
-  createdAt: number;
-  isNew: boolean;
+export type ProjectDashboardProps = {
+  project: Project;
+  agents: AgentFile[];
+  skills: SkillFile[];
+  hooks: HookConfig[];
+  activeAgents: Set<string>;
+  agentContexts: Map<string, AgentContext>;
+  currentTools?: Map<string, string>;
+  waitingAgents?: Set<string>;
+  onRefresh: () => void;
 };
-
-const colorMap: Record<string, string> = {
-  cyan: "bg-cyan-500", blue: "bg-blue-500", green: "bg-green-500",
-  yellow: "bg-yellow-500", orange: "bg-orange-500", red: "bg-red-500",
-  purple: "bg-purple-500", pink: "bg-pink-500",
-};
-
-// ─── Context progress bar ───
-
-function formatTokens(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
-  return String(n);
-}
-
-function progressColor(percent: number): string {
-  if (percent >= 90) return "bg-red-500/20";
-  if (percent >= 70) return "bg-yellow-500/20";
-  return "bg-cyan-500/15";
-}
-
-function ContextBar({ percent, tokensIn, tokensOut, costUsd }: { percent: number; tokensIn: number; tokensOut: number; costUsd: number }) {
-  return (
-    <div
-      className="absolute inset-0 rounded-lg pointer-events-none transition-all duration-500"
-      title={`In: ${formatTokens(tokensIn)} · Out: ${formatTokens(tokensOut)} · $${costUsd.toFixed(4)} · ${percent.toFixed(0)}% context`}
-    >
-      <div
-        className={`h-full rounded-lg transition-all duration-500 ${progressColor(percent)}`}
-        style={{ width: `${percent}%` }}
-      />
-    </div>
-  );
-}
 
 // ─── Agent rows ───
 
@@ -99,7 +72,7 @@ function OrchestratorTree({
   linkAction?: "link" | "unlink";
   isAgentFavorite?: (name: string) => boolean;
   activeAgents?: Set<string>;
-  agentContexts?: Map<string, import("../hooks/useIPC").AgentContext>;
+  agentContexts?: Map<string, AgentContext>;
 }) {
   const agentMap = new Map(allAgents.map((a) => [a.id, a]));
   const subs = orchestrator.subAgents
@@ -186,7 +159,7 @@ function AgentRow({
   agent: AgentFile;
   selected: boolean;
   active?: boolean;
-  context?: import("../hooks/useIPC").AgentContext;
+  context?: AgentContext;
   onSelect: (a: AgentFile) => void;
   onAgentAction: (action: string, agentName: string) => void;
   onToggleLink?: (name: string) => void;
@@ -236,7 +209,7 @@ function renderAgentList(
   linkAction?: "link" | "unlink",
   isAgentFavorite?: (name: string) => boolean,
   activeAgents?: Set<string>,
-  agentContexts?: Map<string, import("../hooks/useIPC").AgentContext>,
+  agentContexts?: Map<string, AgentContext>,
 ) {
   const agentIds = new Set(allAgents.map((a) => a.id));
   const subAgentIds = new Set<string>();
@@ -343,20 +316,7 @@ function HookRow({
   );
 }
 
-// ─── Section sub-header ───
-
-function SectionLabel({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <div className="flex items-center gap-1.5 px-3 py-1 mt-1 first:mt-0">
-      {icon}
-      <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">{label}</span>
-    </div>
-  );
-}
-
 // ─── Skill detail ───
-
-type SkillTab = "overview" | "chat" | "prompt" | "files";
 
 function SkillDetail({ skill, isFavorite, onToggleFavorite }: { skill: SkillFile; isFavorite?: boolean; onToggleFavorite?: () => void }) {
   const [tab, setTab] = useState<SkillTab>("chat");
@@ -428,9 +388,9 @@ function SkillDetail({ skill, isFavorite, onToggleFavorite }: { skill: SkillFile
         </div>
       ) : (
         <div className="flex-1 min-h-0 overflow-y-auto p-6">
-          {tab === "overview" && <SkillOverview skill={skill} />}
-          {tab === "prompt" && <SkillPrompt skill={skill} />}
-          {tab === "files" && <SkillFiles skill={skill} />}
+          {tab === "overview" ? <SkillOverview skill={skill} /> : null}
+          {tab === "prompt" ? <SkillPrompt skill={skill} /> : null}
+          {tab === "files" ? <SkillFiles skill={skill} /> : null}
         </div>
       )}
     </div>
@@ -506,7 +466,7 @@ function SkillFiles({ skill }: { skill: SkillFile }) {
 
 // ─── Main component ───
 
-export default function ProjectDashboard({
+export function ProjectDashboard({
   project,
   agents,
   skills,
@@ -516,17 +476,7 @@ export default function ProjectDashboard({
   currentTools,
   waitingAgents,
   onRefresh,
-}: {
-  project: Project;
-  agents: AgentFile[];
-  skills: SkillFile[];
-  hooks: HookConfig[];
-  activeAgents: Set<string>;
-  agentContexts: Map<string, import("../hooks/useIPC").AgentContext>;
-  currentTools?: Map<string, string>;
-  waitingAgents?: Set<string>;
-  onRefresh: () => void;
-}) {
+}: ProjectDashboardProps) {
   const [view, setView] = useState<MainView>("none");
   const [selectedAgent, setSelectedAgent] = useState<AgentFile | null>(null);
   const [selectedSkill, setSelectedSkill] = useState<SkillFile | null>(null);
@@ -782,7 +732,7 @@ export default function ProjectDashboard({
                       {agentName}
                     </span>
                     {/* Waiting badge */}
-                    {isWaiting && (
+                    {isWaiting ? (
                       <span
                         className="text-[9px] px-1 py-0.5 rounded shrink-0"
                         style={{
@@ -793,9 +743,9 @@ export default function ProjectDashboard({
                       >
                         awaiting
                       </span>
-                    )}
+                    ) : null}
                     {/* Context gauge */}
-                    {ctx && ctx.percent > 0 && !isWaiting && (
+                    {ctx && ctx.percent > 0 && !isWaiting ? (
                       <div className="flex-1 flex items-center gap-1.5 ml-auto min-w-0">
                         <div
                           className="flex-1 h-[3px] rounded-full overflow-hidden"
@@ -818,7 +768,7 @@ export default function ProjectDashboard({
                           {Math.round(ctx.percent)}%
                         </span>
                       </div>
-                    )}
+                    ) : null}
                   </button>
                 );
               })}
@@ -873,7 +823,7 @@ export default function ProjectDashboard({
                     >
                       {chat.title}
                     </span>
-                    {isActive && (
+                    {isActive ? (
                       <span
                         className="w-1.5 h-1.5 rounded-full shrink-0 ml-auto"
                         style={{
@@ -881,7 +831,7 @@ export default function ProjectDashboard({
                           animation: 'pulse 1s ease-in-out infinite',
                         }}
                       />
-                    )}
+                    ) : null}
                   </button>
                 );
               })}
@@ -1052,7 +1002,7 @@ export default function ProjectDashboard({
               <HookRow key={i} hook={h} isFavorite={isFavorite("hook", `${h.event}:${h.matcher}`)} onToggleFavorite={() => toggleFavorite("hook", `${h.event}:${h.matcher}`)} />
             )),
           } : null,
-          ].filter(Boolean) as { key: string; label: string; icon: React.ReactNode; count: number; content: React.ReactNode }[])
+          ].filter(Boolean) as { key: string; label: string; icon: ReactNode; count: number; content: ReactNode }[])
             .map((panel) => (
               <Accordion
                 key={panel.key}
@@ -1244,16 +1194,16 @@ export default function ProjectDashboard({
                                 {s.title || s.firstPrompt || s.sessionId.slice(0, 8)}
                               </p>
                               <div className="flex items-center gap-2 mt-0.5">
-                                {s.agentName && (
+                                {s.agentName ? (
                                   <span className="text-[10px]" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
                                     {s.agentName}
                                   </span>
-                                )}
-                                {s.branch && (
+                                ) : null}
+                                {s.branch ? (
                                   <span className="flex items-center gap-0.5 text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
                                     <GitBranch size={8} />{s.branch}
                                   </span>
-                                )}
+                                ) : null}
                               </div>
                             </div>
                             <span
@@ -1332,7 +1282,7 @@ export default function ProjectDashboard({
                                   >
                                     {agent.frontmatter.name}
                                   </span>
-                                  {isOrch && (
+                                  {isOrch ? (
                                     <span
                                       className="text-[9px] px-1.5 py-0.5 rounded shrink-0"
                                       style={{
@@ -1343,16 +1293,16 @@ export default function ProjectDashboard({
                                     >
                                       orchestrator
                                     </span>
-                                  )}
+                                  ) : null}
                                 </div>
-                                {agent.frontmatter.description && (
+                                {agent.frontmatter.description ? (
                                   <p
                                     className="text-[10px] truncate mt-0.5"
                                     style={{ color: 'var(--color-text-muted)' }}
                                   >
                                     {agent.frontmatter.description}
                                   </p>
-                                )}
+                                ) : null}
                               </div>
                             </button>
                           );

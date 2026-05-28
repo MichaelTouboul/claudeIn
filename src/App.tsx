@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { ProjectSwitcher } from "@/components/ProjectSwitcher/ProjectSwitcher";
-import ProjectDashboard from "./components/ProjectDashboard";
+import { ProjectDashboard } from '@/components/ProjectDashboard/ProjectDashboard';
 import { GlobalChatModal } from "@/components/GlobalChatModal/GlobalChatModal";
 import { StatsBar } from "@/components/StatsBar/StatsBar";
 import { EventConsole } from "@/components/EventConsole/EventConsole";
