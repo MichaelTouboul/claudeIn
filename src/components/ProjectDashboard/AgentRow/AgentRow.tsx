@@ -1,10 +1,11 @@
 import { Link, Unlink } from "lucide-react";
 
-import type { AgentFile } from '@/types/agent.types';
-import type { AgentContext } from '@/hooks/useIPC';
 import { AgentContextMenu } from '@/components/AgentContextMenu/AgentContextMenu';
-import { colorMap } from '../utils';
+import type { AgentContext } from '@/hooks/useIPC';
+import type { AgentFile } from '@/types/agent.types';
+
 import { ContextBar } from '../ContextBar/ContextBar';
+import { colorMap } from '../utils';
 
 export type AgentRowProps = {
   agent: AgentFile;
@@ -37,17 +38,14 @@ export function AgentRow({
           selected ? "bg-surface-3 text-white" : "text-fg hover:bg-surface-2"
         }`}
       >
-        {active && context && context.percent > 0 && (
-          <ContextBar percent={context.percent} tokensIn={context.tokensIn} tokensOut={context.tokensOut} costUsd={context.costUsd} />
-        )}
+        {active && context && context.percent > 0 ? <ContextBar percent={context.percent} tokensIn={context.tokensIn} tokensOut={context.tokensOut} costUsd={context.costUsd} /> : null}
         <span className={`relative w-2 h-2 rounded-full shrink-0 ${active ? "bg-active animate-pulse" : (colorMap[agent.frontmatter.color || ""] || "bg-surface-3")}`} />
         <span className="relative truncate text-sm font-medium">{agent.id}</span>
       </button>
       <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
         <AgentContextMenu agentName={agent.id} isOrchestrator={agent.subAgents.length > 0} isFavorite={isAgentFavorite?.(agent.id)} onAction={onAgentAction} />
       </div>
-      {onToggleLink && linkAction && (
-        <button
+      {onToggleLink && linkAction ? <button
           onClick={() => onToggleLink(agent.id)}
           className={`p-1.5 mr-1 rounded shrink-0 transition-colors ${
             linkAction === "link"
@@ -56,8 +54,7 @@ export function AgentRow({
           }`}
         >
           {linkAction === "link" ? <Link size={12} /> : <Unlink size={12} />}
-        </button>
-      )}
+        </button> : null}
     </div>
   );
 }

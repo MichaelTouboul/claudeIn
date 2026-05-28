@@ -1,9 +1,9 @@
+import { ChevronRight, Loader2, Paperclip, Send, X } from 'lucide-react';
 import { type RefObject } from 'react';
 
-import { ChevronRight, Loader2, Paperclip, Send, X } from 'lucide-react';
-
-import type { SpawnSession } from '@/types/spawn.types';
 import { Button } from '@/components/_ui/Button';
+import type { SpawnSession } from '@/types/spawn.types';
+
 import type { SlashCommand } from '../slashCommands';
 
 export type AttachedFile = { path: string; dataUrl: string | null };

@@ -1,7 +1,8 @@
 import { GitBranch, History, Terminal } from "lucide-react";
 
-import type { AgentFile } from '@/types/agent.types';
 import type { SessionSummary } from '@/hooks/useSessions';
+import type { AgentFile } from '@/types/agent.types';
+
 import type { MainView } from '../types';
 
 export type LandingPageProps = {
@@ -89,8 +90,7 @@ export function LandingPage({
         </div>
 
         {/* 2. Continue a session */}
-        {sessions.length > 0 && (
-          <div>
+        {sessions.length > 0 ? <div>
             <h3
               className="text-[11px] font-semibold uppercase tracking-widest mb-2 px-1"
               style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}
@@ -149,8 +149,7 @@ export function LandingPage({
                   </button>
                 );
               })}
-              {sessions.length > 5 && (
-                <button
+              {sessions.length > 5 ? <button
                   onClick={() => onSetView("session")}
                   className="w-full text-center py-1.5 text-[11px] rounded-lg transition-colors"
                   style={{ color: 'var(--color-text-muted)' }}
@@ -158,15 +157,12 @@ export function LandingPage({
                   onMouseLeave={(e) => e.currentTarget.style.color = 'var(--color-text-muted)'}
                 >
                   View all {sessions.length} sessions &rarr;
-                </button>
-              )}
+                </button> : null}
             </div>
-          </div>
-        )}
+          </div> : null}
 
         {/* 3. Chat with an agent */}
-        {agents.length > 0 && (
-          <div>
+        {agents.length > 0 ? <div>
             <h3
               className="text-[11px] font-semibold uppercase tracking-widest mb-2 px-1"
               style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}
@@ -242,8 +238,7 @@ export function LandingPage({
                 });
               })()}
             </div>
-          </div>
-        )}
+          </div> : null}
       </div>
     </div>
   );

@@ -1,16 +1,17 @@
-import { GitBranch, BarChart3, History } from "lucide-react";
+import { BarChart3, GitBranch, History } from "lucide-react";
 
-import type { AgentFile } from '@/types/agent.types';
-import type { SkillFile } from '@/hooks/useProjects';
-import type { AgentContext } from '@/hooks/useIPC';
-import type { SessionSummary, SessionConversation } from '@/hooks/useSessions';
-import type { MainView } from '../types';
+import { AgentChat } from '@/components/AgentChat/AgentChat';
 import { AgentDetail } from '@/components/AgentDetail/AgentDetail';
 import { AgentTree } from '@/components/AgentTree/AgentTree';
 import { CostDashboard } from '@/components/CostDashboard/CostDashboard';
 import { SessionViewer } from '@/components/SessionViewer/SessionViewer';
-import { AgentChat } from '@/components/AgentChat/AgentChat';
+import type { AgentContext } from '@/hooks/useIPC';
+import type { SkillFile } from '@/hooks/useProjects';
+import type { SessionConversation,SessionSummary } from '@/hooks/useSessions';
+import type { AgentFile } from '@/types/agent.types';
+
 import { SkillDetail } from '../SkillDetail/SkillDetail';
+import type { MainView } from '../types';
 import { LandingPage } from './LandingPage';
 
 export type MainContentProps = {

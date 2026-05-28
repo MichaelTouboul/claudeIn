@@ -1,5 +1,6 @@
-import { FolderOpen, ChevronDown, Bot, Wrench, Settings } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { Bot, ChevronDown, FolderOpen, Settings,Wrench } from "lucide-react";
+import { useEffect,useRef, useState } from "react";
+
 import type { Project } from "../../hooks/useProjects";
 
 export type ProjectSwitcherProps = {
@@ -47,8 +48,7 @@ export function ProjectSwitcher({
         <ChevronDown size={11} style={{ color: 'var(--color-text-muted)' }} />
       </button>
 
-      {open && (
-        <div
+      {open ? <div
           className="absolute top-full left-0 mt-1.5 w-80 rounded-xl z-50 overflow-hidden"
           style={{
             background: 'var(--color-surface-2)',
@@ -98,29 +98,22 @@ export function ProjectSwitcher({
                       {p.path}
                     </div>
                     <div className="flex gap-3 mt-1">
-                      {p.agentCount > 0 && (
-                        <span className="flex items-center gap-1 text-[11px]" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
+                      {p.agentCount > 0 ? <span className="flex items-center gap-1 text-[11px]" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
                           <Bot size={10} /> {p.agentCount}
-                        </span>
-                      )}
-                      {p.skillCount > 0 && (
-                        <span className="flex items-center gap-1 text-[11px]" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
+                        </span> : null}
+                      {p.skillCount > 0 ? <span className="flex items-center gap-1 text-[11px]" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
                           <Wrench size={10} /> {p.skillCount}
-                        </span>
-                      )}
-                      {p.hasSettings && (
-                        <span className="flex items-center gap-1 text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
+                        </span> : null}
+                      {p.hasSettings ? <span className="flex items-center gap-1 text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
                           <Settings size={10} />
-                        </span>
-                      )}
+                        </span> : null}
                     </div>
                   </div>
                 </button>
               );
             })}
           </div>
-        </div>
-      )}
+        </div> : null}
     </div>
   );
 }

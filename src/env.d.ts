@@ -1,3 +1,5 @@
+declare module '*.css';
+
 interface Window {
   api: {
     getAgents: () => Promise<import("./types/agent.types").AgentFile[]>;

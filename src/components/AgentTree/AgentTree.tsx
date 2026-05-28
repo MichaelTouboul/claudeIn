@@ -1,9 +1,10 @@
+import { ChevronDown,ChevronRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { ChevronRight, ChevronDown } from 'lucide-react';
 
-import type { AgentFile } from '@/types/agent.types';
-import type { AgentContext } from '@/hooks/useIPC';
 import { Button } from '@/components/_ui/Button';
+import type { AgentContext } from '@/hooks/useIPC';
+import type { AgentFile } from '@/types/agent.types';
+
 import { TreeNode } from './TreeNode/TreeNode';
 
 export type AgentTreeProps = {
@@ -92,8 +93,7 @@ export function AgentTree({
                 </div>
               </div>
 
-              {!isCollapsed && subs.length > 0 && (
-                <div className="ml-3" style={{ borderLeft: '1px solid var(--color-border-subtle)' }}>
+              {!isCollapsed && subs.length > 0 ? <div className="ml-3" style={{ borderLeft: '1px solid var(--color-border-subtle)' }}>
                   {subs.map((sub) => (
                     <TreeNode
                       key={sub.id}
@@ -106,15 +106,12 @@ export function AgentTree({
                       onSelect={onSelect}
                     />
                   ))}
-                </div>
-              )}
+                </div> : null}
             </div>
           );
         })}
 
-        {standalones.length > 0 && orchestrators.length > 0 && (
-          <div className="my-3" style={{ borderTop: '1px solid var(--color-border-subtle)' }} />
-        )}
+        {standalones.length > 0 && orchestrators.length > 0 ? <div className="my-3" style={{ borderTop: '1px solid var(--color-border-subtle)' }} /> : null}
 
         {standalones.map((a) => (
           <TreeNode
@@ -130,14 +127,12 @@ export function AgentTree({
         ))}
       </div>
 
-      {agents.length === 0 && (
-        <p
+      {agents.length === 0 ? <p
           className="text-center py-12"
           style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}
         >
           No agents found
-        </p>
-      )}
+        </p> : null}
     </div>
   );
 }

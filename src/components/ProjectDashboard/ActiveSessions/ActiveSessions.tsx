@@ -1,5 +1,5 @@
-import type { AgentFile } from '@/types/agent.types';
 import type { AgentContext } from '@/hooks/useIPC';
+import type { AgentFile } from '@/types/agent.types';
 
 const colorHex: Record<string, string> = {
   cyan: '#06b6d4', blue: '#3b82f6', green: '#22c55e',

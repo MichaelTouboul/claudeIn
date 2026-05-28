@@ -1,7 +1,7 @@
 import { Wrench } from 'lucide-react';
 
-import type { SkillFile } from '@/hooks/useProjects';
 import { ItemContextMenu } from '@/components/ItemContextMenu/ItemContextMenu';
+import type { SkillFile } from '@/hooks/useProjects';
 
 export type SkillRowProps = {
   skill: SkillFile;

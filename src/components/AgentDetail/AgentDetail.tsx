@@ -1,10 +1,12 @@
-import { useState } from 'react';
 import { Brain, Database, FileText, Settings, Terminal } from 'lucide-react';
-import type { AgentFile, AgentFrontmatter } from '@/types/agent.types';
-import { api } from '@/services/api';
+import { useState } from 'react';
+
 import { MarkdownBody } from '@/components/_ui/MarkdownBody';
-import { MemoryManager } from '@/components/MemoryManager/MemoryManager';
 import { AgentChat } from '@/components/AgentChat/AgentChat';
+import { MemoryManager } from '@/components/MemoryManager/MemoryManager';
+import { api } from '@/services/api';
+import type { AgentFile, AgentFrontmatter } from '@/types/agent.types';
+
 import { DetailHeader } from './DetailHeader/DetailHeader';
 import { FrontmatterTable } from './FrontmatterTable/FrontmatterTable';
 
@@ -159,9 +161,7 @@ export function AgentDetail({
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto p-6">
-          {tab === "overview" && (
-            <FrontmatterTable agent={agent} editing={editing} draft={draft} onDraftChange={handleDraftChange} />
-          )}
+          {tab === "overview" ? <FrontmatterTable agent={agent} editing={editing} draft={draft} onDraftChange={handleDraftChange} /> : null}
           {tab === "prompt" ? <MarkdownBody content={agent.body} /> : null}
           {tab === "memory" ? <MemoryManager agent={agent} onRefresh={onRefresh} /> : null}
           {tab === "files" ? (

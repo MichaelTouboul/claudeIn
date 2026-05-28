@@ -1,6 +1,7 @@
 import type { AgentFile, AgentFrontmatter } from '@/types/agent.types';
-import { FIELDS, fieldDisplayValue } from '../fields';
+
 import { EditField } from '../EditField/EditField';
+import { fieldDisplayValue,FIELDS } from '../fields';
 
 export type FrontmatterTableProps = {
   agent: AgentFile;

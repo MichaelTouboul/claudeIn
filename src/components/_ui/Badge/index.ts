@@ -1,7 +1,7 @@
 export {
   Badge,
-  isBadgeVariant,
-  toBadgeVariant,
   type BadgeProps,
   type BadgeVariant,
+  isBadgeVariant,
+  toBadgeVariant,
 } from './Badge';

@@ -1,18 +1,19 @@
-import { useState, useRef, useCallback } from "react";
+import { useCallback,useRef, useState } from "react";
 
-import type { AgentFile } from '@/types/agent.types';
-import type { SkillFile, HookConfig, Project } from '@/hooks/useProjects';
-import type { AgentContext } from '@/hooks/useIPC';
-import type { SessionSummary } from '@/hooks/useSessions';
-import { useFavorites } from '@/hooks/useFavorites';
-import { useSessions } from '@/hooks/useSessions';
 import { useAutoChatTitles } from '@/hooks/useAutoChatTitles';
+import { useFavorites } from '@/hooks/useFavorites';
+import type { AgentContext } from '@/hooks/useIPC';
+import type { HookConfig, Project,SkillFile } from '@/hooks/useProjects';
 import { useResizableSidebar } from '@/hooks/useResizableSidebar';
+import type { SessionSummary } from '@/hooks/useSessions';
+import { useSessions } from '@/hooks/useSessions';
+import type { AgentFile } from '@/types/agent.types';
+
 import { ActiveSessions } from './ActiveSessions/ActiveSessions';
-import { OpenChatsList } from './OpenChatsList/OpenChatsList';
-import { ResizeHandle } from './ResizeHandle/ResizeHandle';
-import { PanelsArea } from './PanelsArea/PanelsArea';
 import { MainContent } from './MainContent/MainContent';
+import { OpenChatsList } from './OpenChatsList/OpenChatsList';
+import { PanelsArea } from './PanelsArea/PanelsArea';
+import { ResizeHandle } from './ResizeHandle/ResizeHandle';
 import type { MainView, OpenChat } from './types';
 
 // Inject animation keyframes

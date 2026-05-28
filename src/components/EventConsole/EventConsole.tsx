@@ -1,5 +1,6 @@
-import { useRef, useEffect, useState } from "react";
-import { Terminal, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp,Terminal } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+
 import type { LiveEvent } from "../../hooks/useIPC";
 
 const eventColorMap: Record<string, string> = {
@@ -67,8 +68,7 @@ export function EventConsole({
         </span>
       </button>
 
-      {expanded && (
-        <div
+      {expanded ? <div
           ref={scrollRef}
           className="h-[calc(100%-36px)] overflow-y-auto px-4 py-1 font-mono text-xs leading-5"
         >
@@ -90,17 +90,14 @@ export function EventConsole({
                   <span className="shrink-0 w-24" style={{ color: typeHex }}>{e.event_type}</span>
                   <span className="shrink-0 w-32 truncate" style={{ color: agentHex }}>{e.agent_name}</span>
                   <span className="truncate" style={{ color: 'var(--color-text-muted)' }}>{e.tool_name || ""}</span>
-                  {e.tokens_in > 0 && (
-                    <span className="ml-auto shrink-0" style={{ color: 'var(--color-text-muted)' }}>
+                  {e.tokens_in > 0 ? <span className="ml-auto shrink-0" style={{ color: 'var(--color-text-muted)' }}>
                       {e.tokens_in + e.tokens_out} tok · ${e.cost_usd.toFixed(4)}
-                    </span>
-                  )}
+                    </span> : null}
                 </div>
               );
             })
           )}
-        </div>
-      )}
+        </div> : null}
     </div>
   );
 }

@@ -1,15 +1,17 @@
-import { useState, useEffect, useRef } from "react";
-import { ProjectSwitcher } from "@/components/ProjectSwitcher/ProjectSwitcher";
-import { ProjectDashboard } from '@/components/ProjectDashboard/ProjectDashboard';
-import { GlobalChatModal } from "@/components/GlobalChatModal/GlobalChatModal";
-import { StatsBar } from "@/components/StatsBar/StatsBar";
-import { EventConsole } from "@/components/EventConsole/EventConsole";
+import { Bot, MessageSquare } from "lucide-react";
+import { useEffect, useRef,useState } from "react";
+
 import { Button } from "@/components/_ui/Button";
-import { useProjects, useDashboard } from "./hooks/useProjects";
+import { EventConsole } from "@/components/EventConsole/EventConsole";
+import { GlobalChatModal } from "@/components/GlobalChatModal/GlobalChatModal";
+import { ProjectDashboard } from '@/components/ProjectDashboard/ProjectDashboard';
+import { ProjectSwitcher } from "@/components/ProjectSwitcher/ProjectSwitcher";
+import { StatsBar } from "@/components/StatsBar/StatsBar";
+
 import { useIPC } from "./hooks/useIPC";
+import { useDashboard,useProjects } from "./hooks/useProjects";
 import { useStats } from "./hooks/useStats";
 import { useAppStore } from "./store/useAppStore";
-import { Bot, MessageSquare } from "lucide-react";
 
 export default function App() {
   const { projects, loading: projectsLoading } = useProjects();
@@ -121,8 +123,8 @@ export default function App() {
                     <div className="text-[13px] font-medium mb-1 truncate group-hover:text-accent transition-colors">{p.name}</div>
                     <div className="text-[11px] truncate mb-2.5" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>{p.path}</div>
                     <div className="flex gap-3 text-[11px]" style={{ color: 'var(--color-text-secondary)' }}>
-                      {p.agentCount > 0 && <span className="font-mono tabular-nums">{p.agentCount} <span style={{ color: 'var(--color-text-muted)' }}>agents</span></span>}
-                      {p.skillCount > 0 && <span className="font-mono tabular-nums">{p.skillCount} <span style={{ color: 'var(--color-text-muted)' }}>skills</span></span>}
+                      {p.agentCount > 0 ? <span className="font-mono tabular-nums">{p.agentCount} <span style={{ color: 'var(--color-text-muted)' }}>agents</span></span> : null}
+                      {p.skillCount > 0 ? <span className="font-mono tabular-nums">{p.skillCount} <span style={{ color: 'var(--color-text-muted)' }}>skills</span></span> : null}
                     </div>
                   </button>
                 ))}
@@ -150,7 +152,7 @@ export default function App() {
         <EventConsole events={events} agentColorMap={agentColorMap} />
       </div>
 
-      {chatOpen && <GlobalChatModal onClose={() => setChatOpen(false)} />}
+      {chatOpen ? <GlobalChatModal onClose={() => setChatOpen(false)} /> : null}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { MessageSquare } from 'lucide-react';
 
 import type { AgentFile } from '@/types/agent.types';
+
 import type { OpenChat } from '../types';
 
 const colorHex: Record<string, string> = {

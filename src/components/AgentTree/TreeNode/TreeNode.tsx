@@ -1,7 +1,7 @@
 import { Cog, Network, Wrench } from 'lucide-react';
 
-import type { AgentFile } from '@/types/agent.types';
 import type { AgentContext } from '@/hooks/useIPC';
+import type { AgentFile } from '@/types/agent.types';
 
 const colorValues: Record<string, string> = {
   cyan: "#06b6d4", blue: "#3b82f6", green: "#22c55e",
@@ -132,8 +132,7 @@ export function TreeNode({
         </span>
       </div>
 
-      {isActive && context && context.percent > 0 && (
-        <div className="ml-6 mt-1">
+      {isActive && context && context.percent > 0 ? <div className="ml-6 mt-1">
           <ContextGauge context={context} />
           <div
             className="flex items-center gap-3 mt-1"
@@ -148,11 +147,9 @@ export function TreeNode({
             <span>out {formatTokens(context.tokensOut)}</span>
             <span style={{ color: 'rgba(234,179,8,0.5)' }}>${context.costUsd.toFixed(4)}</span>
           </div>
-        </div>
-      )}
+        </div> : null}
 
-      {isActive && currentTool && (
-        <div className="flex items-center gap-1.5 ml-6 mt-1.5">
+      {isActive && currentTool ? <div className="flex items-center gap-1.5 ml-6 mt-1.5">
           <Wrench size={9} style={{ color: 'rgba(234,179,8,0.6)' }} />
           <span
             className="truncate"
@@ -164,8 +161,7 @@ export function TreeNode({
           >
             {currentTool}
           </span>
-        </div>
-      )}
+        </div> : null}
     </button>
   );
 }

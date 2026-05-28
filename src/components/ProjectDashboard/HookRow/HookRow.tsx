@@ -1,7 +1,7 @@
 import { Settings } from 'lucide-react';
 
-import type { HookConfig } from '@/hooks/useProjects';
 import { ItemContextMenu } from '@/components/ItemContextMenu/ItemContextMenu';
+import type { HookConfig } from '@/hooks/useProjects';
 
 export type HookRowProps = {
   hook: HookConfig;

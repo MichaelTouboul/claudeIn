@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback,useEffect, useState } from "react";
 
 export type Stats = {
   active_sessions: string;
@@ -31,7 +31,9 @@ export function useStats(refreshTrigger?: number) {
       ]);
       setStats(s);
       setAgentStats(a);
-    } catch {}
+    } catch {
+      // stats endpoint may not be available; ignore silently
+    }
   }, []);
 
   useEffect(() => {

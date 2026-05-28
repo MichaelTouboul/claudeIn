@@ -1,10 +1,10 @@
+import { ChevronRight, Loader2, Terminal } from 'lucide-react';
 import { type RefObject } from 'react';
 
-import { ChevronRight, Loader2, Terminal } from 'lucide-react';
-
 import type { ChatMessage, SpawnSession } from '@/types/spawn.types';
-import type { QuickReply } from '../types';
+
 import { MessageRow } from '../MessageRow/MessageRow';
+import type { QuickReply } from '../types';
 
 export type AgentChatMessagesProps = {
   agentName: string;

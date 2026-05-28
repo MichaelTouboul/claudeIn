@@ -1,4 +1,5 @@
-import { Activity, Zap, DollarSign, Radio } from "lucide-react";
+import { Activity, DollarSign, Radio,Zap } from "lucide-react";
+
 import type { Stats } from "../../hooks/useStats";
 
 export type StatsBarProps = {

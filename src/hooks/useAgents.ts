@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
-import type { AgentFile } from "../types/agent.types";
+import { useCallback,useEffect, useState } from "react";
+
 import { api } from "../services/api";
+import type { AgentFile } from "../types/agent.types";
 
 export function useAgents() {
   const [agents, setAgents] = useState<AgentFile[]>([]);

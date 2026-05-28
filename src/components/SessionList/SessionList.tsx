@@ -1,4 +1,4 @@
-import { Clock, GitBranch, Bot } from "lucide-react";
+import { Bot,Clock, GitBranch } from "lucide-react";
 
 import type { SessionSummary } from "@/hooks/useSessions";
 
@@ -50,11 +50,9 @@ export function SessionList({
               >
                 {s.agentName || "no agent"}
               </span>
-              {s.model && (
-                <span className="text-[9px]" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
+              {s.model ? <span className="text-[9px]" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
                   {s.model.split("-").pop()}
-                </span>
-              )}
+                </span> : null}
               <span
                 className="ml-auto text-[10px] flex items-center gap-1 shrink-0"
                 style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}
@@ -69,8 +67,7 @@ export function SessionList({
             >
               {s.title || s.firstPrompt || s.sessionId.slice(0, 8)}
             </div>
-            {s.branch && (
-              <div className="flex items-center gap-1 mt-0.5 pl-5">
+            {s.branch ? <div className="flex items-center gap-1 mt-0.5 pl-5">
                 <GitBranch size={9} style={{ color: 'var(--color-border)' }} />
                 <span
                   className="text-[10px] truncate"
@@ -78,14 +75,11 @@ export function SessionList({
                 >
                   {s.branch}
                 </span>
-              </div>
-            )}
+              </div> : null}
           </button>
         );
       })}
-      {sessions.length === 0 && (
-        <p className="text-xs text-center py-6" style={{ color: 'var(--color-text-muted)' }}>No sessions found</p>
-      )}
+      {sessions.length === 0 ? <p className="text-xs text-center py-6" style={{ color: 'var(--color-text-muted)' }}>No sessions found</p> : null}
     </div>
   );
 }

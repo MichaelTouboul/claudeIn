@@ -1,5 +1,6 @@
-import type { AgentFile } from '@/types/agent.types';
 import type { AgentContext } from '@/hooks/useIPC';
+import type { AgentFile } from '@/types/agent.types';
+
 import { AgentRow } from '../AgentRow/AgentRow';
 import { OrchestratorTree } from '../OrchestratorTree/OrchestratorTree';
 

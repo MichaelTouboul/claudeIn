@@ -1,19 +1,20 @@
-import { type ReactNode } from "react";
 import {
-  Bot, Wrench, Settings, Globe, User,
-  Star, History,
-} from "lucide-react";
+  Bot, Globe, History,
+Settings,   Star, User,
+Wrench, } from "lucide-react";
+import { type ReactNode } from "react";
 
-import type { AgentFile } from '@/types/agent.types';
-import type { SkillFile, HookConfig } from '@/hooks/useProjects';
-import type { AgentContext } from '@/hooks/useIPC';
-import type { SessionSummary } from '@/hooks/useSessions';
 import { Accordion } from '@/components/_ui/Accordion';
+import { SessionList } from '@/components/SessionList/SessionList';
+import type { AgentContext } from '@/hooks/useIPC';
+import type { HookConfig,SkillFile } from '@/hooks/useProjects';
+import type { SessionSummary } from '@/hooks/useSessions';
+import type { AgentFile } from '@/types/agent.types';
+
 import { AgentList } from '../AgentList/AgentList';
-import { SkillRow } from '../SkillRow/SkillRow';
 import { HookRow } from '../HookRow/HookRow';
 import { SectionLabel } from '../SectionLabel/SectionLabel';
-import { SessionList } from '@/components/SessionList/SessionList';
+import { SkillRow } from '../SkillRow/SkillRow';
 
 export type PanelsAreaProps = {
   agents: AgentFile[];
@@ -85,7 +86,7 @@ export function PanelsArea({
   return (
     <div className="flex-1 flex flex-col min-h-0">
       {/* Spacer pushes panels to bottom when all are closed */}
-      {!openPanels.size && <div className="flex-1" />}
+      {!openPanels.size ? <div className="flex-1" /> : null}
 
       {([
       hasFavorites ? {
@@ -95,28 +96,22 @@ export function PanelsArea({
         count: favAgents.length + favSkills.length + favHooks.length,
         content: (
           <>
-            {favAgents.length > 0 && (
-              <>
+            {favAgents.length > 0 ? <>
                 <SectionLabel icon={<Bot size={10} className="text-accent" />} label="Agents" />
                 <AgentList agents={favAgents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} isAgentFavorite={(n) => isFavorite("agent", n)} activeAgents={activeAgents} agentContexts={agentContexts} />
-              </>
-            )}
-            {favSkills.length > 0 && (
-              <>
+              </> : null}
+            {favSkills.length > 0 ? <>
                 <SectionLabel icon={<Wrench size={10} className="text-active" />} label="Skills" />
                 {favSkills.map((s) => (
                   <SkillRow key={s.filePath} skill={s} selected={selectedSkill?.filePath === s.filePath} isFavorite onSelect={onSelectSkill} onToggleFavorite={() => toggleFavorite("skill", s.name)} />
                 ))}
-              </>
-            )}
-            {favHooks.length > 0 && (
-              <>
+              </> : null}
+            {favHooks.length > 0 ? <>
                 <SectionLabel icon={<Settings size={10} className="text-yellow-400" />} label="Hooks" />
                 {favHooks.map((h, i) => (
                   <HookRow key={i} hook={h} isFavorite onToggleFavorite={() => toggleFavorite("hook", `${h.event}:${h.matcher}`)} />
                 ))}
-              </>
-            )}
+              </> : null}
           </>
         ),
       } : null,
@@ -194,24 +189,20 @@ export function PanelsArea({
           ))
         ) : (
           <>
-            {projectSkills.length > 0 && (
-              <>
+            {projectSkills.length > 0 ? <>
                 <SectionLabel icon={<Globe size={10} className="text-accent" />} label="Project" />
                 {projectSkills.map((s) => (
                   <SkillRow key={s.filePath} skill={s} selected={selectedSkill?.filePath === s.filePath} isFavorite={isFavorite("skill", s.name)} onSelect={onSelectSkill} onToggleFavorite={() => toggleFavorite("skill", s.name)} />
                 ))}
-              </>
-            )}
-            {userSkills.length > 0 && (
-              <>
+              </> : null}
+            {userSkills.length > 0 ? <>
                 <SectionLabel icon={<User size={10} className="text-fg-muted" />} label="User" />
                 <div className="opacity-60">
                   {userSkills.map((s) => (
                     <SkillRow key={s.filePath} skill={s} selected={selectedSkill?.filePath === s.filePath} isFavorite={isFavorite("skill", s.name)} onSelect={onSelectSkill} onToggleFavorite={() => toggleFavorite("skill", s.name)} />
                   ))}
                 </div>
-              </>
-            )}
+              </> : null}
           </>
         ),
       } : null,

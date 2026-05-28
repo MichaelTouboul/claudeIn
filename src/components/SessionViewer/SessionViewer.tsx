@@ -1,9 +1,9 @@
-import { Bot, ChevronRight, Wrench, ArrowUp, ArrowDown, ChevronsDown, Send } from "lucide-react";
-import { useRef, useEffect, useState, useCallback } from "react";
+import { ArrowDown, ArrowUp, Bot, ChevronRight, ChevronsDown, Send,Wrench } from "lucide-react";
+import { useCallback,useEffect, useRef, useState } from "react";
 
-import type { SessionConversation } from "@/hooks/useSessions";
 import { Button } from "@/components/_ui/Button";
 import { renderContentWithImages } from '@/components/_ui/InlineImage';
+import type { SessionConversation } from "@/hooks/useSessions";
 
 function formatTokens(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
@@ -77,8 +77,7 @@ export function SessionViewer({
         >
           {conversation.sessionId.slice(0, 8)}
         </span>
-        {conversation.model && (
-          <span
+        {conversation.model ? <span
             className="text-[10px] px-1.5 py-0.5 rounded"
             style={{
               background: 'rgba(168,85,247,0.12)',
@@ -88,8 +87,7 @@ export function SessionViewer({
             }}
           >
             {conversation.model}
-          </span>
-        )}
+          </span> : null}
         <span
           className="text-[10px] ml-auto"
           style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}
@@ -128,17 +126,14 @@ export function SessionViewer({
                   <div className="flex items-center gap-2 mb-0.5">
                     <Bot size={12} style={{ color: 'var(--color-text-secondary)' }} />
                     <span className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>assistant</span>
-                    {msg.tokensIn != null && msg.tokensIn > 0 && (
-                      <span
+                    {(msg.tokensIn ?? 0) > 0 ? <span
                         className="text-[10px] ml-auto"
                         style={{ color: 'var(--color-text-muted)', fontVariantNumeric: 'tabular-nums' }}
                       >
-                        {formatTokens(msg.tokensIn)}↓ {formatTokens(msg.tokensOut || 0)}↑
-                      </span>
-                    )}
+                        {formatTokens(msg.tokensIn ?? 0)}↓ {formatTokens(msg.tokensOut || 0)}↑
+                      </span> : null}
                   </div>
-                  {msg.toolNames && msg.toolNames.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 ml-5 mb-1">
+                  {msg.toolNames && msg.toolNames.length > 0 ? <div className="flex flex-wrap gap-1.5 ml-5 mb-1">
                       {msg.toolNames.map((t, j) => (
                         <span
                           key={j}
@@ -148,8 +143,7 @@ export function SessionViewer({
                           <Wrench size={9} />{t}
                         </span>
                       ))}
-                    </div>
-                  )}
+                    </div> : null}
                   <pre
                     className="text-sm whitespace-pre-wrap ml-5 leading-relaxed"
                     style={{ color: 'var(--color-text-primary)' }}
@@ -160,14 +154,11 @@ export function SessionViewer({
               )}
             </div>
           ))}
-          {conversation.messages.length === 0 && (
-            <p className="text-sm text-center py-8" style={{ color: 'var(--color-text-muted)' }}>No messages in this session</p>
-          )}
+          {conversation.messages.length === 0 ? <p className="text-sm text-center py-8" style={{ color: 'var(--color-text-muted)' }}>No messages in this session</p> : null}
         </div>
 
         {/* Floating scroll-to-bottom button */}
-        {showScrollBtn && (
-          <button
+        {showScrollBtn ? <button
             onClick={() => {
               scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
             }}
@@ -180,13 +171,11 @@ export function SessionViewer({
             title="Scroll to bottom"
           >
             <ChevronsDown size={16} />
-          </button>
-        )}
+          </button> : null}
       </div>
 
       {/* Resume input */}
-      {onResume && conversation && (
-        <div
+      {onResume && conversation ? <div
           className="px-4 py-3 border-t"
           style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface-1)' }}
         >
@@ -231,8 +220,7 @@ export function SessionViewer({
               <Send size={16} />
             </Button>
           </div>
-        </div>
-      )}
+        </div> : null}
     </div>
   );
 }

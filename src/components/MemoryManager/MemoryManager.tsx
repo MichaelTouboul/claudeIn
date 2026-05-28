@@ -1,12 +1,12 @@
-import { useState } from "react";
 import {
-  Save, Trash2, X, FileText, Plus, AlertTriangle,
-  Clock, ChevronDown, ChevronRight,
-} from "lucide-react";
+AlertTriangle,
+ChevronDown, ChevronRight,
+  Clock, FileText, Plus,   Save, Trash2, X, } from "lucide-react";
+import { useState } from "react";
 
-import type { AgentFile, MemoryFile } from "@/types/agent.types";
 import { Button } from "@/components/_ui/Button";
 import { api } from "@/services/api";
+import type { AgentFile, MemoryFile } from "@/types/agent.types";
 
 const MAX_LINES = 200;
 const MAX_BYTES = 25 * 1024;
@@ -100,11 +100,9 @@ function MemoryFileCard({
         <span className={`text-sm font-medium ${isIndex ? "text-accent" : "text-fg"}`}>
           {file.name}
         </span>
-        {isIndex && (
-          <span className="text-[9px] font-semibold bg-accent/15 text-accent/90 px-1.5 py-0.5 rounded uppercase tracking-wider">
+        {isIndex ? <span className="text-[9px] font-semibold bg-accent/15 text-accent/90 px-1.5 py-0.5 rounded uppercase tracking-wider">
             index
-          </span>
-        )}
+          </span> : null}
         <span className="ml-auto flex items-center gap-2.5">
           <span className="text-[10px] text-fg-subtle flex items-center gap-1">
             <Clock size={9} />
@@ -114,20 +112,15 @@ function MemoryFileCard({
         </span>
       </div>
 
-      {expanded && (
-        <div className="px-4 pb-3 border-t border-border/30">
-          {isIndex && (
-            <div className="space-y-1.5 mt-3 mb-3">
+      {expanded ? <div className="px-4 pb-3 border-t border-border/30">
+          {isIndex ? <div className="space-y-1.5 mt-3 mb-3">
               <SizeGauge label="Lines" current={lines} max={MAX_LINES} unit="lines" />
               <SizeGauge label="Size" current={bytes} max={MAX_BYTES} unit="B" />
-              {lines > MAX_LINES * 0.8 && (
-                <div className="flex items-center gap-1.5 text-[10px] text-yellow-400/90 mt-1">
+              {lines > MAX_LINES * 0.8 ? <div className="flex items-center gap-1.5 text-[10px] text-yellow-400/90 mt-1">
                   <AlertTriangle size={10} />
                   Approaching limit — content past line {MAX_LINES} is truncated at session start
-                </div>
-              )}
-            </div>
-          )}
+                </div> : null}
+            </div> : null}
 
           <div className="flex items-center gap-2 my-2">
             {editing ? (
@@ -142,11 +135,9 @@ function MemoryFileCard({
             ) : (
               <>
                 <Button intent="ghost" size="sm" onClick={() => setEditing(true)}>edit</Button>
-                {!isIndex && (
-                  <Button intent="danger" size="icon" onClick={remove}>
+                {!isIndex ? <Button intent="danger" size="icon" onClick={remove}>
                     <Trash2 size={10} />
-                  </Button>
-                )}
+                  </Button> : null}
               </>
             )}
           </div>
@@ -162,8 +153,7 @@ function MemoryFileCard({
               {file.content || "(empty)"}
             </pre>
           )}
-        </div>
-      )}
+        </div> : null}
     </div>
   );
 }
@@ -232,8 +222,7 @@ export function MemoryManager({
         </Button>
       </div>
 
-      {creating && (
-        <div className="border border-accent/25 rounded-lg p-4 bg-accent/[0.03]">
+      {creating ? <div className="border border-accent/25 rounded-lg p-4 bg-accent/[0.03]">
           <div className="flex items-center gap-2 mb-2">
             <input
               value={newFileName}
@@ -261,27 +250,20 @@ export function MemoryManager({
             rows={4}
             className="w-full bg-surface-1/80 border border-border/60 text-fg text-xs font-mono p-3 rounded-lg focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/20 resize-y leading-relaxed"
           />
-        </div>
-      )}
+        </div> : null}
 
-      {indexFile && (
-        <MemoryFileCard file={indexFile} agentName={agent.id} isIndex onRefresh={onRefresh} />
-      )}
+      {indexFile ? <MemoryFileCard file={indexFile} agentName={agent.id} isIndex onRefresh={onRefresh} /> : null}
 
-      {topicFiles.length > 0 && (
-        <div className="space-y-2">
+      {topicFiles.length > 0 ? <div className="space-y-2">
           <h4 className="text-[10px] font-semibold text-fg-subtle uppercase tracking-[0.12em]">Topic Files</h4>
           {topicFiles.map((f) => (
             <MemoryFileCard key={f.name} file={f} agentName={agent.id} isIndex={false} onRefresh={onRefresh} />
           ))}
-        </div>
-      )}
+        </div> : null}
 
-      {!indexFile && topicFiles.length === 0 && (
-        <p className="text-fg-subtle text-sm text-center py-8">
+      {!indexFile && topicFiles.length === 0 ? <p className="text-fg-subtle text-sm text-center py-8">
           No memory files yet. They will be created during the agent's first session.
-        </p>
-      )}
+        </p> : null}
     </div>
   );
 }

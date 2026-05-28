@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { ChevronRight, RefreshCw } from "lucide-react";
 import * as Collapsible from "@radix-ui/react-collapsible";
+import { ChevronRight, RefreshCw } from "lucide-react";
+import { useState } from "react";
 
 export type AccordionProps = {
   label: string;

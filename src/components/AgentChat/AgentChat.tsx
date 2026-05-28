@@ -1,13 +1,14 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useEffect, useMemo,useRef, useState } from 'react';
 
-import type { SpawnSession, ChatMessage } from '@/types/spawn.types';
-import { useAppStore } from '@/store/useAppStore';
 import { useAgentChatActions } from '@/hooks/useAgentChatActions';
+import { useAppStore } from '@/store/useAppStore';
+import type { ChatMessage,SpawnSession } from '@/types/spawn.types';
+
+import { AgentChatHeader } from './AgentChatHeader/AgentChatHeader';
+import { AgentChatInput } from './AgentChatInput/AgentChatInput';
+import { AgentChatMessages } from './AgentChatMessages/AgentChatMessages';
 import { detectQuickReplies } from './quickReplies';
 import { SLASH_COMMANDS } from './slashCommands';
-import { AgentChatHeader } from './AgentChatHeader/AgentChatHeader';
-import { AgentChatMessages } from './AgentChatMessages/AgentChatMessages';
-import { AgentChatInput } from './AgentChatInput/AgentChatInput';
 
 type SpawnEvent =
   | { type: 'spawn_message'; sessionId: string; message: ChatMessage }

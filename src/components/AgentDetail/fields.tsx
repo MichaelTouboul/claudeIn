@@ -1,5 +1,5 @@
-import type { AgentFrontmatter } from '@/types/agent.types';
 import { Badge, toBadgeVariant } from '@/components/_ui/Badge';
+import type { AgentFrontmatter } from '@/types/agent.types';
 
 export type FieldDef = {
   key: string;

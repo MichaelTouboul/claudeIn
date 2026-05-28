@@ -1,8 +1,8 @@
 import { Edit3, RefreshCw, Save, Star, Trash2, X } from 'lucide-react';
 
-import type { AgentFile } from '@/types/agent.types';
 import { Badge } from '@/components/_ui/Badge';
 import { Button } from '@/components/_ui/Button';
+import type { AgentFile } from '@/types/agent.types';
 
 export type DetailHeaderProps = {
   agent: AgentFile;
@@ -57,20 +57,17 @@ export function DetailHeader({
           >
             {agent.id}
           </h2>
-          {onToggleFavorite && (
-            <button
+          {onToggleFavorite ? <button
               onClick={onToggleFavorite}
               className="p-1 rounded hover:bg-surface-2 transition-colors"
               title={isFavorite ? "Remove from favorites" : "Add to favorites"}
             >
               <Star size={16} className={isFavorite ? "text-yellow-400 fill-yellow-400" : "text-fg-subtle hover:text-yellow-400"} />
-            </button>
-          )}
+            </button> : null}
           <Badge variant={agent.frontmatter.model === "opus" ? "purple" : "blue"}>
             {agent.frontmatter.model || "inherit"}
           </Badge>
-          {editing && (
-            <span
+          {editing ? <span
               className="text-xs font-medium px-2 py-0.5 rounded text-accent bg-accent-dim"
               style={{
                 fontFamily: 'var(--font-mono)',
@@ -79,8 +76,7 @@ export function DetailHeader({
               }}
             >
               EDITING
-            </span>
-          )}
+            </span> : null}
         </div>
         <div className="flex gap-2">
           {editing ? (

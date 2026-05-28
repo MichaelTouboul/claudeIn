@@ -1,7 +1,7 @@
 import { Square, Terminal } from 'lucide-react';
 
-import type { SpawnSession } from '@/types/spawn.types';
 import { Button } from '@/components/_ui/Button';
+import type { SpawnSession } from '@/types/spawn.types';
 
 export type AgentChatHeaderProps = {
   agentName: string;

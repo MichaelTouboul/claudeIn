@@ -1,5 +1,5 @@
 export {
   InlineImage,
-  renderContentWithImages,
   type InlineImageProps,
+  renderContentWithImages,
 } from './InlineImage';

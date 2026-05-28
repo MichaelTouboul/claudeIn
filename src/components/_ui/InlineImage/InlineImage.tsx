@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
 import { ImageIcon, Loader2 } from "lucide-react";
+import { useEffect,useState } from "react";
 
 // Full-line path: starts with /, ends with image extension — handles spaces in filenames
 const IMAGE_LINE_REGEX = /^(\/.*\.(?:png|jpe?g|webp|gif|svg))$/i;
@@ -63,8 +63,7 @@ function CodeBlock({ language, code }: { language: string; code: string }) {
           border: '1px solid rgba(255,255,255,0.08)',
         }}
       >
-        {language && (
-          <span
+        {language ? <span
             className="block px-3 py-1 text-[10px] font-medium"
             style={{
               color: 'rgba(255,255,255,0.4)',
@@ -73,8 +72,7 @@ function CodeBlock({ language, code }: { language: string; code: string }) {
             }}
           >
             {language}
-          </span>
-        )}
+          </span> : null}
         <span
           className="block px-3 py-2 overflow-x-auto"
           style={{
