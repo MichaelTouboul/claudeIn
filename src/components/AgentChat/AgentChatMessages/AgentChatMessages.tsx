@@ -4,7 +4,7 @@ import { type RefObject } from 'react';
 import type { ChatMessage, SpawnSession } from '@/types/spawn.types';
 
 import { MessageRow } from '../MessageRow/MessageRow';
-import type { QuickReply } from '../types';
+import type { QueueItem,QuickReply } from '../types';
 
 export type AgentChatMessagesProps = {
   agentName: string;
@@ -13,7 +13,7 @@ export type AgentChatMessagesProps = {
   isRunning: boolean;
   waitingInput: boolean;
   awaitingResponse: boolean;
-  queue: string[];
+  queue: QueueItem[];
   quickReplies: QuickReply[] | null;
   onQuickReply: (value: string) => void;
   scrollRef: RefObject<HTMLDivElement | null>;
@@ -49,7 +49,7 @@ export function AgentChatMessages({
       ) : null}
       {messages.map((msg, i) => (
         <MessageRow
-          key={i}
+          key={msg.id}
           msg={msg}
           isLast={i === messages.length - 1 || (msg.role === "assistant" && i === messages.length - 1)}
           quickReplies={i === messages.length - 1 && msg.role === "assistant" ? quickReplies : null}
@@ -64,10 +64,10 @@ export function AgentChatMessages({
       ) : null}
       {queue.length > 0 ? (
         <div className="space-y-1 ml-5 mt-1">
-          {queue.map((q, i) => (
-            <div key={i} className="flex items-center gap-2 opacity-40">
+          {queue.map((q) => (
+            <div key={q.id} className="flex items-center gap-2 opacity-40">
               <ChevronRight size={10} className="text-accent" />
-              <span className="text-xs text-accent font-mono">{q}</span>
+              <span className="text-xs text-accent font-mono">{q.text}</span>
               <span className="text-[10px] text-fg-subtle italic">queued</span>
             </div>
           ))}

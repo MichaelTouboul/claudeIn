@@ -296,12 +296,24 @@ import { spawn, type SpawnOptions } from 'node:child_process';
 {isReady && <Panel />}         // ❌ — renders 0/'' if the left side is truthy-by-accident
 ```
 
-**Unique IDs as keys — never the array index:**
+**Unique IDs as keys — NEVER the array index:**
 
 ```tsx
 {items.map((item) => <Row key={item.id} item={item} />)}   // ✅
-{items.map((item, i) => <Row key={i} item={item} />)}      // ❌ — breaks diffing on reorder
+{items.map((item, i) => <Row key={i} item={item} />)}      // ❌ — breaks diffing on reorder/filter
 ```
+
+This is a **hard rule, enforced by ESLint as an error.** Array-index keys cause real, hard-to-reproduce bugs: when the list reorders, filters, or inserts in the middle, React reuses DOM nodes by position rather than identity. Local state (input focus, scroll, animations, hover) jumps to the wrong row, and components that should unmount keep stale data.
+
+**If the item has no natural id, derive one** — compose fields that uniquely identify it:
+
+```tsx
+{hooks.map((h) => <HookRow key={`${h.event}:${h.matcher}`} hook={h} />)}     // ✅
+{tools.map((t) => <ToolBadge key={`${t.name}:${t.version}`} tool={t} />)}    // ✅
+{chartTools.map((entry) => <Cell key={entry.name} fill={entry.fill} />)}     // ✅
+```
+
+If you literally cannot derive a stable key — the data is just `string[]` with possible duplicates and the order is meaningful — that's a data-modelling smell; either dedupe to make values unique, or wrap each value in `{ id, value }` upstream. **Do not reach for the index.**
 
 **`useMemo` only when it matters:**
 

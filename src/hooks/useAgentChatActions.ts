@@ -1,5 +1,6 @@
 import { type RefObject, useCallback } from 'react';
 
+import type { QueueItem } from '@/components/AgentChat/types';
 import type { ChatMessage, SpawnSession } from '@/types/spawn.types';
 
 type SetState<T> = React.Dispatch<React.SetStateAction<T>>;
@@ -19,7 +20,7 @@ type UseAgentChatActionsParams = {
   setInput: SetState<string>;
   setAttachedFiles: SetState<AttachedFile[]>;
   setShowSlash: SetState<boolean>;
-  setQueue: SetState<string[]>;
+  setQueue: SetState<QueueItem[]>;
   setMessages: SetState<ChatMessage[]>;
   setAwaitingResponse: SetState<boolean>;
   setWaitingInput: SetState<boolean>;
@@ -60,11 +61,11 @@ export function useAgentChatActions({
     inputRef.current?.focus();
 
     if (awaitingResponse) {
-      setQueue((prev) => [...prev, fullText]);
+      setQueue((prev) => [...prev, { id: crypto.randomUUID(), text: fullText }]);
       return;
     }
 
-    const msg: ChatMessage = { role: 'user', content: fullText, timestamp: new Date().toISOString() };
+    const msg: ChatMessage = { id: crypto.randomUUID(), role: 'user', content: fullText, timestamp: new Date().toISOString() };
     setMessages((prev) => [...prev, msg]);
     setAwaitingResponse(true);
     setWaitingInput(false);
@@ -106,7 +107,7 @@ export function useAgentChatActions({
   }, [inputRef, setAttachedFiles]);
 
   const handleQuickReply = useCallback(async (value: string) => {
-    const msg: ChatMessage = { role: 'user', content: value, timestamp: new Date().toISOString() };
+    const msg: ChatMessage = { id: crypto.randomUUID(), role: 'user', content: value, timestamp: new Date().toISOString() };
     setMessages((prev) => [...prev, msg]);
     pendingUserMsgs.current.add(value);
     setWaitingInput(false);

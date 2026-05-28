@@ -1,4 +1,6 @@
 export type ChatMessage = {
+  /** Stable client-side identifier for React keys. Generated at construction time. */
+  id: string;
   role: "user" | "assistant" | "system" | "tool";
   content: string;
   toolName?: string;

@@ -818,6 +818,12 @@ function spawnAgent(agentName, mission, cwd, resumeSessionId) {
 		}],
 		claudeSessionId: resumeSessionId
 	};
+	broadcast({
+		type: "spawn_message",
+		sessionId,
+		agentName,
+		message: session.messages[0]
+	});
 	let buffer = "";
 	proc.stdout?.on("data", (chunk) => {
 		buffer += chunk.toString();
@@ -1270,12 +1276,21 @@ async function extractMetadata(filePath) {
 				}
 				if (obj.type === "assistant" && obj.message?.model && !meta.model) meta.model = obj.message.model;
 			} catch {}
-			if (lineCount >= 50) {
+			if (lineCount >= 200) {
 				rl.close();
 				stream.destroy();
 			}
 		});
-		rl.on("close", () => resolve(meta));
+		rl.on("close", () => {
+			if (!meta.title && meta.firstPrompt) {
+				let fallback = meta.firstPrompt.replace(/[\n\r]+/g, " ").replace(/\*\*(.+?)\*\*/g, "$1").replace(/`([^`]+)`/g, "$1").replace(/^#+\s+/, "").trim();
+				const sentenceEnd = fallback.search(/[.!?]\s/);
+				if (sentenceEnd > 0 && sentenceEnd < 60) fallback = fallback.slice(0, sentenceEnd + 1);
+				else if (fallback.length > 60) fallback = fallback.slice(0, 57) + "...";
+				meta.title = fallback;
+			}
+			resolve(meta);
+		});
 		rl.on("error", () => resolve(meta));
 	});
 }
@@ -1320,11 +1335,22 @@ async function loadConversation(filePath) {
 	let totalTokensOut = 0;
 	let model = null;
 	return new Promise((resolve) => {
+		if (!fs.default.existsSync(filePath)) {
+			resolve({
+				sessionId,
+				messages,
+				totalTokensIn,
+				totalTokensOut,
+				model
+			});
+			return;
+		}
 		const stream = fs.default.createReadStream(filePath, { encoding: "utf-8" });
 		const rl = readline.default.createInterface({
 			input: stream,
 			crlfDelay: Infinity
 		});
+		const pendingToolNames = [];
 		rl.on("line", (line) => {
 			try {
 				const obj = JSON.parse(line);
@@ -1345,28 +1371,40 @@ async function loadConversation(filePath) {
 						if (c.type === "text" && c.text) textParts.push(c.text);
 						if (c.type === "tool_use" && c.name) toolNames.push(c.name);
 					}
+					const usage = obj.message.usage;
+					const tokensIn = usage?.input_tokens || 0;
+					const tokensOut = usage?.output_tokens || 0;
 					if (textParts.length > 0 || toolNames.length > 0) {
-						const usage = obj.message.usage;
-						const tokensIn = usage?.input_tokens || 0;
-						const tokensOut = usage?.output_tokens || 0;
 						totalTokensIn += tokensIn;
 						totalTokensOut += tokensOut;
 						if (obj.message.model && !model) model = obj.message.model;
+					}
+					if (textParts.length === 0 && toolNames.length > 0) pendingToolNames.push(...toolNames);
+					else if (textParts.length > 0) {
+						const combinedTools = [...pendingToolNames, ...toolNames];
+						pendingToolNames.length = 0;
 						messages.push({
 							role: "assistant",
-							content: textParts.join("\n") || `[tools: ${toolNames.join(", ")}]`,
+							content: textParts.join("\n"),
 							timestamp: obj.timestamp || "",
 							uuid: obj.uuid || "",
 							model: obj.message.model,
 							tokensIn,
 							tokensOut,
-							toolNames: toolNames.length > 0 ? toolNames : void 0
+							toolNames: combinedTools.length > 0 ? combinedTools : void 0
 						});
 					}
 				}
 			} catch {}
 		});
 		rl.on("close", () => {
+			if (pendingToolNames.length > 0) messages.push({
+				role: "assistant",
+				content: "",
+				timestamp: "",
+				uuid: "",
+				toolNames: pendingToolNames
+			});
 			resolve({
 				sessionId,
 				messages,
@@ -1375,7 +1413,7 @@ async function loadConversation(filePath) {
 				model
 			});
 		});
-		rl.on("error", () => {
+		rl.on("error", (_err) => {
 			resolve({
 				sessionId,
 				messages,
@@ -1491,6 +1529,69 @@ function registerSessionHandlers() {
 	electron.ipcMain.handle("sessions:watch-stop", (_e, projectPath) => stopWatching(projectPath));
 }
 //#endregion
+//#region electron/ipc/dialog.ipc.ts
+function registerDialogHandlers() {
+	electron.ipcMain.handle("dialog:open-file", async () => {
+		const win = electron.BrowserWindow.getFocusedWindow();
+		const result = await electron.dialog.showOpenDialog(win, {
+			properties: ["openFile", "multiSelections"],
+			filters: [{
+				name: "All Files",
+				extensions: ["*"]
+			}, {
+				name: "Images",
+				extensions: [
+					"png",
+					"jpg",
+					"jpeg",
+					"webp",
+					"gif",
+					"svg"
+				]
+			}]
+		});
+		if (result.canceled) return [];
+		return result.filePaths;
+	});
+	electron.ipcMain.handle("dialog:read-image", async (_e, filePath) => {
+		try {
+			if (!fs.default.existsSync(filePath)) return null;
+			const data = fs.default.readFileSync(filePath);
+			return `data:${{
+				".png": "image/png",
+				".jpg": "image/jpeg",
+				".jpeg": "image/jpeg",
+				".gif": "image/gif",
+				".svg": "image/svg+xml",
+				".webp": "image/webp"
+			}[path.default.extname(filePath).toLowerCase()] || "application/octet-stream"};base64,${data.toString("base64")}`;
+		} catch {
+			return null;
+		}
+	});
+	electron.ipcMain.handle("dialog:generate-title", async (_e, userMessage, assistantMessage) => {
+		const prompt = `Generate a concise title (3-6 words max) for this conversation. Reply ONLY with the title, nothing else — no quotes, no period, no explanation.
+
+User: ${userMessage.slice(0, 200)}
+Assistant: ${assistantMessage.slice(0, 200)}`;
+		return new Promise((resolve) => {
+			const proc = (0, child_process.exec)("claude --print --max-turns 1", {
+				timeout: 15e3,
+				encoding: "utf-8",
+				env: { ...process.env }
+			}, (error, stdout) => {
+				if (error || !stdout.trim()) {
+					let fallback = userMessage.replace(/[\n\r]+/g, " ").trim();
+					if (fallback.length > 50) fallback = fallback.slice(0, 47) + "...";
+					resolve(fallback);
+				} else resolve(stdout.trim().slice(0, 60));
+			});
+			proc.stdin?.write(prompt);
+			proc.stdin?.end();
+		});
+	});
+}
+//#endregion
 //#region electron/ipc/index.ts
 function registerAllHandlers() {
 	registerAgentHandlers();
@@ -1502,6 +1603,7 @@ function registerAllHandlers() {
 	registerFavoriteHandlers();
 	registerMissionHandlers();
 	registerSessionHandlers();
+	registerDialogHandlers();
 }
 //#endregion
 //#region electron/main.ts

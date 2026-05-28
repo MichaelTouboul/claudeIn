@@ -10185,6 +10185,19 @@ var ChevronUp = createLucideIcon("chevron-up", [["path", {
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
+var ChevronsDown = createLucideIcon("chevrons-down", [["path", {
+	d: "m7 6 5 5 5-5",
+	key: "1lc07p"
+}], ["path", {
+	d: "m7 13 5 5 5-5",
+	key: "1d48rs"
+}]]);
+/**
+* @license lucide-react v1.16.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
 var Clock = createLucideIcon("clock", [["circle", {
 	cx: "12",
 	cy: "12",
@@ -10437,6 +10450,33 @@ var History = createLucideIcon("history", [
 * This source code is licensed under the ISC license.
 * See the LICENSE file in the root directory of this source tree.
 */
+var Image = createLucideIcon("image", [
+	["rect", {
+		width: "18",
+		height: "18",
+		x: "3",
+		y: "3",
+		rx: "2",
+		ry: "2",
+		key: "1m3agn"
+	}],
+	["circle", {
+		cx: "9",
+		cy: "9",
+		r: "2",
+		key: "af1f0g"
+	}],
+	["path", {
+		d: "m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21",
+		key: "1xmnt7"
+	}]
+]);
+/**
+* @license lucide-react v1.16.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
 var Link = createLucideIcon("link", [["path", {
 	d: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71",
 	key: "1cjeqo"
@@ -10514,6 +10554,16 @@ var Network = createLucideIcon("network", [
 		key: "2874zd"
 	}]
 ]);
+/**
+* @license lucide-react v1.16.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
+var Paperclip = createLucideIcon("paperclip", [["path", {
+	d: "m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551",
+	key: "1miecu"
+}]]);
 /**
 * @license lucide-react v1.16.0 - ISC
 *
@@ -10940,79 +10990,126 @@ function ProjectSwitcher({ projects, selected, onSelect }) {
 		className: "relative",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 			onClick: () => setOpen(!open),
-			className: "flex items-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg transition-colors",
+			className: "flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-150",
+			style: {
+				background: "var(--color-surface-2)",
+				border: "1px solid var(--color-border)",
+				fontFamily: "var(--font-mono)"
+			},
+			onMouseEnter: (e) => e.currentTarget.style.borderColor = "rgba(6,182,212,0.25)",
+			onMouseLeave: (e) => e.currentTarget.style.borderColor = "var(--color-border)",
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FolderOpen, {
-					size: 14,
-					className: "text-cyan-400"
+					size: 13,
+					style: { color: "var(--color-accent)" }
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-					className: "text-sm font-medium text-gray-200 max-w-[200px] truncate",
+					className: "text-[13px] font-medium max-w-[200px] truncate",
+					style: { color: "var(--color-text-primary)" },
 					children: selected?.name || "Select project"
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, {
-					size: 12,
-					className: "text-gray-500"
+					size: 11,
+					style: { color: "var(--color-text-muted)" }
 				})
 			]
 		}), open && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "absolute top-full left-0 mt-1 w-80 bg-gray-800 border border-gray-700 rounded-xl shadow-2xl z-50 overflow-hidden",
+			className: "absolute top-full left-0 mt-1.5 w-80 rounded-xl z-50 overflow-hidden",
+			style: {
+				background: "var(--color-surface-2)",
+				border: "1px solid var(--color-border)",
+				boxShadow: "0 12px 48px rgba(0,0,0,0.5), 0 0 1px rgba(6,182,212,0.1)"
+			},
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "p-2 border-b border-gray-700",
+				className: "px-4 py-2.5",
+				style: { borderBottom: "1px solid var(--color-border-subtle)" },
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-					className: "text-xs text-gray-500 uppercase tracking-wider px-2",
+					className: "text-[10px] font-semibold uppercase",
+					style: {
+						color: "var(--color-text-muted)",
+						fontFamily: "var(--font-mono)",
+						letterSpacing: "0.1em"
+					},
 					children: "Projects"
 				})
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 				className: "max-h-80 overflow-y-auto p-1",
-				children: projects.map((p) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-					onClick: () => {
-						onSelect(p);
-						setOpen(false);
-					},
-					className: `w-full text-left px-3 py-2.5 rounded-lg flex items-start gap-3 transition-colors ${selected?.id === p.id ? "bg-cyan-600/20 text-white" : "text-gray-300 hover:bg-gray-700"}`,
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FolderOpen, {
-						size: 14,
-						className: `mt-0.5 shrink-0 ${p.id === "user" ? "text-yellow-400" : "text-cyan-400"}`
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "min-w-0 flex-1",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "text-sm font-medium truncate",
-								children: p.name
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "text-xs text-gray-500 truncate",
-								children: p.path
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex gap-3 mt-1",
-								children: [
-									p.agentCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-										className: "flex items-center gap-1 text-xs text-gray-500",
-										children: [
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bot, { size: 10 }),
-											" ",
-											p.agentCount
-										]
-									}),
-									p.skillCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-										className: "flex items-center gap-1 text-xs text-gray-500",
-										children: [
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wrench, { size: 10 }),
-											" ",
-											p.skillCount
-										]
-									}),
-									p.hasSettings && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "flex items-center gap-1 text-xs text-gray-500",
-										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Settings, { size: 10 })
-									})
-								]
-							})
-						]
-					})]
-				}, p.id))
+				children: projects.map((p) => {
+					const isSelected = selected?.id === p.id;
+					return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						onClick: () => {
+							onSelect(p);
+							setOpen(false);
+						},
+						className: "w-full text-left px-3 py-2.5 rounded-lg flex items-start gap-3 transition-all duration-150",
+						style: {
+							background: isSelected ? "var(--color-accent-dim)" : "transparent",
+							border: isSelected ? "1px solid rgba(6,182,212,0.15)" : "1px solid transparent"
+						},
+						onMouseEnter: (e) => {
+							if (!isSelected) e.currentTarget.style.background = "var(--color-surface-3)";
+						},
+						onMouseLeave: (e) => {
+							if (!isSelected) e.currentTarget.style.background = "transparent";
+						},
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FolderOpen, {
+							size: 13,
+							className: "mt-0.5 shrink-0",
+							style: { color: p.id === "user" ? "#facc15" : "var(--color-accent)" }
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "min-w-0 flex-1",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "text-[13px] font-medium truncate",
+									style: { color: isSelected ? "var(--color-accent)" : "var(--color-text-primary)" },
+									children: p.name
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "text-[11px] truncate",
+									style: {
+										color: "var(--color-text-muted)",
+										fontFamily: "var(--font-mono)"
+									},
+									children: p.path
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex gap-3 mt-1",
+									children: [
+										p.agentCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+											className: "flex items-center gap-1 text-[11px]",
+											style: {
+												color: "var(--color-text-muted)",
+												fontFamily: "var(--font-mono)"
+											},
+											children: [
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bot, { size: 10 }),
+												" ",
+												p.agentCount
+											]
+										}),
+										p.skillCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+											className: "flex items-center gap-1 text-[11px]",
+											style: {
+												color: "var(--color-text-muted)",
+												fontFamily: "var(--font-mono)"
+											},
+											children: [
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wrench, { size: 10 }),
+												" ",
+												p.skillCount
+											]
+										}),
+										p.hasSettings && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "flex items-center gap-1 text-[11px]",
+											style: { color: "var(--color-text-muted)" },
+											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Settings, { size: 10 })
+										})
+									]
+								})
+							]
+						})]
+					}, p.id);
+				})
 			})]
 		})]
 	});
@@ -11444,6 +11541,217 @@ var useAppStore = create((set) => ({
 	setSelectedProject: (project) => set({ selectedProject: project })
 }));
 //#endregion
+//#region src/components/InlineImage.tsx
+var IMAGE_LINE_REGEX = /^(\/.*\.(?:png|jpe?g|webp|gif|svg))$/i;
+var IMAGE_INLINE_REGEX = /((?:\/[\w.\-~]+)+\.(?:png|jpe?g|webp|gif|svg))/gi;
+function renderFormattedText(text, keyOffset = 0) {
+	const parts = [];
+	const regex = /(\*\*(.+?)\*\*)|(`([^`\n]+?)`)|((?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*))/g;
+	let lastIndex = 0;
+	let match;
+	let key = keyOffset;
+	while ((match = regex.exec(text)) !== null) {
+		if (match.index > lastIndex) parts.push(text.slice(lastIndex, match.index));
+		if (match[2]) parts.push(/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", {
+			style: {
+				fontWeight: 600,
+				color: "inherit"
+			},
+			children: match[2]
+		}, `f${key++}`));
+		else if (match[4]) parts.push(/* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", {
+			style: {
+				background: "rgba(255,255,255,0.06)",
+				padding: "1px 5px",
+				borderRadius: "4px",
+				fontSize: "0.9em",
+				color: "inherit"
+			},
+			children: match[4]
+		}, `f${key++}`));
+		else if (match[6]) parts.push(/* @__PURE__ */ (0, import_jsx_runtime.jsx)("em", {
+			style: {
+				fontStyle: "italic",
+				color: "inherit"
+			},
+			children: match[6]
+		}, `f${key++}`));
+		lastIndex = regex.lastIndex;
+	}
+	if (lastIndex === 0) return text;
+	if (lastIndex < text.length) parts.push(text.slice(lastIndex));
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, { children: parts });
+}
+function CodeBlock({ language, code }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+		className: "block my-2",
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+			className: "block rounded-lg overflow-hidden",
+			style: {
+				background: "rgba(0,0,0,0.4)",
+				border: "1px solid rgba(255,255,255,0.08)"
+			},
+			children: [language && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				className: "block px-3 py-1 text-[10px] font-medium",
+				style: {
+					color: "rgba(255,255,255,0.4)",
+					borderBottom: "1px solid rgba(255,255,255,0.06)",
+					fontFamily: "var(--font-mono)"
+				},
+				children: language
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				className: "block px-3 py-2 overflow-x-auto",
+				style: {
+					fontFamily: "var(--font-mono)",
+					fontSize: "12px",
+					lineHeight: "1.5",
+					color: "#e2e8f0",
+					whiteSpace: "pre"
+				},
+				children: code
+			})]
+		})
+	});
+}
+function renderContentWithImages(content) {
+	if (!content) return content;
+	const CODE_BLOCK_REGEX = /```(\w*)\n([\s\S]*?)```/g;
+	const segments = [];
+	let lastIdx = 0;
+	let codeMatch;
+	while ((codeMatch = CODE_BLOCK_REGEX.exec(content)) !== null) {
+		if (codeMatch.index > lastIdx) segments.push({
+			type: "text",
+			value: content.slice(lastIdx, codeMatch.index)
+		});
+		segments.push({
+			type: "code",
+			language: codeMatch[1] || "",
+			code: codeMatch[2]
+		});
+		lastIdx = CODE_BLOCK_REGEX.lastIndex;
+	}
+	if (lastIdx < content.length) segments.push({
+		type: "text",
+		value: content.slice(lastIdx)
+	});
+	if (segments.length === 1 && segments[0].type === "text") return processTextSegment(segments[0].value);
+	const result = [];
+	let key = 0;
+	for (const seg of segments) if (seg.type === "code") result.push(/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CodeBlock, {
+		language: seg.language,
+		code: seg.code
+	}, `cb${key++}`));
+	else {
+		result.push(processTextSegment(seg.value, key));
+		key += 100;
+	}
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, { children: result });
+}
+function processTextSegment(content, keyOffset = 0) {
+	if (!content) return content;
+	const lines = content.split("\n");
+	const result = [];
+	let hasTransform = false;
+	let key = keyOffset;
+	for (let i = 0; i < lines.length; i++) {
+		if (i > 0) result.push("\n");
+		const line = lines[i];
+		const lineMatch = line.trim().match(IMAGE_LINE_REGEX);
+		if (lineMatch) {
+			result.push(/* @__PURE__ */ (0, import_jsx_runtime.jsx)(InlineImage, { filePath: lineMatch[1] }, key++));
+			hasTransform = true;
+			continue;
+		}
+		IMAGE_INLINE_REGEX.lastIndex = 0;
+		let lastIdx = 0;
+		let match;
+		let lineHasImage = false;
+		while ((match = IMAGE_INLINE_REGEX.exec(line)) !== null) {
+			if (match.index > lastIdx) {
+				const pre = renderFormattedText(line.slice(lastIdx, match.index));
+				result.push(pre);
+				if (typeof pre !== "string") hasTransform = true;
+			}
+			result.push(/* @__PURE__ */ (0, import_jsx_runtime.jsx)(InlineImage, { filePath: match[1] }, key++));
+			lastIdx = IMAGE_INLINE_REGEX.lastIndex;
+			lineHasImage = true;
+		}
+		if (lineHasImage) {
+			hasTransform = true;
+			if (lastIdx < line.length) {
+				const post = renderFormattedText(line.slice(lastIdx));
+				result.push(post);
+				if (typeof post !== "string") hasTransform = true;
+			}
+		} else {
+			const formatted = renderFormattedText(line);
+			result.push(formatted);
+			if (typeof formatted !== "string") hasTransform = true;
+		}
+	}
+	if (!hasTransform) return content;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, { children: result });
+}
+function InlineImage({ filePath }) {
+	const [dataUrl, setDataUrl] = (0, import_react.useState)(null);
+	const [loading, setLoading] = (0, import_react.useState)(true);
+	const [error, setError] = (0, import_react.useState)(false);
+	(0, import_react.useEffect)(() => {
+		let cancelled = false;
+		setLoading(true);
+		setError(false);
+		setDataUrl(null);
+		window.api.readImageAsDataUrl(filePath).then((result) => {
+			if (cancelled) return;
+			if (result) setDataUrl(result);
+			else setError(true);
+			setLoading(false);
+		});
+		return () => {
+			cancelled = true;
+		};
+	}, [filePath]);
+	if (loading) return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+		className: "inline-flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded my-1",
+		style: {
+			background: "var(--color-surface-2)",
+			color: "var(--color-text-muted)",
+			border: "1px solid var(--color-border)"
+		},
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, {
+			size: 10,
+			className: "animate-spin"
+		}), filePath.split("/").pop()]
+	});
+	if (error || !dataUrl) return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+		className: "inline-flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded my-1",
+		style: {
+			background: "var(--color-surface-2)",
+			color: "var(--color-text-muted)",
+			border: "1px solid var(--color-border)"
+		},
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Image, { size: 10 }), filePath.split("/").pop()]
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+		className: "block my-2",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+			src: dataUrl,
+			alt: filePath.split("/").pop() || "image",
+			className: "rounded-lg",
+			style: {
+				maxWidth: "300px",
+				maxHeight: "300px",
+				border: "1px solid var(--color-border)"
+			}
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+			className: "block text-[10px] mt-0.5",
+			style: { color: "var(--color-text-muted)" },
+			children: filePath.split("/").pop()
+		})]
+	});
+}
+//#endregion
 //#region src/components/AgentChat.tsx
 var SLASH_COMMANDS = [
 	{
@@ -11592,7 +11900,7 @@ function MessageRow({ msg, isLast, quickReplies, onQuickReply }) {
 			]
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", {
 			className: "text-sm text-cyan-300 whitespace-pre-wrap font-mono ml-5 leading-relaxed",
-			children: msg.content
+			children: renderContentWithImages(msg.content)
 		})]
 	});
 	if (isTool) return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -11615,7 +11923,7 @@ function MessageRow({ msg, isLast, quickReplies, onQuickReply }) {
 			]
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", {
 			className: "text-xs text-gray-500 whitespace-pre-wrap font-mono leading-relaxed max-h-32 overflow-y-auto",
-			children: msg.content
+			children: renderContentWithImages(msg.content)
 		})]
 	});
 	const hasPermission = isLast && quickReplies && PERMISSION_PATTERNS.some((p) => p.test(msg.content));
@@ -11644,7 +11952,7 @@ function MessageRow({ msg, isLast, quickReplies, onQuickReply }) {
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", {
 				className: `text-sm whitespace-pre-wrap font-mono ml-5 leading-relaxed ${hasPermission ? "text-yellow-200/80" : "text-gray-200"}`,
-				children: msg.content
+				children: renderContentWithImages(msg.content)
 			}),
 			isLast && quickReplies && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 				className: "flex flex-wrap gap-2 ml-5 mt-2",
@@ -11657,7 +11965,7 @@ function MessageRow({ msg, isLast, quickReplies, onQuickReply }) {
 		]
 	});
 }
-function AgentChat({ agentName }) {
+function AgentChat({ agentName, resumeSessionId, initialMessage }) {
 	const projectPath = useAppStore((s) => s.selectedProject?.path);
 	const [session, setSession] = (0, import_react.useState)(null);
 	const [claudeSessionId, setClaudeSessionId] = (0, import_react.useState)(null);
@@ -11670,6 +11978,7 @@ function AgentChat({ agentName }) {
 	const [slashIndex, setSlashIndex] = (0, import_react.useState)(0);
 	const [waitingInput, setWaitingInput] = (0, import_react.useState)(false);
 	const [awaitingResponse, setAwaitingResponse] = (0, import_react.useState)(false);
+	const [attachedFiles, setAttachedFiles] = (0, import_react.useState)([]);
 	const scrollRef = (0, import_react.useRef)(null);
 	const inputRef = (0, import_react.useRef)(null);
 	const sessionRef = (0, import_react.useRef)(null);
@@ -11740,6 +12049,36 @@ function AgentChat({ agentName }) {
 			}
 		});
 	}, [sendNextFromQueue]);
+	const autoSentRef = (0, import_react.useRef)(false);
+	(0, import_react.useEffect)(() => {
+		if (autoSentRef.current) return;
+		if (!initialMessage || !resumeSessionId || !projectPath) return;
+		autoSentRef.current = true;
+		setClaudeSessionId(resumeSessionId);
+		setMessages([{
+			role: "user",
+			content: initialMessage,
+			timestamp: (/* @__PURE__ */ new Date()).toISOString()
+		}]);
+		pendingUserMsgs.current.add(initialMessage);
+		setAwaitingResponse(true);
+		window.api.spawn({
+			agent_name: agentName || void 0,
+			mission: initialMessage,
+			cwd: projectPath,
+			resume_session_id: resumeSessionId
+		}).then((data) => {
+			setSession(data);
+			if (data.claudeSessionId) setClaudeSessionId(data.claudeSessionId);
+		}).catch(() => {
+			setAwaitingResponse(false);
+		});
+	}, [
+		initialMessage,
+		resumeSessionId,
+		projectPath,
+		agentName
+	]);
 	const isRunning = session?.status === "running";
 	const lastAssistantMsg = (0, import_react.useMemo)(() => {
 		for (let i = messages.length - 1; i >= 0; i--) if (messages[i].role === "assistant") return messages[i];
@@ -11765,32 +12104,35 @@ function AgentChat({ agentName }) {
 		inputRef.current?.focus();
 	};
 	const handleSend = (0, import_react.useCallback)(async () => {
-		if (!input.trim()) return;
+		if (!input.trim() && attachedFiles.length === 0) return;
 		const text = input.trim();
+		const filePaths = attachedFiles.map((f) => f.path).join("\n");
+		const fullText = filePaths ? text ? text + "\n" + filePaths : filePaths : text;
 		setInput("");
+		setAttachedFiles([]);
 		setShowSlash(false);
 		inputRef.current?.focus();
 		if (awaitingResponse) {
-			setQueue((prev) => [...prev, text]);
+			setQueue((prev) => [...prev, fullText]);
 			return;
 		}
 		const msg = {
 			role: "user",
-			content: text,
+			content: fullText,
 			timestamp: (/* @__PURE__ */ new Date()).toISOString()
 		};
 		setMessages((prev) => [...prev, msg]);
 		setAwaitingResponse(true);
 		setWaitingInput(false);
 		if (session && isRunning) {
-			pendingUserMsgs.current.add(text);
-			await window.api.sendInput(session.id, text);
+			pendingUserMsgs.current.add(fullText);
+			await window.api.sendInput(session.id, fullText);
 		} else {
-			pendingUserMsgs.current.add(text);
+			pendingUserMsgs.current.add(fullText);
 			try {
 				const data = await window.api.spawn({
 					agent_name: agentName,
-					mission: text,
+					mission: fullText,
 					cwd: projectPath,
 					resume_session_id: claudeSessionId || void 0
 				});
@@ -11802,12 +12144,41 @@ function AgentChat({ agentName }) {
 		}
 	}, [
 		input,
+		attachedFiles,
 		awaitingResponse,
 		session,
 		isRunning,
 		agentName,
 		projectPath
 	]);
+	const handleAttach = (0, import_react.useCallback)(async () => {
+		const paths = await window.api.openFilePicker();
+		if (paths.length === 0) return;
+		const imageExts = [
+			".png",
+			".jpg",
+			".jpeg",
+			".webp",
+			".gif",
+			".svg"
+		];
+		const newFiles = [];
+		for (const p of paths) {
+			const ext = p.slice(p.lastIndexOf(".")).toLowerCase();
+			if (imageExts.includes(ext)) {
+				const dataUrl = await window.api.readImageAsDataUrl(p);
+				newFiles.push({
+					path: p,
+					dataUrl
+				});
+			} else newFiles.push({
+				path: p,
+				dataUrl: null
+			});
+		}
+		setAttachedFiles((prev) => [...prev, ...newFiles]);
+		inputRef.current?.focus();
+	}, []);
 	const handleQuickReply = (0, import_react.useCallback)(async (value) => {
 		const msg = {
 			role: "user",
@@ -11817,6 +12188,7 @@ function AgentChat({ agentName }) {
 		setMessages((prev) => [...prev, msg]);
 		pendingUserMsgs.current.add(value);
 		setWaitingInput(false);
+		setAttachedFiles([]);
 		setAwaitingResponse(true);
 		if (session && isRunning) await window.api.sendInput(session.id, value);
 		else try {
@@ -11841,6 +12213,20 @@ function AgentChat({ agentName }) {
 		if (!session) return;
 		await window.api.killSession(session.id);
 	}, [session]);
+	(0, import_react.useEffect)(() => {
+		const onKeyDown = (e) => {
+			if (e.key === "Escape" && isRunning && awaitingResponse) {
+				e.preventDefault();
+				handleKill();
+			}
+		};
+		document.addEventListener("keydown", onKeyDown);
+		return () => document.removeEventListener("keydown", onKeyDown);
+	}, [
+		isRunning,
+		awaitingResponse,
+		handleKill
+	]);
 	const handleKeyDown = (e) => {
 		if (showSlash && filteredCommands.length > 0) {
 			if (e.key === "ArrowDown") {
@@ -11977,51 +12363,95 @@ function AgentChat({ agentName }) {
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: `relative border-t p-3 ${waitingInput ? "border-yellow-500/50 bg-yellow-500/5" : "border-gray-800"}`,
-				children: [showSlash && filteredCommands.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "absolute bottom-full left-3 right-3 mb-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl max-h-48 overflow-y-auto py-1",
-					children: filteredCommands.map((cmd, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-						onClick: () => handleSelectSlash(cmd.cmd),
-						className: `w-full flex items-center gap-3 px-3 py-1.5 text-xs transition-colors ${i === slashIndex ? "bg-cyan-500/20 text-cyan-300" : "text-gray-300 hover:bg-gray-700"}`,
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "font-mono text-yellow-400 w-28 text-left",
-							children: cmd.cmd
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-gray-500",
-							children: cmd.desc
-						})]
-					}, cmd.cmd))
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex gap-2 items-end",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: `flex items-center text-sm shrink-0 pt-1.5 ${waitingInput ? "text-yellow-400" : "text-cyan-500"}`,
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { size: 14 })
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", {
-							ref: inputRef,
-							value: input,
-							onChange: (e) => handleInputChange(e.target.value),
-							onKeyDown: handleKeyDown,
-							placeholder: waitingInput ? "Type your response (yes / no / ...)..." : session && isRunning ? "Send a message..." : "Type a prompt or / for commands...",
-							rows: 1,
-							className: "flex-1 bg-transparent text-gray-200 text-sm resize-none focus:outline-none font-mono placeholder-gray-700 leading-relaxed",
-							onInput: (e) => {
-								const el = e.currentTarget;
-								el.style.height = "auto";
-								el.style.height = Math.min(el.scrollHeight, 120) + "px";
-							}
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-							onClick: handleSend,
-							disabled: !input.trim() || spawning,
-							className: "p-1.5 text-cyan-400 hover:text-cyan-300 disabled:text-gray-700 transition-colors shrink-0",
-							children: spawning ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, {
-								size: 16,
-								className: "animate-spin"
-							}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, { size: 16 })
-						})
-					]
-				})]
+				children: [
+					attachedFiles.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "flex flex-wrap gap-2 px-3 pt-2 pb-1",
+						children: attachedFiles.map((file, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "relative group/attach",
+							children: [file.dataUrl ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+								src: file.dataUrl,
+								alt: file.path.split("/").pop() || "",
+								className: "rounded-lg",
+								style: {
+									maxWidth: "80px",
+									maxHeight: "80px",
+									border: "1px solid rgba(255,255,255,0.1)"
+								}
+							}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center gap-1 text-[11px] px-2 py-1 rounded-lg",
+								style: {
+									background: "rgba(255,255,255,0.05)",
+									color: "#9ca3af",
+									border: "1px solid rgba(255,255,255,0.1)"
+								},
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Paperclip, { size: 10 }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "truncate max-w-[120px]",
+									children: file.path.split("/").pop()
+								})]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								onClick: () => setAttachedFiles((prev) => prev.filter((_, j) => j !== i)),
+								className: "absolute -top-1.5 -right-1.5 p-0.5 rounded-full opacity-0 group-hover/attach:opacity-100 transition-opacity",
+								style: {
+									background: "#374151",
+									color: "#d1d5db"
+								},
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { size: 10 })
+							})]
+						}, i))
+					}),
+					showSlash && filteredCommands.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "absolute bottom-full left-3 right-3 mb-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl max-h-48 overflow-y-auto py-1",
+						children: filteredCommands.map((cmd, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+							onClick: () => handleSelectSlash(cmd.cmd),
+							className: `w-full flex items-center gap-3 px-3 py-1.5 text-xs transition-colors ${i === slashIndex ? "bg-cyan-500/20 text-cyan-300" : "text-gray-300 hover:bg-gray-700"}`,
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "font-mono text-yellow-400 w-28 text-left",
+								children: cmd.cmd
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-gray-500",
+								children: cmd.desc
+							})]
+						}, cmd.cmd))
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex gap-2 items-end",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: `flex items-center text-sm shrink-0 pt-1.5 ${waitingInput ? "text-yellow-400" : "text-cyan-500"}`,
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { size: 14 })
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", {
+								ref: inputRef,
+								value: input,
+								onChange: (e) => handleInputChange(e.target.value),
+								onKeyDown: handleKeyDown,
+								placeholder: waitingInput ? "Type your response (yes / no / ...)..." : session && isRunning ? "Send a message..." : "Type a prompt or / for commands...",
+								rows: 1,
+								className: "flex-1 bg-transparent text-gray-200 text-sm resize-none focus:outline-none font-mono placeholder-gray-700 leading-relaxed",
+								onInput: (e) => {
+									const el = e.currentTarget;
+									el.style.height = "auto";
+									el.style.height = Math.min(el.scrollHeight, 120) + "px";
+								}
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								onClick: handleAttach,
+								className: "p-1.5 text-gray-500 hover:text-gray-300 transition-colors shrink-0",
+								title: "Attach file",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Paperclip, { size: 16 })
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								onClick: handleSend,
+								disabled: !input.trim() && attachedFiles.length === 0 || spawning,
+								className: "p-1.5 text-cyan-400 hover:text-cyan-300 disabled:text-gray-700 transition-colors shrink-0",
+								children: spawning ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, {
+									size: 16,
+									className: "animate-spin"
+								}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, { size: 16 })
+							})
+						]
+					})
+				]
 			})
 		]
 	});
@@ -12043,18 +12473,58 @@ var tabIcons = {
 	files: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Database, { size: 14 })
 };
 function Badge({ children, variant }) {
-	const colors = {
-		blue: "bg-blue-500/20 text-blue-300",
-		green: "bg-green-500/20 text-green-300",
-		yellow: "bg-yellow-500/20 text-yellow-300",
-		orange: "bg-orange-500/20 text-orange-300",
-		cyan: "bg-cyan-500/20 text-cyan-300",
-		purple: "bg-purple-500/20 text-purple-300",
-		gray: "bg-gray-700 text-gray-300",
-		red: "bg-red-500/20 text-red-300"
+	const colorMap = {
+		blue: {
+			bg: "rgba(59,130,246,0.12)",
+			text: "#93c5fd",
+			border: "rgba(59,130,246,0.2)"
+		},
+		green: {
+			bg: "rgba(34,197,94,0.12)",
+			text: "#86efac",
+			border: "rgba(34,197,94,0.2)"
+		},
+		yellow: {
+			bg: "rgba(234,179,8,0.12)",
+			text: "#fde047",
+			border: "rgba(234,179,8,0.2)"
+		},
+		orange: {
+			bg: "rgba(249,115,22,0.12)",
+			text: "#fdba74",
+			border: "rgba(249,115,22,0.2)"
+		},
+		cyan: {
+			bg: "var(--color-accent-dim)",
+			text: "var(--color-accent)",
+			border: "rgba(6,182,212,0.2)"
+		},
+		purple: {
+			bg: "rgba(168,85,247,0.12)",
+			text: "#c4b5fd",
+			border: "rgba(168,85,247,0.2)"
+		},
+		gray: {
+			bg: "var(--color-surface-3)",
+			text: "var(--color-text-secondary)",
+			border: "var(--color-border-subtle)"
+		},
+		red: {
+			bg: "rgba(248,113,113,0.12)",
+			text: "#fca5a5",
+			border: "rgba(248,113,113,0.2)"
+		}
 	};
+	const c = colorMap[variant] || colorMap.gray;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-		className: `px-2 py-0.5 rounded-full text-xs font-medium ${colors[variant] || colors.gray}`,
+		className: "px-2 py-0.5 rounded text-xs font-medium",
+		style: {
+			fontFamily: "var(--font-mono)",
+			background: c.bg,
+			color: c.text,
+			border: `1px solid ${c.border}`,
+			letterSpacing: "0.01em"
+		},
 		children
 	});
 }
@@ -12163,7 +12633,7 @@ var FIELDS = [
 function fieldDisplayValue(fm, key) {
 	const val = fm[key];
 	if (val === void 0 || val === null || val === "") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-		className: "text-gray-500",
+		style: { color: "var(--color-text-muted)" },
 		children: "—"
 	});
 	if (key === "model") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Badge, {
@@ -12185,7 +12655,7 @@ function fieldDisplayValue(fm, key) {
 	if (key === "tools" || key === "disallowedTools" || key === "subAgents") {
 		const arr = Array.isArray(val) ? val : typeof val === "string" ? val.split(",").map((t) => t.trim()).filter(Boolean) : [];
 		if (arr.length === 0) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-			className: "text-gray-500",
+			style: { color: "var(--color-text-muted)" },
 			children: key === "tools" ? "all (inherited)" : "—"
 		});
 		const variant = key === "tools" ? "cyan" : key === "subAgents" ? "blue" : "red";
@@ -12199,15 +12669,26 @@ function fieldDisplayValue(fm, key) {
 	}
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 		className: "font-mono text-sm",
+		style: { color: "var(--color-text-primary)" },
 		children: String(val)
 	});
 }
 function EditField({ field, value, onChange }) {
-	const base = "w-full bg-gray-800 border border-cyan-500/50 rounded px-2.5 py-1.5 text-sm text-gray-200 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30";
+	const base = "w-full rounded px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1";
+	const fieldStyle = {
+		background: "var(--color-surface-2)",
+		borderWidth: "1px",
+		borderStyle: "solid",
+		borderColor: "rgba(6,182,212,0.25)",
+		color: "var(--color-text-primary)",
+		fontFamily: "var(--font-mono)",
+		fontSize: "13px"
+	};
 	if (field.type === "dropdown") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("select", {
 		value: String(value ?? ""),
 		onChange: (e) => onChange(e.target.value || void 0),
 		className: base,
+		style: fieldStyle,
 		children: field.options.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
 			value: opt,
 			children: opt || "— inherit —"
@@ -12218,18 +12699,21 @@ function EditField({ field, value, onChange }) {
 		value: value !== void 0 && value !== null ? String(value) : "",
 		onChange: (e) => onChange(e.target.value ? Number(e.target.value) : void 0),
 		className: base,
+		style: fieldStyle,
 		placeholder: "—"
 	});
 	if (field.type === "textarea") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", {
 		value: String(value ?? ""),
 		onChange: (e) => onChange(e.target.value),
 		rows: 3,
-		className: `${base} resize-y`
+		className: `${base} resize-y`,
+		style: fieldStyle
 	});
 	if (field.type === "boolean") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", {
 		value: value ? "true" : "false",
 		onChange: (e) => onChange(e.target.value === "true"),
 		className: base,
+		style: fieldStyle,
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
 			value: "false",
 			children: "no"
@@ -12243,6 +12727,7 @@ function EditField({ field, value, onChange }) {
 		value: Array.isArray(value) ? value.join(", ") : String(value ?? ""),
 		onChange: (e) => onChange(e.target.value),
 		className: base,
+		style: fieldStyle,
 		placeholder: "—"
 	});
 }
@@ -12251,13 +12736,23 @@ function FrontmatterTable({ agent, editing, draft, onDraftChange }) {
 		className: "space-y-4",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("table", {
 			className: "w-full text-sm",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: FIELDS.map((field) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
-				className: "border-b border-gray-800",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: FIELDS.map((field, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
+				style: {
+					borderBottom: "1px solid var(--color-border-subtle)",
+					background: idx % 2 === 1 ? "var(--color-surface-1)" : "transparent"
+				},
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-					className: "py-2.5 pr-4 text-gray-500 font-medium w-40 align-top",
+					className: "py-2.5 pr-4 font-medium w-40 align-top",
+					style: {
+						color: "var(--color-text-muted)",
+						fontFamily: "var(--font-mono)",
+						fontSize: "12px",
+						letterSpacing: "0.02em"
+					},
 					children: field.label
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
-					className: "py-2.5 text-gray-200",
+					className: "py-2.5",
+					style: { color: "var(--color-text-primary)" },
 					children: editing ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EditField, {
 						field,
 						value: draft[field.key] !== void 0 ? draft[field.key] : agent.frontmatter[field.key],
@@ -12323,21 +12818,31 @@ function AgentDetail({ agent, onEdit, onDelete, onRefresh, onAgentUpdated, isFav
 		}));
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: `flex-1 flex flex-col h-full ${editing ? "ring-2 ring-cyan-500/30 ring-inset rounded-lg" : ""}`,
+		className: `flex-1 flex flex-col h-full ${editing ? "ring-inset rounded-lg" : ""}`,
+		style: editing ? { boxShadow: "inset 0 0 0 2px rgba(6,182,212,0.2)" } : void 0,
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: `border-b px-6 py-4 ${editing ? "border-cyan-500/30 bg-cyan-500/5" : "border-gray-800"}`,
+				className: "border-b px-6 py-4",
+				style: {
+					background: editing ? "rgba(6,182,212,0.04)" : "var(--color-surface-1)",
+					borderColor: editing ? "rgba(6,182,212,0.2)" : "var(--color-border)"
+				},
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-center justify-between",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "flex items-center gap-3",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: `w-3 h-3 rounded-full`,
-								style: { backgroundColor: `var(--agent-color, #06b6d4)` }
+								className: "w-3 h-3 rounded-full",
+								style: { backgroundColor: `var(--agent-color, var(--color-accent))` }
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-								className: "text-lg font-bold text-white",
+								className: "text-lg font-bold",
+								style: {
+									fontFamily: "var(--font-mono)",
+									color: "var(--color-text-primary)",
+									letterSpacing: "-0.01em"
+								},
 								children: agent.id
 							}),
 							onToggleFavorite && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
@@ -12354,7 +12859,14 @@ function AgentDetail({ agent, onEdit, onDelete, onRefresh, onAgentUpdated, isFav
 								children: agent.frontmatter.model || "inherit"
 							}),
 							editing && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "text-xs font-medium text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded",
+								className: "text-xs font-medium px-2 py-0.5 rounded",
+								style: {
+									color: "var(--color-accent)",
+									background: "var(--color-accent-dim)",
+									fontFamily: "var(--font-mono)",
+									letterSpacing: "0.05em",
+									border: "1px solid rgba(6,182,212,0.15)"
+								},
 								children: "EDITING"
 							})
 						]
@@ -12362,18 +12874,43 @@ function AgentDetail({ agent, onEdit, onDelete, onRefresh, onAgentUpdated, isFav
 						className: "flex gap-2",
 						children: editing ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 							onClick: handleCancel,
-							className: "flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors",
+							className: "flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-all duration-150",
+							style: {
+								color: "var(--color-text-secondary)",
+								border: "1px solid var(--color-border)"
+							},
+							onMouseEnter: (e) => {
+								e.currentTarget.style.color = "var(--color-text-primary)";
+								e.currentTarget.style.background = "var(--color-surface-3)";
+							},
+							onMouseLeave: (e) => {
+								e.currentTarget.style.color = "var(--color-text-secondary)";
+								e.currentTarget.style.background = "transparent";
+							},
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { size: 14 }), "Cancel"]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 							onClick: handleSave,
 							disabled: saving,
-							className: "flex items-center gap-1.5 px-3 py-1.5 text-sm bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg transition-colors disabled:opacity-50",
+							className: "flex items-center gap-1.5 px-3 py-1.5 text-sm text-white rounded-md transition-all duration-150 disabled:opacity-40 glow-cyan",
+							style: {
+								background: "var(--color-accent)",
+								fontFamily: "var(--font-mono)"
+							},
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Save, { size: 14 }), saving ? "Saving..." : "Save"]
 						})] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								onClick: handleRefreshAgent,
 								disabled: refreshing,
-								className: "p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors disabled:opacity-50",
+								className: "p-1.5 rounded-md transition-all duration-150 disabled:opacity-40",
+								style: { color: "var(--color-text-muted)" },
+								onMouseEnter: (e) => {
+									e.currentTarget.style.color = "var(--color-text-primary)";
+									e.currentTarget.style.background = "var(--color-surface-3)";
+								},
+								onMouseLeave: (e) => {
+									e.currentTarget.style.color = "var(--color-text-muted)";
+									e.currentTarget.style.background = "transparent";
+								},
 								title: "Refresh from disk",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, {
 									size: 14,
@@ -12382,14 +12919,30 @@ function AgentDetail({ agent, onEdit, onDelete, onRefresh, onAgentUpdated, isFav
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 								onClick: handleEdit,
-								className: "flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-colors",
+								className: "flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-all duration-150",
+								style: {
+									color: "var(--color-text-secondary)",
+									border: "1px solid var(--color-border)"
+								},
+								onMouseEnter: (e) => {
+									e.currentTarget.style.color = "var(--color-text-primary)";
+									e.currentTarget.style.background = "var(--color-surface-3)";
+								},
+								onMouseLeave: (e) => {
+									e.currentTarget.style.color = "var(--color-text-secondary)";
+									e.currentTarget.style.background = "transparent";
+								},
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PenLine, { size: 14 }), "Edit"]
 							}),
 							confirmDelete ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "flex items-center gap-2",
 								children: [
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "text-xs text-red-400",
+										className: "text-xs",
+										style: {
+											color: "var(--color-danger)",
+											fontFamily: "var(--font-mono)"
+										},
 										children: "Confirm?"
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
@@ -12397,39 +12950,73 @@ function AgentDetail({ agent, onEdit, onDelete, onRefresh, onAgentUpdated, isFav
 											onDelete(agent.id);
 											setConfirmDelete(false);
 										},
-										className: "px-3 py-1.5 text-sm bg-red-600 hover:bg-red-500 text-white rounded-lg",
+										className: "px-3 py-1.5 text-sm text-white rounded-md transition-colors",
+										style: {
+											background: "#dc2626",
+											fontFamily: "var(--font-mono)"
+										},
 										children: "Delete"
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 										onClick: () => setConfirmDelete(false),
-										className: "p-1 text-gray-400 hover:text-white",
+										className: "p-1 transition-colors",
+										style: { color: "var(--color-text-muted)" },
+										onMouseEnter: (e) => e.currentTarget.style.color = "var(--color-text-primary)",
+										onMouseLeave: (e) => e.currentTarget.style.color = "var(--color-text-muted)",
 										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { size: 14 })
 									})
 								]
 							}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								onClick: () => setConfirmDelete(true),
-								className: "flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-400 hover:text-red-400 hover:bg-gray-800 rounded-lg transition-colors",
+								className: "flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-all duration-150",
+								style: { color: "var(--color-text-muted)" },
+								onMouseEnter: (e) => {
+									e.currentTarget.style.color = "#f87171";
+									e.currentTarget.style.background = "rgba(248,113,113,0.08)";
+								},
+								onMouseLeave: (e) => {
+									e.currentTarget.style.color = "var(--color-text-muted)";
+									e.currentTarget.style.background = "transparent";
+								},
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { size: 14 })
 							})
 						] })
 					})]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "text-xs text-gray-600 font-mono mt-1.5",
+					className: "text-xs font-mono mt-1.5",
+					style: { color: "var(--color-text-muted)" },
 					children: agent.filePath
 				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: `border-b px-6 flex items-center gap-1 ${editing ? "border-cyan-500/30" : "border-gray-800"}`,
+				className: "border-b px-6 flex items-center gap-1",
+				style: {
+					borderColor: editing ? "rgba(6,182,212,0.2)" : "var(--color-border)",
+					background: "var(--color-surface-1)"
+				},
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						onClick: () => setTab("chat"),
-						className: `flex items-center gap-1.5 px-3.5 py-1.5 my-1.5 mr-2 text-sm font-medium rounded-lg transition-colors ${tab === "chat" ? "bg-cyan-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"}`,
+						className: "flex items-center gap-1.5 px-3.5 py-1.5 my-1.5 mr-2 text-sm font-medium rounded-lg transition-all duration-150",
+						style: {
+							background: tab === "chat" ? "var(--color-accent)" : "var(--color-surface-3)",
+							color: tab === "chat" ? "#fff" : "var(--color-text-secondary)",
+							boxShadow: tab === "chat" ? "0 0 12px rgba(6,182,212,0.2), 0 1px 3px rgba(0,0,0,0.3)" : "none",
+							border: tab === "chat" ? "none" : "1px solid var(--color-border-subtle)"
+						},
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Terminal, { size: 14 }), "Chat"]
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-px h-5 bg-gray-700 mr-1" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "w-px h-5 mr-1",
+						style: { background: "var(--color-border)" }
+					}),
 					TABS.filter((t) => t !== "chat").map((t) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						onClick: () => setTab(t),
-						className: `flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium border-b-2 transition-colors ${tab === t ? "border-cyan-400 text-cyan-400" : "border-transparent text-gray-500 hover:text-gray-300"}`,
+						className: "flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium border-b-2 transition-colors",
+						style: {
+							borderColor: tab === t ? "var(--color-accent)" : "transparent",
+							color: tab === t ? "var(--color-accent)" : "var(--color-text-muted)"
+						},
 						children: [tabIcons[t], t.charAt(0).toUpperCase() + t.slice(1)]
 					}, t))
 				]
@@ -12454,15 +13041,25 @@ function AgentDetail({ agent, onEdit, onDelete, onRefresh, onAgentUpdated, isFav
 					tab === "files" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 						className: "space-y-4",
 						children: agent.annexFiles.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-gray-500 text-sm",
+							className: "text-sm",
+							style: { color: "var(--color-text-muted)" },
 							children: "No annex files"
 						}) : agent.annexFiles.map((f) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "bg-gray-800/50 rounded-lg p-4",
+							className: "rounded-lg p-4",
+							style: {
+								background: "var(--color-surface-2)",
+								border: "1px solid var(--color-border-subtle)"
+							},
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-								className: "text-sm font-medium text-gray-300 mb-2",
+								className: "text-sm font-medium mb-2",
+								style: {
+									color: "var(--color-text-secondary)",
+									fontFamily: "var(--font-mono)"
+								},
 								children: f.name
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", {
-								className: "text-xs text-gray-400 overflow-x-auto whitespace-pre-wrap font-mono",
+								className: "text-xs overflow-x-auto whitespace-pre-wrap font-mono",
+								style: { color: "var(--color-text-muted)" },
 								children: f.content
 							})]
 						}, f.path))
@@ -12484,17 +13081,34 @@ var colorValues = {
 	purple: "#a855f7",
 	pink: "#ec4899"
 };
+function gaugeGradient(percent) {
+	if (percent >= 90) return "linear-gradient(90deg, #ef4444 0%, #f87171 100%)";
+	if (percent >= 70) return "linear-gradient(90deg, #eab308 0%, #facc15 100%)";
+	return "linear-gradient(90deg, #06b6d4 0%, #22d3ee 100%)";
+}
 function ContextGauge({ context }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "flex items-center gap-2 mt-1.5",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "flex-1 h-[5px] bg-gray-800/80 rounded-full overflow-hidden backdrop-blur-sm",
+			className: "flex-1 h-[5px] rounded-full overflow-hidden",
+			style: { background: "var(--color-surface-0)" },
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: `h-full rounded-full transition-all duration-700 ease-out ${context.percent >= 90 ? "bg-red-500" : context.percent >= 70 ? "bg-yellow-500" : "bg-cyan-500"}`,
-				style: { width: `${context.percent}%` }
+				className: "h-full rounded-full transition-all duration-700 ease-out",
+				style: {
+					width: `${context.percent}%`,
+					background: gaugeGradient(context.percent),
+					boxShadow: context.percent >= 70 ? `0 0 6px ${context.percent >= 90 ? "rgba(239,68,68,0.3)" : "rgba(234,179,8,0.25)"}` : "0 0 4px rgba(6,182,212,0.2)"
+				}
 			})
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-			className: "text-[10px] text-gray-500 font-mono tabular-nums w-8 text-right",
+			style: {
+				fontSize: "10px",
+				color: "var(--color-text-muted)",
+				fontFamily: "var(--font-mono)",
+				fontFeatureSettings: "'tnum' 1",
+				width: "32px",
+				textAlign: "right"
+			},
 			children: [context.percent.toFixed(0), "%"]
 		})]
 	});
@@ -12510,29 +13124,53 @@ function TreeNode({ agent, depth, isActive, context, currentTool, selected, onSe
 	const isOrchestrator = agent.subAgents.length > 0;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 		onClick: () => onSelect(agent),
-		className: `w-full text-left px-3 py-2.5 rounded-lg transition-all duration-200 ${selected ? "bg-gray-800/90 ring-1 ring-cyan-500/25 shadow-[0_0_12px_rgba(6,182,212,0.06)]" : "hover:bg-gray-800/40"}`,
-		style: { paddingLeft: `${12 + depth * 20}px` },
+		className: "w-full text-left rounded-lg transition-all duration-200",
+		style: {
+			paddingLeft: `${12 + depth * 20}px`,
+			paddingRight: "12px",
+			paddingTop: "10px",
+			paddingBottom: "10px",
+			background: selected ? "var(--color-surface-2)" : void 0,
+			boxShadow: selected ? "0 0 12px rgba(6,182,212,0.06), inset 0 0 0 1px rgba(6,182,212,0.15)" : void 0
+		},
+		onMouseEnter: (e) => {
+			if (!selected) e.currentTarget.style.background = "var(--color-surface-2)";
+		},
+		onMouseLeave: (e) => {
+			if (!selected) e.currentTarget.style.background = "transparent";
+		},
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex items-center gap-2",
 				children: [
 					isOrchestrator ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Network, {
 						size: 13,
-						className: isActive ? "text-green-400" : "text-cyan-400/70"
+						className: isActive ? "text-green-400" : "",
+						style: isActive ? void 0 : { color: "rgba(6,182,212,0.5)" }
 					}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Cog, {
 						size: 11,
-						className: isActive ? "text-green-400" : "text-gray-600"
+						style: { color: isActive ? "#4ade80" : "var(--color-text-muted)" }
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: `w-2 h-2 rounded-full shrink-0 transition-all duration-500 ${isActive ? "animate-pulse shadow-[0_0_6px_rgba(74,222,128,0.5)]" : ""}`,
-						style: { backgroundColor: isActive ? "#4ade80" : color }
+						className: `w-2 h-2 rounded-full shrink-0 transition-all duration-500 ${isActive ? "animate-pulse" : ""}`,
+						style: {
+							backgroundColor: isActive ? "#4ade80" : color,
+							boxShadow: isActive ? "0 0 6px rgba(74,222,128,0.5)" : void 0
+						}
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: `text-sm font-medium truncate transition-colors ${isActive ? "text-white" : "text-gray-300"}`,
+						className: "text-sm font-medium truncate transition-colors",
+						style: { color: isActive ? "var(--color-text-primary)" : "var(--color-text-secondary)" },
 						children: agent.id
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "ml-auto text-[10px] text-gray-600 font-mono tabular-nums",
+						className: "ml-auto",
+						style: {
+							fontSize: "10px",
+							color: "var(--color-text-muted)",
+							fontFamily: "var(--font-mono)",
+							fontFeatureSettings: "'tnum' 1"
+						},
 						children: model
 					})
 				]
@@ -12540,12 +13178,18 @@ function TreeNode({ agent, depth, isActive, context, currentTool, selected, onSe
 			isActive && context && context.percent > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "ml-6 mt-1",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ContextGauge, { context }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-3 mt-1 text-[10px] text-gray-500 font-mono tabular-nums",
+					className: "flex items-center gap-3 mt-1",
+					style: {
+						fontSize: "10px",
+						color: "var(--color-text-muted)",
+						fontFamily: "var(--font-mono)",
+						fontFeatureSettings: "'tnum' 1"
+					},
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["in ", formatTokens$4(context.tokensIn)] }),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["out ", formatTokens$4(context.tokensOut)] }),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-							className: "text-yellow-500/60",
+							style: { color: "rgba(234,179,8,0.5)" },
 							children: ["$", context.costUsd.toFixed(4)]
 						})
 					]
@@ -12555,9 +13199,14 @@ function TreeNode({ agent, depth, isActive, context, currentTool, selected, onSe
 				className: "flex items-center gap-1.5 ml-6 mt-1.5",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wrench, {
 					size: 9,
-					className: "text-yellow-500/70"
+					style: { color: "rgba(234,179,8,0.6)" }
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-					className: "text-[10px] text-yellow-500/70 font-mono truncate",
+					className: "truncate",
+					style: {
+						fontSize: "10px",
+						color: "rgba(234,179,8,0.6)",
+						fontFamily: "var(--font-mono)"
+					},
 					children: currentTool
 				})]
 			})
@@ -12585,10 +13234,19 @@ function AgentTree({ agents, activeAgents, agentContexts, currentTools, selected
 		});
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "h-full overflow-y-auto bg-gray-950 p-4",
+		className: "h-full overflow-y-auto p-4",
+		style: { background: "var(--color-surface-0)" },
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-				className: "text-[10px] font-semibold text-gray-600 uppercase tracking-[0.12em] mb-3 px-3",
+				className: "mb-3 px-3",
+				style: {
+					fontSize: "10px",
+					fontWeight: 600,
+					color: "var(--color-text-muted)",
+					textTransform: "uppercase",
+					letterSpacing: "0.12em",
+					fontFamily: "var(--font-mono)"
+				},
 				children: "Agent Hierarchy"
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -12601,7 +13259,10 @@ function AgentTree({ agents, activeAgents, agentContexts, currentTools, selected
 							className: "flex items-center",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								onClick: () => toggleCollapse(orch.id),
-								className: "p-1 text-gray-700 hover:text-gray-400 transition-colors",
+								className: "p-1 transition-colors",
+								style: { color: "var(--color-text-muted)" },
+								onMouseEnter: (e) => e.currentTarget.style.color = "var(--color-text-secondary)",
+								onMouseLeave: (e) => e.currentTarget.style.color = "var(--color-text-muted)",
 								children: isCollapsed ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { size: 12 }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { size: 12 })
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 								className: "flex-1 min-w-0",
@@ -12616,7 +13277,8 @@ function AgentTree({ agents, activeAgents, agentContexts, currentTools, selected
 								})
 							})]
 						}), !isCollapsed && subs.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "ml-3 border-l border-gray-800/60",
+							className: "ml-3",
+							style: { borderLeft: "1px solid var(--color-border-subtle)" },
 							children: subs.map((sub) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TreeNode, {
 								agent: sub,
 								depth: 1,
@@ -12628,7 +13290,10 @@ function AgentTree({ agents, activeAgents, agentContexts, currentTools, selected
 							}, sub.id))
 						})] }, orch.id);
 					}),
-					standalones.length > 0 && orchestrators.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "border-t border-gray-800/40 my-3" }),
+					standalones.length > 0 && orchestrators.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "my-3",
+						style: { borderTop: "1px solid var(--color-border-subtle)" }
+					}),
 					standalones.map((a) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TreeNode, {
 						agent: a,
 						depth: 0,
@@ -12641,7 +13306,12 @@ function AgentTree({ agents, activeAgents, agentContexts, currentTools, selected
 				]
 			}),
 			agents.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "text-sm text-gray-700 text-center py-12",
+				className: "text-center py-12",
+				style: {
+					fontSize: "13px",
+					color: "var(--color-text-muted)",
+					fontFamily: "var(--font-mono)"
+				},
 				children: "No agents found"
 			})
 		]
@@ -38383,48 +39053,81 @@ function timeAgo(iso) {
 function SessionList({ sessions, selectedId, onSelect }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "space-y-0.5",
-		children: [sessions.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-			onClick: () => onSelect(s),
-			className: `w-full text-left px-3 py-2 rounded-lg transition-all duration-200 ${selectedId === s.sessionId ? "bg-gray-800/90 ring-1 ring-purple-500/25 shadow-[0_0_12px_rgba(168,85,247,0.04)]" : "hover:bg-gray-800/40"}`,
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-2",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bot, {
-							size: 11,
-							className: s.agentName ? "text-cyan-400/60" : "text-gray-600"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-xs font-medium text-gray-300 truncate",
-							children: s.agentName || "no agent"
-						}),
-						s.model && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-[9px] text-gray-600 font-mono",
-							children: s.model.split("-").pop()
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-							className: "ml-auto text-[10px] text-gray-600 flex items-center gap-1 tabular-nums shrink-0",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { size: 9 }), timeAgo(s.lastActiveAt)]
-						})
-					]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "mt-0.5 text-[11px] text-gray-500 truncate pl-5",
-					children: s.title || s.firstPrompt || s.sessionId.slice(0, 8)
-				}),
-				s.branch && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-1 mt-0.5 pl-5",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(GitBranch, {
-						size: 9,
-						className: "text-gray-700"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-[10px] text-gray-600 truncate",
-						children: s.branch
-					})]
-				})
-			]
-		}, s.sessionId)), sessions.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-			className: "text-xs text-gray-600 text-center py-6",
+		children: [sessions.map((s) => {
+			const selected = selectedId === s.sessionId;
+			return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+				onClick: () => onSelect(s),
+				className: "w-full text-left px-3 py-2 rounded-lg transition-all duration-200",
+				style: {
+					background: selected ? "rgba(168,85,247,0.06)" : void 0,
+					border: selected ? "1px solid rgba(168,85,247,0.15)" : "1px solid transparent",
+					boxShadow: selected ? "0 0 12px rgba(168,85,247,0.04)" : void 0
+				},
+				onMouseEnter: (e) => {
+					if (!selected) e.currentTarget.style.background = "var(--color-surface-2)";
+				},
+				onMouseLeave: (e) => {
+					if (!selected) e.currentTarget.style.background = "transparent";
+				},
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-2",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bot, {
+								size: 11,
+								style: { color: s.agentName ? "rgba(6,182,212,0.5)" : "var(--color-text-muted)" }
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-xs font-medium truncate",
+								style: {
+									color: "var(--color-text-secondary)",
+									fontFamily: "var(--font-mono)"
+								},
+								children: s.agentName || "no agent"
+							}),
+							s.model && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-[9px]",
+								style: {
+									color: "var(--color-text-muted)",
+									fontFamily: "var(--font-mono)"
+								},
+								children: s.model.split("-").pop()
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+								className: "ml-auto text-[10px] flex items-center gap-1 shrink-0",
+								style: {
+									color: "var(--color-text-muted)",
+									fontFamily: "var(--font-mono)",
+									fontVariantNumeric: "tabular-nums"
+								},
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { size: 9 }), timeAgo(s.lastActiveAt)]
+							})
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "mt-0.5 text-[11px] truncate pl-5",
+						style: { color: "var(--color-text-muted)" },
+						children: s.title || s.firstPrompt || s.sessionId.slice(0, 8)
+					}),
+					s.branch && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-1 mt-0.5 pl-5",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(GitBranch, {
+							size: 9,
+							style: { color: "var(--color-border)" }
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-[10px] truncate",
+							style: {
+								color: "var(--color-text-muted)",
+								fontFamily: "var(--font-mono)"
+							},
+							children: s.branch
+						})]
+					})
+				]
+			}, s.sessionId);
+		}), sessions.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+			className: "text-xs text-center py-6",
+			style: { color: "var(--color-text-muted)" },
 			children: "No sessions found"
 		})]
 	});
@@ -38436,14 +39139,29 @@ function formatTokens$2(n) {
 	if (n >= 1e3) return `${(n / 1e3).toFixed(1)}k`;
 	return String(n);
 }
-function SessionViewer({ conversation, loading }) {
+function SessionViewer({ conversation, loading, onResume }) {
 	const scrollRef = (0, import_react.useRef)(null);
+	const [showScrollBtn, setShowScrollBtn] = (0, import_react.useState)(false);
+	const [resumeInput, setResumeInput] = (0, import_react.useState)("");
+	const resumeInputRef = (0, import_react.useRef)(null);
+	const handleScroll = (0, import_react.useCallback)(() => {
+		if (!scrollRef.current) return;
+		const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+		setShowScrollBtn(scrollHeight - scrollTop - clientHeight > 200);
+	}, []);
+	(0, import_react.useEffect)(() => {
+		if (scrollRef.current && conversation) setTimeout(() => {
+			if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+		}, 50);
+	}, [conversation?.sessionId]);
 	if (loading) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "h-full flex items-center justify-center text-gray-500 text-sm",
+		className: "h-full flex items-center justify-center text-sm",
+		style: { color: "var(--color-text-secondary)" },
 		children: "Loading conversation..."
 	});
 	if (!conversation) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "h-full flex items-center justify-center text-gray-700 text-sm",
+		className: "h-full flex items-center justify-center text-sm",
+		style: { color: "var(--color-text-muted)" },
 		children: "Select a session to view"
 	});
 	const scrollTo = (pos) => {
@@ -38451,102 +39169,214 @@ function SessionViewer({ conversation, loading }) {
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "h-full flex flex-col",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "px-6 py-3 border-b border-gray-800/80 flex items-center gap-3",
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bot, {
-					size: 14,
-					className: "text-purple-400"
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-					className: "text-sm font-medium text-white",
-					children: conversation.sessionId.slice(0, 8)
-				}),
-				conversation.model && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-					className: "text-[10px] bg-blue-500/15 text-blue-400 px-1.5 py-0.5 rounded",
-					children: conversation.model
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-					className: "text-[10px] text-gray-500 font-mono tabular-nums ml-auto",
-					children: [
-						formatTokens$2(conversation.totalTokensIn),
-						" in · ",
-						formatTokens$2(conversation.totalTokensOut),
-						" out · ",
-						conversation.messages.length,
-						" msgs"
-					]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-0.5 ml-2",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						onClick: () => scrollTo("top"),
-						className: "p-1 text-gray-600 hover:text-gray-300 transition-colors",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { size: 12 })
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						onClick: () => scrollTo("bottom"),
-						className: "p-1 text-gray-600 hover:text-gray-300 transition-colors",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { size: 12 })
-					})]
-				})
-			]
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			ref: scrollRef,
-			className: "flex-1 overflow-y-auto px-6 py-4 space-y-4 font-mono",
-			children: [conversation.messages.map((msg, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "group",
-				children: msg.role === "user" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-2 mb-0.5",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, {
-						size: 12,
-						className: "text-cyan-400"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-xs text-cyan-400 font-medium",
-						children: "you"
-					})]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", {
-					className: "text-sm text-cyan-300 whitespace-pre-wrap ml-5 leading-relaxed",
-					children: msg.content
-				})] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-2 mb-0.5",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "px-6 py-3 border-b flex items-center gap-3",
+				style: {
+					background: "var(--color-surface-1)",
+					borderColor: "var(--color-border)"
+				},
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bot, {
+						size: 14,
+						style: { color: "#a855f7" }
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-sm font-medium",
+						style: {
+							color: "var(--color-text-primary)",
+							fontFamily: "var(--font-mono)"
+						},
+						children: conversation.sessionId.slice(0, 8)
+					}),
+					conversation.model && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-[10px] px-1.5 py-0.5 rounded",
+						style: {
+							background: "rgba(168,85,247,0.12)",
+							color: "#c4b5fd",
+							border: "1px solid rgba(168,85,247,0.15)",
+							fontFamily: "var(--font-mono)"
+						},
+						children: conversation.model
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+						className: "text-[10px] ml-auto",
+						style: {
+							color: "var(--color-text-muted)",
+							fontFamily: "var(--font-mono)",
+							fontVariantNumeric: "tabular-nums"
+						},
 						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bot, {
-								size: 12,
-								className: "text-gray-400"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "text-xs text-gray-400 font-medium",
-								children: "assistant"
-							}),
-							msg.tokensIn != null && msg.tokensIn > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-								className: "text-[10px] text-gray-600 ml-auto tabular-nums",
-								children: [
-									formatTokens$2(msg.tokensIn),
-									"↓ ",
-									formatTokens$2(msg.tokensOut || 0),
-									"↑"
-								]
-							})
+							formatTokens$2(conversation.totalTokensIn),
+							" in · ",
+							formatTokens$2(conversation.totalTokensOut),
+							" out · ",
+							conversation.messages.length,
+							" msgs"
 						]
 					}),
-					msg.toolNames && msg.toolNames.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "flex flex-wrap gap-1.5 ml-5 mb-1",
-						children: msg.toolNames.map((t, j) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-							className: "flex items-center gap-1 text-[10px] text-yellow-500/60",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wrench, { size: 9 }), t]
-						}, j))
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", {
-						className: "text-sm text-gray-200 whitespace-pre-wrap ml-5 leading-relaxed",
-						children: msg.content
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-0.5 ml-2",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							onClick: () => scrollTo("top"),
+							className: "p-1 rounded transition-colors",
+							style: { color: "var(--color-text-muted)" },
+							onMouseEnter: (e) => (e.currentTarget.style.color = "var(--color-text-secondary)", e.currentTarget.style.background = "var(--color-surface-2)"),
+							onMouseLeave: (e) => (e.currentTarget.style.color = "var(--color-text-muted)", e.currentTarget.style.background = "transparent"),
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowUp, { size: 12 })
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							onClick: () => scrollTo("bottom"),
+							className: "p-1 rounded transition-colors",
+							style: { color: "var(--color-text-muted)" },
+							onMouseEnter: (e) => (e.currentTarget.style.color = "var(--color-text-secondary)", e.currentTarget.style.background = "var(--color-surface-2)"),
+							onMouseLeave: (e) => (e.currentTarget.style.color = "var(--color-text-muted)", e.currentTarget.style.background = "transparent"),
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowDown, { size: 12 })
+						})]
 					})
-				] })
-			}, i)), conversation.messages.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "text-gray-600 text-sm text-center py-8",
-				children: "No messages in this session"
-			})]
-		})]
+				]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "relative flex-1 min-h-0",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					ref: scrollRef,
+					onScroll: handleScroll,
+					className: "h-full overflow-y-auto px-6 py-4 space-y-4 font-mono",
+					children: [conversation.messages.map((msg, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "group",
+						children: msg.role === "user" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center gap-2 mb-0.5",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, {
+								size: 12,
+								style: { color: "var(--color-accent)" }
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-xs font-medium",
+								style: { color: "var(--color-accent)" },
+								children: "you"
+							})]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", {
+							className: "text-sm whitespace-pre-wrap ml-5 leading-relaxed",
+							style: { color: "#67e8f9" },
+							children: renderContentWithImages(msg.content)
+						})] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center gap-2 mb-0.5",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bot, {
+										size: 12,
+										style: { color: "var(--color-text-secondary)" }
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "text-xs font-medium",
+										style: { color: "var(--color-text-secondary)" },
+										children: "assistant"
+									}),
+									msg.tokensIn != null && msg.tokensIn > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+										className: "text-[10px] ml-auto",
+										style: {
+											color: "var(--color-text-muted)",
+											fontVariantNumeric: "tabular-nums"
+										},
+										children: [
+											formatTokens$2(msg.tokensIn),
+											"↓ ",
+											formatTokens$2(msg.tokensOut || 0),
+											"↑"
+										]
+									})
+								]
+							}),
+							msg.toolNames && msg.toolNames.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "flex flex-wrap gap-1.5 ml-5 mb-1",
+								children: msg.toolNames.map((t, j) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+									className: "flex items-center gap-1 text-[10px]",
+									style: { color: "rgba(250,204,21,0.5)" },
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wrench, { size: 9 }), t]
+								}, j))
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", {
+								className: "text-sm whitespace-pre-wrap ml-5 leading-relaxed",
+								style: { color: "var(--color-text-primary)" },
+								children: renderContentWithImages(msg.content)
+							})
+						] })
+					}, i)), conversation.messages.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-sm text-center py-8",
+						style: { color: "var(--color-text-muted)" },
+						children: "No messages in this session"
+					})]
+				}), showScrollBtn && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					onClick: () => {
+						scrollRef.current?.scrollTo({
+							top: scrollRef.current.scrollHeight,
+							behavior: "smooth"
+						});
+					},
+					className: "absolute bottom-4 right-4 p-2 rounded-full shadow-lg transition-all hover:scale-110",
+					style: {
+						background: "var(--color-surface-2)",
+						border: "1px solid var(--color-border)",
+						color: "var(--color-text-secondary)"
+					},
+					title: "Scroll to bottom",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronsDown, { size: 16 })
+				})]
+			}),
+			onResume && conversation && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "px-4 py-3 border-t",
+				style: {
+					borderColor: "var(--color-border)",
+					background: "var(--color-surface-1)"
+				},
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex gap-2 items-end",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "flex items-center text-sm shrink-0 pt-1.5",
+							style: { color: "var(--color-accent)" },
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { size: 14 })
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", {
+							ref: resumeInputRef,
+							value: resumeInput,
+							onChange: (e) => setResumeInput(e.target.value),
+							onKeyDown: (e) => {
+								if (e.key === "Enter" && !e.shiftKey) {
+									e.preventDefault();
+									if (resumeInput.trim()) {
+										onResume(conversation.sessionId, resumeInput.trim());
+										setResumeInput("");
+									}
+								}
+							},
+							placeholder: "Continue this session...",
+							rows: 1,
+							className: "flex-1 bg-transparent text-sm resize-none focus:outline-none placeholder-gray-700 leading-relaxed",
+							style: {
+								color: "var(--color-text-primary)",
+								fontFamily: "var(--font-mono)"
+							},
+							onInput: (e) => {
+								const el = e.currentTarget;
+								el.style.height = "auto";
+								el.style.height = Math.min(el.scrollHeight, 120) + "px";
+							}
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							onClick: () => {
+								if (resumeInput.trim()) {
+									onResume(conversation.sessionId, resumeInput.trim());
+									setResumeInput("");
+								}
+							},
+							disabled: !resumeInput.trim(),
+							className: "p-1.5 transition-colors shrink-0",
+							style: { color: resumeInput.trim() ? "var(--color-accent)" : "var(--color-text-muted)" },
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, { size: 16 })
+						})
+					]
+				})
+			})
+		]
 	});
 }
 //#endregion
@@ -38563,21 +39393,42 @@ function Accordion({ label, icon, count, defaultOpen = false, open: controlledOp
 		className: `${isOpen && flex ? "flex-1 min-h-0 flex flex-col" : ""}`,
 		style: isOpen && flex ? void 0 : { flex: "none" },
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "flex items-center border-b border-gray-800/50 shrink-0",
+			className: "flex items-center shrink-0",
+			style: {
+				borderBottom: "1px solid var(--color-border-subtle)",
+				borderLeft: isOpen ? "2px solid var(--color-accent)" : "2px solid transparent",
+				transition: "border-color 0.2s ease"
+			},
 			onMouseEnter: () => setHovered(true),
 			onMouseLeave: () => setHovered(false),
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 				onClick: handleToggle,
-				className: "flex-1 flex items-center gap-2 px-2 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-300 hover:bg-gray-800/50 transition-colors",
+				className: "flex-1 flex items-center gap-2 px-2 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors",
+				style: {
+					color: hovered ? "var(--color-text-primary)" : "var(--color-text-muted)",
+					background: hovered ? "var(--color-surface-2)" : "transparent",
+					fontFamily: "var(--font-sans)"
+				},
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, {
 						size: 11,
-						className: `transition-transform shrink-0 ${isOpen ? "rotate-90" : ""}`
+						className: "shrink-0",
+						style: {
+							transform: isOpen ? "rotate(90deg)" : "rotate(0deg)",
+							transition: "transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+						}
 					}),
 					icon,
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: label }),
 					count !== void 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-gray-600 font-normal normal-case",
+						style: {
+							fontFamily: "var(--font-mono)",
+							fontFeatureSettings: "'tnum' 1",
+							color: "var(--color-text-muted)",
+							fontSize: "10px",
+							fontWeight: 400,
+							textTransform: "none"
+						},
 						children: count
 					})
 				]
@@ -38586,7 +39437,8 @@ function Accordion({ label, icon, count, defaultOpen = false, open: controlledOp
 					e.stopPropagation();
 					onRefresh();
 				},
-				className: "p-1 mr-1 text-gray-500 hover:text-gray-200 transition-colors",
+				className: "p-1 mr-1 transition-colors",
+				style: { color: hovered ? "var(--color-text-secondary)" : "var(--color-text-muted)" },
 				title: `Refresh ${label.toLowerCase()}`,
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { size: 11 })
 			})]
@@ -38704,6 +39556,18 @@ function ItemContextMenu({ isFavorite, onToggleFavorite }) {
 }
 //#endregion
 //#region src/components/ProjectDashboard.tsx
+if (typeof document !== "undefined" && !document.getElementById("chat-animations")) {
+	const style = document.createElement("style");
+	style.id = "chat-animations";
+	style.textContent = `
+    @keyframes chatSlideIn {
+      0% { opacity: 0; transform: translateX(-16px); max-height: 0; }
+      50% { max-height: 40px; }
+      100% { opacity: 1; transform: translateX(0); max-height: 40px; }
+    }
+  `;
+	document.head.appendChild(style);
+}
 var colorMap = {
 	cyan: "bg-cyan-500",
 	blue: "bg-blue-500",
@@ -39107,15 +39971,65 @@ function SkillFiles({ skill }) {
 		}, f.name))
 	});
 }
-function ProjectDashboard({ project, agents, skills, hooks, activeAgents, agentContexts, currentTools, onRefresh }) {
+function ProjectDashboard({ project, agents, skills, hooks, activeAgents, agentContexts, currentTools, waitingAgents, onRefresh }) {
 	const [view, setView] = (0, import_react.useState)("none");
 	const [selectedAgent, setSelectedAgent] = (0, import_react.useState)(null);
 	const [selectedSkill, setSelectedSkill] = (0, import_react.useState)(null);
-	const [openPanels, setOpenPanels] = (0, import_react.useState)(() => new Set(["agents", "sessions"]));
+	const [openPanels, setOpenPanels] = (0, import_react.useState)(() => /* @__PURE__ */ new Set());
 	const [scopeTab, setScopeTab] = (0, import_react.useState)("project");
 	const [selectedSessionId, setSelectedSessionId] = (0, import_react.useState)(null);
 	const { isFavorite, toggle: toggleFavorite } = useFavorites(project.id);
 	const { sessions, loading: sessionsLoading, conversation, conversationLoading, selectSession } = useSessions(project.path);
+	const [resumeChat, setResumeChat] = (0, import_react.useState)(null);
+	const [openChats, setOpenChats] = (0, import_react.useState)([]);
+	const chatIdCounter = (0, import_react.useRef)(0);
+	const pendingTitles = (0, import_react.useRef)(/* @__PURE__ */ new Map());
+	const addOpenChat = (0, import_react.useCallback)((agentName, title) => {
+		const id = `chat-${++chatIdCounter.current}-${Date.now()}`;
+		setOpenChats((prev) => [{
+			id,
+			agentName,
+			title,
+			createdAt: Date.now(),
+			isNew: true
+		}, ...prev]);
+		setTimeout(() => {
+			setOpenChats((prev) => prev.map((c) => c.id === id ? {
+				...c,
+				isNew: false
+			} : c));
+		}, 600);
+		return id;
+	}, []);
+	(0, import_react.useEffect)(() => {
+		return window.api.onEvent((data) => {
+			if (data.type === "spawn_message" && data.message?.content) {
+				const agent = data.agentName || "";
+				const role = data.message.role;
+				const content = data.message.content;
+				if (role === "user") setOpenChats((prev) => {
+					if (!prev.some((c) => (c.agentName === agent || c.agentName === "claude") && (c.title === "New chat" || c.title.startsWith("Chat with "))) || pendingTitles.current.has(agent)) return prev;
+					pendingTitles.current.set(agent, content);
+					let preview = content.replace(/[\n\r]+/g, " ").trim();
+					if (preview.length > 40) preview = preview.slice(0, 37) + "...";
+					return prev.map((c) => (c.agentName === agent || c.agentName === "claude") && (c.title === "New chat" || c.title.startsWith("Chat with ")) ? {
+						...c,
+						title: preview
+					} : c);
+				});
+				if (role === "assistant" && pendingTitles.current.has(agent)) {
+					const userMsg = pendingTitles.current.get(agent);
+					pendingTitles.current.delete(agent);
+					window.api.generateTitle(userMsg, content).then((title) => {
+						if (title) setOpenChats((prev) => prev.map((c) => c.agentName === agent || c.agentName === "claude" ? {
+							...c,
+							title
+						} : c));
+					});
+				}
+			}
+		});
+	}, []);
 	const togglePanel = (panel) => {
 		setOpenPanels((prev) => {
 			const next = new Set(prev);
@@ -39124,6 +40038,26 @@ function ProjectDashboard({ project, agents, skills, hooks, activeAgents, agentC
 			return next;
 		});
 	};
+	const [sidebarWidth, setSidebarWidth] = (0, import_react.useState)(288);
+	const sidebarRef = (0, import_react.useRef)(null);
+	const isDragging = (0, import_react.useRef)(false);
+	(0, import_react.useEffect)(() => {
+		const onMouseMove = (e) => {
+			if (!isDragging.current) return;
+			setSidebarWidth(Math.min(Math.max(e.clientX, 200), 500));
+		};
+		const onMouseUp = () => {
+			isDragging.current = false;
+			document.body.style.cursor = "";
+			document.body.style.userSelect = "";
+		};
+		document.addEventListener("mousemove", onMouseMove);
+		document.addEventListener("mouseup", onMouseUp);
+		return () => {
+			document.removeEventListener("mousemove", onMouseMove);
+			document.removeEventListener("mouseup", onMouseUp);
+		};
+	}, []);
 	const isUserProject = project.id === "user";
 	const projectAgents = agents.filter((a) => a.scope === "project" || a.scope === "user" && a.linked);
 	const userAgents = agents.filter((a) => a.scope === "user" && !a.linked);
@@ -39172,218 +40106,459 @@ function ProjectDashboard({ project, agents, skills, hooks, activeAgents, agentC
 		setSelectedAgent(null);
 		setView("skill");
 	};
+	const handleSessionResume = (sessionId, message) => {
+		const session = sessions.find((s) => s.sessionId === sessionId);
+		const agentName = session?.agentName || "claude";
+		addOpenChat(agentName, `Resume: ${session?.title || agentName}`);
+		setResumeChat({
+			agentName,
+			sessionId,
+			message
+		});
+		setView("chat");
+	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "flex-1 flex h-full",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "w-72 border-r border-gray-800 bg-gray-900/30 flex flex-col h-full",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			ref: sidebarRef,
+			className: "flex flex-col h-full shrink-0 relative",
+			style: {
+				width: `${sidebarWidth}px`,
+				background: "var(--color-surface-1)",
+				borderRight: "1px solid var(--color-border)"
+			},
 			children: [
-				hasFavorites ? {
-					key: "favorites",
-					label: "Favorites",
-					icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, {
-						size: 11,
-						className: "text-yellow-400"
-					}),
-					count: favAgents.length + favSkills.length + favHooks.length,
-					content: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-						favAgents.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SectionLabel, {
-							icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bot, {
-								size: 10,
-								className: "text-cyan-400"
-							}),
-							label: "Agents"
-						}), renderAgentList(favAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, void 0, void 0, (n) => isFavorite("agent", n), activeAgents, agentContexts)] }),
-						favSkills.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SectionLabel, {
-							icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wrench, {
-								size: 10,
-								className: "text-green-400"
-							}),
-							label: "Skills"
-						}), favSkills.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SkillRow, {
-							skill: s,
-							selected: selectedSkill?.filePath === s.filePath,
-							isFavorite: true,
-							onSelect: handleSelectSkill,
-							onToggleFavorite: () => toggleFavorite("skill", s.name)
-						}, s.filePath))] }),
-						favHooks.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SectionLabel, {
-							icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Settings, {
-								size: 10,
+				activeAgents.size > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "px-3 pt-3 pb-2",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-2 mb-2 px-1",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-[10px] font-semibold uppercase tracking-widest",
+							style: {
+								color: "var(--color-text-muted)",
+								fontFamily: "var(--font-mono)"
+							},
+							children: "Active"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-[10px] px-1.5 py-0.5 rounded-full",
+							style: {
+								background: "var(--color-surface-2)",
+								color: "var(--color-text-muted)"
+							},
+							children: activeAgents.size
+						})]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "space-y-0.5",
+						children: Array.from(activeAgents).map((agentName) => {
+							const agent = agents.find((a) => a.frontmatter.name === agentName || a.id === agentName);
+							const ctx = agentContexts.get(agentName);
+							const isWaiting = waitingAgents?.has(agentName);
+							const dotColor = {
+								cyan: "#06b6d4",
+								blue: "#3b82f6",
+								green: "#22c55e",
+								yellow: "#eab308",
+								orange: "#f97316",
+								red: "#ef4444",
+								purple: "#a855f7",
+								pink: "#ec4899"
+							}[agent?.frontmatter?.color || ""] || "#06b6d4";
+							return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+								onClick: () => {
+									if (agent) {
+										setSelectedAgent(agent);
+										setSelectedSkill(null);
+										setView("agent");
+									}
+								},
+								className: "w-full flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors",
+								style: { background: "transparent" },
+								onMouseEnter: (e) => e.currentTarget.style.background = "var(--color-surface-2)",
+								onMouseLeave: (e) => e.currentTarget.style.background = "transparent",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "w-2 h-2 rounded-full shrink-0",
+										style: {
+											backgroundColor: isWaiting ? "#eab308" : dotColor,
+											boxShadow: `0 0 6px ${isWaiting ? "rgba(234,179,8,0.5)" : dotColor + "80"}`,
+											animation: isWaiting ? "pulse 0.6s ease-in-out infinite" : "pulse 1s ease-in-out infinite"
+										}
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "text-xs font-medium truncate",
+										style: {
+											color: "var(--color-text-primary)",
+											fontFamily: "var(--font-mono)"
+										},
+										children: agentName
+									}),
+									isWaiting && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "text-[9px] px-1 py-0.5 rounded shrink-0",
+										style: {
+											background: "rgba(234,179,8,0.15)",
+											color: "#eab308",
+											border: "1px solid rgba(234,179,8,0.2)"
+										},
+										children: "awaiting"
+									}),
+									ctx && ctx.percent > 0 && !isWaiting && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex-1 flex items-center gap-1.5 ml-auto min-w-0",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: "flex-1 h-[3px] rounded-full overflow-hidden",
+											style: {
+												background: "var(--color-surface-0)",
+												minWidth: "30px"
+											},
+											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+												className: "h-full rounded-full transition-all duration-700",
+												style: {
+													width: `${ctx.percent}%`,
+													background: ctx.percent >= 90 ? "#ef4444" : ctx.percent >= 70 ? "#eab308" : dotColor
+												}
+											})
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+											className: "text-[9px] shrink-0",
+											style: {
+												color: "var(--color-text-muted)",
+												fontFamily: "var(--font-mono)"
+											},
+											children: [Math.round(ctx.percent), "%"]
+										})]
+									})
+								]
+							}, agentName);
+						})
+					})]
+				}),
+				openChats.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "px-3 pb-2",
+					style: { borderBottom: "1px solid var(--color-border-subtle)" },
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "flex items-center gap-2 mb-1.5 px-1",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-[10px] font-semibold uppercase tracking-widest",
+							style: {
+								color: "var(--color-text-muted)",
+								fontFamily: "var(--font-mono)"
+							},
+							children: "Chats"
+						})
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "space-y-0.5",
+						children: openChats.map((chat) => {
+							const colorHex = {
+								cyan: "#06b6d4",
+								blue: "#3b82f6",
+								green: "#22c55e",
+								yellow: "#eab308",
+								orange: "#f97316",
+								red: "#ef4444",
+								purple: "#a855f7",
+								pink: "#ec4899"
+							};
+							const agent = agents.find((a) => a.frontmatter.name === chat.agentName || a.id === chat.agentName);
+							const dotColor = colorHex[agent?.frontmatter?.color || ""] || "#06b6d4";
+							const isActive = activeAgents.has(chat.agentName);
+							return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+								onClick: () => {
+									if (agent) {
+										setSelectedAgent(agent);
+										setSelectedSkill(null);
+										setView("agent");
+									}
+								},
+								className: "w-full flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors text-left",
+								style: {
+									background: "transparent",
+									animation: chat.isNew ? "chatSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1)" : void 0
+								},
+								onMouseEnter: (e) => e.currentTarget.style.background = "var(--color-surface-2)",
+								onMouseLeave: (e) => e.currentTarget.style.background = "transparent",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageSquare, {
+										size: 12,
+										style: { color: dotColor },
+										className: "shrink-0"
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "text-xs truncate",
+										style: {
+											color: "var(--color-text-primary)",
+											fontFamily: "var(--font-mono)"
+										},
+										children: chat.title
+									}),
+									isActive && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "w-1.5 h-1.5 rounded-full shrink-0 ml-auto",
+										style: {
+											backgroundColor: dotColor,
+											animation: "pulse 1s ease-in-out infinite"
+										}
+									})
+								]
+							}, chat.id);
+						})
+					})]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex-1 flex flex-col min-h-0",
+					children: [!openPanels.size && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "flex-1" }), [
+						hasFavorites ? {
+							key: "favorites",
+							label: "Favorites",
+							icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, {
+								size: 11,
 								className: "text-yellow-400"
 							}),
-							label: "Hooks"
-						}), favHooks.map((h, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HookRow, {
-							hook: h,
-							isFavorite: true,
-							onToggleFavorite: () => toggleFavorite("hook", `${h.event}:${h.matcher}`)
-						}, i))] })
-					] })
-				} : null,
-				{
-					key: "agents",
-					label: "Agents",
-					icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bot, {
-						size: 11,
-						className: "text-cyan-400"
-					}),
-					count: agents.length,
-					content: isUserProject ? renderAgentList(agents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, void 0, void 0, (n) => isFavorite("agent", n), activeAgents, agentContexts) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-0.5 px-2 mb-2",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-							onClick: () => setScopeTab("project"),
-							className: `flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-md transition-colors ${scopeTab === "project" ? "bg-cyan-500/15 text-cyan-400 shadow-[inset_0_0_8px_rgba(6,182,212,0.08)]" : "text-gray-500 hover:text-gray-300 hover:bg-gray-800/60"}`,
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Globe, { size: 10 }),
-								"Project",
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "text-[10px] tabular-nums opacity-60",
-									children: projectAgents.length
-								})
-							]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-							onClick: () => setScopeTab("user"),
-							className: `flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-md transition-colors ${scopeTab === "user" ? "bg-yellow-500/12 text-yellow-400 shadow-[inset_0_0_8px_rgba(234,179,8,0.06)]" : "text-gray-500 hover:text-gray-300 hover:bg-gray-800/60"}`,
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(User, { size: 10 }),
-								"User",
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "text-[10px] tabular-nums opacity-60",
-									children: userAgents.length
-								})
-							]
-						})]
-					}), scopeTab === "project" ? projectAgents.length > 0 ? renderAgentList(projectAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, (name) => handleToggleLink(name, true), "unlink", (n) => isFavorite("agent", n), activeAgents, agentContexts) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "px-3 py-6 text-center",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-xs text-gray-500 mb-1.5",
-							children: "No project agents"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-							className: "text-[10px] text-gray-600 leading-relaxed",
-							children: ["Link user agents or create agents in ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", {
-								className: "text-cyan-500/80 bg-cyan-500/8 px-1 py-0.5 rounded",
-								children: ".claude/agents/"
-							})]
-						})]
-					}) : userAgents.length > 0 ? renderAgentList(userAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, (name) => handleToggleLink(name, false), "link", (n) => isFavorite("agent", n), activeAgents, agentContexts) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "px-3 py-6 text-xs text-gray-500 text-center",
-						children: "No user agents"
-					})] })
-				},
-				projectSkills.length > 0 || userSkills.length > 0 ? {
-					key: "skills",
-					label: "Skills",
-					icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wrench, {
-						size: 11,
-						className: "text-green-400"
-					}),
-					count: projectSkills.length + userSkills.length,
-					content: isUserProject ? skills.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SkillRow, {
-						skill: s,
-						selected: selectedSkill?.filePath === s.filePath,
-						isFavorite: isFavorite("skill", s.name),
-						onSelect: handleSelectSkill,
-						onToggleFavorite: () => toggleFavorite("skill", s.name)
-					}, s.filePath)) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [projectSkills.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SectionLabel, {
-						icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Globe, {
-							size: 10,
-							className: "text-cyan-400"
-						}),
-						label: "Project"
-					}), projectSkills.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SkillRow, {
-						skill: s,
-						selected: selectedSkill?.filePath === s.filePath,
-						isFavorite: isFavorite("skill", s.name),
-						onSelect: handleSelectSkill,
-						onToggleFavorite: () => toggleFavorite("skill", s.name)
-					}, s.filePath))] }), userSkills.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SectionLabel, {
-						icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(User, {
-							size: 10,
-							className: "text-gray-500"
-						}),
-						label: "User"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "opacity-60",
-						children: userSkills.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SkillRow, {
-							skill: s,
-							selected: selectedSkill?.filePath === s.filePath,
-							isFavorite: isFavorite("skill", s.name),
-							onSelect: handleSelectSkill,
-							onToggleFavorite: () => toggleFavorite("skill", s.name)
-						}, s.filePath))
-					})] })] })
-				} : null,
-				{
-					key: "sessions",
-					label: "Sessions",
-					icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(History, {
-						size: 11,
-						className: "text-purple-400"
-					}),
-					count: sessions.length,
-					content: sessionsLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "text-xs text-gray-600 text-center py-4",
-						children: "Loading sessions..."
-					}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SessionList, {
-						sessions,
-						selectedId: selectedSessionId,
-						onSelect: (s) => {
-							setSelectedSessionId(s.sessionId);
-							selectSession(s.filePath);
-							setSelectedAgent(null);
-							setSelectedSkill(null);
-							setView("session");
-						}
-					})
-				},
-				hooks.length > 0 ? {
-					key: "hooks",
-					label: "Hooks",
-					icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Settings, {
-						size: 11,
-						className: "text-yellow-400"
-					}),
-					count: hooks.length,
-					content: hooks.map((h, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HookRow, {
-						hook: h,
-						isFavorite: isFavorite("hook", `${h.event}:${h.matcher}`),
-						onToggleFavorite: () => toggleFavorite("hook", `${h.event}:${h.matcher}`)
-					}, i))
-				} : null
-			].filter(Boolean).sort((a, b) => {
-				if (a.key === "favorites") return -1;
-				if (b.key === "favorites") return 1;
-				return (openPanels.has(a.key) ? 0 : 1) - (openPanels.has(b.key) ? 0 : 1);
-			}).map((panel) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Accordion, {
-				label: panel.label,
-				icon: panel.icon,
-				count: panel.count,
-				open: openPanels.has(panel.key),
-				onToggle: () => togglePanel(panel.key),
-				onRefresh,
-				flex: true,
-				children: panel.content
-			}, panel.key))
+							count: favAgents.length + favSkills.length + favHooks.length,
+							content: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+								favAgents.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SectionLabel, {
+									icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bot, {
+										size: 10,
+										className: "text-cyan-400"
+									}),
+									label: "Agents"
+								}), renderAgentList(favAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, void 0, void 0, (n) => isFavorite("agent", n), activeAgents, agentContexts)] }),
+								favSkills.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SectionLabel, {
+									icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wrench, {
+										size: 10,
+										className: "text-green-400"
+									}),
+									label: "Skills"
+								}), favSkills.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SkillRow, {
+									skill: s,
+									selected: selectedSkill?.filePath === s.filePath,
+									isFavorite: true,
+									onSelect: handleSelectSkill,
+									onToggleFavorite: () => toggleFavorite("skill", s.name)
+								}, s.filePath))] }),
+								favHooks.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SectionLabel, {
+									icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Settings, {
+										size: 10,
+										className: "text-yellow-400"
+									}),
+									label: "Hooks"
+								}), favHooks.map((h, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HookRow, {
+									hook: h,
+									isFavorite: true,
+									onToggleFavorite: () => toggleFavorite("hook", `${h.event}:${h.matcher}`)
+								}, i))] })
+							] })
+						} : null,
+						{
+							key: "agents",
+							label: "Agents",
+							icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bot, {
+								size: 11,
+								className: "text-cyan-400"
+							}),
+							count: agents.length,
+							content: isUserProject ? renderAgentList(agents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, void 0, void 0, (n) => isFavorite("agent", n), activeAgents, agentContexts) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center gap-px px-2 mb-2 p-0.5 rounded-lg",
+								style: {
+									background: "var(--color-surface-0)",
+									border: "1px solid var(--color-border-subtle)"
+								},
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+									onClick: () => setScopeTab("project"),
+									className: "flex-1 flex items-center justify-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-md transition-all duration-200",
+									style: scopeTab === "project" ? {
+										background: "var(--color-accent-dim)",
+										color: "var(--color-accent)",
+										boxShadow: "inset 0 0 8px rgba(6,182,212,0.08)"
+									} : { color: "var(--color-text-muted)" },
+									children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Globe, { size: 10 }),
+										"Project",
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											style: {
+												fontFamily: "var(--font-mono)",
+												fontFeatureSettings: "'tnum' 1",
+												fontSize: "10px",
+												opacity: .6
+											},
+											children: projectAgents.length
+										})
+									]
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+									onClick: () => setScopeTab("user"),
+									className: "flex-1 flex items-center justify-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-md transition-all duration-200",
+									style: scopeTab === "user" ? {
+										background: "rgba(234, 179, 8, 0.1)",
+										color: "#eab308",
+										boxShadow: "inset 0 0 8px rgba(234,179,8,0.06)"
+									} : { color: "var(--color-text-muted)" },
+									children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)(User, { size: 10 }),
+										"User",
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											style: {
+												fontFamily: "var(--font-mono)",
+												fontFeatureSettings: "'tnum' 1",
+												fontSize: "10px",
+												opacity: .6
+											},
+											children: userAgents.length
+										})
+									]
+								})]
+							}), scopeTab === "project" ? projectAgents.length > 0 ? renderAgentList(projectAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, (name) => handleToggleLink(name, true), "unlink", (n) => isFavorite("agent", n), activeAgents, agentContexts) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "px-3 py-6 text-center",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-xs text-gray-500 mb-1.5",
+									children: "No project agents"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+									className: "text-[10px] text-gray-600 leading-relaxed",
+									children: ["Link user agents or create agents in ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", {
+										className: "text-cyan-500/80 bg-cyan-500/8 px-1 py-0.5 rounded",
+										children: ".claude/agents/"
+									})]
+								})]
+							}) : userAgents.length > 0 ? renderAgentList(userAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, (name) => handleToggleLink(name, false), "link", (n) => isFavorite("agent", n), activeAgents, agentContexts) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "px-3 py-6 text-xs text-gray-500 text-center",
+								children: "No user agents"
+							})] })
+						},
+						projectSkills.length > 0 || userSkills.length > 0 ? {
+							key: "skills",
+							label: "Skills",
+							icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wrench, {
+								size: 11,
+								className: "text-green-400"
+							}),
+							count: projectSkills.length + userSkills.length,
+							content: isUserProject ? skills.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SkillRow, {
+								skill: s,
+								selected: selectedSkill?.filePath === s.filePath,
+								isFavorite: isFavorite("skill", s.name),
+								onSelect: handleSelectSkill,
+								onToggleFavorite: () => toggleFavorite("skill", s.name)
+							}, s.filePath)) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [projectSkills.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SectionLabel, {
+								icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Globe, {
+									size: 10,
+									className: "text-cyan-400"
+								}),
+								label: "Project"
+							}), projectSkills.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SkillRow, {
+								skill: s,
+								selected: selectedSkill?.filePath === s.filePath,
+								isFavorite: isFavorite("skill", s.name),
+								onSelect: handleSelectSkill,
+								onToggleFavorite: () => toggleFavorite("skill", s.name)
+							}, s.filePath))] }), userSkills.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SectionLabel, {
+								icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(User, {
+									size: 10,
+									className: "text-gray-500"
+								}),
+								label: "User"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "opacity-60",
+								children: userSkills.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SkillRow, {
+									skill: s,
+									selected: selectedSkill?.filePath === s.filePath,
+									isFavorite: isFavorite("skill", s.name),
+									onSelect: handleSelectSkill,
+									onToggleFavorite: () => toggleFavorite("skill", s.name)
+								}, s.filePath))
+							})] })] })
+						} : null,
+						{
+							key: "sessions",
+							label: "Sessions",
+							icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(History, {
+								size: 11,
+								className: "text-purple-400"
+							}),
+							count: sessions.length,
+							content: sessionsLoading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-xs text-gray-600 text-center py-4",
+								children: "Loading sessions..."
+							}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SessionList, {
+								sessions,
+								selectedId: selectedSessionId,
+								onSelect: (s) => {
+									setSelectedSessionId(s.sessionId);
+									selectSession(s.filePath);
+									setSelectedAgent(null);
+									setSelectedSkill(null);
+									setView("session");
+								}
+							})
+						},
+						hooks.length > 0 ? {
+							key: "hooks",
+							label: "Hooks",
+							icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Settings, {
+								size: 11,
+								className: "text-yellow-400"
+							}),
+							count: hooks.length,
+							content: hooks.map((h, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HookRow, {
+								hook: h,
+								isFavorite: isFavorite("hook", `${h.event}:${h.matcher}`),
+								onToggleFavorite: () => toggleFavorite("hook", `${h.event}:${h.matcher}`)
+							}, i))
+						} : null
+					].filter(Boolean).map((panel) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Accordion, {
+						label: panel.label,
+						icon: panel.icon,
+						count: panel.count,
+						open: openPanels.has(panel.key),
+						onToggle: () => togglePanel(panel.key),
+						onRefresh,
+						flex: true,
+						children: panel.content
+					}, panel.key))]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-cyan-500/30 transition-colors",
+					onMouseDown: (e) => {
+						e.preventDefault();
+						isDragging.current = true;
+						document.body.style.cursor = "col-resize";
+						document.body.style.userSelect = "none";
+					}
+				})
+			]
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "flex-1 flex flex-col",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex items-center gap-1 px-4 py-2 border-b border-gray-800 bg-gray-900/30",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "flex items-center gap-1 px-4 py-2",
+				style: {
+					borderBottom: "1px solid var(--color-border)",
+					background: "var(--color-surface-1)"
+				},
 				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-						onClick: () => setView("tree"),
-						className: `flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${view === "tree" ? "bg-gray-700 text-white" : "text-gray-500 hover:text-gray-300 hover:bg-gray-800"}`,
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(GitBranch, { size: 13 }), "Tree"]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-						onClick: () => setView("session"),
-						className: `flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${view === "session" ? "bg-gray-700 text-white" : "text-gray-500 hover:text-gray-300 hover:bg-gray-800"}`,
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(History, { size: 13 }), "Sessions"]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-						onClick: () => setView("costs"),
-						className: `flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${view === "costs" ? "bg-gray-700 text-white" : "text-gray-500 hover:text-gray-300 hover:bg-gray-800"}`,
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChartColumn, { size: 13 }), "Costs"]
-					})
-				]
+					{
+						key: "tree",
+						icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GitBranch, { size: 13 }),
+						label: "Tree"
+					},
+					{
+						key: "session",
+						icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(History, { size: 13 }),
+						label: "Sessions"
+					},
+					{
+						key: "costs",
+						icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChartColumn, { size: 13 }),
+						label: "Costs"
+					}
+				].map((tab) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+					onClick: () => setView(tab.key),
+					className: "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200",
+					style: {
+						fontFamily: "var(--font-mono)",
+						fontSize: "11px",
+						letterSpacing: "0.02em",
+						...view === tab.key ? {
+							background: "var(--color-surface-3)",
+							color: "var(--color-text-primary)",
+							boxShadow: "0 0 8px rgba(6, 182, 212, 0.06)"
+						} : { color: "var(--color-text-muted)" }
+					},
+					children: [tab.icon, tab.label]
+				}, tab.key))
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 				className: "flex-1 min-h-0 overflow-hidden",
 				children: view === "agent" && selectedAgent ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AgentDetail, {
@@ -39407,10 +40582,227 @@ function ProjectDashboard({ project, agents, skills, hooks, activeAgents, agentC
 					onSelect: handleSelectAgent
 				}) : view === "session" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SessionViewer, {
 					conversation,
-					loading: conversationLoading
+					loading: conversationLoading,
+					onResume: handleSessionResume
+				}) : view === "chat" && resumeChat ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AgentChat, {
+					agentName: resumeChat.agentName,
+					resumeSessionId: resumeChat.sessionId,
+					initialMessage: resumeChat.message
 				}) : view === "costs" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CostDashboard, {}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "h-full flex items-center justify-center text-gray-500 text-sm",
-					children: "Select an item from the sidebar"
+					className: "h-full overflow-y-auto",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "max-w-2xl mx-auto px-8 py-10 space-y-8",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+								className: "text-lg font-semibold",
+								style: { color: "var(--color-text-primary)" },
+								children: project.name || project.id
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-xs mt-1",
+								style: {
+									color: "var(--color-text-muted)",
+									fontFamily: "var(--font-mono)"
+								},
+								children: project.path
+							})] }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+								onClick: () => {
+									addOpenChat("claude", "New chat");
+									setResumeChat({
+										agentName: "claude",
+										sessionId: "",
+										message: ""
+									});
+									setView("chat");
+								},
+								className: "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
+								style: {
+									background: "var(--color-surface-1)",
+									border: "1px solid var(--color-border)"
+								},
+								onMouseEnter: (e) => {
+									e.currentTarget.style.background = "var(--color-surface-2)";
+									e.currentTarget.style.borderColor = "var(--color-accent)";
+								},
+								onMouseLeave: (e) => {
+									e.currentTarget.style.background = "var(--color-surface-1)";
+									e.currentTarget.style.borderColor = "var(--color-border)";
+								},
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
+									style: { background: "rgba(6,182,212,0.1)" },
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Terminal, {
+										size: 16,
+										style: { color: "var(--color-accent)" }
+									})
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "text-left",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "text-sm font-medium",
+										style: { color: "var(--color-text-primary)" },
+										children: "New chat"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "text-[11px]",
+										style: { color: "var(--color-text-muted)" },
+										children: "Start a fresh conversation with Claude"
+									})]
+								})]
+							}) }),
+							sessions.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+								className: "text-[11px] font-semibold uppercase tracking-widest mb-2 px-1",
+								style: {
+									color: "var(--color-text-muted)",
+									fontFamily: "var(--font-mono)"
+								},
+								children: "Recent sessions"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "space-y-0.5",
+								children: [sessions.slice(0, 5).map((s) => {
+									const timeAgo = s.lastActiveAt ? (() => {
+										const diff = Date.now() - new Date(s.lastActiveAt).getTime();
+										const mins = Math.floor(diff / 6e4);
+										if (mins < 1) return "now";
+										if (mins < 60) return `${mins}m ago`;
+										const hours = Math.floor(mins / 60);
+										if (hours < 24) return `${hours}h ago`;
+										return `${Math.floor(hours / 24)}d ago`;
+									})() : "";
+									return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+										onClick: () => {
+											addOpenChat(s.agentName || "claude", s.title || s.firstPrompt || "Session");
+											setSelectedSessionId(s.sessionId);
+											selectSession(s.filePath);
+											setView("session");
+										},
+										className: "w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left",
+										style: { background: "transparent" },
+										onMouseEnter: (e) => e.currentTarget.style.background = "var(--color-surface-1)",
+										onMouseLeave: (e) => e.currentTarget.style.background = "transparent",
+										children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(History, {
+												size: 13,
+												style: { color: "#a855f7" },
+												className: "shrink-0"
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+												className: "flex-1 min-w-0",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+													className: "text-xs font-medium truncate",
+													style: { color: "var(--color-text-primary)" },
+													children: s.title || s.firstPrompt || s.sessionId.slice(0, 8)
+												}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+													className: "flex items-center gap-2 mt-0.5",
+													children: [s.agentName && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+														className: "text-[10px]",
+														style: {
+															color: "var(--color-text-muted)",
+															fontFamily: "var(--font-mono)"
+														},
+														children: s.agentName
+													}), s.branch && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+														className: "flex items-center gap-0.5 text-[10px]",
+														style: { color: "var(--color-text-muted)" },
+														children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(GitBranch, { size: 8 }), s.branch]
+													})]
+												})]
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "text-[10px] shrink-0",
+												style: {
+													color: "var(--color-text-muted)",
+													fontFamily: "var(--font-mono)"
+												},
+												children: timeAgo
+											})
+										]
+									}, s.sessionId);
+								}), sessions.length > 5 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+									onClick: () => setView("session"),
+									className: "w-full text-center py-1.5 text-[11px] rounded-lg transition-colors",
+									style: { color: "var(--color-text-muted)" },
+									onMouseEnter: (e) => e.currentTarget.style.color = "var(--color-text-secondary)",
+									onMouseLeave: (e) => e.currentTarget.style.color = "var(--color-text-muted)",
+									children: [
+										"View all ",
+										sessions.length,
+										" sessions →"
+									]
+								})]
+							})] }),
+							agents.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+								className: "text-[11px] font-semibold uppercase tracking-widest mb-2 px-1",
+								style: {
+									color: "var(--color-text-muted)",
+									fontFamily: "var(--font-mono)"
+								},
+								children: "Agents"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "space-y-0.5",
+								children: (() => {
+									const colorHex = {
+										cyan: "#06b6d4",
+										blue: "#3b82f6",
+										green: "#22c55e",
+										yellow: "#eab308",
+										orange: "#f97316",
+										red: "#ef4444",
+										purple: "#a855f7",
+										pink: "#ec4899"
+									};
+									return [...agents].sort((a, b) => {
+										const aOrch = a.subAgents.length > 0 ? 0 : 1;
+										const bOrch = b.subAgents.length > 0 ? 0 : 1;
+										if (aOrch !== bOrch) return aOrch - bOrch;
+										return a.frontmatter.name.localeCompare(b.frontmatter.name);
+									}).map((agent) => {
+										const color = colorHex[agent.frontmatter.color || ""] || "#6b7280";
+										const isOrch = agent.subAgents.length > 0;
+										return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+											onClick: () => {
+												addOpenChat(agent.frontmatter.name, `Chat with ${agent.frontmatter.name}`);
+												setSelectedAgent(agent);
+												setSelectedSkill(null);
+												setView("agent");
+											},
+											className: "w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-left",
+											style: { background: "transparent" },
+											onMouseEnter: (e) => e.currentTarget.style.background = "var(--color-surface-1)",
+											onMouseLeave: (e) => e.currentTarget.style.background = "transparent",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "w-2 h-2 rounded-full shrink-0",
+												style: { backgroundColor: color }
+											}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+												className: "flex-1 min-w-0",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+													className: "flex items-center gap-2",
+													children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+														className: "text-xs font-medium truncate",
+														style: {
+															color: "var(--color-text-primary)",
+															fontFamily: "var(--font-mono)"
+														},
+														children: agent.frontmatter.name
+													}), isOrch && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+														className: "text-[9px] px-1.5 py-0.5 rounded shrink-0",
+														style: {
+															background: "rgba(6,182,212,0.1)",
+															color: "var(--color-accent)",
+															border: "1px solid rgba(6,182,212,0.15)"
+														},
+														children: "orchestrator"
+													})]
+												}), agent.frontmatter.description && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+													className: "text-[10px] truncate mt-0.5",
+													style: { color: "var(--color-text-muted)" },
+													children: agent.frontmatter.description
+												})]
+											})]
+										}, agent.id);
+									});
+								})()
+							})] })
+						]
+					})
 				})
 			})]
 		})]
@@ -39424,50 +40816,95 @@ function GlobalChatModal({ onClose }) {
 	const [editingTitle, setEditingTitle] = (0, import_react.useState)(false);
 	if (minimized) return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 		onClick: () => setMinimized(false),
-		className: "fixed bottom-4 right-4 z-50 flex items-center gap-2 px-4 py-2.5 bg-gray-800 border border-gray-700/60 rounded-xl shadow-2xl shadow-black/40 hover:bg-gray-750 hover:border-gray-600 transition-all duration-200 group",
+		className: "fixed bottom-4 right-4 z-50 flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-200 group",
+		style: {
+			background: "var(--color-surface-3)",
+			border: "1px solid var(--color-border)",
+			boxShadow: "0 4px 24px rgba(0,0,0,0.4)"
+		},
+		onMouseEnter: (e) => {
+			e.currentTarget.style.borderColor = "rgba(6,182,212,0.2)";
+			e.currentTarget.style.boxShadow = "0 4px 24px rgba(0,0,0,0.4), 0 0 12px rgba(6,182,212,0.08)";
+		},
+		onMouseLeave: (e) => {
+			e.currentTarget.style.borderColor = "var(--color-border)";
+			e.currentTarget.style.boxShadow = "0 4px 24px rgba(0,0,0,0.4)";
+		},
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageSquare, {
 				size: 14,
-				className: "text-cyan-400 group-hover:text-cyan-300"
+				style: { color: "var(--color-accent)" }
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-				className: "text-sm font-medium text-white",
+				className: "text-sm font-medium",
+				style: { color: "var(--color-text-primary)" },
 				children: title
 			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "w-1.5 h-1.5 rounded-full bg-cyan-400/60 animate-pulse" })
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				className: "w-1.5 h-1.5 rounded-full animate-pulse",
+				style: { background: "rgba(6,182,212,0.5)" }
+			})
 		]
 	});
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "fixed inset-0 z-50 flex items-center justify-center",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "absolute inset-0 bg-black/60 backdrop-blur-[2px]",
+			className: "absolute inset-0",
+			style: {
+				background: "rgba(0,0,0,0.7)",
+				backdropFilter: "blur(6px)",
+				WebkitBackdropFilter: "blur(6px)"
+			},
 			onClick: onClose
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "relative w-[720px] h-[82vh] bg-gray-900 border border-gray-700/50 rounded-2xl flex flex-col shadow-2xl shadow-black/60",
+			className: "relative w-[720px] h-[82vh] rounded-2xl flex flex-col",
+			style: {
+				background: "var(--color-surface-2)",
+				border: "1px solid var(--color-border)",
+				boxShadow: "0 8px 48px rgba(0,0,0,0.6), 0 0 1px rgba(6,182,212,0.1)"
+			},
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex items-center justify-between px-5 py-3.5 border-b border-gray-800/80 rounded-t-2xl",
+				className: "flex items-center justify-between px-5 py-3.5 border-b rounded-t-2xl",
+				style: {
+					background: "var(--color-surface-3)",
+					borderColor: "var(--color-border)"
+				},
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-center gap-2.5",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageSquare, {
 							size: 15,
-							className: "text-cyan-400"
+							style: { color: "var(--color-accent)" }
 						}),
 						editingTitle ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 							value: title,
 							onChange: (e) => setTitle(e.target.value),
 							onBlur: () => setEditingTitle(false),
 							onKeyDown: (e) => e.key === "Enter" && setEditingTitle(false),
-							className: "bg-gray-800 border border-cyan-500/40 rounded px-2 py-0.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/30 w-48",
+							className: "rounded px-2 py-0.5 text-sm focus:outline-none focus:ring-1 w-48",
+							style: {
+								background: "var(--color-surface-2)",
+								border: "1px solid rgba(6,182,212,0.3)",
+								color: "var(--color-text-primary)",
+								fontFamily: "var(--font-mono)"
+							},
 							autoFocus: true
 						}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 							onDoubleClick: () => setEditingTitle(true),
-							className: "text-sm font-bold text-white cursor-text hover:text-cyan-100 transition-colors",
+							className: "text-sm font-bold cursor-text transition-colors",
+							style: { color: "var(--color-text-primary)" },
 							title: "Double-click to rename",
 							children: title
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-[9px] font-semibold text-gray-500 bg-gray-800/80 px-1.5 py-0.5 rounded uppercase tracking-wider",
+							className: "text-[9px] font-semibold px-1.5 py-0.5 rounded uppercase",
+							style: {
+								color: "var(--color-text-muted)",
+								background: "var(--color-surface-2)",
+								fontFamily: "var(--font-mono)",
+								letterSpacing: "0.08em",
+								border: "1px solid var(--color-border-subtle)"
+							},
 							children: "global"
 						})
 					]
@@ -39475,12 +40912,30 @@ function GlobalChatModal({ onClose }) {
 					className: "flex items-center gap-0.5",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						onClick: () => setMinimized(true),
-						className: "p-2 text-gray-500 hover:text-white hover:bg-gray-800 rounded-lg transition-colors",
+						className: "p-2 rounded-lg transition-colors",
+						style: { color: "var(--color-text-muted)" },
+						onMouseEnter: (e) => {
+							e.currentTarget.style.color = "var(--color-text-primary)";
+							e.currentTarget.style.background = "var(--color-surface-2)";
+						},
+						onMouseLeave: (e) => {
+							e.currentTarget.style.color = "var(--color-text-muted)";
+							e.currentTarget.style.background = "transparent";
+						},
 						title: "Minimize",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Minus, { size: 14 })
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						onClick: onClose,
-						className: "p-2 text-gray-500 hover:text-white hover:bg-gray-800 rounded-lg transition-colors",
+						className: "p-2 rounded-lg transition-colors",
+						style: { color: "var(--color-text-muted)" },
+						onMouseEnter: (e) => {
+							e.currentTarget.style.color = "var(--color-text-primary)";
+							e.currentTarget.style.background = "var(--color-surface-2)";
+						},
+						onMouseLeave: (e) => {
+							e.currentTarget.style.color = "var(--color-text-muted)";
+							e.currentTarget.style.background = "transparent";
+						},
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { size: 14 })
 					})]
 				})]
@@ -39497,64 +40952,59 @@ function StatsBar({ stats, activeCount, connected }) {
 	if (!stats) return null;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "flex items-center gap-4 text-xs",
+		style: {
+			fontFamily: "var(--font-mono)",
+			fontVariantNumeric: "tabular-nums"
+		},
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex items-center gap-1.5",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `w-2 h-2 rounded-full ${connected ? "bg-green-400 animate-pulse" : "bg-red-400"}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-					className: "text-gray-500",
-					children: connected ? "Live" : "Disconnected"
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: `w-1.5 h-1.5 rounded-full ${connected ? "animate-pulse" : ""}`,
+					style: { background: connected ? "var(--color-active)" : "var(--color-danger)" }
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					style: {
+						color: "var(--color-text-muted)",
+						fontSize: "11px"
+					},
+					children: connected ? "Live" : "Off"
 				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Stat, {
-				icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Activity, { size: 12 }),
-				label: "Active",
+				icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Activity, { size: 11 }),
 				value: String(activeCount),
-				color: "text-cyan-400"
+				color: "var(--color-accent)"
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Stat, {
-				icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Radio, { size: 12 }),
-				label: "Events today",
+				icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Radio, { size: 11 }),
 				value: stats.events_today,
-				color: "text-blue-400"
+				color: "#60a5fa"
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Stat, {
-				icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Zap, { size: 12 }),
-				label: "Tokens",
+				icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Zap, { size: 11 }),
 				value: formatTokens(parseInt(stats.total_tokens_in) + parseInt(stats.total_tokens_out)),
-				color: "text-yellow-400"
+				color: "#facc15"
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Stat, {
-				icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DollarSign, { size: 12 }),
-				label: "Today",
+				icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DollarSign, { size: 11 }),
 				value: `$${stats.cost_today.toFixed(2)}`,
-				color: "text-green-400"
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Stat, {
-				icon: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DollarSign, { size: 12 }),
-				label: "Total",
-				value: `$${stats.total_cost.toFixed(2)}`,
-				color: "text-gray-400"
+				color: "var(--color-active)"
 			})
 		]
 	});
 }
-function Stat({ icon, label, value, color }) {
+function Stat({ icon, value, color }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "flex items-center gap-1.5",
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-				className: color,
-				children: icon
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-				className: "text-gray-500",
-				children: label
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-				className: `font-semibold ${color}`,
-				children: value
-			})
-		]
+		className: "flex items-center gap-1",
+		style: { color },
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+			style: { opacity: .7 },
+			children: icon
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+			className: "font-medium",
+			style: { fontSize: "11px" },
+			children: value
+		})]
 	});
 }
 function formatTokens(n) {
@@ -39564,23 +41014,23 @@ function formatTokens(n) {
 }
 //#endregion
 //#region src/components/EventConsole.tsx
-var eventColors = {
-	PreToolUse: "text-yellow-400",
-	PostToolUse: "text-green-400",
-	Stop: "text-red-400",
-	SubagentStart: "text-cyan-400",
-	SubagentStop: "text-blue-400",
-	unknown: "text-gray-400"
+var eventColorMap = {
+	PreToolUse: "#facc15",
+	PostToolUse: "#4ade80",
+	Stop: "#f87171",
+	SubagentStart: "#06b6d4",
+	SubagentStop: "#60a5fa",
+	Usage: "#8892a4"
 };
-var agentColors = {
-	cyan: "text-cyan-400",
-	blue: "text-blue-400",
-	green: "text-green-400",
-	yellow: "text-yellow-400",
-	orange: "text-orange-400",
-	red: "text-red-400",
-	purple: "text-purple-400",
-	pink: "text-pink-400"
+var agentColorValues = {
+	cyan: "#06b6d4",
+	blue: "#60a5fa",
+	green: "#4ade80",
+	yellow: "#facc15",
+	orange: "#fb923c",
+	red: "#f87171",
+	purple: "#c084fc",
+	pink: "#f472b6"
 };
 function formatTime(iso) {
 	return new Date(iso).toLocaleTimeString("en-US", { hour12: false });
@@ -39592,19 +41042,37 @@ function EventConsole({ events, agentColorMap }) {
 		if (scrollRef.current && expanded) scrollRef.current.scrollTop = 0;
 	}, [events.length, expanded]);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: `border-t border-gray-800 bg-gray-950 transition-all ${expanded ? "h-52" : "h-9"}`,
+		className: "transition-all duration-200",
+		style: {
+			borderTop: "1px solid var(--color-border)",
+			background: "var(--color-surface-0)",
+			height: expanded ? "13rem" : "2.25rem"
+		},
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 			onClick: () => setExpanded(!expanded),
-			className: "w-full flex items-center gap-2 px-4 py-2 text-xs font-medium text-gray-400 hover:text-gray-200 bg-gray-900/50",
+			className: "w-full flex items-center gap-2 px-4 py-2 text-xs font-medium transition-colors",
+			style: {
+				color: "var(--color-text-secondary)",
+				background: "var(--color-surface-1)",
+				fontFamily: "var(--font-mono)"
+			},
 			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Terminal, { size: 12 }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Terminal, {
+					size: 12,
+					style: { color: "var(--color-accent)" }
+				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Event Console" }),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-					className: "text-gray-600 ml-1",
+					className: "ml-1",
+					style: {
+						color: "var(--color-text-muted)",
+						fontVariantNumeric: "tabular-nums"
+					},
 					children: [events.length, " events"]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 					className: "ml-auto",
+					style: { color: "var(--color-text-muted)" },
 					children: expanded ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { size: 12 }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronUp, { size: 12 })
 				})
 			]
@@ -39612,32 +41080,41 @@ function EventConsole({ events, agentColorMap }) {
 			ref: scrollRef,
 			className: "h-[calc(100%-36px)] overflow-y-auto px-4 py-1 font-mono text-xs leading-5",
 			children: events.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "text-gray-600 py-2",
+				className: "py-2",
+				style: { color: "var(--color-text-muted)" },
 				children: "Waiting for events..."
 			}) : events.map((e) => {
-				const agentColor = agentColors[agentColorMap.get(e.agent_name) || ""] || "text-gray-300";
-				const typeColor = eventColors[e.event_type] || eventColors.unknown;
+				const agentHex = agentColorValues[agentColorMap.get(e.agent_name) || ""] || "var(--color-text-secondary)";
+				const typeHex = eventColorMap[e.event_type] || "var(--color-text-muted)";
 				return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex gap-3 hover:bg-gray-900/50 rounded px-1",
+					className: "flex gap-3 rounded px-1 transition-colors",
+					style: { fontVariantNumeric: "tabular-nums" },
+					onMouseEnter: (e) => e.currentTarget.style.background = "var(--color-surface-1)",
+					onMouseLeave: (e) => e.currentTarget.style.background = "transparent",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-gray-600 shrink-0",
+							className: "shrink-0",
+							style: { color: "var(--color-text-muted)" },
 							children: formatTime(e.created_at)
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: `${typeColor} shrink-0 w-24`,
+							className: "shrink-0 w-24",
+							style: { color: typeHex },
 							children: e.event_type
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: `${agentColor} shrink-0 w-32 truncate`,
+							className: "shrink-0 w-32 truncate",
+							style: { color: agentHex },
 							children: e.agent_name
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-gray-500 truncate",
+							className: "truncate",
+							style: { color: "var(--color-text-muted)" },
 							children: e.tool_name || ""
 						}),
 						e.tokens_in > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-							className: "text-gray-600 ml-auto shrink-0",
+							className: "ml-auto shrink-0",
+							style: { color: "var(--color-text-muted)" },
 							children: [
 								e.tokens_in + e.tokens_out,
 								" tok · $",
@@ -39696,6 +41173,7 @@ function useIPC() {
 	const [activeAgents, setActiveAgents] = (0, import_react.useState)(/* @__PURE__ */ new Set());
 	const [agentContexts, setAgentContexts] = (0, import_react.useState)(/* @__PURE__ */ new Map());
 	const [currentTools, setCurrentTools] = (0, import_react.useState)(/* @__PURE__ */ new Map());
+	const [waitingAgents, setWaitingAgents] = (0, import_react.useState)(/* @__PURE__ */ new Set());
 	const activeTimers = (0, import_react.useRef)(/* @__PURE__ */ new Map());
 	const markActive = (0, import_react.useCallback)((agentName, tokensIn, tokensOut, costUsd, toolName) => {
 		setActiveAgents((prev) => new Set(prev).add(agentName));
@@ -39747,8 +41225,28 @@ function useIPC() {
 				setEvents((prev) => [event, ...prev].slice(0, 200));
 				markActive(event.agent_name, event.tokens_in || 0, event.tokens_out || 0, event.cost_usd || 0, event.tool_name || void 0);
 			}
-			if (data.type === "spawn_usage") markActive(data.agentName, data.tokensIn || 0, data.tokensOut || 0, 0);
-			if (data.type === "session_activity") markActive(data.agentName || "unknown", data.tokensIn || 0, data.tokensOut || 0, 0);
+			if (data.type === "spawn_usage") {
+				markActive(data.agentName, data.tokensIn || 0, data.tokensOut || 0, 0);
+				if (data.agentName) setWaitingAgents((prev) => {
+					const next = new Set(prev);
+					next.delete(data.agentName);
+					return next;
+				});
+			}
+			if (data.type === "session_activity") {
+				markActive(data.agentName || "unknown", data.tokensIn || 0, data.tokensOut || 0, 0);
+				if (data.agentName) setWaitingAgents((prev) => {
+					const next = new Set(prev);
+					next.delete(data.agentName);
+					return next;
+				});
+			}
+			if (data.type === "spawn_input_request" && data.agentName) setWaitingAgents((prev) => new Set(prev).add(data.agentName));
+			if (data.type === "spawn_exit" && data.agentName) setWaitingAgents((prev) => {
+				const next = new Set(prev);
+				next.delete(data.agentName);
+				return next;
+			});
 		});
 	}, [markActive]);
 	return {
@@ -39756,7 +41254,8 @@ function useIPC() {
 		connected,
 		activeAgents,
 		agentContexts,
-		currentTools
+		currentTools,
+		waitingAgents
 	};
 }
 //#endregion
@@ -39787,7 +41286,7 @@ function App() {
 	const selectedProject = useAppStore((s) => s.selectedProject);
 	const setSelectedProject = useAppStore((s) => s.setSelectedProject);
 	const { dashboard, loading: dashLoading, refresh } = useDashboard(selectedProject?.id ?? null);
-	const { events, connected, activeAgents, agentContexts, currentTools } = useIPC();
+	const { events, connected, activeAgents, agentContexts, currentTools, waitingAgents } = useIPC();
 	const { stats } = useStats(events.length);
 	const [chatOpen, setChatOpen] = (0, import_react.useState)(false);
 	const prevProjectPath = (0, import_react.useRef)(null);
@@ -39959,6 +41458,7 @@ function App() {
 					activeAgents,
 					agentContexts,
 					currentTools,
+					waitingAgents,
 					onRefresh: refresh
 				}) : null, /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EventConsole, {
 					events,

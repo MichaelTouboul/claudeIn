@@ -51,7 +51,7 @@ export function AgentChatInput({
       {attachedFiles.length > 0 ? (
         <div className="flex flex-wrap gap-2 px-3 pt-2 pb-1">
           {attachedFiles.map((file, i) => (
-            <div key={i} className="relative group/attach">
+            <div key={file.path} className="relative group/attach">
               {file.dataUrl ? (
                 <img
                   src={file.dataUrl}

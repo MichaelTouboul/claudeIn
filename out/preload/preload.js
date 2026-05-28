@@ -38,6 +38,9 @@ electron.contextBridge.exposeInMainWorld("api", {
 	getSessionConversation: (filePath) => electron.ipcRenderer.invoke("sessions:conversation", filePath),
 	watchSessions: (projectPath) => electron.ipcRenderer.invoke("sessions:watch-start", projectPath),
 	unwatchSessions: (projectPath) => electron.ipcRenderer.invoke("sessions:watch-stop", projectPath),
+	openFilePicker: () => electron.ipcRenderer.invoke("dialog:open-file"),
+	readImageAsDataUrl: (filePath) => electron.ipcRenderer.invoke("dialog:read-image", filePath),
+	generateTitle: (userMessage, assistantMessage) => electron.ipcRenderer.invoke("dialog:generate-title", userMessage, assistantMessage),
 	onEvent: (cb) => {
 		const handler = (_e, data) => cb(data);
 		electron.ipcRenderer.on("push-event", handler);

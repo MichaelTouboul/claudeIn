@@ -11,6 +11,20 @@ function formatTokens(n: number): string {
   return String(n);
 }
 
+/**
+ * Turn a list of (possibly repeating) strings into entries with stable per-position keys.
+ * Example: `['Read', 'Read', 'Edit']` → `[{name:'Read', key:'Read#0'}, {name:'Read', key:'Read#1'}, {name:'Edit', key:'Edit#0'}]`.
+ * Lets the JSX use a real key without falling back to the array index.
+ */
+function dedupeWithOccurrence(names: readonly string[]): Array<{ name: string; key: string }> {
+  const seen = new Map<string, number>();
+  return names.map((name) => {
+    const count = seen.get(name) ?? 0;
+    seen.set(name, count + 1);
+    return { name, key: `${name}#${count}` };
+  });
+}
+
 export type SessionViewerProps = {
   conversation: SessionConversation | null;
   loading: boolean;
@@ -107,8 +121,8 @@ export function SessionViewer({
 
       <div className="relative flex-1 min-h-0">
         <div ref={scrollRef} onScroll={handleScroll} className="h-full overflow-y-auto px-6 py-4 space-y-4 font-mono">
-          {conversation.messages.map((msg, i) => (
-            <div key={i} className="group">
+          {conversation.messages.map((msg) => (
+            <div key={msg.uuid} className="group">
               {msg.role === "user" ? (
                 <div>
                   <div className="flex items-center gap-2 mb-0.5">
@@ -135,13 +149,13 @@ export function SessionViewer({
                       </span> : null}
                   </div>
                   {msg.toolNames && msg.toolNames.length > 0 ? <div className="flex flex-wrap gap-1.5 ml-5 mb-1">
-                      {msg.toolNames.map((t, j) => (
+                      {dedupeWithOccurrence(msg.toolNames).map((t) => (
                         <span
-                          key={j}
+                          key={`${msg.uuid}-${t.key}`}
                           className="flex items-center gap-1 text-[10px]"
                           style={{ color: 'rgba(250,204,21,0.5)' }}
                         >
-                          <Wrench size={9} />{t}
+                          <Wrench size={9} />{t.name}
                         </span>
                       ))}
                     </div> : null}

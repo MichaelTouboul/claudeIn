@@ -9,9 +9,11 @@ import { AgentChatInput } from './AgentChatInput/AgentChatInput';
 import { AgentChatMessages } from './AgentChatMessages/AgentChatMessages';
 import { detectQuickReplies } from './quickReplies';
 import { SLASH_COMMANDS } from './slashCommands';
+import type { QueueItem } from './types';
 
 type SpawnEvent =
-  | { type: 'spawn_message'; sessionId: string; message: ChatMessage }
+  // The backend doesn't generate ChatMessage.id — we mint it on receive.
+  | { type: 'spawn_message'; sessionId: string; message: Omit<ChatMessage, 'id'> }
   | { type: 'spawn_input_request'; sessionId: string }
   | { type: 'spawn_claude_session'; sessionId: string; claudeSessionId: string }
   | { type: 'spawn_exit'; sessionId: string; status: SpawnSession['status']; claudeSessionId?: string };
@@ -27,7 +29,7 @@ export function AgentChat({ agentName, resumeSessionId, initialMessage }: AgentC
   const [session, setSession] = useState<SpawnSession | null>(null);
   const [claudeSessionId, setClaudeSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [queue, setQueue] = useState<string[]>([]);
+  const [queue, setQueue] = useState<QueueItem[]>([]);
   const [input, setInput] = useState('');
   const [spawning] = useState(false);
   const [showSlash, setShowSlash] = useState(false);
@@ -65,12 +67,12 @@ export function AgentChat({ agentName, resumeSessionId, initialMessage }: AgentC
     setQueue((prev) => {
       if (prev.length === 0) return prev;
       const [next, ...rest] = prev;
-      const msg: ChatMessage = { role: 'user', content: next, timestamp: new Date().toISOString() };
+      const msg: ChatMessage = { id: crypto.randomUUID(), role: 'user', content: next.text, timestamp: new Date().toISOString() };
       setMessages((m) => [...m, msg]);
-      pendingUserMsgs.current.add(next);
+      pendingUserMsgs.current.add(next.text);
       setAwaitingResponse(true);
       const resumeId = claudeSessionIdRef.current;
-      window.api.spawn({ agent_name: agentName, mission: next, cwd: projectPath, resume_session_id: resumeId || undefined })
+      window.api.spawn({ agent_name: agentName, mission: next.text, cwd: projectPath, resume_session_id: resumeId || undefined })
         .then((data: SpawnSession) => {
           setSession(data);
           if (data.claudeSessionId) setClaudeSessionId(data.claudeSessionId);
@@ -84,7 +86,7 @@ export function AgentChat({ agentName, resumeSessionId, initialMessage }: AgentC
       const data = raw as SpawnEvent;
       const s = sessionRef.current;
       if (data.type === 'spawn_message' && s && data.sessionId === s.id) {
-        const msg: ChatMessage = data.message;
+        const msg: ChatMessage = { ...data.message, id: crypto.randomUUID() };
         if (msg.role === 'user' && pendingUserMsgs.current.has(msg.content)) {
           pendingUserMsgs.current.delete(msg.content);
           return;
@@ -120,7 +122,7 @@ export function AgentChat({ agentName, resumeSessionId, initialMessage }: AgentC
     if (!initialMessage || !resumeSessionId || !projectPath) return;
     autoSentRef.current = true;
     setClaudeSessionId(resumeSessionId);
-    const msg: ChatMessage = { role: 'user', content: initialMessage, timestamp: new Date().toISOString() };
+    const msg: ChatMessage = { id: crypto.randomUUID(), role: 'user', content: initialMessage, timestamp: new Date().toISOString() };
     setMessages([msg]);
     pendingUserMsgs.current.add(initialMessage);
     setAwaitingResponse(true);

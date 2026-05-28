@@ -108,8 +108,8 @@ export function PanelsArea({
               </> : null}
             {favHooks.length > 0 ? <>
                 <SectionLabel icon={<Settings size={10} className="text-yellow-400" />} label="Hooks" />
-                {favHooks.map((h, i) => (
-                  <HookRow key={i} hook={h} isFavorite onToggleFavorite={() => toggleFavorite("hook", `${h.event}:${h.matcher}`)} />
+                {favHooks.map((h) => (
+                  <HookRow key={`${h.event}:${h.matcher}`} hook={h} isFavorite onToggleFavorite={() => toggleFavorite("hook", `${h.event}:${h.matcher}`)} />
                 ))}
               </> : null}
           </>
@@ -226,8 +226,8 @@ export function PanelsArea({
         label: "Hooks",
         icon: <Settings size={11} className="text-yellow-400" />,
         count: hooks.length,
-        content: hooks.map((h, i) => (
-          <HookRow key={i} hook={h} isFavorite={isFavorite("hook", `${h.event}:${h.matcher}`)} onToggleFavorite={() => toggleFavorite("hook", `${h.event}:${h.matcher}`)} />
+        content: hooks.map((h) => (
+          <HookRow key={`${h.event}:${h.matcher}`} hook={h} isFavorite={isFavorite("hook", `${h.event}:${h.matcher}`)} onToggleFavorite={() => toggleFavorite("hook", `${h.event}:${h.matcher}`)} />
         )),
       } : null,
       ].filter(Boolean) as { key: string; label: string; icon: ReactNode; count: number; content: ReactNode }[])

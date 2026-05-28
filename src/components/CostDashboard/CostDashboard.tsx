@@ -157,8 +157,8 @@ export function CostDashboard() {
                     `${name ?? ""} ${((percent ?? 0) * 100).toFixed(0)}%`
                   }
                 >
-                  {chartTools.map((entry, i) => (
-                    <Cell key={i} fill={entry.fill} />
+                  {chartTools.map((entry) => (
+                    <Cell key={entry.name} fill={entry.fill} />
                   ))}
                 </Pie>
                 <Tooltip content={CustomTooltip} />

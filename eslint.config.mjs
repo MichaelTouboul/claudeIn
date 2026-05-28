@@ -68,10 +68,11 @@ export default tseslint.config(
       // Enforces explicit ternary `{cond ? <X/> : null}` instead of `{cond && <X/>}`
       // — falsy values like 0 or '' would otherwise render their literal text.
       'react/jsx-no-leaked-render': ['error', { validStrategies: ['ternary'] }],
-      // Off — many of our lists are immutable read-only views (conversation
-      // history, slash command catalogue) where index-as-key is correct and
-      // the rule produces noise. If a list reorders or filters, use a real id.
-      'react/no-array-index-key': 'off',
+      // Array indices as keys cause real bugs (lost state on reorder/filter,
+      // wrong rendering during inserts). Use a stable id from the item itself.
+      // If the item has no natural id, derive one (e.g., compose multiple
+      // fields with `${a.event}:${a.matcher}`).
+      'react/no-array-index-key': 'error',
 
       // ── React hooks ─────────────────────────────────────────
       'react-hooks/rules-of-hooks': 'error',
