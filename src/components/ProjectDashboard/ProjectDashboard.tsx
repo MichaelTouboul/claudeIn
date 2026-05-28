@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect, useCallback, type ReactNode } from "react";
+import { useState, useRef, useCallback, type ReactNode } from "react";
 import {
   Bot, Wrench, Settings, BarChart3, Globe, User,
-  Star, Terminal, GitBranch, History, MessageSquare,
+  Star, Terminal, GitBranch, History,
 } from "lucide-react";
 
 import type { AgentFile } from '@/types/agent.types';
@@ -9,6 +9,8 @@ import type { SkillFile, HookConfig, Project } from '@/hooks/useProjects';
 import type { AgentContext } from '@/hooks/useIPC';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useSessions } from '@/hooks/useSessions';
+import { useAutoChatTitles } from '@/hooks/useAutoChatTitles';
+import { useResizableSidebar } from '@/hooks/useResizableSidebar';
 import { AgentDetail } from '@/components/AgentDetail/AgentDetail';
 import { AgentTree } from '@/components/AgentTree/AgentTree';
 import { CostDashboard } from '@/components/CostDashboard/CostDashboard';
@@ -22,6 +24,9 @@ import { SectionLabel } from './SectionLabel/SectionLabel';
 import { SkillRow } from './SkillRow/SkillRow';
 import { HookRow } from './HookRow/HookRow';
 import { SkillDetail } from './SkillDetail/SkillDetail';
+import { ActiveSessions } from './ActiveSessions/ActiveSessions';
+import { OpenChatsList } from './OpenChatsList/OpenChatsList';
+import { ResizeHandle } from './ResizeHandle/ResizeHandle';
 
 // Inject animation keyframes
 if (typeof document !== "undefined" && !document.getElementById("chat-animations")) {
@@ -73,7 +78,6 @@ export function ProjectDashboard({
   const [resumeChat, setResumeChat] = useState<{ agentName: string; sessionId: string; message: string } | null>(null);
   const [openChats, setOpenChats] = useState<OpenChat[]>([]);
   const chatIdCounter = useRef(0);
-  const pendingTitles = useRef(new Map<string, string>());
 
   const addOpenChat = useCallback((agentName: string, title: string) => {
     const id = `chat-${++chatIdCounter.current}-${Date.now()}`;
@@ -89,60 +93,7 @@ export function ProjectDashboard({
     return id;
   }, []);
 
-  // Auto-rename chats with LLM-generated title after first exchange
-  useEffect(() => {
-    const cleanup = window.api.onEvent((data: any) => {
-      if (data.type === "spawn_message" && data.message?.content) {
-        const agent: string = data.agentName || "";
-        const role: string = data.message.role;
-        const content: string = data.message.content;
-
-        if (role === "user") {
-          // Check if there's a chat with a generic title
-          setOpenChats((prev) => {
-            const hasGeneric = prev.some(
-              (c) =>
-                (c.agentName === agent || c.agentName === "claude") &&
-                (c.title === "New chat" || c.title.startsWith("Chat with "))
-            );
-            if (!hasGeneric || pendingTitles.current.has(agent)) return prev;
-
-            pendingTitles.current.set(agent, content);
-
-            // Show truncated preview immediately
-            let preview = content.replace(/[\n\r]+/g, " ").trim();
-            if (preview.length > 40) preview = preview.slice(0, 37) + "...";
-
-            return prev.map((c) =>
-              (c.agentName === agent || c.agentName === "claude") &&
-              (c.title === "New chat" || c.title.startsWith("Chat with "))
-                ? { ...c, title: preview }
-                : c
-            );
-          });
-        }
-
-        if (role === "assistant" && pendingTitles.current.has(agent)) {
-          const userMsg = pendingTitles.current.get(agent)!;
-          pendingTitles.current.delete(agent);
-
-          // Call LLM to generate a proper title
-          window.api.generateTitle(userMsg, content).then((title) => {
-            if (title) {
-              setOpenChats((prev) =>
-                prev.map((c) =>
-                  c.agentName === agent || c.agentName === "claude"
-                    ? { ...c, title }
-                    : c
-                )
-              );
-            }
-          });
-        }
-      }
-    });
-    return cleanup;
-  }, []);
+  useAutoChatTitles({ setOpenChats });
 
   const togglePanel = (panel: string) => {
     setOpenPanels((prev) => {
@@ -153,28 +104,7 @@ export function ProjectDashboard({
     });
   };
 
-  const [sidebarWidth, setSidebarWidth] = useState(288);
-  const sidebarRef = useRef<HTMLDivElement>(null);
-  const isDragging = useRef(false);
-
-  useEffect(() => {
-    const onMouseMove = (e: MouseEvent) => {
-      if (!isDragging.current) return;
-      const newWidth = Math.min(Math.max(e.clientX, 200), 500);
-      setSidebarWidth(newWidth);
-    };
-    const onMouseUp = () => {
-      isDragging.current = false;
-      document.body.style.cursor = "";
-      document.body.style.userSelect = "";
-    };
-    document.addEventListener("mousemove", onMouseMove);
-    document.addEventListener("mouseup", onMouseUp);
-    return () => {
-      document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("mouseup", onMouseUp);
-    };
-  }, []);
+  const { width: sidebarWidth, ref: sidebarRef, startDrag: handleResizeDragStart } = useResizableSidebar();
 
   const isUserProject = project.id === "user";
 
@@ -257,172 +187,20 @@ export function ProjectDashboard({
         }}
       >
 
-        {/* Active Sessions */}
-        {activeAgents.size > 0 && (
-          <div className="px-3 pt-3 pb-2">
-            <div className="flex items-center gap-2 mb-2 px-1">
-              <span
-                className="text-[10px] font-semibold uppercase tracking-widest"
-                style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}
-              >
-                Active
-              </span>
-              <span
-                className="text-[10px] px-1.5 py-0.5 rounded-full"
-                style={{ background: 'var(--color-surface-2)', color: 'var(--color-text-muted)' }}
-              >
-                {activeAgents.size}
-              </span>
-            </div>
-            <div className="space-y-0.5">
-              {Array.from(activeAgents).map((agentName) => {
-                const agent = agents.find((a) => a.frontmatter.name === agentName || a.id === agentName);
-                const ctx = agentContexts.get(agentName);
-                const isWaiting = waitingAgents?.has(agentName);
-                const agentColor = agent?.frontmatter?.color;
-                const colorHex: Record<string, string> = {
-                  cyan: "#06b6d4", blue: "#3b82f6", green: "#22c55e",
-                  yellow: "#eab308", orange: "#f97316", red: "#ef4444",
-                  purple: "#a855f7", pink: "#ec4899",
-                };
-                const dotColor = colorHex[agentColor || ""] || "#06b6d4";
+        <ActiveSessions
+          agents={agents}
+          activeAgents={activeAgents}
+          agentContexts={agentContexts}
+          waitingAgents={waitingAgents}
+          onSelectAgent={(a) => { setSelectedAgent(a); setSelectedSkill(null); setView("agent"); }}
+        />
 
-                return (
-                  <button
-                    key={agentName}
-                    onClick={() => {
-                      if (agent) { setSelectedAgent(agent); setSelectedSkill(null); setView("agent"); }
-                    }}
-                    className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors"
-                    style={{ background: 'transparent' }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-2)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                  >
-                    {/* Agent color dot — fast pulse */}
-                    <span
-                      className="w-2 h-2 rounded-full shrink-0"
-                      style={{
-                        backgroundColor: isWaiting ? '#eab308' : dotColor,
-                        boxShadow: `0 0 6px ${isWaiting ? 'rgba(234,179,8,0.5)' : dotColor + '80'}`,
-                        animation: isWaiting
-                          ? 'pulse 0.6s ease-in-out infinite'
-                          : 'pulse 1s ease-in-out infinite',
-                      }}
-                    />
-                    {/* Agent name */}
-                    <span
-                      className="text-xs font-medium truncate"
-                      style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
-                    >
-                      {agentName}
-                    </span>
-                    {/* Waiting badge */}
-                    {isWaiting ? (
-                      <span
-                        className="text-[9px] px-1 py-0.5 rounded shrink-0"
-                        style={{
-                          background: 'rgba(234,179,8,0.15)',
-                          color: '#eab308',
-                          border: '1px solid rgba(234,179,8,0.2)',
-                        }}
-                      >
-                        awaiting
-                      </span>
-                    ) : null}
-                    {/* Context gauge */}
-                    {ctx && ctx.percent > 0 && !isWaiting ? (
-                      <div className="flex-1 flex items-center gap-1.5 ml-auto min-w-0">
-                        <div
-                          className="flex-1 h-[3px] rounded-full overflow-hidden"
-                          style={{ background: 'var(--color-surface-0)', minWidth: '30px' }}
-                        >
-                          <div
-                            className="h-full rounded-full transition-all duration-700"
-                            style={{
-                              width: `${ctx.percent}%`,
-                              background: ctx.percent >= 90 ? '#ef4444'
-                                : ctx.percent >= 70 ? '#eab308'
-                                : dotColor,
-                            }}
-                          />
-                        </div>
-                        <span
-                          className="text-[9px] shrink-0"
-                          style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}
-                        >
-                          {Math.round(ctx.percent)}%
-                        </span>
-                      </div>
-                    ) : null}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Open Chats */}
-        {openChats.length > 0 && (
-          <div className="px-3 pb-2" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-            <div className="flex items-center gap-2 mb-1.5 px-1">
-              <span
-                className="text-[10px] font-semibold uppercase tracking-widest"
-                style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}
-              >
-                Chats
-              </span>
-            </div>
-            <div className="space-y-0.5">
-              {openChats.map((chat) => {
-                const colorHex: Record<string, string> = {
-                  cyan: "#06b6d4", blue: "#3b82f6", green: "#22c55e",
-                  yellow: "#eab308", orange: "#f97316", red: "#ef4444",
-                  purple: "#a855f7", pink: "#ec4899",
-                };
-                const agent = agents.find((a) => a.frontmatter.name === chat.agentName || a.id === chat.agentName);
-                const dotColor = colorHex[agent?.frontmatter?.color || ""] || "#06b6d4";
-                const isActive = activeAgents.has(chat.agentName);
-
-                return (
-                  <button
-                    key={chat.id}
-                    onClick={() => {
-                      if (agent) {
-                        setSelectedAgent(agent);
-                        setSelectedSkill(null);
-                        setView("agent");
-                      }
-                    }}
-                    className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors text-left"
-                    style={{
-                      background: 'transparent',
-                      animation: chat.isNew ? 'chatSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1)' : undefined,
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-2)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                  >
-                    <MessageSquare size={12} style={{ color: dotColor }} className="shrink-0" />
-                    <span
-                      className="text-xs truncate"
-                      style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
-                    >
-                      {chat.title}
-                    </span>
-                    {isActive ? (
-                      <span
-                        className="w-1.5 h-1.5 rounded-full shrink-0 ml-auto"
-                        style={{
-                          backgroundColor: dotColor,
-                          animation: 'pulse 1s ease-in-out infinite',
-                        }}
-                      />
-                    ) : null}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
+        <OpenChatsList
+          agents={agents}
+          openChats={openChats}
+          activeAgents={activeAgents}
+          onSelectAgent={(a) => { setSelectedAgent(a); setSelectedSkill(null); setView("agent"); }}
+        />
 
         {/* Panels area — panels anchored at bottom, expand upward when opened */}
         <div className="flex-1 flex flex-col min-h-0">
@@ -605,16 +383,7 @@ export function ProjectDashboard({
           }
         </div>
 
-        {/* Resize handle */}
-        <div
-          className="absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-cyan-500/30 transition-colors"
-          onMouseDown={(e) => {
-            e.preventDefault();
-            isDragging.current = true;
-            document.body.style.cursor = "col-resize";
-            document.body.style.userSelect = "none";
-          }}
-        />
+        <ResizeHandle onMouseDown={handleResizeDragStart} />
 
       </div>
 
