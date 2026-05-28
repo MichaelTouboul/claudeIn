@@ -19,6 +19,13 @@ export type AgentContext = {
   percent: number;
 };
 
+type IPCEvent =
+  | ({ type: 'event' } & LiveEvent)
+  | { type: 'spawn_usage'; agentName: string; tokensIn?: number; tokensOut?: number }
+  | { type: 'session_activity'; agentName?: string; tokensIn?: number; tokensOut?: number }
+  | { type: 'spawn_input_request'; agentName?: string }
+  | { type: 'spawn_exit'; agentName?: string };
+
 const DEFAULT_LIMIT = 200_000;
 
 export function useIPC() {
@@ -81,11 +88,11 @@ export function useIPC() {
 
   useEffect(() => {
     setConnected(true);
-    const cleanup = window.api.onEvent((data: any) => {
+    const cleanup = window.api.onEvent((raw) => {
+      const data = raw as IPCEvent;
       if (data.type === "event") {
-        const event: LiveEvent = data;
-        setEvents((prev) => [event, ...prev].slice(0, 200));
-        markActive(event.agent_name, event.tokens_in || 0, event.tokens_out || 0, event.cost_usd || 0, event.tool_name || undefined);
+        setEvents((prev) => [data, ...prev].slice(0, 200));
+        markActive(data.agent_name, data.tokens_in || 0, data.tokens_out || 0, data.cost_usd || 0, data.tool_name || undefined);
       }
       if (data.type === "spawn_usage") {
         markActive(data.agentName, data.tokensIn || 0, data.tokensOut || 0, 0);
@@ -100,20 +107,23 @@ export function useIPC() {
       if (data.type === "session_activity") {
         markActive(data.agentName || "unknown", data.tokensIn || 0, data.tokensOut || 0, 0);
         if (data.agentName) {
+          const name = data.agentName;
           setWaitingAgents((prev) => {
             const next = new Set(prev);
-            next.delete(data.agentName);
+            next.delete(name);
             return next;
           });
         }
       }
       if (data.type === "spawn_input_request" && data.agentName) {
-        setWaitingAgents((prev) => new Set(prev).add(data.agentName));
+        const name = data.agentName;
+        setWaitingAgents((prev) => new Set(prev).add(name));
       }
       if (data.type === "spawn_exit" && data.agentName) {
+        const name = data.agentName;
         setWaitingAgents((prev) => {
           const next = new Set(prev);
-          next.delete(data.agentName);
+          next.delete(name);
           return next;
         });
       }

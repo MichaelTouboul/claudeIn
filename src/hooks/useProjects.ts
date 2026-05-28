@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 
+import type { AgentFile } from "@/types/agent.types";
+
 export type Project = {
   id: string;
   name: string;
@@ -62,20 +64,22 @@ export function useProjects() {
   return { projects, loading, refresh };
 }
 
+export type Dashboard = {
+  project: Project;
+  agents: AgentFile[];
+  skills: SkillFile[];
+  hooks: HookConfig[];
+};
+
 export function useDashboard(projectId: string | null) {
-  const [dashboard, setDashboard] = useState<{
-    project: Project;
-    agents: any[];
-    skills: SkillFile[];
-    hooks: HookConfig[];
-  } | null>(null);
+  const [dashboard, setDashboard] = useState<Dashboard | null>(null);
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
     if (!projectId) return;
     setLoading(true);
     const data = await window.api.getDashboard(projectId);
-    setDashboard(data as any);
+    setDashboard(data as Dashboard);
     setLoading(false);
   }, [projectId]);
 

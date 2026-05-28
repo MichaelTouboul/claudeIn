@@ -95,8 +95,8 @@ export function ProjectDashboard({
 
   const isUserProject = project.id === "user";
 
-  const projectAgents = agents.filter((a: any) => a.scope === "project" || (a.scope === "user" && a.linked));
-  const userAgents = agents.filter((a: any) => a.scope === "user" && !a.linked);
+  const projectAgents = agents.filter((a) => a.scope === "project" || (a.scope === "user" && a.linked));
+  const userAgents = agents.filter((a) => a.scope === "user" && !a.linked);
 
   const projectSkills = skills.filter((s) => s.scope !== "user");
   const userSkills = skills.filter((s) => s.scope === "user");

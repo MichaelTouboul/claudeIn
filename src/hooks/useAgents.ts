@@ -13,8 +13,8 @@ export function useAgents() {
       const data = await api.getAgents();
       setAgents(data);
       setError(null);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
