@@ -14,17 +14,17 @@ import {
 } from "recharts";
 import { DollarSign, Zap, TrendingUp } from "lucide-react";
 
-import type { AgentData, DayData, Summary, ToolData } from './types';
+import type { CostsByAgent, CostsByDay, CostsByTool, CostsSummary } from '@/types/costs.types';
 import { COLORS, PERIODS, formatDay, formatTokens } from './utils';
 import { BigStat } from './BigStat/BigStat';
 import { CustomTooltip } from './CustomTooltip/CustomTooltip';
 
 export function CostDashboard() {
   const [period, setPeriod] = useState(30);
-  const [summary, setSummary] = useState<Summary | null>(null);
-  const [dailyData, setDailyData] = useState<DayData[]>([]);
-  const [agentData, setAgentData] = useState<AgentData[]>([]);
-  const [toolData, setToolData] = useState<ToolData[]>([]);
+  const [summary, setSummary] = useState<CostsSummary | null>(null);
+  const [dailyData, setDailyData] = useState<CostsByDay[]>([]);
+  const [agentData, setAgentData] = useState<CostsByAgent[]>([]);
+  const [toolData, setToolData] = useState<CostsByTool[]>([]);
 
   const refresh = useCallback(async () => {
     const [s, d, a, t] = await Promise.all([
@@ -33,10 +33,10 @@ export function CostDashboard() {
       window.api.getCostsByAgent(period),
       window.api.getCostsByTool(period),
     ]);
-    setSummary(s as Summary);
-    setDailyData(d as DayData[]);
-    setAgentData(a as AgentData[]);
-    setToolData(t as ToolData[]);
+    setSummary(s);
+    setDailyData(d);
+    setAgentData(a);
+    setToolData(t);
   }, [period]);
 
   useEffect(() => {
@@ -48,13 +48,6 @@ export function CostDashboard() {
     "Tokens In": parseInt(d.tokens_in),
     "Tokens Out": parseInt(d.tokens_out),
     "$ Cost": d.cost_usd,
-  }));
-
-  const chartAgents = agentData.map((a) => ({
-    name: a.agent_name,
-    tokens: parseInt(a.tokens_in) + parseInt(a.tokens_out),
-    cost: a.cost_usd,
-    events: parseInt(a.events_count),
   }));
 
   const chartTools = toolData.map((t, i) => ({

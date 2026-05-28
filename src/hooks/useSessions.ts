@@ -42,7 +42,7 @@ export function useSessions(projectPath: string | null) {
     if (!projectPath) return;
     setLoading(true);
     const data = await window.api.getSessionList(projectPath);
-    setSessions(data as SessionSummary[]);
+    setSessions(data);
     setLoading(false);
   }, [projectPath]);
 
@@ -51,7 +51,7 @@ export function useSessions(projectPath: string | null) {
   const selectSession = useCallback(async (filePath: string) => {
     setConversationLoading(true);
     const data = await window.api.getSessionConversation(filePath);
-    setConversation(data as SessionConversation);
+    setConversation(data);
     setConversationLoading(false);
   }, []);
 

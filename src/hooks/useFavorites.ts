@@ -11,7 +11,7 @@ export function useFavorites(projectId: string | null) {
   const refresh = useCallback(async () => {
     if (!projectId) return;
     const data = await window.api.getFavorites(projectId);
-    setFavorites(data as FavoriteItem[]);
+    setFavorites(data);
   }, [projectId]);
 
   useEffect(() => { refresh(); }, [refresh]);

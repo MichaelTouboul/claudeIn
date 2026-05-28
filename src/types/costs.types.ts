@@ -1,4 +1,4 @@
-export type Summary = {
+export type CostsSummary = {
   tokens_in_today: string;
   tokens_out_today: string;
   cost_today: number;
@@ -13,7 +13,7 @@ export type Summary = {
   cost_all: number;
 };
 
-export type DayData = {
+export type CostsByDay = {
   day: string;
   tokens_in: string;
   tokens_out: string;
@@ -21,7 +21,7 @@ export type DayData = {
   events_count: string;
 };
 
-export type AgentData = {
+export type CostsByAgent = {
   agent_name: string;
   tokens_in: string;
   tokens_out: string;
@@ -31,7 +31,7 @@ export type AgentData = {
   last_seen: string;
 };
 
-export type ToolData = {
+export type CostsByTool = {
   tool_name: string;
   tokens_in: string;
   tokens_out: string;

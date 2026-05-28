@@ -55,7 +55,7 @@ export function useProjects() {
   const refresh = useCallback(async () => {
     setLoading(true);
     const data = await window.api.getProjects();
-    setProjects(data as Project[]);
+    setProjects(data);
     setLoading(false);
   }, []);
 
@@ -79,7 +79,7 @@ export function useDashboard(projectId: string | null) {
     if (!projectId) return;
     setLoading(true);
     const data = await window.api.getDashboard(projectId);
-    setDashboard(data as Dashboard);
+    setDashboard(data);
     setLoading(false);
   }, [projectId]);
 
