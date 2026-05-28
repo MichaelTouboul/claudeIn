@@ -1,8 +1,9 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Bot, Wrench, Settings, BarChart3, Globe, User,
-  Link, Unlink, Network, Cog, Star, Terminal, GitBranch, History,
+  Link, Unlink, Network, Cog, Star, Terminal, GitBranch, History, MessageSquare,
 } from "lucide-react";
+
 import type { AgentFile } from "../types/agent.types";
 import type { SkillFile, HookConfig, Project } from "../hooks/useProjects";
 import { useFavorites } from "../hooks/useFavorites";
@@ -12,12 +13,34 @@ import AgentTree from "./AgentTree";
 import CostDashboard from "./CostDashboard";
 import SessionList from "./SessionList";
 import SessionViewer from "./SessionViewer";
-import Accordion from "./Accordion";
+import { Accordion } from '@/components/_ui/Accordion';
 import AgentContextMenu from "./AgentContextMenu";
 import ItemContextMenu from "./ItemContextMenu";
 import AgentChat from "./AgentChat";
 
+// Inject animation keyframes
+if (typeof document !== "undefined" && !document.getElementById("chat-animations")) {
+  const style = document.createElement("style");
+  style.id = "chat-animations";
+  style.textContent = `
+    @keyframes chatSlideIn {
+      0% { opacity: 0; transform: translateX(-16px); max-height: 0; }
+      50% { max-height: 40px; }
+      100% { opacity: 1; transform: translateX(0); max-height: 40px; }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
 type MainView = "agent" | "skill" | "hook" | "tree" | "costs" | "session" | "chat" | "none";
+
+type OpenChat = {
+  id: string;
+  agentName: string;
+  title: string;
+  createdAt: number;
+  isNew: boolean;
+};
 
 const colorMap: Record<string, string> = {
   cyan: "bg-cyan-500", blue: "bg-blue-500", green: "bg-green-500",
@@ -513,6 +536,78 @@ export default function ProjectDashboard({
   const { isFavorite, toggle: toggleFavorite } = useFavorites(project.id);
   const { sessions, loading: sessionsLoading, conversation, conversationLoading, selectSession } = useSessions(project.path);
   const [resumeChat, setResumeChat] = useState<{ agentName: string; sessionId: string; message: string } | null>(null);
+  const [openChats, setOpenChats] = useState<OpenChat[]>([]);
+  const chatIdCounter = useRef(0);
+  const pendingTitles = useRef(new Map<string, string>());
+
+  const addOpenChat = useCallback((agentName: string, title: string) => {
+    const id = `chat-${++chatIdCounter.current}-${Date.now()}`;
+    setOpenChats((prev) => [
+      { id, agentName, title, createdAt: Date.now(), isNew: true },
+      ...prev,
+    ]);
+    setTimeout(() => {
+      setOpenChats((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, isNew: false } : c))
+      );
+    }, 600);
+    return id;
+  }, []);
+
+  // Auto-rename chats with LLM-generated title after first exchange
+  useEffect(() => {
+    const cleanup = window.api.onEvent((data: any) => {
+      if (data.type === "spawn_message" && data.message?.content) {
+        const agent: string = data.agentName || "";
+        const role: string = data.message.role;
+        const content: string = data.message.content;
+
+        if (role === "user") {
+          // Check if there's a chat with a generic title
+          setOpenChats((prev) => {
+            const hasGeneric = prev.some(
+              (c) =>
+                (c.agentName === agent || c.agentName === "claude") &&
+                (c.title === "New chat" || c.title.startsWith("Chat with "))
+            );
+            if (!hasGeneric || pendingTitles.current.has(agent)) return prev;
+
+            pendingTitles.current.set(agent, content);
+
+            // Show truncated preview immediately
+            let preview = content.replace(/[\n\r]+/g, " ").trim();
+            if (preview.length > 40) preview = preview.slice(0, 37) + "...";
+
+            return prev.map((c) =>
+              (c.agentName === agent || c.agentName === "claude") &&
+              (c.title === "New chat" || c.title.startsWith("Chat with "))
+                ? { ...c, title: preview }
+                : c
+            );
+          });
+        }
+
+        if (role === "assistant" && pendingTitles.current.has(agent)) {
+          const userMsg = pendingTitles.current.get(agent)!;
+          pendingTitles.current.delete(agent);
+
+          // Call LLM to generate a proper title
+          window.api.generateTitle(userMsg, content).then((title) => {
+            if (title) {
+              setOpenChats((prev) =>
+                prev.map((c) =>
+                  c.agentName === agent || c.agentName === "claude"
+                    ? { ...c, title }
+                    : c
+                )
+              );
+            }
+          });
+        }
+      }
+    });
+    return cleanup;
+  }, []);
 
   const togglePanel = (panel: string) => {
     setOpenPanels((prev) => {
@@ -609,6 +704,7 @@ export default function ProjectDashboard({
   const handleSessionResume = (sessionId: string, message: string) => {
     const session = sessions.find((s) => s.sessionId === sessionId);
     const agentName = session?.agentName || "claude";
+    addOpenChat(agentName, `Resume: ${session?.title || agentName}`);
     setResumeChat({ agentName, sessionId, message });
     setView("chat");
   };
@@ -722,6 +818,69 @@ export default function ProjectDashboard({
                           {Math.round(ctx.percent)}%
                         </span>
                       </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Open Chats */}
+        {openChats.length > 0 && (
+          <div className="px-3 pb-2" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+            <div className="flex items-center gap-2 mb-1.5 px-1">
+              <span
+                className="text-[10px] font-semibold uppercase tracking-widest"
+                style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}
+              >
+                Chats
+              </span>
+            </div>
+            <div className="space-y-0.5">
+              {openChats.map((chat) => {
+                const colorHex: Record<string, string> = {
+                  cyan: "#06b6d4", blue: "#3b82f6", green: "#22c55e",
+                  yellow: "#eab308", orange: "#f97316", red: "#ef4444",
+                  purple: "#a855f7", pink: "#ec4899",
+                };
+                const agent = agents.find((a) => a.frontmatter.name === chat.agentName || a.id === chat.agentName);
+                const dotColor = colorHex[agent?.frontmatter?.color || ""] || "#06b6d4";
+                const isActive = activeAgents.has(chat.agentName);
+
+                return (
+                  <button
+                    key={chat.id}
+                    onClick={() => {
+                      if (agent) {
+                        setSelectedAgent(agent);
+                        setSelectedSkill(null);
+                        setView("agent");
+                      }
+                    }}
+                    className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors text-left"
+                    style={{
+                      background: 'transparent',
+                      animation: chat.isNew ? 'chatSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1)' : undefined,
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-2)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <MessageSquare size={12} style={{ color: dotColor }} className="shrink-0" />
+                    <span
+                      className="text-xs truncate"
+                      style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}
+                    >
+                      {chat.title}
+                    </span>
+                    {isActive && (
+                      <span
+                        className="w-1.5 h-1.5 rounded-full shrink-0 ml-auto"
+                        style={{
+                          backgroundColor: dotColor,
+                          animation: 'pulse 1s ease-in-out infinite',
+                        }}
+                      />
                     )}
                   </button>
                 );
@@ -1005,6 +1164,7 @@ export default function ProjectDashboard({
                 <div>
                   <button
                     onClick={() => {
+                      addOpenChat("claude", "New chat");
                       setResumeChat({ agentName: "claude", sessionId: "", message: "" });
                       setView("chat");
                     }}
@@ -1065,6 +1225,7 @@ export default function ProjectDashboard({
                           <button
                             key={s.sessionId}
                             onClick={() => {
+                              addOpenChat(s.agentName || "claude", s.title || s.firstPrompt || "Session");
                               setSelectedSessionId(s.sessionId);
                               selectSession(s.filePath);
                               setView("session");
@@ -1149,6 +1310,7 @@ export default function ProjectDashboard({
                             <button
                               key={agent.id}
                               onClick={() => {
+                                addOpenChat(agent.frontmatter.name, `Chat with ${agent.frontmatter.name}`);
                                 setSelectedAgent(agent);
                                 setSelectedSkill(null);
                                 setView("agent");

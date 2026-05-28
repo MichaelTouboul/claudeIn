@@ -1,17 +1,7 @@
 import { useState } from "react";
 import { ChevronRight, RefreshCw } from "lucide-react";
 
-export default function Accordion({
-  label,
-  icon,
-  count,
-  defaultOpen = false,
-  open: controlledOpen,
-  onToggle,
-  onRefresh,
-  flex = false,
-  children,
-}: {
+export type AccordionProps = {
   label: string;
   icon: React.ReactNode;
   count?: number;
@@ -21,7 +11,19 @@ export default function Accordion({
   onRefresh?: () => void;
   flex?: boolean;
   children: React.ReactNode;
-}) {
+};
+
+export function Accordion({
+  label,
+  icon,
+  count,
+  defaultOpen = false,
+  open: controlledOpen,
+  onToggle,
+  onRefresh,
+  flex = false,
+  children,
+}: AccordionProps) {
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
   const [hovered, setHovered] = useState(false);
   const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
