@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import type { AgentFile, AgentFrontmatter } from "../types/agent.types";
 import { api } from "../services/api";
-import MemoryManager from "./MemoryManager";
+import { MemoryManager } from "@/components/MemoryManager/MemoryManager";
 import { MarkdownBody } from '@/components/_ui/MarkdownBody';
 import AgentChat from "./AgentChat";
 import { Terminal } from "lucide-react";

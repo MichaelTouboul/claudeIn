@@ -11,11 +11,11 @@ import { useSessions } from "../hooks/useSessions";
 import AgentDetail from "./AgentDetail";
 import AgentTree from "./AgentTree";
 import CostDashboard from "./CostDashboard";
-import SessionList from "./SessionList";
-import SessionViewer from "./SessionViewer";
+import { SessionList } from "@/components/SessionList/SessionList";
+import { SessionViewer } from "@/components/SessionViewer/SessionViewer";
 import { Accordion } from '@/components/_ui/Accordion';
-import AgentContextMenu from "./AgentContextMenu";
-import ItemContextMenu from "./ItemContextMenu";
+import { AgentContextMenu } from "@/components/AgentContextMenu/AgentContextMenu";
+import { ItemContextMenu } from "@/components/ItemContextMenu/ItemContextMenu";
 import AgentChat from "./AgentChat";
 
 // Inject animation keyframes
