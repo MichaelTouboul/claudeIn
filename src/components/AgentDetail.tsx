@@ -17,6 +17,7 @@ import MemoryManager from "./MemoryManager";
 import MarkdownBody from "./MarkdownBody";
 import AgentChat from "./AgentChat";
 import { Terminal } from "lucide-react";
+import { Badge, toBadgeVariant } from '@/components/_ui/Badge';
 
 const TABS = ["overview", "chat", "prompt", "memory", "files"] as const;
 type Tab = (typeof TABS)[number];
@@ -28,34 +29,6 @@ const tabIcons: Record<Tab, React.ReactNode> = {
   memory: <Brain size={14} />,
   files: <Database size={14} />,
 };
-
-function Badge({ children, variant }: { children: React.ReactNode; variant: string }) {
-  const colorMap: Record<string, { bg: string; text: string; border: string }> = {
-    blue:   { bg: 'rgba(59,130,246,0.12)',  text: '#93c5fd', border: 'rgba(59,130,246,0.2)' },
-    green:  { bg: 'rgba(34,197,94,0.12)',   text: '#86efac', border: 'rgba(34,197,94,0.2)' },
-    yellow: { bg: 'rgba(234,179,8,0.12)',   text: '#fde047', border: 'rgba(234,179,8,0.2)' },
-    orange: { bg: 'rgba(249,115,22,0.12)',  text: '#fdba74', border: 'rgba(249,115,22,0.2)' },
-    cyan:   { bg: 'var(--color-accent-dim)', text: 'var(--color-accent)', border: 'rgba(6,182,212,0.2)' },
-    purple: { bg: 'rgba(168,85,247,0.12)',  text: '#c4b5fd', border: 'rgba(168,85,247,0.2)' },
-    gray:   { bg: 'var(--color-surface-3)', text: 'var(--color-text-secondary)', border: 'var(--color-border-subtle)' },
-    red:    { bg: 'rgba(248,113,113,0.12)', text: '#fca5a5', border: 'rgba(248,113,113,0.2)' },
-  };
-  const c = colorMap[variant] || colorMap.gray;
-  return (
-    <span
-      className="px-2 py-0.5 rounded text-xs font-medium"
-      style={{
-        fontFamily: 'var(--font-mono)',
-        background: c.bg,
-        color: c.text,
-        border: `1px solid ${c.border}`,
-        letterSpacing: '0.01em',
-      }}
-    >
-      {children}
-    </span>
-  );
-}
 
 const MODEL_OPTIONS = ["", "opus", "sonnet", "haiku"];
 const COLOR_OPTIONS = ["", "cyan", "blue", "green", "yellow", "orange", "red", "purple", "pink"];
@@ -92,7 +65,7 @@ function fieldDisplayValue(fm: AgentFrontmatter, key: string): React.ReactNode {
   if (val === undefined || val === null || val === "") return <span style={{ color: 'var(--color-text-muted)' }}>—</span>;
 
   if (key === "model") return <Badge variant={val === "opus" ? "purple" : val === "sonnet" ? "blue" : "gray"}>{String(val)}</Badge>;
-  if (key === "color") return <Badge variant={String(val)}>{String(val)}</Badge>;
+  if (key === "color") return <Badge variant={toBadgeVariant(String(val))}>{String(val)}</Badge>;
   if (key === "memory") return <Badge variant="green">{String(val)}</Badge>;
   if (key === "background") return <Badge variant={val ? "green" : "gray"}>{val ? "yes" : "no"}</Badge>;
 
