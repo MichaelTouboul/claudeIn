@@ -9,110 +9,17 @@ import {
   PieChart,
   Pie,
   Cell,
-  Legend,
   AreaChart,
   Area,
 } from "recharts";
-import { DollarSign, Zap, TrendingUp, Clock } from "lucide-react";
+import { DollarSign, Zap, TrendingUp } from "lucide-react";
 
-type Summary = {
-  tokens_in_today: string;
-  tokens_out_today: string;
-  cost_today: number;
-  tokens_in_7d: string;
-  tokens_out_7d: string;
-  cost_7d: number;
-  tokens_in_30d: string;
-  tokens_out_30d: string;
-  cost_30d: number;
-  tokens_in_all: string;
-  tokens_out_all: string;
-  cost_all: number;
-};
+import type { AgentData, DayData, Summary, ToolData } from './types';
+import { COLORS, PERIODS, formatDay, formatTokens } from './utils';
+import { BigStat } from './BigStat/BigStat';
+import { CustomTooltip } from './CustomTooltip/CustomTooltip';
 
-type DayData = {
-  day: string;
-  tokens_in: string;
-  tokens_out: string;
-  cost_usd: number;
-  events_count: string;
-};
-
-type AgentData = {
-  agent_name: string;
-  tokens_in: string;
-  tokens_out: string;
-  cost_usd: number;
-  events_count: string;
-  active_days: string;
-  last_seen: string;
-};
-
-type ToolData = {
-  tool_name: string;
-  tokens_in: string;
-  tokens_out: string;
-  cost_usd: number;
-  call_count: string;
-};
-
-const COLORS = ["#06b6d4", "#3b82f6", "#22c55e", "#eab308", "#f97316", "#a855f7", "#ec4899", "#ef4444"];
-const PERIODS = [
-  { label: "7d", days: 7 },
-  { label: "30d", days: 30 },
-  { label: "90d", days: 90 },
-];
-
-function formatTokens(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-  return String(n);
-}
-
-function formatDay(day: string): string {
-  return new Date(day).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
-
-function BigStat({
-  icon,
-  label,
-  value,
-  sub,
-  color,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  sub?: string;
-  color: string;
-}) {
-  return (
-    <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-4">
-      <div className="flex items-center gap-2 mb-2">
-        <span className={color}>{icon}</span>
-        <span className="text-xs text-gray-500 uppercase tracking-wider">{label}</span>
-      </div>
-      <div className={`text-2xl font-bold ${color}`}>{value}</div>
-      {sub && <div className="text-xs text-gray-500 mt-1">{sub}</div>}
-    </div>
-  );
-}
-
-function CustomTooltip({ active, payload, label }: any) {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 shadow-xl text-xs">
-      <p className="text-gray-400 mb-1">{label}</p>
-      {payload.map((p: any) => (
-        <p key={p.name} style={{ color: p.color }}>
-          {p.name}: {typeof p.value === "number" && p.name.includes("$") ? `$${p.value.toFixed(4)}` : formatTokens(p.value)}
-        </p>
-      ))}
-    </div>
-  );
-}
-
-export default function CostDashboard() {
+export function CostDashboard() {
   const [period, setPeriod] = useState(30);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [dailyData, setDailyData] = useState<DayData[]>([]);
@@ -188,7 +95,7 @@ export default function CostDashboard() {
       </div>
 
       {/* Top stats */}
-      {summary && (
+      {summary ? (
         <div className="grid grid-cols-4 gap-4">
           <BigStat
             icon={<DollarSign size={16} />}
@@ -219,7 +126,7 @@ export default function CostDashboard() {
             color="text-yellow-400"
           />
         </div>
-      )}
+      ) : null}
 
       <div className="grid grid-cols-3 gap-6">
         {/* Tokens per day - area chart */}
@@ -229,7 +136,7 @@ export default function CostDashboard() {
             <AreaChart data={chartDaily}>
               <XAxis dataKey="day" tick={{ fill: "#6b7280", fontSize: 10 }} />
               <YAxis tick={{ fill: "#6b7280", fontSize: 10 }} tickFormatter={formatTokens} />
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={CustomTooltip} />
               <Area type="monotone" dataKey="Tokens In" stackId="1" stroke="#06b6d4" fill="#06b6d4" fillOpacity={0.3} />
               <Area type="monotone" dataKey="Tokens Out" stackId="1" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.3} />
             </AreaChart>
@@ -260,7 +167,7 @@ export default function CostDashboard() {
                     <Cell key={i} fill={entry.fill} />
                   ))}
                 </Pie>
-                <Tooltip content={<CustomTooltip />} />
+                <Tooltip content={CustomTooltip} />
               </PieChart>
             </ResponsiveContainer>
           )}
@@ -274,7 +181,7 @@ export default function CostDashboard() {
           <BarChart data={chartDaily}>
             <XAxis dataKey="day" tick={{ fill: "#6b7280", fontSize: 10 }} />
             <YAxis tick={{ fill: "#6b7280", fontSize: 10 }} tickFormatter={(v) => `$${v.toFixed(2)}`} />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={CustomTooltip} />
             <Bar dataKey="$ Cost" fill="#22c55e" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>

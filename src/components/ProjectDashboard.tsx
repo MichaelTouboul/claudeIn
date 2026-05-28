@@ -10,7 +10,7 @@ import { useFavorites } from "../hooks/useFavorites";
 import { useSessions } from "../hooks/useSessions";
 import AgentDetail from "./AgentDetail";
 import { AgentTree } from '@/components/AgentTree/AgentTree';
-import CostDashboard from "./CostDashboard";
+import { CostDashboard } from '@/components/CostDashboard/CostDashboard';
 import { SessionList } from "@/components/SessionList/SessionList";
 import { SessionViewer } from "@/components/SessionViewer/SessionViewer";
 import { Accordion } from '@/components/_ui/Accordion';
