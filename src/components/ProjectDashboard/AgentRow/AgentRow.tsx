@@ -34,13 +34,13 @@ export function AgentRow({
       <button
         onClick={() => onSelect(agent)}
         className={`relative flex-1 flex items-center gap-2 px-3 py-2 rounded-lg transition-colors overflow-hidden ${
-          selected ? "bg-gray-700 text-white" : "text-gray-300 hover:bg-gray-800"
+          selected ? "bg-surface-3 text-white" : "text-fg hover:bg-surface-2"
         }`}
       >
         {active && context && context.percent > 0 && (
           <ContextBar percent={context.percent} tokensIn={context.tokensIn} tokensOut={context.tokensOut} costUsd={context.costUsd} />
         )}
-        <span className={`relative w-2 h-2 rounded-full shrink-0 ${active ? "bg-green-400 animate-pulse" : (colorMap[agent.frontmatter.color || ""] || "bg-gray-500")}`} />
+        <span className={`relative w-2 h-2 rounded-full shrink-0 ${active ? "bg-active animate-pulse" : (colorMap[agent.frontmatter.color || ""] || "bg-surface-3")}`} />
         <span className="relative truncate text-sm font-medium">{agent.id}</span>
       </button>
       <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -51,8 +51,8 @@ export function AgentRow({
           onClick={() => onToggleLink(agent.id)}
           className={`p-1.5 mr-1 rounded shrink-0 transition-colors ${
             linkAction === "link"
-              ? "text-gray-600 hover:text-green-400 hover:bg-green-500/10"
-              : "text-green-400/60 hover:text-red-400 hover:bg-red-500/10"
+              ? "text-fg-subtle hover:text-active hover:bg-active/10"
+              : "text-active/60 hover:text-danger hover:bg-danger/10"
           }`}
         >
           {linkAction === "link" ? <Link size={12} /> : <Unlink size={12} />}

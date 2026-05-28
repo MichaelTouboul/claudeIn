@@ -58,10 +58,10 @@ export function DetailHeader({
           {onToggleFavorite && (
             <button
               onClick={onToggleFavorite}
-              className="p-1 rounded hover:bg-gray-800 transition-colors"
+              className="p-1 rounded hover:bg-surface-2 transition-colors"
               title={isFavorite ? "Remove from favorites" : "Add to favorites"}
             >
-              <Star size={16} className={isFavorite ? "text-yellow-400 fill-yellow-400" : "text-gray-600 hover:text-yellow-400"} />
+              <Star size={16} className={isFavorite ? "text-yellow-400 fill-yellow-400" : "text-fg-subtle hover:text-yellow-400"} />
             </button>
           )}
           <Badge variant={agent.frontmatter.model === "opus" ? "purple" : "blue"}>

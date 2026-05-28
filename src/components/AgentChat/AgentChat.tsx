@@ -187,7 +187,7 @@ export function AgentChat({ agentName, resumeSessionId, initialMessage }: AgentC
   };
 
   return (
-    <div className="h-full flex flex-col bg-gray-950 rounded-lg border border-gray-800">
+    <div className="h-full flex flex-col bg-surface-0 rounded-lg border border-border">
       <AgentChatHeader agentName={agentName} session={session} isRunning={isRunning ?? false} waitingInput={waitingInput} onKill={handleKill} />
       <AgentChatMessages
         agentName={agentName} messages={messages} session={session}

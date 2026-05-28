@@ -19,8 +19,8 @@ export function HookRow({
       <div className="flex-1 flex items-center gap-2 px-3 py-1.5 text-xs">
         <Settings size={10} className="text-yellow-400 shrink-0" />
         <span className="text-yellow-400 font-mono">{hook.event}</span>
-        <span className="text-gray-600">→</span>
-        <span className="text-gray-400 font-mono truncate">{hook.matcher}</span>
+        <span className="text-fg-subtle">→</span>
+        <span className="text-fg-muted font-mono truncate">{hook.matcher}</span>
       </div>
       <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
         <ItemContextMenu isFavorite={isFavorite} onToggleFavorite={onToggleFavorite} />

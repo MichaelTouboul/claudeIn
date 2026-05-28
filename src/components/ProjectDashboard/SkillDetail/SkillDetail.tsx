@@ -29,19 +29,19 @@ export function SkillDetail({ skill, isFavorite, onToggleFavorite }: SkillDetail
       {/* Header */}
       <div className="px-6 pt-5 pb-3">
         <div className="flex items-center gap-2 mb-1">
-          <Wrench size={16} className="text-green-400" />
+          <Wrench size={16} className="text-active" />
           <h2 className="text-lg font-bold text-white">{skill.name}</h2>
           {onToggleFavorite && (
             <button
               onClick={onToggleFavorite}
-              className="p-1 rounded hover:bg-gray-800 transition-colors"
+              className="p-1 rounded hover:bg-surface-2 transition-colors"
               title={isFavorite ? "Remove from favorites" : "Add to favorites"}
             >
-              <Star size={16} className={isFavorite ? "text-yellow-400 fill-yellow-400" : "text-gray-600 hover:text-yellow-400"} />
+              <Star size={16} className={isFavorite ? "text-yellow-400 fill-yellow-400" : "text-fg-subtle hover:text-yellow-400"} />
             </button>
           )}
           <span className={`text-xs px-2 py-0.5 rounded-full ${
-            skill.scope === "user" ? "bg-yellow-500/15 text-yellow-400" : "bg-cyan-500/15 text-cyan-400"
+            skill.scope === "user" ? "bg-yellow-500/15 text-yellow-400" : "bg-accent/15 text-accent"
           }`}>
             {skill.scope}
           </span>
@@ -49,27 +49,27 @@ export function SkillDetail({ skill, isFavorite, onToggleFavorite }: SkillDetail
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 px-6 border-b border-gray-800">
+      <div className="flex items-center gap-1 px-6 border-b border-border">
         <button
           onClick={() => setTab("chat")}
           className={`flex items-center gap-1.5 px-3 py-1.5 my-1.5 mr-2 text-xs font-medium rounded-lg transition-colors ${
             tab === "chat"
-              ? "bg-cyan-600 text-white"
-              : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+              ? "bg-accent text-white"
+              : "bg-surface-3 text-fg hover:bg-surface-3"
           }`}
         >
           <Terminal size={12} />
           Chat
         </button>
-        <div className="w-px h-4 bg-gray-700 mr-1" />
+        <div className="w-px h-4 bg-surface-3 mr-1" />
         {tabs.filter((t) => t.key !== "chat").map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
             className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
               tab === t.key
-                ? "border-cyan-400 text-cyan-400"
-                : "border-transparent text-gray-500 hover:text-gray-300"
+                ? "border-accent text-accent"
+                : "border-transparent text-fg-muted hover:text-fg"
             }`}
           >
             {t.label}

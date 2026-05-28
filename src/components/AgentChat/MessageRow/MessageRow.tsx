@@ -21,11 +21,11 @@ export function MessageRow({ msg, isLast, quickReplies, onQuickReply }: MessageR
     return (
       <div className="group">
         <div className="flex items-center gap-2 mb-0.5">
-          <ChevronRight size={12} className="text-cyan-400" />
-          <span className="text-xs text-cyan-400 font-medium">you</span>
-          <span className="text-xs text-gray-600 opacity-0 group-hover:opacity-100">{time}</span>
+          <ChevronRight size={12} className="text-accent" />
+          <span className="text-xs text-accent font-medium">you</span>
+          <span className="text-xs text-fg-subtle opacity-0 group-hover:opacity-100">{time}</span>
         </div>
-        <pre className="text-sm text-cyan-300 whitespace-pre-wrap font-mono ml-5 leading-relaxed">{renderContentWithImages(msg.content)}</pre>
+        <pre className="text-sm text-accent whitespace-pre-wrap font-mono ml-5 leading-relaxed">{renderContentWithImages(msg.content)}</pre>
       </div>
     );
   }
@@ -36,9 +36,9 @@ export function MessageRow({ msg, isLast, quickReplies, onQuickReply }: MessageR
         <div className="flex items-center gap-2 mb-0.5">
           <Wrench size={10} className="text-yellow-500" />
           <span className="text-xs text-yellow-500 font-mono">{msg.toolName || "tool"}</span>
-          <span className="text-xs text-gray-600 opacity-0 group-hover:opacity-100">{time}</span>
+          <span className="text-xs text-fg-subtle opacity-0 group-hover:opacity-100">{time}</span>
         </div>
-        <pre className="text-xs text-gray-500 whitespace-pre-wrap font-mono leading-relaxed max-h-32 overflow-y-auto">{renderContentWithImages(msg.content)}</pre>
+        <pre className="text-xs text-fg-muted whitespace-pre-wrap font-mono leading-relaxed max-h-32 overflow-y-auto">{renderContentWithImages(msg.content)}</pre>
       </div>
     );
   }
@@ -51,14 +51,14 @@ export function MessageRow({ msg, isLast, quickReplies, onQuickReply }: MessageR
         {hasPermission ? (
           <Shield size={12} className="text-yellow-400" />
         ) : (
-          <Bot size={12} className="text-gray-400" />
+          <Bot size={12} className="text-fg-muted" />
         )}
-        <span className={`text-xs font-medium ${hasPermission ? "text-yellow-400" : "text-gray-400"}`}>
+        <span className={`text-xs font-medium ${hasPermission ? "text-yellow-400" : "text-fg-muted"}`}>
           {hasPermission ? "authorization" : "agent"}
         </span>
-        <span className="text-xs text-gray-600 opacity-0 group-hover:opacity-100">{time}</span>
+        <span className="text-xs text-fg-subtle opacity-0 group-hover:opacity-100">{time}</span>
       </div>
-      <pre className={`text-sm whitespace-pre-wrap font-mono ml-5 leading-relaxed ${hasPermission ? "text-yellow-200/80" : "text-gray-200"}`}>
+      <pre className={`text-sm whitespace-pre-wrap font-mono ml-5 leading-relaxed ${hasPermission ? "text-yellow-200/80" : "text-fg"}`}>
         {renderContentWithImages(msg.content)}
       </pre>
       {isLast && quickReplies && (

@@ -21,14 +21,14 @@ export function SkillOverview({ skill }: SkillOverviewProps) {
       <table className="w-full text-sm">
         <tbody>
           {rows.map(([label, value]) => (
-            <tr key={label} className="border-b border-gray-800/50">
-              <td className="py-2 pr-4 text-gray-500 font-medium w-40">{label}</td>
-              <td className="py-2 text-gray-300">{value}</td>
+            <tr key={label} className="border-b border-border/50">
+              <td className="py-2 pr-4 text-fg-muted font-medium w-40">{label}</td>
+              <td className="py-2 text-fg">{value}</td>
             </tr>
           ))}
         </tbody>
       </table>
-      <div className="text-xs text-gray-600 font-mono">{skill.filePath}</div>
+      <div className="text-xs text-fg-subtle font-mono">{skill.filePath}</div>
     </div>
   );
 }

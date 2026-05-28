@@ -45,7 +45,7 @@ export function AgentChatInput({
   onSend,
 }: AgentChatInputProps) {
   return (
-    <div className={`relative border-t p-3 ${waitingInput ? "border-yellow-500/50 bg-yellow-500/5" : "border-gray-800"}`}>
+    <div className={`relative border-t p-3 ${waitingInput ? "border-yellow-500/50 bg-yellow-500/5" : "border-border"}`}>
       {/* Attached files preview */}
       {attachedFiles.length > 0 ? (
         <div className="flex flex-wrap gap-2 px-3 pt-2 pb-1">
@@ -89,24 +89,24 @@ export function AgentChatInput({
 
       {/* Slash command popup */}
       {showSlash && filteredCommands.length > 0 ? (
-        <div className="absolute bottom-full left-3 right-3 mb-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl max-h-48 overflow-y-auto py-1">
+        <div className="absolute bottom-full left-3 right-3 mb-1 bg-surface-2 border border-border rounded-lg shadow-xl max-h-48 overflow-y-auto py-1">
           {filteredCommands.map((cmd, i) => (
             <button
               key={cmd.cmd}
               onClick={() => onSelectSlash(cmd.cmd)}
               className={`w-full flex items-center gap-3 px-3 py-1.5 text-xs transition-colors ${
-                i === slashIndex ? "bg-cyan-500/20 text-cyan-300" : "text-gray-300 hover:bg-gray-700"
+                i === slashIndex ? "bg-accent/20 text-accent" : "text-fg hover:bg-surface-3"
               }`}
             >
               <span className="font-mono text-yellow-400 w-28 text-left">{cmd.cmd}</span>
-              <span className="text-gray-500">{cmd.desc}</span>
+              <span className="text-fg-muted">{cmd.desc}</span>
             </button>
           ))}
         </div>
       ) : null}
 
       <div className="flex gap-2 items-end">
-        <div className={`flex items-center text-sm shrink-0 pt-1.5 ${waitingInput ? "text-yellow-400" : "text-cyan-500"}`}>
+        <div className={`flex items-center text-sm shrink-0 pt-1.5 ${waitingInput ? "text-yellow-400" : "text-accent"}`}>
           <ChevronRight size={14} />
         </div>
         <textarea
@@ -116,7 +116,7 @@ export function AgentChatInput({
           onKeyDown={onKeyDown}
           placeholder={waitingInput ? "Type your response (yes / no / ...)..." : session && isRunning ? "Send a message..." : "Type a prompt or / for commands..."}
           rows={1}
-          className="flex-1 bg-transparent text-gray-200 text-sm resize-none focus:outline-none font-mono placeholder-gray-700 leading-relaxed"
+          className="flex-1 bg-transparent text-fg text-sm resize-none focus:outline-none font-mono placeholder-gray-700 leading-relaxed"
           onInput={(e) => {
             const el = e.currentTarget;
             el.style.height = "auto";
@@ -125,7 +125,7 @@ export function AgentChatInput({
         />
         <button
           onClick={onAttach}
-          className="p-1.5 text-gray-500 hover:text-gray-300 transition-colors shrink-0"
+          className="p-1.5 text-fg-muted hover:text-fg transition-colors shrink-0"
           title="Attach file"
         >
           <Paperclip size={16} />
@@ -133,7 +133,7 @@ export function AgentChatInput({
         <button
           onClick={onSend}
           disabled={(!input.trim() && attachedFiles.length === 0) || spawning}
-          className="p-1.5 text-cyan-400 hover:text-cyan-300 disabled:text-gray-700 transition-colors shrink-0"
+          className="p-1.5 text-accent hover:text-accent disabled:text-fg-subtle transition-colors shrink-0"
         >
           {spawning ? (
             <Loader2 size={16} className="animate-spin" />

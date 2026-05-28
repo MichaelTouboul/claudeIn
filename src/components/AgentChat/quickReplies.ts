@@ -42,7 +42,7 @@ export function detectQuickReplies(content: string): QuickReply[] | null {
 }
 
 export const replyStyles: Record<string, string> = {
-  accept: "bg-green-600/20 text-green-400 border-green-500/30 hover:bg-green-600/30",
-  deny: "bg-red-600/20 text-red-400 border-red-500/30 hover:bg-red-600/30",
-  neutral: "bg-gray-700/50 text-gray-300 border-gray-600/30 hover:bg-gray-700",
+  accept: "bg-active/20 text-active border-active/30 hover:bg-active/30",
+  deny: "bg-danger/20 text-danger border-danger/30 hover:bg-danger/30",
+  neutral: "bg-surface-3/50 text-fg border-border/30 hover:bg-surface-3",
 };

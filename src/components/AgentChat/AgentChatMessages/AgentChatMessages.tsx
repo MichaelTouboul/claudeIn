@@ -36,15 +36,15 @@ export function AgentChatMessages({
       {messages.length === 0 && !session ? (
         <div className="h-full flex items-center justify-center">
           <div className="text-center">
-            <Terminal size={32} className="text-gray-800 mx-auto mb-2" />
-            <p className="text-gray-600 text-xs">Type a prompt to start a session with <span className="text-cyan-500">{agentName}</span></p>
-            <p className="text-gray-700 text-xs mt-1">Type <span className="text-yellow-500">/</span> for commands</p>
+            <Terminal size={32} className="text-fg-subtle mx-auto mb-2" />
+            <p className="text-fg-subtle text-xs">Type a prompt to start a session with <span className="text-accent">{agentName}</span></p>
+            <p className="text-fg-subtle text-xs mt-1">Type <span className="text-yellow-500">/</span> for commands</p>
           </div>
         </div>
       ) : null}
       {messages.length === 0 && session ? (
         <div className="h-full flex items-center justify-center">
-          <Loader2 size={20} className="text-cyan-400 animate-spin" />
+          <Loader2 size={20} className="text-accent animate-spin" />
         </div>
       ) : null}
       {messages.map((msg, i) => (
@@ -57,7 +57,7 @@ export function AgentChatMessages({
         />
       ))}
       {isRunning && awaitingResponse && !waitingInput ? (
-        <div className="flex items-center gap-2 text-gray-600 text-xs ml-5">
+        <div className="flex items-center gap-2 text-fg-subtle text-xs ml-5">
           <Loader2 size={10} className="animate-spin" />
           thinking...
         </div>
@@ -66,9 +66,9 @@ export function AgentChatMessages({
         <div className="space-y-1 ml-5 mt-1">
           {queue.map((q, i) => (
             <div key={i} className="flex items-center gap-2 opacity-40">
-              <ChevronRight size={10} className="text-cyan-400" />
-              <span className="text-xs text-cyan-300 font-mono">{q}</span>
-              <span className="text-[10px] text-gray-600 italic">queued</span>
+              <ChevronRight size={10} className="text-accent" />
+              <span className="text-xs text-accent font-mono">{q}</span>
+              <span className="text-[10px] text-fg-subtle italic">queued</span>
             </div>
           ))}
         </div>

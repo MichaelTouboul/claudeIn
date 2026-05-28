@@ -99,7 +99,7 @@ export function TreeNode({
     >
       <div className="flex items-center gap-2">
         {isOrchestrator ? (
-          <Network size={13} className={isActive ? "text-green-400" : ""} style={isActive ? undefined : { color: 'rgba(6,182,212,0.5)' }} />
+          <Network size={13} className={isActive ? "text-active" : ""} style={isActive ? undefined : { color: 'rgba(6,182,212,0.5)' }} />
         ) : (
           <Cog size={11} style={{ color: isActive ? '#4ade80' : 'var(--color-text-muted)' }} />
         )}

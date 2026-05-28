@@ -70,15 +70,15 @@ export function CostDashboard() {
       {/* Period selector */}
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold text-white">Token & Cost Dashboard</h2>
-        <div className="flex gap-1 bg-gray-800 rounded-lg p-0.5">
+        <div className="flex gap-1 bg-surface-2 rounded-lg p-0.5">
           {PERIODS.map((p) => (
             <button
               key={p.days}
               onClick={() => setPeriod(p.days)}
               className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
                 period === p.days
-                  ? "bg-cyan-600 text-white"
-                  : "text-gray-400 hover:text-white"
+                  ? "bg-accent text-white"
+                  : "text-fg-muted hover:text-white"
               }`}
             >
               {p.label}
@@ -95,14 +95,14 @@ export function CostDashboard() {
             label="Cost today"
             value={`$${summary.cost_today.toFixed(2)}`}
             sub={`${formatTokens(parseInt(summary.tokens_in_today) + parseInt(summary.tokens_out_today))} tokens`}
-            color="text-green-400"
+            color="text-active"
           />
           <BigStat
             icon={<DollarSign size={16} />}
             label={`Cost ${period}d`}
             value={`$${(periodSummary.cost || 0).toFixed(2)}`}
             sub={`${formatTokens((parseInt(periodSummary.tokens_in || "0")) + parseInt(periodSummary.tokens_out || "0"))} tokens`}
-            color="text-cyan-400"
+            color="text-accent"
           />
           <BigStat
             icon={<Zap size={16} />}
@@ -123,8 +123,8 @@ export function CostDashboard() {
 
       <div className="grid grid-cols-3 gap-6">
         {/* Tokens per day - area chart */}
-        <div className="col-span-2 bg-gray-800/30 border border-gray-700/50 rounded-xl p-4">
-          <h3 className="text-sm font-medium text-gray-400 mb-4">Tokens per day</h3>
+        <div className="col-span-2 bg-surface-2/30 border border-border/50 rounded-xl p-4">
+          <h3 className="text-sm font-medium text-fg-muted mb-4">Tokens per day</h3>
           <ResponsiveContainer width="100%" height={240}>
             <AreaChart data={chartDaily}>
               <XAxis dataKey="day" tick={{ fill: "#6b7280", fontSize: 10 }} />
@@ -137,10 +137,10 @@ export function CostDashboard() {
         </div>
 
         {/* Tool breakdown - pie chart */}
-        <div className="bg-gray-800/30 border border-gray-700/50 rounded-xl p-4">
-          <h3 className="text-sm font-medium text-gray-400 mb-4">Tokens by tool</h3>
+        <div className="bg-surface-2/30 border border-border/50 rounded-xl p-4">
+          <h3 className="text-sm font-medium text-fg-muted mb-4">Tokens by tool</h3>
           {chartTools.length === 0 ? (
-            <p className="text-gray-600 text-xs text-center py-16">No data yet</p>
+            <p className="text-fg-subtle text-xs text-center py-16">No data yet</p>
           ) : (
             <ResponsiveContainer width="100%" height={240}>
               <PieChart>
@@ -168,8 +168,8 @@ export function CostDashboard() {
       </div>
 
       {/* Cost per day - bar chart */}
-      <div className="bg-gray-800/30 border border-gray-700/50 rounded-xl p-4">
-        <h3 className="text-sm font-medium text-gray-400 mb-4">Cost per day (USD)</h3>
+      <div className="bg-surface-2/30 border border-border/50 rounded-xl p-4">
+        <h3 className="text-sm font-medium text-fg-muted mb-4">Cost per day (USD)</h3>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={chartDaily}>
             <XAxis dataKey="day" tick={{ fill: "#6b7280", fontSize: 10 }} />
@@ -181,14 +181,14 @@ export function CostDashboard() {
       </div>
 
       {/* Agent breakdown table */}
-      <div className="bg-gray-800/30 border border-gray-700/50 rounded-xl p-4">
-        <h3 className="text-sm font-medium text-gray-400 mb-4">Cost by agent</h3>
+      <div className="bg-surface-2/30 border border-border/50 rounded-xl p-4">
+        <h3 className="text-sm font-medium text-fg-muted mb-4">Cost by agent</h3>
         {agentData.length === 0 ? (
-          <p className="text-gray-600 text-xs">No data yet</p>
+          <p className="text-fg-subtle text-xs">No data yet</p>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-gray-500 text-xs uppercase">
+              <tr className="text-fg-muted text-xs uppercase">
                 <th className="text-left py-2">Agent</th>
                 <th className="text-right py-2">Events</th>
                 <th className="text-right py-2">Tokens In</th>
@@ -205,32 +205,32 @@ export function CostDashboard() {
                   ...agentData.map((x) => parseInt(x.tokens_in) + parseInt(x.tokens_out))
                 );
                 return (
-                  <tr key={a.agent_name} className="border-t border-gray-800 hover:bg-gray-800/30">
+                  <tr key={a.agent_name} className="border-t border-border hover:bg-surface-2/30">
                     <td className="py-2.5">
                       <div className="flex items-center gap-2">
                         <span
                           className="w-2 h-2 rounded-full"
                           style={{ backgroundColor: COLORS[i % COLORS.length] }}
                         />
-                        <span className="text-gray-200 font-medium">{a.agent_name}</span>
+                        <span className="text-fg font-medium">{a.agent_name}</span>
                       </div>
                     </td>
-                    <td className="text-right text-gray-400">{a.events_count}</td>
-                    <td className="text-right text-cyan-400">{formatTokens(parseInt(a.tokens_in))}</td>
+                    <td className="text-right text-fg-muted">{a.events_count}</td>
+                    <td className="text-right text-accent">{formatTokens(parseInt(a.tokens_in))}</td>
                     <td className="text-right text-blue-400">{formatTokens(parseInt(a.tokens_out))}</td>
                     <td className="text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <div className="w-24 h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                        <div className="w-24 h-1.5 bg-surface-2 rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-cyan-500 rounded-full"
+                            className="h-full bg-accent rounded-full"
                             style={{ width: `${(total / maxTotal) * 100}%` }}
                           />
                         </div>
-                        <span className="text-gray-300 w-16 text-right">{formatTokens(total)}</span>
+                        <span className="text-fg w-16 text-right">{formatTokens(total)}</span>
                       </div>
                     </td>
-                    <td className="text-right text-green-400 font-mono">${a.cost_usd.toFixed(4)}</td>
-                    <td className="text-right text-gray-600 text-xs">
+                    <td className="text-right text-active font-mono">${a.cost_usd.toFixed(4)}</td>
+                    <td className="text-right text-fg-subtle text-xs">
                       {new Date(a.last_seen).toLocaleDateString()}
                     </td>
                   </tr>

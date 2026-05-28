@@ -44,13 +44,13 @@ export function OrchestratorTree({
         <button
           onClick={() => onSelect(orchestrator)}
           className={`relative flex-1 flex items-center gap-2 px-3 py-2 rounded-lg transition-colors overflow-hidden ${
-            selectedId === orchestrator.id ? "bg-gray-700 text-white" : "text-gray-300 hover:bg-gray-800"
+            selectedId === orchestrator.id ? "bg-surface-3 text-white" : "text-fg hover:bg-surface-2"
           }`}
         >
           {orchActive && orchCtx && orchCtx.percent > 0 && (
             <ContextBar percent={orchCtx.percent} tokensIn={orchCtx.tokensIn} tokensOut={orchCtx.tokensOut} costUsd={orchCtx.costUsd} />
           )}
-          <Network size={14} className={`relative shrink-0 ${orchActive ? "text-green-400 animate-pulse" : "text-cyan-400"}`} />
+          <Network size={14} className={`relative shrink-0 ${orchActive ? "text-active animate-pulse" : "text-accent"}`} />
           <span className="relative truncate text-sm font-medium">{orchestrator.id}</span>
         </button>
         <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -61,8 +61,8 @@ export function OrchestratorTree({
             onClick={() => onToggleLink(orchestrator.id)}
             className={`p-1.5 mr-1 rounded shrink-0 transition-colors ${
               linkAction === "link"
-                ? "text-gray-600 hover:text-green-400 hover:bg-green-500/10"
-                : "text-green-400/60 hover:text-red-400 hover:bg-red-500/10"
+                ? "text-fg-subtle hover:text-active hover:bg-active/10"
+                : "text-active/60 hover:text-danger hover:bg-danger/10"
             }`}
             title={linkAction === "link" ? "Link orchestrator + sub-agents" : "Unlink all"}
           >
@@ -71,7 +71,7 @@ export function OrchestratorTree({
         )}
       </div>
       {subs.length > 0 && (
-        <div className="ml-4 border-l border-gray-800 pl-1 space-y-0.5">
+        <div className="ml-4 border-l border-border pl-1 space-y-0.5">
           {subs.map((sub) => {
             const subActive = activeAgents?.has(sub.id);
             const subCtx = agentContexts?.get(sub.id);
@@ -80,13 +80,13 @@ export function OrchestratorTree({
               <button
                 onClick={() => onSelect(sub)}
                 className={`relative flex-1 flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors overflow-hidden ${
-                  selectedId === sub.id ? "bg-gray-700 text-white" : "text-gray-400 hover:bg-gray-800"
+                  selectedId === sub.id ? "bg-surface-3 text-white" : "text-fg-muted hover:bg-surface-2"
                 }`}
               >
                 {subActive && subCtx && subCtx.percent > 0 && (
                   <ContextBar percent={subCtx.percent} tokensIn={subCtx.tokensIn} tokensOut={subCtx.tokensOut} costUsd={subCtx.costUsd} />
                 )}
-                <Cog size={11} className={`relative shrink-0 ${subActive ? "text-green-400 animate-pulse" : "text-gray-500"}`} />
+                <Cog size={11} className={`relative shrink-0 ${subActive ? "text-active animate-pulse" : "text-fg-muted"}`} />
                 <span className="relative truncate text-xs font-medium">{sub.id}</span>
               </button>
               <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">

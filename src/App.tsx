@@ -127,7 +127,7 @@ export default function App() {
             </div>
           </div>
         ) : dashLoading ? (
-          <div className="flex-1 flex items-center justify-center text-gray-500">
+          <div className="flex-1 flex items-center justify-center text-fg-muted">
             Loading dashboard...
           </div>
         ) : dashboard ? (
