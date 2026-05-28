@@ -186,7 +186,9 @@ function processTextSegment(content: string, keyOffset: number = 0): React.React
   return <>{result}</>;
 }
 
-function InlineImage({ filePath }: { filePath: string }) {
+export type InlineImageProps = { filePath: string };
+
+export function InlineImage({ filePath }: InlineImageProps) {
   const [dataUrl, setDataUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -263,5 +265,3 @@ function InlineImage({ filePath }: { filePath: string }) {
     </span>
   );
 }
-
-export default InlineImage;

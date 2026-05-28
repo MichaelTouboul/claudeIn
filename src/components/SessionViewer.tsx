@@ -1,7 +1,7 @@
 import { Bot, ChevronRight, Wrench, ArrowUp, ArrowDown, ChevronsDown, Send } from "lucide-react";
 import { useRef, useEffect, useState, useCallback } from "react";
 import type { SessionConversation } from "../hooks/useSessions";
-import { renderContentWithImages } from "./InlineImage";
+import { renderContentWithImages } from '@/components/_ui/InlineImage';
 
 function formatTokens(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;

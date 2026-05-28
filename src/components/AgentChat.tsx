@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import type { SpawnSession, ChatMessage } from "../types/spawn.types";
 import { useAppStore } from "../store/useAppStore";
-import { renderContentWithImages } from "./InlineImage";
+import { renderContentWithImages } from '@/components/_ui/InlineImage';
 
 const SLASH_COMMANDS = [
   { cmd: "/help", desc: "Get help with Claude Code" },
