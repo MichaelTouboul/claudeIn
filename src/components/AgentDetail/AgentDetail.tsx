@@ -4,7 +4,7 @@ import type { AgentFile, AgentFrontmatter } from '@/types/agent.types';
 import { api } from '@/services/api';
 import { MarkdownBody } from '@/components/_ui/MarkdownBody';
 import { MemoryManager } from '@/components/MemoryManager/MemoryManager';
-import AgentChat from "../AgentChat";
+import { AgentChat } from '@/components/AgentChat/AgentChat';
 import { DetailHeader } from './DetailHeader/DetailHeader';
 import { FrontmatterTable } from './FrontmatterTable/FrontmatterTable';
 

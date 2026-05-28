@@ -16,7 +16,7 @@ import { SessionViewer } from "@/components/SessionViewer/SessionViewer";
 import { Accordion } from '@/components/_ui/Accordion';
 import { AgentContextMenu } from "@/components/AgentContextMenu/AgentContextMenu";
 import { ItemContextMenu } from "@/components/ItemContextMenu/ItemContextMenu";
-import AgentChat from "./AgentChat";
+import { AgentChat } from '@/components/AgentChat/AgentChat';
 
 // Inject animation keyframes
 if (typeof document !== "undefined" && !document.getElementById("chat-animations")) {

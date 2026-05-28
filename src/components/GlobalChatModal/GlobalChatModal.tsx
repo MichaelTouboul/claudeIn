@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { X, Minus, MessageSquare } from "lucide-react";
-import AgentChat from "../AgentChat";
+import { AgentChat } from '@/components/AgentChat/AgentChat';
 
 export type GlobalChatModalProps = {
   onClose: () => void;

@@ -17,7 +17,7 @@ interface Window {
     linkAgent: (agentName: string, projectId: string) => Promise<void>;
     unlinkAgent: (agentName: string, projectId: string) => Promise<void>;
 
-    spawn: (opts: { agent_name?: string; mission: string; cwd?: string; resume_session_id?: string }) => Promise<unknown>;
+    spawn: (opts: { agent_name?: string; mission: string; cwd?: string; resume_session_id?: string }) => Promise<import("./types/spawn.types").SpawnSession>;
     getSession: (sessionId: string) => Promise<unknown>;
     sendInput: (sessionId: string, text: string) => Promise<boolean>;
     killSession: (sessionId: string) => Promise<boolean>;
@@ -47,6 +47,7 @@ interface Window {
     unwatchSessions: (projectPath: string) => Promise<void>;
     openFilePicker: () => Promise<string[]>;
     readImageAsDataUrl: (filePath: string) => Promise<string | null>;
+    generateTitle: (userMessage: string, assistantMessage: string) => Promise<string>;
 
     onEvent: (cb: (data: unknown) => void) => () => void;
   };
