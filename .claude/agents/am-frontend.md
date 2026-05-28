@@ -17,6 +17,8 @@ tools:
 disallowedTools:
   - Agent
 maxTurns: 30
+skills:
+  - react-dev
 ---
 
 # am-frontend — Agent Manager Frontend Code Writer
@@ -30,6 +32,62 @@ You write React components, hooks, and features for the Agent Manager Electron a
 - **Data fetching:** `window.api.xxx()` via IPC — NOT fetch(). See `src/env.d.ts` for available methods.
 - **State:** zustand for global state (`src/store/useAppStore.ts`), local useState for component state
 - **Push events:** `window.api.onEvent(callback)` for real-time data from main process
+
+## Folder Structure
+
+One component per folder, PascalCase naming. All components live under `src/components/`. **The folder hierarchy reflects the component hierarchy.**
+
+```
+src/components/
+├── _ui/                          ← reusable, generic UI primitives ONLY
+│   ├── Accordion/
+│   │   ├── Accordion.tsx
+│   │   ├── Accordion.css         ← optional, only if component has its own styles
+│   │   └── index.ts              ← REQUIRED for _ui only: export { Accordion }
+│   └── MarkdownBody/
+├── AgentChat/                    ← parent (feature component)
+│   ├── AgentChat.tsx
+│   ├── AgentChat.css             ← optional
+│   ├── AgentChatHeader/          ← child, used ONLY by AgentChat
+│   │   └── AgentChatHeader.tsx
+│   ├── AgentChatMessages/        ← child
+│   │   └── AgentChatMessages.tsx
+│   └── AgentChatInput/           ← child
+│       └── AgentChatInput.tsx
+└── AgentDetail/                  ← sibling of AgentChat (independent feature)
+    └── AgentDetail.tsx
+```
+
+**Base rules:**
+- One folder per component. Folder name = component name in **PascalCase**.
+- A `.css` file is created **only when the component has its own styles**. NEVER create an empty `.css` file.
+
+**Parent–child vs siblings:**
+- A component used by a **single parent** lives **inside that parent's folder** (parent–child relationship reflected by folder nesting).
+- Two components used independently live as **sibling folders** at the same level.
+- **Promotion rule:** as soon as a child becomes used by **more than one parent**, promote it:
+  - to `src/components/_ui/` if it's a generic, reusable primitive
+  - to `src/components/` (root) otherwise — it becomes a sibling of its former parents
+- **Max nesting: 2 levels.** Beyond that, split or promote. Deep nesting is a signal that the component tree needs flattening.
+
+**Primitives (`_ui/`):**
+- Contains **reusable UI primitives** with no feature/domain knowledge (e.g., `Accordion`, `MarkdownBody`, `InlineImage`, `StatsBar`). A primitive must be reusable across features.
+- **Only** components inside `_ui/` get an `index.ts` barrel file (`export { Component } from "./Component"`). Feature components do NOT have an `index.ts`.
+
+**Out of scope:**
+- Do NOT restructure `src/hooks/`, `src/services/`, `src/store/`, `src/types/` — they stay flat as they are today. The one-folder-per-thing pattern applies to components only.
+
+## File Size Limit
+
+**Hard rule: no file may exceed 300 lines.** This is enforced by the linter and is a non-negotiable rule for every file you write or edit (`.tsx`, `.ts`, `.css`).
+
+When a file approaches 300 lines, split it. Strategies in order of preference:
+1. Extract sub-components into their own folders under `src/components/`
+2. Extract custom hooks into `src/hooks/`
+3. Extract pure helpers into a sibling file (e.g., `AgentChat/utils.ts`)
+4. Extract local types into a sibling file (e.g., `AgentChat/types.ts`)
+
+If the file you're about to write would exceed 300 lines, **STOP** and propose a split plan to the orchestrator instead of writing the oversized file.
 
 ## Design System
 
@@ -54,12 +112,218 @@ All styling uses CSS custom properties defined in `src/index.css`:
 ```
 
 **Rules:**
+
 - Use `style={{ }}` for CSS vars (Tailwind can't reference them)
 - Use `var(--font-mono)` for code/data, `var(--font-sans)` for UI labels
 - Use `tabular-nums` for numbers
 - Hover states via onMouseEnter/onMouseLeave (inline style changes)
 - Utility classes: `surface-grain`, `glow-cyan`, `glow-active`
 - NEVER use hardcoded Tailwind colors (bg-gray-800, text-cyan-400) — use CSS vars
+
+## UI Primitives Stack
+
+Components in `src/components/_ui/` are built on three libraries. Feature components consume `_ui/` primitives — they don't touch Radix or `cva` directly. `cn` is used everywhere.
+
+**Radix UI** — accessible, unstyled behavior layer
+
+- Install per primitive: `npm i @radix-ui/react-dialog`
+- Wrap each Radix primitive in a `_ui/` component that owns the styling
+- Feature components import from `_ui/` only — never from `@radix-ui/*` directly
+
+**`cn` — composing classNames** (`clsx` + `tailwind-merge`)
+
+Defined once at `src/lib/cn.ts`:
+
+```ts
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+```
+
+Use it everywhere classNames are conditional or merged with an incoming `className` prop:
+
+```tsx
+<button className={cn('px-3 py-1', isActive && 'bg-active', className)} />
+```
+
+**`class-variance-authority` (cva)** — typed variants for `_ui/` components
+
+Declare variants (size, intent, …) with full TypeScript autocomplete:
+
+```ts
+import { cva, type VariantProps } from 'class-variance-authority';
+
+const button = cva('inline-flex items-center font-mono', {
+  variants: {
+    intent: { primary: '...', ghost: '...' },
+    size:   { sm: 'h-7 px-2 text-xs', md: 'h-8 px-3 text-sm' },
+  },
+  defaultVariants: { intent: 'primary', size: 'md' },
+});
+
+type ButtonProps = VariantProps<typeof button> &
+  React.ButtonHTMLAttributes<HTMLButtonElement>;
+```
+
+**Rules:**
+
+- Variants must compose Tailwind utilities wired to design-system CSS vars — never hardcoded colors (see Design System)
+- `cva` lives **inside `_ui/` components only** — feature components consume the resulting props, not `cva` directly
+- `cn` lives once at `src/lib/cn.ts` and is imported wherever needed
+
+## TypeScript
+
+Everything is typed. **No `any`.** Avoid creating type aliases that just rename an existing type — reuse the source type directly.
+
+**Component props:**
+
+- `_ui/` primitives extend `React.ComponentProps<'tag'>` so all native DOM props are inherited. Props types are **exported from the component file**:
+
+  ```tsx
+  // src/components/_ui/Button/Button.tsx
+  import { type ComponentProps } from 'react';
+  import { cva, type VariantProps } from 'class-variance-authority';
+
+  const button = cva('...', { variants: { /* ... */ } });
+
+  export type ButtonProps = ComponentProps<'button'> & VariantProps<typeof button>;
+
+  export function Button({ intent, size, className, ...props }: ButtonProps) { /* ... */ }
+  ```
+
+- Feature components: props type stays next to the component (same file), not exported unless reused.
+
+**Shared types live in `src/types/`:**
+
+```
+src/types/
+├── agent.interface.ts
+├── session.interface.ts
+├── mission.type.ts
+├── agent-status.enum.ts
+└── index.ts                ← barrel — re-exports everything
+```
+
+File naming:
+
+- `*.interface.ts` — `interface` declarations
+- `*.type.ts` — `type` aliases (unions, intersections, mapped/conditional types, function signatures)
+- `*.enum.ts` — `enum` declarations
+
+Always import shared types via the alias: `import type { Agent } from '@/types'`.
+
+**Choosing the right construct:**
+
+- `interface` — for object shapes that may be extended or implemented
+- `type` — for unions, intersections, mapped/conditional types, function signatures
+- `Record<K, V>` — for object maps (`Record<AgentId, Agent>`), never `{ [key: string]: Agent }`
+- Inline literal union (`'valid' | 'invalid'`) — for finite string sets used in 1–2 places, **no enum needed**
+- `enum` — see the rule below
+
+**Enum rule:**
+
+Use `enum` only when **both** are true:
+
+1. The values are used in **3+ files**, AND
+2. You need a runtime object to iterate (e.g., `Object.values(MyEnum)` for select options)
+
+Otherwise prefer:
+
+- Inline literal union for local sets
+- `as const` object for reusable maps without enum runtime overhead:
+
+  ```ts
+  export const AgentStatus = {
+    Active: 'active',
+    Idle: 'idle',
+    Stopped: 'stopped',
+  } as const;
+  export type AgentStatus = (typeof AgentStatus)[keyof typeof AgentStatus];
+  ```
+
+**Path aliases (configured in `tsconfig.json`):**
+
+```
+@/  →  src/
+```
+
+Always import via `@/…`. Never use `../../../` relative paths beyond one level up.
+
+## Imports
+
+**React:**
+
+```ts
+import { useEffect, useState, type ComponentProps } from 'react';
+```
+
+- Never `import * as React from 'react'`
+- Never `import React from 'react'` (JSX transform handles it)
+
+**Type imports:** prefer `import type` so the bundler strips them.
+
+```ts
+import type { Agent } from '@/types';
+
+// Mixed import — use inline `type`:
+import { spawn, type SpawnOptions } from 'node:child_process';
+```
+
+**Import order** (blank line between groups):
+
+1. Node built-ins (`node:fs`, `node:path`)
+2. External packages (`react`, `@radix-ui/*`, `zustand`, …)
+3. Internal aliases (`@/components/…`, `@/hooks/…`, `@/types`, `@/lib/cn`)
+4. Relative imports (`./Header`, `../utils`)
+5. Side-effect imports (`import './Button.css'`) — always last
+
+**Other rules:**
+
+- **Named imports only** — no default exports, except where a library requires it
+- **No file extensions** in import paths (`@/lib/cn`, not `@/lib/cn.ts`)
+- Merge duplicates from the same module into a single import statement
+- Sort named imports alphabetically within the braces
+
+## React Patterns
+
+**Explicit ternaries for conditional rendering:**
+
+```tsx
+{isReady ? <Panel /> : null}   // ✅
+{isReady && <Panel />}         // ❌ — renders 0/'' if the left side is truthy-by-accident
+```
+
+**Unique IDs as keys — never the array index:**
+
+```tsx
+{items.map((item) => <Row key={item.id} item={item} />)}   // ✅
+{items.map((item, i) => <Row key={i} item={item} />)}      // ❌ — breaks diffing on reorder
+```
+
+**`useMemo` only when it matters:**
+
+Don't preemptively memoize. Use `useMemo` **only** when:
+
+- The computation is measurably expensive, OR
+- You need a stable reference for an effect dependency or a memoized child prop
+
+Otherwise, compute the value inline.
+
+**`gap` on flex/grid, not margins on children:**
+
+```css
+/* ✅ */
+.row { display: flex; gap: 12px; }
+
+/* ❌ */
+.row { display: flex; }
+.row > * + * { margin-left: 12px; }
+```
+
+More predictable, no margin collapsing, no orphan margins on the first/last child.
 
 ## Key Components
 
