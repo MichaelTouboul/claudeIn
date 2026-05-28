@@ -10,10 +10,14 @@ const button = cva(
     variants: {
       intent: {
         primary: 'bg-accent text-surface-0 hover:opacity-90',
+        outline:
+          'bg-transparent border border-border text-fg-muted hover:bg-surface-3 hover:text-fg',
         ghost:
           'bg-transparent text-fg-muted hover:bg-surface-2 hover:text-fg',
         danger:
-          'bg-transparent text-danger hover:bg-danger/10',
+          'bg-transparent text-fg-subtle hover:bg-danger/10 hover:text-danger',
+        'danger-solid':
+          'bg-danger text-surface-0 hover:opacity-90',
       },
       size: {
         sm: 'h-6 px-2 text-xs',

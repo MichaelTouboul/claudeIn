@@ -1,6 +1,8 @@
 import { Edit3, RefreshCw, Save, Star, Trash2, X } from 'lucide-react';
+
 import type { AgentFile } from '@/types/agent.types';
 import { Badge } from '@/components/_ui/Badge';
+import { Button } from '@/components/_ui/Button';
 
 export type DetailHeaderProps = {
   agent: AgentFile;
@@ -50,8 +52,8 @@ export function DetailHeader({
             style={{ backgroundColor: `var(--agent-color, var(--color-accent))` }}
           />
           <h2
-            className="text-lg font-bold"
-            style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)', letterSpacing: '-0.01em' }}
+            className="text-lg font-bold text-fg"
+            style={{ fontFamily: 'var(--font-mono)', letterSpacing: '-0.01em' }}
           >
             {agent.id}
           </h2>
@@ -69,10 +71,8 @@ export function DetailHeader({
           </Badge>
           {editing && (
             <span
-              className="text-xs font-medium px-2 py-0.5 rounded"
+              className="text-xs font-medium px-2 py-0.5 rounded text-accent bg-accent-dim"
               style={{
-                color: 'var(--color-accent)',
-                background: 'var(--color-accent-dim)',
                 fontFamily: 'var(--font-mono)',
                 letterSpacing: '0.05em',
                 border: '1px solid rgba(6,182,212,0.15)',
@@ -85,85 +85,60 @@ export function DetailHeader({
         <div className="flex gap-2">
           {editing ? (
             <>
-              <button
-                onClick={onCancel}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-all duration-150"
-                style={{ color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-text-primary)'; e.currentTarget.style.background = 'var(--color-surface-3)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-secondary)'; e.currentTarget.style.background = 'transparent'; }}
-              >
+              <Button intent="outline" onClick={onCancel}>
                 <X size={14} />
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                intent="primary"
                 onClick={onSave}
                 disabled={saving}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-white rounded-md transition-all duration-150 disabled:opacity-40 glow-cyan"
-                style={{ background: 'var(--color-accent)', fontFamily: 'var(--font-mono)' }}
+                className="glow-cyan"
+                style={{ fontFamily: 'var(--font-mono)' }}
               >
                 <Save size={14} />
                 {saving ? "Saving..." : "Save"}
-              </button>
+              </Button>
             </>
           ) : (
             <>
-              <button
+              <Button
+                intent="ghost"
+                size="icon"
                 onClick={onRefreshAgent}
                 disabled={refreshing}
-                className="p-1.5 rounded-md transition-all duration-150 disabled:opacity-40"
-                style={{ color: 'var(--color-text-muted)' }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-text-primary)'; e.currentTarget.style.background = 'var(--color-surface-3)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-muted)'; e.currentTarget.style.background = 'transparent'; }}
                 title="Refresh from disk"
               >
                 <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
-              </button>
-              <button
-                onClick={onEdit}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-all duration-150"
-                style={{ color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)' }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-text-primary)'; e.currentTarget.style.background = 'var(--color-surface-3)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-secondary)'; e.currentTarget.style.background = 'transparent'; }}
-              >
+              </Button>
+              <Button intent="outline" onClick={onEdit}>
                 <Edit3 size={14} />
                 Edit
-              </button>
+              </Button>
               {confirmDelete ? (
                 <div className="flex items-center gap-2">
-                  <span className="text-xs" style={{ color: 'var(--color-danger)', fontFamily: 'var(--font-mono)' }}>Confirm?</span>
-                  <button
+                  <span className="text-xs text-danger" style={{ fontFamily: 'var(--font-mono)' }}>Confirm?</span>
+                  <Button
+                    intent="danger-solid"
                     onClick={onDelete}
-                    className="px-3 py-1.5 text-sm text-white rounded-md transition-colors"
-                    style={{ background: '#dc2626', fontFamily: 'var(--font-mono)' }}
+                    style={{ fontFamily: 'var(--font-mono)' }}
                   >
                     Delete
-                  </button>
-                  <button
-                    onClick={onCancelDelete}
-                    className="p-1 transition-colors"
-                    style={{ color: 'var(--color-text-muted)' }}
-                    onMouseEnter={(e) => e.currentTarget.style.color = 'var(--color-text-primary)'}
-                    onMouseLeave={(e) => e.currentTarget.style.color = 'var(--color-text-muted)'}
-                  >
+                  </Button>
+                  <Button intent="ghost" size="icon" onClick={onCancelDelete}>
                     <X size={14} />
-                  </button>
+                  </Button>
                 </div>
               ) : (
-                <button
-                  onClick={onConfirmDelete}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-all duration-150"
-                  style={{ color: 'var(--color-text-muted)' }}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.background = 'rgba(248,113,113,0.08)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-muted)'; e.currentTarget.style.background = 'transparent'; }}
-                >
+                <Button intent="danger" size="icon" onClick={onConfirmDelete}>
                   <Trash2 size={14} />
-                </button>
+                </Button>
               )}
             </>
           )}
         </div>
       </div>
-      <div className="text-xs font-mono mt-1.5" style={{ color: 'var(--color-text-muted)' }}>{agent.filePath}</div>
+      <div className="text-xs font-mono mt-1.5 text-fg-subtle">{agent.filePath}</div>
     </div>
   );
 }
