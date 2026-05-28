@@ -24,6 +24,7 @@
     "vite": "^8.0.14"
   },
   "dependencies": {
+    "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-slot": "^1.2.4",
     "@tailwindcss/postcss": "^4.3.0",
     "class-variance-authority": "^0.7.1",
