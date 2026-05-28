@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import { Terminal, ChevronDown, ChevronUp } from "lucide-react";
-import type { LiveEvent } from "../hooks/useIPC";
+import type { LiveEvent } from "../../hooks/useIPC";
 
 const eventColorMap: Record<string, string> = {
   PreToolUse: "#facc15",
@@ -21,13 +21,15 @@ function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString("en-US", { hour12: false });
 }
 
-export default function EventConsole({
-  events,
-  agentColorMap,
-}: {
+export type EventConsoleProps = {
   events: LiveEvent[];
   agentColorMap: Map<string, string>;
-}) {
+};
+
+export function EventConsole({
+  events,
+  agentColorMap,
+}: EventConsoleProps) {
   const [expanded, setExpanded] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
 

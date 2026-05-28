@@ -1,16 +1,18 @@
 import { FolderOpen, ChevronDown, Bot, Wrench, Settings } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-import type { Project } from "../hooks/useProjects";
+import type { Project } from "../../hooks/useProjects";
 
-export default function ProjectSwitcher({
-  projects,
-  selected,
-  onSelect,
-}: {
+export type ProjectSwitcherProps = {
   projects: Project[];
   selected: Project | null;
   onSelect: (p: Project) => void;
-}) {
+};
+
+export function ProjectSwitcher({
+  projects,
+  selected,
+  onSelect,
+}: ProjectSwitcherProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 

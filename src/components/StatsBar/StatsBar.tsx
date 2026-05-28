@@ -1,15 +1,17 @@
 import { Activity, Zap, DollarSign, Radio } from "lucide-react";
-import type { Stats } from "../hooks/useStats";
+import type { Stats } from "../../hooks/useStats";
 
-export default function StatsBar({
-  stats,
-  activeCount,
-  connected,
-}: {
+export type StatsBarProps = {
   stats: Stats | null;
   activeCount: number;
   connected: boolean;
-}) {
+};
+
+export function StatsBar({
+  stats,
+  activeCount,
+  connected,
+}: StatsBarProps) {
   if (!stats) return null;
 
   return (

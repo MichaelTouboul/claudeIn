@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import ProjectSwitcher from "./components/ProjectSwitcher";
+import { ProjectSwitcher } from "@/components/ProjectSwitcher/ProjectSwitcher";
 import ProjectDashboard from "./components/ProjectDashboard";
-import GlobalChatModal from "./components/GlobalChatModal";
-import StatsBar from "./components/StatsBar";
-import EventConsole from "./components/EventConsole";
+import { GlobalChatModal } from "@/components/GlobalChatModal/GlobalChatModal";
+import { StatsBar } from "@/components/StatsBar/StatsBar";
+import { EventConsole } from "@/components/EventConsole/EventConsole";
 import { useProjects, useDashboard } from "./hooks/useProjects";
 import { useIPC } from "./hooks/useIPC";
 import { useStats } from "./hooks/useStats";

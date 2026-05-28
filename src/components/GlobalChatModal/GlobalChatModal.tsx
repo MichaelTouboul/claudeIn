@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { X, Minus, MessageSquare } from "lucide-react";
-import AgentChat from "./AgentChat";
+import AgentChat from "../AgentChat";
 
-export default function GlobalChatModal({
-  onClose,
-}: {
+export type GlobalChatModalProps = {
   onClose: () => void;
-}) {
+};
+
+export function GlobalChatModal({
+  onClose,
+}: GlobalChatModalProps) {
   const [minimized, setMinimized] = useState(false);
   const [title, setTitle] = useState("Claude Code");
   const [editingTitle, setEditingTitle] = useState(false);
