@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback, type ReactNode } from "react";
 import {
   Bot, Wrench, Settings, BarChart3, Globe, User,
-  Link, Unlink, Network, Cog, Star, Terminal, GitBranch, History, MessageSquare,
+  Star, Terminal, GitBranch, History, MessageSquare,
 } from "lucide-react";
 
 import type { AgentFile } from '@/types/agent.types';
@@ -15,12 +15,10 @@ import { CostDashboard } from '@/components/CostDashboard/CostDashboard';
 import { SessionList } from '@/components/SessionList/SessionList';
 import { SessionViewer } from '@/components/SessionViewer/SessionViewer';
 import { Accordion } from '@/components/_ui/Accordion';
-import { AgentContextMenu } from '@/components/AgentContextMenu/AgentContextMenu';
 import { ItemContextMenu } from '@/components/ItemContextMenu/ItemContextMenu';
+import { AgentList } from './AgentList/AgentList';
 import { AgentChat } from '@/components/AgentChat/AgentChat';
 import type { MainView, OpenChat, SkillTab } from './types';
-import { colorMap } from './utils';
-import { ContextBar } from './ContextBar/ContextBar';
 import { SectionLabel } from './SectionLabel/SectionLabel';
 
 // Inject animation keyframes
@@ -48,214 +46,6 @@ export type ProjectDashboardProps = {
   waitingAgents?: Set<string>;
   onRefresh: () => void;
 };
-
-// ─── Agent rows ───
-
-function OrchestratorTree({
-  orchestrator,
-  allAgents,
-  selectedId,
-  onSelect,
-  onAgentAction,
-  onToggleLink,
-  linkAction,
-  isAgentFavorite,
-  activeAgents,
-  agentContexts,
-}: {
-  orchestrator: AgentFile;
-  allAgents: AgentFile[];
-  selectedId: string | null;
-  onSelect: (a: AgentFile) => void;
-  onAgentAction: (action: string, agentName: string) => void;
-  onToggleLink?: (name: string) => void;
-  linkAction?: "link" | "unlink";
-  isAgentFavorite?: (name: string) => boolean;
-  activeAgents?: Set<string>;
-  agentContexts?: Map<string, AgentContext>;
-}) {
-  const agentMap = new Map(allAgents.map((a) => [a.id, a]));
-  const subs = orchestrator.subAgents
-    .map((id) => agentMap.get(id))
-    .filter((a): a is AgentFile => !!a);
-
-  const orchActive = activeAgents?.has(orchestrator.id);
-  const orchCtx = agentContexts?.get(orchestrator.id);
-
-  return (
-    <div className="mb-1">
-      <div className="flex items-center group">
-        <button
-          onClick={() => onSelect(orchestrator)}
-          className={`relative flex-1 flex items-center gap-2 px-3 py-2 rounded-lg transition-colors overflow-hidden ${
-            selectedId === orchestrator.id ? "bg-gray-700 text-white" : "text-gray-300 hover:bg-gray-800"
-          }`}
-        >
-          {orchActive && orchCtx && orchCtx.percent > 0 && (
-            <ContextBar percent={orchCtx.percent} tokensIn={orchCtx.tokensIn} tokensOut={orchCtx.tokensOut} costUsd={orchCtx.costUsd} />
-          )}
-          <Network size={14} className={`relative shrink-0 ${orchActive ? "text-green-400 animate-pulse" : "text-cyan-400"}`} />
-          <span className="relative truncate text-sm font-medium">{orchestrator.id}</span>
-        </button>
-        <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-          <AgentContextMenu agentName={orchestrator.id} isOrchestrator isFavorite={isAgentFavorite?.(orchestrator.id)} onAction={onAgentAction} />
-        </div>
-        {onToggleLink && linkAction && (
-          <button
-            onClick={() => onToggleLink(orchestrator.id)}
-            className={`p-1.5 mr-1 rounded shrink-0 transition-colors ${
-              linkAction === "link"
-                ? "text-gray-600 hover:text-green-400 hover:bg-green-500/10"
-                : "text-green-400/60 hover:text-red-400 hover:bg-red-500/10"
-            }`}
-            title={linkAction === "link" ? "Link orchestrator + sub-agents" : "Unlink all"}
-          >
-            {linkAction === "link" ? <Link size={12} /> : <Unlink size={12} />}
-          </button>
-        )}
-      </div>
-      {subs.length > 0 && (
-        <div className="ml-4 border-l border-gray-800 pl-1 space-y-0.5">
-          {subs.map((sub) => {
-            const subActive = activeAgents?.has(sub.id);
-            const subCtx = agentContexts?.get(sub.id);
-            return (
-            <div key={sub.id} className="flex items-center group">
-              <button
-                onClick={() => onSelect(sub)}
-                className={`relative flex-1 flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors overflow-hidden ${
-                  selectedId === sub.id ? "bg-gray-700 text-white" : "text-gray-400 hover:bg-gray-800"
-                }`}
-              >
-                {subActive && subCtx && subCtx.percent > 0 && (
-                  <ContextBar percent={subCtx.percent} tokensIn={subCtx.tokensIn} tokensOut={subCtx.tokensOut} costUsd={subCtx.costUsd} />
-                )}
-                <Cog size={11} className={`relative shrink-0 ${subActive ? "text-green-400 animate-pulse" : "text-gray-500"}`} />
-                <span className="relative truncate text-xs font-medium">{sub.id}</span>
-              </button>
-              <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                <AgentContextMenu agentName={sub.id} isOrchestrator={false} isFavorite={isAgentFavorite?.(sub.id)} onAction={onAgentAction} />
-              </div>
-            </div>
-          );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function AgentRow({
-  agent,
-  selected,
-  active,
-  context,
-  onSelect,
-  onAgentAction,
-  onToggleLink,
-  linkAction,
-  isAgentFavorite,
-}: {
-  agent: AgentFile;
-  selected: boolean;
-  active?: boolean;
-  context?: AgentContext;
-  onSelect: (a: AgentFile) => void;
-  onAgentAction: (action: string, agentName: string) => void;
-  onToggleLink?: (name: string) => void;
-  linkAction?: "link" | "unlink";
-  isAgentFavorite?: (name: string) => boolean;
-}) {
-  return (
-    <div className="flex items-center group">
-      <button
-        onClick={() => onSelect(agent)}
-        className={`relative flex-1 flex items-center gap-2 px-3 py-2 rounded-lg transition-colors overflow-hidden ${
-          selected ? "bg-gray-700 text-white" : "text-gray-300 hover:bg-gray-800"
-        }`}
-      >
-        {active && context && context.percent > 0 && (
-          <ContextBar percent={context.percent} tokensIn={context.tokensIn} tokensOut={context.tokensOut} costUsd={context.costUsd} />
-        )}
-        <span className={`relative w-2 h-2 rounded-full shrink-0 ${active ? "bg-green-400 animate-pulse" : (colorMap[agent.frontmatter.color || ""] || "bg-gray-500")}`} />
-        <span className="relative truncate text-sm font-medium">{agent.id}</span>
-      </button>
-      <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-        <AgentContextMenu agentName={agent.id} isOrchestrator={agent.subAgents.length > 0} isFavorite={isAgentFavorite?.(agent.id)} onAction={onAgentAction} />
-      </div>
-      {onToggleLink && linkAction && (
-        <button
-          onClick={() => onToggleLink(agent.id)}
-          className={`p-1.5 mr-1 rounded shrink-0 transition-colors ${
-            linkAction === "link"
-              ? "text-gray-600 hover:text-green-400 hover:bg-green-500/10"
-              : "text-green-400/60 hover:text-red-400 hover:bg-red-500/10"
-          }`}
-        >
-          {linkAction === "link" ? <Link size={12} /> : <Unlink size={12} />}
-        </button>
-      )}
-    </div>
-  );
-}
-
-function renderAgentList(
-  agents: AgentFile[],
-  allAgents: AgentFile[],
-  selectedId: string | null,
-  onSelect: (a: AgentFile) => void,
-  onAgentAction: (action: string, agentName: string) => void,
-  onToggleLink?: (name: string) => void,
-  linkAction?: "link" | "unlink",
-  isAgentFavorite?: (name: string) => boolean,
-  activeAgents?: Set<string>,
-  agentContexts?: Map<string, AgentContext>,
-) {
-  const agentIds = new Set(allAgents.map((a) => a.id));
-  const subAgentIds = new Set<string>();
-  for (const a of agents) {
-    for (const sub of a.subAgents) {
-      if (agentIds.has(sub)) subAgentIds.add(sub);
-    }
-  }
-
-  const orchestrators = agents.filter((a) => a.subAgents.length > 0);
-  const standalones = agents.filter((a) => a.subAgents.length === 0 && !subAgentIds.has(a.id));
-
-  return (
-    <div className="space-y-0.5">
-      {orchestrators.map((orch) => (
-        <OrchestratorTree
-          key={orch.id}
-          orchestrator={orch}
-          allAgents={allAgents}
-          selectedId={selectedId}
-          onSelect={onSelect}
-          onAgentAction={onAgentAction}
-          onToggleLink={onToggleLink}
-          linkAction={linkAction}
-          isAgentFavorite={isAgentFavorite}
-          activeAgents={activeAgents}
-          agentContexts={agentContexts}
-        />
-      ))}
-      {standalones.map((a) => (
-        <AgentRow
-          key={a.id}
-          agent={a}
-          selected={selectedId === a.id}
-          active={activeAgents?.has(a.id)}
-          context={agentContexts?.get(a.id)}
-          onSelect={onSelect}
-          onAgentAction={onAgentAction}
-          onToggleLink={onToggleLink}
-          linkAction={linkAction}
-          isAgentFavorite={isAgentFavorite}
-        />
-      ))}
-    </div>
-  );
-}
 
 // ─── Skill row ───
 
@@ -855,7 +645,7 @@ export function ProjectDashboard({
                 {favAgents.length > 0 && (
                   <>
                     <SectionLabel icon={<Bot size={10} className="text-cyan-400" />} label="Agents" />
-                    {renderAgentList(favAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, undefined, undefined, (n) => isFavorite("agent", n), activeAgents, agentContexts)}
+                    <AgentList agents={favAgents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={handleSelectAgent} onAgentAction={handleAgentAction} isAgentFavorite={(n) => isFavorite("agent", n)} activeAgents={activeAgents} agentContexts={agentContexts} />
                   </>
                 )}
                 {favSkills.length > 0 && (
@@ -883,7 +673,7 @@ export function ProjectDashboard({
             icon: <Bot size={11} className="text-cyan-400" />,
             count: agents.length,
             content: isUserProject ? (
-              renderAgentList(agents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, undefined, undefined, (n) => isFavorite("agent", n), activeAgents, agentContexts)
+              <AgentList agents={agents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={handleSelectAgent} onAgentAction={handleAgentAction} isAgentFavorite={(n) => isFavorite("agent", n)} activeAgents={activeAgents} agentContexts={agentContexts} />
             ) : (
               <div>
                 <div
@@ -923,7 +713,7 @@ export function ProjectDashboard({
                 </div>
                 {scopeTab === "project" ? (
                   projectAgents.length > 0 ? (
-                    renderAgentList(projectAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, (name) => handleToggleLink(name, true), "unlink", (n) => isFavorite("agent", n), activeAgents, agentContexts)
+                    <AgentList agents={projectAgents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={handleSelectAgent} onAgentAction={handleAgentAction} onToggleLink={(name) => handleToggleLink(name, true)} linkAction="unlink" isAgentFavorite={(n) => isFavorite("agent", n)} activeAgents={activeAgents} agentContexts={agentContexts} />
                   ) : (
                     <div className="px-3 py-6 text-center">
                       <p className="text-xs text-gray-500 mb-1.5">No project agents</p>
@@ -932,7 +722,7 @@ export function ProjectDashboard({
                   )
                 ) : (
                   userAgents.length > 0 ? (
-                    renderAgentList(userAgents, agents, selectedAgent?.id ?? null, handleSelectAgent, handleAgentAction, (name) => handleToggleLink(name, false), "link", (n) => isFavorite("agent", n), activeAgents, agentContexts)
+                    <AgentList agents={userAgents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={handleSelectAgent} onAgentAction={handleAgentAction} onToggleLink={(name) => handleToggleLink(name, false)} linkAction="link" isAgentFavorite={(n) => isFavorite("agent", n)} activeAgents={activeAgents} agentContexts={agentContexts} />
                   ) : (
                     <p className="px-3 py-6 text-xs text-gray-500 text-center">No user agents</p>
                   )
