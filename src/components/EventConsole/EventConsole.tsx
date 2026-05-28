@@ -81,10 +81,8 @@ export function EventConsole({
               return (
                 <div
                   key={e.id}
-                  className="flex gap-3 rounded px-1 transition-colors"
+                  className="flex gap-3 rounded px-1 transition-colors hover:bg-surface-1"
                   style={{ fontVariantNumeric: 'tabular-nums' }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-surface-1)'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                 >
                   <span className="shrink-0" style={{ color: 'var(--color-text-muted)' }}>{formatTime(e.created_at)}</span>
                   <span className="shrink-0 w-24" style={{ color: typeHex }}>{e.event_type}</span>

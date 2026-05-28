@@ -88,9 +88,11 @@ function MemoryFileCard({
         ? "border-accent/20 bg-accent/[0.03]"
         : "border-border/60 bg-surface-2/20 hover:border-border/60"
     }`}>
-      <div
-        className="flex items-center gap-2 px-4 py-2.5 cursor-pointer select-none"
+      <button
+        type="button"
+        className="w-full flex items-center gap-2 px-4 py-2.5 select-none text-left"
         onClick={() => setExpanded(!expanded)}
+        aria-expanded={expanded}
       >
         {expanded
           ? <ChevronDown size={12} className="text-fg-subtle shrink-0" />
@@ -110,7 +112,7 @@ function MemoryFileCard({
           </span>
           <span className="text-[10px] text-fg-subtle tabular-nums">{lines}L</span>
         </span>
-      </div>
+      </button>
 
       {expanded ? <div className="px-4 pb-3 border-t border-border/30">
           {isIndex ? <div className="space-y-1.5 mt-3 mb-3">

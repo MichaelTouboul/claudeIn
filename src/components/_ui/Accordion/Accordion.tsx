@@ -48,6 +48,7 @@ export function Accordion({
       style={isOpen && flex ? undefined : { flex: "none" }}
     >
       <div
+        role="presentation"
         className="flex items-center shrink-0"
         style={{
           borderBottom: "1px solid var(--color-border-subtle)",

@@ -43,8 +43,10 @@ export function GlobalChatModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div
-        className="absolute inset-0"
+      <button
+        type="button"
+        aria-label="Close chat"
+        className="absolute inset-0 cursor-default"
         style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}
         onClick={onClose}
       />
@@ -79,10 +81,18 @@ export function GlobalChatModal({
               />
             ) : (
               <span
+                role="button"
+                tabIndex={0}
                 onDoubleClick={() => setEditingTitle(true)}
-                className="text-sm font-bold cursor-text transition-colors"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === 'F2') {
+                    e.preventDefault();
+                    setEditingTitle(true);
+                  }
+                }}
+                className="text-sm font-bold cursor-text transition-colors focus:outline-none focus:ring-1 focus:ring-accent rounded"
                 style={{ color: 'var(--color-text-primary)' }}
-                title="Double-click to rename"
+                title="Double-click or press Enter to rename"
               >
                 {title}
               </span>

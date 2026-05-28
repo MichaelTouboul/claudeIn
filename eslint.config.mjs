@@ -76,7 +76,7 @@ export default tseslint.config(
 
       // ── React hooks ─────────────────────────────────────────
       'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
 
       // ── TypeScript ──────────────────────────────────────────
       '@typescript-eslint/no-explicit-any': 'error',
@@ -112,7 +112,7 @@ export default tseslint.config(
       'simple-import-sort/exports': 'error',
       'unused-imports/no-unused-imports': 'error',
       'unused-imports/no-unused-vars': [
-        'error',
+        'warn',
         {
           vars: 'all',
           varsIgnorePattern: '^_',
@@ -143,16 +143,31 @@ export default tseslint.config(
       ],
 
       // ── a11y ────────────────────────────────────────────────
-      // Electron desktop app — most jsx-a11y rules are written for public
-      // web pages and produce too many false positives on mouse-driven UI
-      // primitives like resize handles, accordion rows, and clickable cards.
-      // Keep the ones that catch genuine bugs (alt text, label-for); turn
-      // off the ones that flag legitimate desktop interactions.
+      // These warn rather than error: the surfaces they cover (interactive
+      // divs, missing label-for, missing keyboard handlers) are real code
+      // smells in a desktop UI too, just not always show-stoppers. Per
+      // policy any warning still has to be cleared before the work lands —
+      // fix the markup (role/tabIndex/onKeyDown) or refactor to a native
+      // element. Don't turn off the rule.
       ...jsxA11y.configs.recommended.rules,
-      'jsx-a11y/click-events-have-key-events': 'off',
-      'jsx-a11y/no-static-element-interactions': 'off',
-      'jsx-a11y/no-noninteractive-element-interactions': 'off',
-      'jsx-a11y/label-has-associated-control': 'off',
+      'jsx-a11y/click-events-have-key-events': 'warn',
+      'jsx-a11y/no-static-element-interactions': 'warn',
+      // Default handlers list flags onMouseDown/onMouseOut/etc — those are
+      // legitimate on drag handles, hover effects, resize splitters. Narrow to
+      // the handlers that signal a real "should be a button" mistake.
+      'jsx-a11y/no-noninteractive-element-interactions': [
+        'warn',
+        { handlers: ['onClick', 'onKeyDown', 'onKeyPress', 'onKeyUp'] },
+      ],
+      // Whitelist `separator` (window splitter pattern from ARIA APG) — these
+      // legitimately carry tabIndex so the user can focus them for keyboard resize.
+      'jsx-a11y/no-noninteractive-tabindex': [
+        'error',
+        { tags: [], roles: ['tabpanel', 'separator'] },
+      ],
+      'jsx-a11y/label-has-associated-control': 'warn',
+      // autoFocus on the chat textarea is a deliberate UX choice in an
+      // Electron app — keep this one off so it doesn't spawn false noise.
       'jsx-a11y/no-autofocus': 'off',
 
       // Apostrophes in inline JSX text are fine — escaping them hurts readability.
@@ -162,7 +177,7 @@ export default tseslint.config(
       eqeqeq: ['error', 'always'],
       'prefer-const': 'error',
       'no-var': 'error',
-      'no-console': ['error', { allow: ['warn', 'error'] }],
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
 
       // ── Hard 300-line file limit (matches am-frontend rule) ─
       'max-lines': [

@@ -339,21 +339,23 @@ More predictable, no margin collapsing, no orphan margins on the first/last chil
 
 ## Linting Policy
 
-**Zero warnings tolerated.** Every ESLint rule in `eslint.config.mjs` is binary — `error` or `off`. There is no `warn` level. The lint command must report `0 problems, 0 errors, 0 warnings` for the code you write to land.
+**Zero output tolerated. Both errors and warnings must be at 0** before any work you produce lands. `error` blocks the build; `warn` is still a defect that has to be cleared. They are two severities of the same standard: code that's wrong in some way.
 
 ```bash
-npm run lint        # check — must pass with 0 problems
+npm run lint        # must report 0 errors AND 0 warnings — both
 npm run lint:fix    # auto-fix what's mechanically fixable
 npm run typecheck   # tsc --noEmit — must pass with 0 errors
 ```
 
+The `warn` level exists in the config for rules where the right reaction depends on context — e.g., `react-hooks/exhaustive-deps` (the deps are missing for a reason often enough that it's worth a thinking pause), `jsx-a11y/no-static-element-interactions` (the markup might genuinely need a `role`/`tabIndex`/`onKeyDown`, or the element should be a `<button>` instead). The "warning" framing tells you: stop and think before fixing — but it does NOT mean "ignore."
+
 **What to do when a rule fires on legitimate code:**
 
-1. **First try to fix the code.** Most ESLint violations point at a real issue: missing effect dependency, mis-typed prop, wrong import order, oversized file, etc. Fix the underlying cause, not the symptom.
-2. **If the rule is genuinely a bad fit for the project**, flag it to the orchestrator. The fix lives in `eslint.config.mjs` — turn the rule `off` globally, not via inline disable comments scattered across files.
-3. **Inline `// eslint-disable-next-line <rule>` is forbidden** unless the orchestrator has explicitly approved it for that single callsite with a documented reason. Inline disables rot fast and create silent escape hatches.
+1. **First try to fix the code.** Most ESLint signals — error or warning — point at a real issue: missing effect dependency, mis-typed prop, wrong import order, oversized file, interactive div that should be a `<button>` or carry `role`/keyboard handlers, etc. Fix the underlying cause.
+2. **If the rule is genuinely a bad fit for the project at large**, flag it to the orchestrator. The fix lives in `eslint.config.mjs` — turn the rule `off` globally (or downgrade to `warn` if it's a useful smell signal but never an error). Not via inline disable comments scattered across files.
+3. **Inline `// eslint-disable-next-line <rule>` is forbidden** unless the orchestrator has explicitly approved it for that single callsite with a documented reason. Inline disables rot fast and create silent escape hatches. The `reportUnusedDisableDirectives: error` linter option will fail the build if any disable comment becomes redundant.
 
-**Why no warnings:** a warning is a deferred decision. In practice deferred decisions accumulate and become invisible to reviewers. Either a rule matters (error) or it doesn't (off). The codebase shouldn't carry a backlog of "we'll get to it" lint output.
+**Why no warnings either:** a warning that never gets fixed is just noise that trains everyone to stop reading lint output. The discipline is to clear every signal — error or warning — before the diff lands.
 
 ## Key Components
 
