@@ -4,23 +4,44 @@
 @source "../src/**/*.{ts,tsx}";
 @source "../src/index.html";
 
+/* Design tokens — exposed as Tailwind utilities:
+ *   `--color-X` → `bg-X`, `text-X`, `border-X`, `ring-X`, etc.
+ *   `--font-X`  → `font-X`
+ * Tailwind 4's @theme also defines these as CSS vars on :root, so existing
+ *   `var(--color-X)` / `style={{ color: 'var(--color-X)' }}` usage keeps working.
+ */
+@theme {
+  --color-surface-0: #06080c;
+  --color-surface-1: #0a0e14;
+  --color-surface-2: #111620;
+  --color-surface-3: #181e2a;
+
+  --color-border: #1e2636;
+  --color-border-subtle: #151b26;
+
+  --color-fg: #e2e8f0;
+  --color-fg-muted: #8892a4;
+  --color-fg-subtle: #4a5568;
+
+  --color-accent: #06b6d4;
+  --color-accent-dim: rgba(6, 182, 212, 0.12);
+
+  --color-active: #4ade80;
+  --color-danger: #f87171;
+
+  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+}
+
 @layer base {
   :root {
-    --color-surface-0: #06080c;
-    --color-surface-1: #0a0e14;
-    --color-surface-2: #111620;
-    --color-surface-3: #181e2a;
-    --color-border: #1e2636;
-    --color-border-subtle: #151b26;
-    --color-text-primary: #e2e8f0;
-    --color-text-secondary: #8892a4;
-    --color-text-muted: #4a5568;
-    --color-accent: #06b6d4;
-    --color-accent-dim: rgba(6, 182, 212, 0.12);
-    --color-active: #4ade80;
-    --color-danger: #f87171;
-    --font-sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
-    --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+    /* Backward-compat aliases for the legacy --color-text-* names.
+     * New code should use --color-fg / --color-fg-muted / --color-fg-subtle
+     * (which also expose the `text-fg`, `text-fg-muted`, `text-fg-subtle` utilities).
+     */
+    --color-text-primary: var(--color-fg);
+    --color-text-secondary: var(--color-fg-muted);
+    --color-text-muted: var(--color-fg-subtle);
   }
 
   * {
