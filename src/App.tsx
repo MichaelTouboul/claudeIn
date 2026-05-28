@@ -46,9 +46,9 @@ export default function App() {
 
   if (projectsLoading) {
     return (
-      <div className="h-full flex items-center justify-center text-[var(--color-text-muted)]" style={{ background: 'var(--color-surface-0)' }}>
+      <div className="h-full flex items-center justify-center text-fg-subtle bg-surface-0">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
           <span className="text-xs font-mono tracking-wider uppercase">Scanning projects</span>
         </div>
       </div>
@@ -60,7 +60,7 @@ export default function App() {
       {/* Top bar */}
       <div className="titlebar-drag flex items-center gap-4 pl-20 pr-4 py-2" style={{ background: 'var(--color-surface-1)', borderBottom: '1px solid var(--color-border)' }}>
         <div className="flex items-center gap-2.5">
-          <Bot size={16} className="text-[var(--color-accent)]" />
+          <Bot size={16} className="text-accent" />
           <span className="text-[13px] font-semibold tracking-[0.02em]" style={{ fontFamily: 'var(--font-mono)' }}>Agent Manager</span>
         </div>
 
@@ -76,7 +76,7 @@ export default function App() {
 
         <button
           onClick={() => setChatOpen(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md text-[var(--color-accent)] transition-all duration-200 hover:bg-[var(--color-accent-dim)] glow-cyan"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md text-accent transition-all duration-200 hover:bg-accent-dim glow-cyan"
           style={{ border: '1px solid rgba(6, 182, 212, 0.25)' }}
         >
           <MessageSquare size={12} />
@@ -90,7 +90,7 @@ export default function App() {
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center max-w-3xl mx-auto px-8">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-5" style={{ background: 'var(--color-accent-dim)', border: '1px solid rgba(6, 182, 212, 0.15)' }}>
-                <Bot size={24} className="text-[var(--color-accent)]" />
+                <Bot size={24} className="text-accent" />
               </div>
               <h1 className="text-xl font-semibold mb-1.5 tracking-tight">Select a project</h1>
               <p className="text-sm mb-8" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
@@ -115,7 +115,7 @@ export default function App() {
                       e.currentTarget.style.boxShadow = 'none';
                     }}
                   >
-                    <div className="text-[13px] font-medium mb-1 truncate group-hover:text-[var(--color-accent)] transition-colors">{p.name}</div>
+                    <div className="text-[13px] font-medium mb-1 truncate group-hover:text-accent transition-colors">{p.name}</div>
                     <div className="text-[11px] truncate mb-2.5" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>{p.path}</div>
                     <div className="flex gap-3 text-[11px]" style={{ color: 'var(--color-text-secondary)' }}>
                       {p.agentCount > 0 && <span className="font-mono tabular-nums">{p.agentCount} <span style={{ color: 'var(--color-text-muted)' }}>agents</span></span>}
