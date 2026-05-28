@@ -8,7 +8,7 @@ import type { AgentFile } from "../types/agent.types";
 import type { SkillFile, HookConfig, Project } from "../hooks/useProjects";
 import { useFavorites } from "../hooks/useFavorites";
 import { useSessions } from "../hooks/useSessions";
-import AgentDetail from "./AgentDetail";
+import { AgentDetail } from '@/components/AgentDetail/AgentDetail';
 import { AgentTree } from '@/components/AgentTree/AgentTree';
 import { CostDashboard } from '@/components/CostDashboard/CostDashboard';
 import { SessionList } from "@/components/SessionList/SessionList";
@@ -1122,7 +1122,7 @@ export default function ProjectDashboard({
 
         <div className="flex-1 min-h-0 overflow-hidden">
           {view === "agent" && selectedAgent ? (
-            <AgentDetail agent={selectedAgent} onEdit={() => {}} onDelete={() => {}} onRefresh={onRefresh} onAgentUpdated={(a) => setSelectedAgent(a)} isFavorite={isFavorite("agent", selectedAgent.id)} onToggleFavorite={() => toggleFavorite("agent", selectedAgent.id)} />
+            <AgentDetail agent={selectedAgent} onDelete={() => {}} onRefresh={onRefresh} onAgentUpdated={(a) => setSelectedAgent(a)} isFavorite={isFavorite("agent", selectedAgent.id)} onToggleFavorite={() => toggleFavorite("agent", selectedAgent.id)} />
           ) : view === "skill" && selectedSkill ? (
             <SkillDetail skill={selectedSkill} isFavorite={isFavorite("skill", selectedSkill.name)} onToggleFavorite={() => toggleFavorite("skill", selectedSkill.name)} />
           ) : view === "tree" ? (
