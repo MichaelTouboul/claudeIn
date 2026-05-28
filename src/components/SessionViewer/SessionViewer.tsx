@@ -34,13 +34,14 @@ export function SessionViewer({
     setShowScrollBtn(scrollHeight - scrollTop - clientHeight > 200);
   }, []);
 
+  const sessionId = conversation?.sessionId;
   useEffect(() => {
-    if (scrollRef.current && conversation) {
-      setTimeout(() => {
-        if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-      }, 50);
-    }
-  }, [conversation?.sessionId]);
+    if (!scrollRef.current || !sessionId) return;
+    const t = setTimeout(() => {
+      if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }, 50);
+    return () => clearTimeout(t);
+  }, [sessionId]);
 
   if (loading) {
     return (

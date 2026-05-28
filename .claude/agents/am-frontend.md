@@ -325,6 +325,24 @@ Otherwise, compute the value inline.
 
 More predictable, no margin collapsing, no orphan margins on the first/last child.
 
+## Linting Policy
+
+**Zero warnings tolerated.** Every ESLint rule in `eslint.config.mjs` is binary — `error` or `off`. There is no `warn` level. The lint command must report `0 problems, 0 errors, 0 warnings` for the code you write to land.
+
+```bash
+npm run lint        # check — must pass with 0 problems
+npm run lint:fix    # auto-fix what's mechanically fixable
+npm run typecheck   # tsc --noEmit — must pass with 0 errors
+```
+
+**What to do when a rule fires on legitimate code:**
+
+1. **First try to fix the code.** Most ESLint violations point at a real issue: missing effect dependency, mis-typed prop, wrong import order, oversized file, etc. Fix the underlying cause, not the symptom.
+2. **If the rule is genuinely a bad fit for the project**, flag it to the orchestrator. The fix lives in `eslint.config.mjs` — turn the rule `off` globally, not via inline disable comments scattered across files.
+3. **Inline `// eslint-disable-next-line <rule>` is forbidden** unless the orchestrator has explicitly approved it for that single callsite with a documented reason. Inline disables rot fast and create silent escape hatches.
+
+**Why no warnings:** a warning is a deferred decision. In practice deferred decisions accumulate and become invisible to reviewers. Either a rule matters (error) or it doesn't (off). The codebase shouldn't carry a backlog of "we'll get to it" lint output.
+
 ## Key Components
 
 - `AgentDetail.tsx` — Agent overview, edit, chat, memory, files
