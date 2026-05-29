@@ -2,10 +2,11 @@ import { useCallback,useRef, useState } from "react";
 
 import { useAutoChatTitles } from '@/hooks/useAutoChatTitles';
 import { useFavorites } from '@/hooks/useFavorites';
-import type { HookConfig, Project,SkillFile } from '@/hooks/useProjects';
+import type { Project, SkillFile } from '@/hooks/useProjects';
 import { useResizableSidebar } from '@/hooks/useResizableSidebar';
 import type { SessionSummary } from '@/hooks/useSessions';
 import { useSessions } from '@/hooks/useSessions';
+import { useDashboardStore } from '@/store/useDashboardStore';
 import type { AgentFile } from '@/types/agent.types';
 
 import { ActiveSessions } from './ActiveSessions/ActiveSessions';
@@ -31,9 +32,6 @@ if (typeof document !== "undefined" && !document.getElementById("chat-animations
 
 export type ProjectDashboardProps = {
   project: Project;
-  agents: AgentFile[];
-  skills: SkillFile[];
-  hooks: HookConfig[];
   onRefresh: () => void;
 };
 
@@ -41,11 +39,12 @@ export type ProjectDashboardProps = {
 
 export function ProjectDashboard({
   project,
-  agents,
-  skills,
-  hooks,
   onRefresh,
 }: ProjectDashboardProps) {
+  const agents = useDashboardStore((s) => s.agents);
+  const skills = useDashboardStore((s) => s.skills);
+  const hooks = useDashboardStore((s) => s.hooks);
+  const toggleLink = useDashboardStore((s) => s.toggleLink);
   const [view, setView] = useState<MainView>("none");
   const [selectedAgent, setSelectedAgent] = useState<AgentFile | null>(null);
   const [selectedSkill, setSelectedSkill] = useState<SkillFile | null>(null);
@@ -98,14 +97,8 @@ export function ProjectDashboard({
   const favHooks = hooks.filter((h) => isFavorite("hook", `${h.event}:${h.matcher}`));
   const hasFavorites = favAgents.length + favSkills.length + favHooks.length > 0;
 
-  const handleToggleLink = async (agentName: string, currentlyLinked: boolean) => {
-    if (currentlyLinked) {
-      await window.api.unlinkAgent(agentName, project.id);
-    } else {
-      await window.api.linkAgent(agentName, project.id);
-    }
-    onRefresh();
-  };
+  const handleToggleLink = (agentName: string, currentlyLinked: boolean) =>
+    toggleLink(agentName, currentlyLinked);
 
   const handleAgentAction = (action: string, agentName: string) => {
     switch (action) {
@@ -118,11 +111,12 @@ export function ProjectDashboard({
         // TODO: implement rename modal
         alert(`Rename ${agentName} — coming soon`);
         break;
-      case "delete":
+      case "delete": {
         if (confirm(`Delete agent "${agentName}"?`)) {
-          window.api.deleteAgent(agentName).then(() => onRefresh());
+          void useDashboardStore.getState().deleteAgent(agentName);
         }
         break;
+      }
       case "add-sub":
         // TODO: implement add sub-agent modal
         alert(`Add sub-agent to ${agentName} — coming soon`);
@@ -174,20 +168,15 @@ export function ProjectDashboard({
       >
 
         <ActiveSessions
-          agents={agents}
           onSelectAgent={(a) => { setSelectedAgent(a); setSelectedSkill(null); setView("agent"); }}
         />
 
         <OpenChatsList
-          agents={agents}
           openChats={openChats}
           onSelectAgent={(a) => { setSelectedAgent(a); setSelectedSkill(null); setView("agent"); }}
         />
 
         <PanelsArea
-          agents={agents}
-          skills={skills}
-          hooks={hooks}
           sessions={sessions}
           sessionsLoading={sessionsLoading}
           selectedAgent={selectedAgent}
@@ -222,7 +211,6 @@ export function ProjectDashboard({
 
       <MainContent
         view={view}
-        agents={agents}
         selectedAgent={selectedAgent}
         selectedSkill={selectedSkill}
         resumeChat={resumeChat}

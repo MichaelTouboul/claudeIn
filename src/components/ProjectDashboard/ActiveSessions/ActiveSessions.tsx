@@ -1,3 +1,4 @@
+import { useDashboardStore } from '@/store/useDashboardStore';
 import { useEventsStore } from '@/store/useEventsStore';
 import type { AgentFile } from '@/types/agent.types';
 
@@ -8,14 +9,13 @@ const colorHex: Record<string, string> = {
 };
 
 export type ActiveSessionsProps = {
-  agents: AgentFile[];
   onSelectAgent: (agent: AgentFile) => void;
 };
 
 export function ActiveSessions({
-  agents,
   onSelectAgent,
 }: ActiveSessionsProps) {
+  const agents = useDashboardStore((s) => s.agents);
   const activeAgents = useEventsStore((s) => s.activeAgents);
   const agentContexts = useEventsStore((s) => s.agentContexts);
   const waitingAgents = useEventsStore((s) => s.waitingAgents);

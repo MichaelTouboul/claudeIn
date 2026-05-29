@@ -7,6 +7,7 @@ import { CostDashboard } from '@/components/CostDashboard/CostDashboard';
 import { SessionViewer } from '@/components/SessionViewer/SessionViewer';
 import type { SkillFile } from '@/hooks/useProjects';
 import type { SessionConversation,SessionSummary } from '@/hooks/useSessions';
+import { useDashboardStore } from '@/store/useDashboardStore';
 import type { AgentFile } from '@/types/agent.types';
 
 import { SkillDetail } from '../SkillDetail/SkillDetail';
@@ -15,7 +16,6 @@ import { LandingPage } from './LandingPage';
 
 export type MainContentProps = {
   view: MainView;
-  agents: AgentFile[];
   selectedAgent: AgentFile | null;
   selectedSkill: SkillFile | null;
   resumeChat: { agentName: string; sessionId: string; message: string } | null;
@@ -39,7 +39,6 @@ export type MainContentProps = {
 
 export function MainContent({
   view,
-  agents,
   selectedAgent,
   selectedSkill,
   resumeChat,
@@ -60,6 +59,7 @@ export function MainContent({
   onStartChat,
   onSelectSession,
 }: MainContentProps) {
+  const agents = useDashboardStore((s) => s.agents);
   return (
     <div className="flex-1 flex flex-col">
       <div

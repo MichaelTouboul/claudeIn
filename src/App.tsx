@@ -8,16 +8,31 @@ import { ProjectDashboard } from '@/components/ProjectDashboard/ProjectDashboard
 import { ProjectSwitcher } from "@/components/ProjectSwitcher/ProjectSwitcher";
 import { StatsBar } from "@/components/StatsBar/StatsBar";
 
-import { useDashboard,useProjects } from "./hooks/useProjects";
+import { useProjects } from "./hooks/useProjects";
 import { useStats } from "./hooks/useStats";
 import { useAppStore } from "./store/useAppStore";
+import { useDashboardStore } from "./store/useDashboardStore";
 import { useEventsStore,useInitEvents } from "./store/useEventsStore";
 
 export default function App() {
   const { projects, loading: projectsLoading } = useProjects();
   const selectedProject = useAppStore((s) => s.selectedProject);
   const setSelectedProject = useAppStore((s) => s.setSelectedProject);
-  const { dashboard, loading: dashLoading, refresh } = useDashboard(selectedProject?.id ?? null);
+  const project = useDashboardStore((s) => s.project);
+  const agents = useDashboardStore((s) => s.agents);
+  const skills = useDashboardStore((s) => s.skills);
+  const hooks = useDashboardStore((s) => s.hooks);
+  const dashLoading = useDashboardStore((s) => s.loading);
+  const loadDashboard = useDashboardStore((s) => s.load);
+  const refresh = useDashboardStore((s) => s.refresh);
+
+  useEffect(() => {
+    if (selectedProject?.id) {
+      void loadDashboard(selectedProject.id);
+    }
+  }, [selectedProject?.id, loadDashboard]);
+
+  const dashboard = project ? { project, agents, skills, hooks } : null;
   useInitEvents();
   const events = useEventsStore((s) => s.events);
   const eventsLength = useEventsStore((s) => s.events.length);
@@ -46,13 +61,11 @@ export default function App() {
 
   const agentColorMap = useMemo(() => {
     const map = new Map<string, string>();
-    if (dashboard) {
-      for (const a of dashboard.agents) {
-        map.set(a.id, a.frontmatter.color || "cyan");
-      }
+    for (const a of agents) {
+      map.set(a.id, a.frontmatter.color || "cyan");
     }
     return map;
-  }, [dashboard]);
+  }, [agents]);
 
   if (projectsLoading) {
     return (
@@ -143,13 +156,7 @@ export default function App() {
             Loading dashboard...
           </div>
         ) : dashboard ? (
-          <ProjectDashboard
-            project={dashboard.project}
-            agents={dashboard.agents}
-            skills={dashboard.skills}
-            hooks={dashboard.hooks}
-            onRefresh={refresh}
-          />
+          <ProjectDashboard project={dashboard.project} onRefresh={refresh} />
         ) : null}
 
         <EventConsole events={events} agentColorMap={agentColorMap} />

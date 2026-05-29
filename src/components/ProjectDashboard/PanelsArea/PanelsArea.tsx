@@ -6,8 +6,9 @@ import { type ReactNode } from "react";
 
 import { Accordion } from '@/components/_ui/Accordion';
 import { SessionList } from '@/components/SessionList/SessionList';
-import type { HookConfig,SkillFile } from '@/hooks/useProjects';
+import type { HookConfig, SkillFile } from '@/hooks/useProjects';
 import type { SessionSummary } from '@/hooks/useSessions';
+import { useDashboardStore } from '@/store/useDashboardStore';
 import type { AgentFile } from '@/types/agent.types';
 
 import { AgentList } from '../AgentList/AgentList';
@@ -16,9 +17,6 @@ import { SectionLabel } from '../SectionLabel/SectionLabel';
 import { SkillRow } from '../SkillRow/SkillRow';
 
 export type PanelsAreaProps = {
-  agents: AgentFile[];
-  skills: SkillFile[];
-  hooks: HookConfig[];
   sessions: SessionSummary[];
   sessionsLoading: boolean;
   selectedAgent: AgentFile | null;
@@ -48,9 +46,6 @@ export type PanelsAreaProps = {
 };
 
 export function PanelsArea({
-  agents,
-  skills,
-  hooks,
   sessions,
   sessionsLoading,
   selectedAgent,
@@ -78,6 +73,9 @@ export function PanelsArea({
   onToggleLink,
   onRefresh,
 }: PanelsAreaProps) {
+  const agents = useDashboardStore((s) => s.agents);
+  const skills = useDashboardStore((s) => s.skills);
+  const hooks = useDashboardStore((s) => s.hooks);
   return (
     <div className="flex-1 flex flex-col min-h-0">
       {/* Spacer pushes panels to bottom when all are closed */}
