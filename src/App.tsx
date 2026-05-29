@@ -1,5 +1,5 @@
 import { Bot, MessageSquare } from "lucide-react";
-import { useEffect, useRef,useState } from "react";
+import { useEffect, useMemo,useRef,useState } from "react";
 
 import { Button } from "@/components/_ui/Button";
 import { EventConsole } from "@/components/EventConsole/EventConsole";
@@ -44,12 +44,15 @@ export default function App() {
     };
   }, [selectedProject]);
 
-  const agentColorMap = new Map<string, string>();
-  if (dashboard) {
-    for (const a of dashboard.agents) {
-      agentColorMap.set(a.id, a.frontmatter.color || "cyan");
+  const agentColorMap = useMemo(() => {
+    const map = new Map<string, string>();
+    if (dashboard) {
+      for (const a of dashboard.agents) {
+        map.set(a.id, a.frontmatter.color || "cyan");
+      }
     }
-  }
+    return map;
+  }, [dashboard]);
 
   if (projectsLoading) {
     return (

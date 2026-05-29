@@ -149,6 +149,11 @@ export function useInitEvents() {
     const cleanup = window.api.onEvent((raw) => {
       useEventsStore.getState().ingest(raw);
     });
-    return cleanup;
+    return () => {
+      cleanup();
+      for (const timer of activeTimers.values()) clearTimeout(timer);
+      activeTimers.clear();
+      useEventsStore.getState().setConnected(false);
+    };
   }, []);
 }
