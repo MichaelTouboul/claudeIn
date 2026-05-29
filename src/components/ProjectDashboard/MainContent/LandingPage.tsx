@@ -2,6 +2,8 @@ import { GitBranch, History, Terminal } from "lucide-react";
 
 import type { SessionSummary } from '@/hooks/useSessions';
 import { useProject } from '@/store/ProjectContext';
+import { useChatsStore } from '@/store/useChatsStore';
+import { useDashboardUIStore } from '@/store/useDashboardUIStore';
 import type { AgentFile } from '@/types/agent.types';
 
 import type { MainView } from '../types';
@@ -10,8 +12,6 @@ export type LandingPageProps = {
   agents: AgentFile[];
   sessions: SessionSummary[];
   onSetView: (view: MainView) => void;
-  onAddOpenChat: (agentName: string, title: string) => string;
-  onStartChat: (agentName: string, sessionId: string, message: string) => void;
   onSelectAgent: (a: AgentFile) => void;
   onSelectSession: (s: SessionSummary) => void;
 };
@@ -20,12 +20,14 @@ export function LandingPage({
   agents,
   sessions,
   onSetView,
-  onAddOpenChat,
-  onStartChat,
   onSelectAgent,
   onSelectSession,
 }: LandingPageProps) {
   const { projectName, projectPath } = useProject();
+  const addOpenChat = useChatsStore((s) => s.addOpenChat);
+  const setResumeChat = useDashboardUIStore((s) => s.setResumeChat);
+  const onStartChat = (agentName: string, sessionId: string, message: string) =>
+    setResumeChat({ agentName, sessionId, message });
   return (
     <div className="h-full overflow-y-auto">
       <div className="max-w-2xl mx-auto px-8 py-10 space-y-8">
@@ -50,7 +52,7 @@ export function LandingPage({
         <div>
           <button
             onClick={() => {
-              onAddOpenChat("claude", "New chat");
+              addOpenChat("claude", "New chat");
               onStartChat("claude", "", "");
               onSetView("chat");
             }}
@@ -186,7 +188,7 @@ export function LandingPage({
                     <button
                       key={agent.id}
                       onClick={() => {
-                        onAddOpenChat(agent.frontmatter.name, `Chat with ${agent.frontmatter.name}`);
+                        addOpenChat(agent.frontmatter.name, `Chat with ${agent.frontmatter.name}`);
                         onSelectAgent(agent);
                         onSetView("agent");
                       }}

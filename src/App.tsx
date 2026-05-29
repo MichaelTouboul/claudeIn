@@ -12,6 +12,7 @@ import { useProjects } from "./hooks/useProjects";
 import { useStats } from "./hooks/useStats";
 import { ProjectProvider } from "./store/ProjectContext";
 import { useAppStore } from "./store/useAppStore";
+import { useInitChatTitles } from "./store/useChatsStore";
 import { useDashboardStore } from "./store/useDashboardStore";
 import { useEventsStore,useInitEvents } from "./store/useEventsStore";
 
@@ -32,6 +33,7 @@ export default function App() {
 
   const dashboard = project ? { project } : null;
   useInitEvents();
+  useInitChatTitles();
   const events = useEventsStore((s) => s.events);
   const connected = useEventsStore((s) => s.connected);
   const activeCount = useEventsStore((s) => s.activeAgents.size);

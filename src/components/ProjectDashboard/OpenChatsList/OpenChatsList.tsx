@@ -1,10 +1,9 @@
 import { MessageSquare } from 'lucide-react';
 
+import { useChatsStore } from '@/store/useChatsStore';
 import { useDashboardStore } from '@/store/useDashboardStore';
 import { useDashboardUIStore } from '@/store/useDashboardUIStore';
 import { useEventsStore } from '@/store/useEventsStore';
-
-import type { OpenChat } from '../types';
 
 const colorHex: Record<string, string> = {
   cyan: '#06b6d4', blue: '#3b82f6', green: '#22c55e',
@@ -12,13 +11,8 @@ const colorHex: Record<string, string> = {
   purple: '#a855f7', pink: '#ec4899',
 };
 
-export type OpenChatsListProps = {
-  openChats: OpenChat[];
-};
-
-export function OpenChatsList({
-  openChats,
-}: OpenChatsListProps) {
+export function OpenChatsList() {
+  const openChats = useChatsStore((s) => s.openChats);
   const agents = useDashboardStore((s) => s.agents);
   const activeAgents = useEventsStore((s) => s.activeAgents);
   const selectAgent = useDashboardUIStore((s) => s.selectAgent);

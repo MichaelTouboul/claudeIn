@@ -17,9 +17,6 @@ export type MainContentProps = {
   conversation: SessionConversation | null;
   conversationLoading: boolean;
   sessions: SessionSummary[];
-  onSessionResume: (sessionId: string, message: string) => void;
-  onAddOpenChat: (agentName: string, title: string) => string;
-  onStartChat: (agentName: string, sessionId: string, message: string) => void;
   onSelectSession: (s: SessionSummary) => void;
 };
 
@@ -27,9 +24,6 @@ export function MainContent({
   conversation,
   conversationLoading,
   sessions,
-  onSessionResume,
-  onAddOpenChat,
-  onStartChat,
   onSelectSession,
 }: MainContentProps) {
   const agents = useDashboardStore((s) => s.agents);
@@ -38,8 +32,14 @@ export function MainContent({
   const selectedSkill = useDashboardUIStore((s) => s.selectedSkill);
   const resumeChat = useDashboardUIStore((s) => s.resumeChat);
   const setView = useDashboardUIStore((s) => s.setView);
+  const setResumeChat = useDashboardUIStore((s) => s.setResumeChat);
   const onSelectAgent = useDashboardUIStore((s) => s.selectAgent);
   const onAgentUpdated = useDashboardUIStore((s) => s.setSelectedAgent);
+
+  const onSessionResume = (sessionId: string, message: string) => {
+    setResumeChat({ agentName: 'claude', sessionId, message });
+    setView('chat');
+  };
   return (
     <div className="flex-1 flex flex-col">
       <div
@@ -111,8 +111,6 @@ export function MainContent({
             agents={agents}
             sessions={sessions}
             onSetView={setView}
-            onAddOpenChat={onAddOpenChat}
-            onStartChat={onStartChat}
             onSelectAgent={onSelectAgent}
             onSelectSession={onSelectSession}
           />

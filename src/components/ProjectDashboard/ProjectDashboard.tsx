@@ -1,10 +1,8 @@
-import { useCallback,useRef, useState } from "react";
-
-import { useAutoChatTitles } from '@/hooks/useAutoChatTitles';
 import { useResizableSidebar } from '@/hooks/useResizableSidebar';
 import type { SessionSummary } from '@/hooks/useSessions';
 import { useSessions } from '@/hooks/useSessions';
 import { useProject } from '@/store/ProjectContext';
+import { useChatsStore } from '@/store/useChatsStore';
 import { useDashboardStore } from '@/store/useDashboardStore';
 import { useDashboardUIStore } from '@/store/useDashboardUIStore';
 import { EMPTY, useFavoritesStore, useInitFavorites } from '@/store/useFavoritesStore';
@@ -14,7 +12,6 @@ import { MainContent } from './MainContent/MainContent';
 import { OpenChatsList } from './OpenChatsList/OpenChatsList';
 import { PanelsArea } from './PanelsArea/PanelsArea';
 import { ResizeHandle } from './ResizeHandle/ResizeHandle';
-import type { OpenChat } from './types';
 
 // Inject animation keyframes
 if (typeof document !== "undefined" && !document.getElementById("chat-animations")) {
@@ -45,24 +42,7 @@ export function ProjectDashboard() {
   const toggleFavorite = (type: 'agent' | 'skill' | 'hook', name: string) =>
     useFavoritesStore.getState().toggle(projectId, type, name);
   const { sessions, loading: sessionsLoading, conversation, conversationLoading, selectSession } = useSessions(projectPath);
-  const [openChats, setOpenChats] = useState<OpenChat[]>([]);
-  const chatIdCounter = useRef(0);
-
-  const addOpenChat = useCallback((agentName: string, title: string) => {
-    const id = `chat-${++chatIdCounter.current}-${Date.now()}`;
-    setOpenChats((prev) => [
-      { id, agentName, title, createdAt: Date.now(), isNew: true },
-      ...prev,
-    ]);
-    setTimeout(() => {
-      setOpenChats((prev) =>
-        prev.map((c) => (c.id === id ? { ...c, isNew: false } : c))
-      );
-    }, 600);
-    return id;
-  }, []);
-
-  useAutoChatTitles({ setOpenChats });
+  const addOpenChat = useChatsStore((s) => s.addOpenChat);
 
   const { width: sidebarWidth, ref: sidebarRef, startDrag: handleResizeDragStart } = useResizableSidebar();
 
@@ -107,14 +87,6 @@ export function ProjectDashboard() {
     }
   };
 
-  const handleSessionResume = (sessionId: string, message: string) => {
-    const session = sessions.find((s) => s.sessionId === sessionId);
-    const agentName = session?.agentName || "claude";
-    addOpenChat(agentName, `Resume: ${session?.title || agentName}`);
-    useDashboardUIStore.getState().setResumeChat({ agentName, sessionId, message });
-    useDashboardUIStore.getState().setView("chat");
-  };
-
   const handleSelectSession = (s: SessionSummary) => {
     addOpenChat(s.agentName || "claude", s.title || s.firstPrompt || "Session");
     useDashboardUIStore.getState().selectSession(s.sessionId);
@@ -136,7 +108,7 @@ export function ProjectDashboard() {
 
         <ActiveSessions />
 
-        <OpenChatsList openChats={openChats} />
+        <OpenChatsList />
 
         <PanelsArea
           sessions={sessions}
@@ -163,9 +135,6 @@ export function ProjectDashboard() {
         conversation={conversation}
         conversationLoading={conversationLoading}
         sessions={sessions}
-        onSessionResume={handleSessionResume}
-        onAddOpenChat={addOpenChat}
-        onStartChat={(agentName, sessionId, message) => useDashboardUIStore.getState().setResumeChat({ agentName, sessionId, message })}
         onSelectSession={handleSelectSession}
       />
     </div>
