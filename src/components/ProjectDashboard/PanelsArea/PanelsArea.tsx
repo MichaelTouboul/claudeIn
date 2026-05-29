@@ -6,12 +6,11 @@ import { type ReactNode } from "react";
 
 import { Accordion } from '@/components/_ui/Accordion';
 import { SessionList } from '@/components/SessionList/SessionList';
-import type { HookConfig, SkillFile } from '@/hooks/useProjects';
 import type { SessionSummary } from '@/hooks/useSessions';
 import { useProject } from '@/store/ProjectContext';
 import { useDashboardStore } from '@/store/useDashboardStore';
 import { useDashboardUIStore } from '@/store/useDashboardUIStore';
-import type { AgentFile } from '@/types/agent.types';
+import { EMPTY, useFavoritesStore } from '@/store/useFavoritesStore';
 
 import { AgentList } from '../AgentList/AgentList';
 import { HookRow } from '../HookRow/HookRow';
@@ -21,15 +20,6 @@ import { SkillRow } from '../SkillRow/SkillRow';
 export type PanelsAreaProps = {
   sessions: SessionSummary[];
   sessionsLoading: boolean;
-  isUserProject: boolean;
-  projectAgents: AgentFile[];
-  userAgents: AgentFile[];
-  projectSkills: SkillFile[];
-  userSkills: SkillFile[];
-  favAgents: AgentFile[];
-  favSkills: SkillFile[];
-  favHooks: HookConfig[];
-  hasFavorites: boolean;
   onAgentAction: (action: string, agentName: string) => void;
   onSelectSession: (s: SessionSummary) => void;
   onToggleLink: (agentName: string, linked: boolean) => void;
@@ -38,23 +28,15 @@ export type PanelsAreaProps = {
 export function PanelsArea({
   sessions,
   sessionsLoading,
-  isUserProject,
-  projectAgents,
-  userAgents,
-  projectSkills,
-  userSkills,
-  favAgents,
-  favSkills,
-  favHooks,
-  hasFavorites,
   onAgentAction,
   onSelectSession,
   onToggleLink,
 }: PanelsAreaProps) {
-  const { refresh } = useProject();
+  const { projectId, isUserProject, refresh } = useProject();
   const agents = useDashboardStore((s) => s.agents);
   const skills = useDashboardStore((s) => s.skills);
   const hooks = useDashboardStore((s) => s.hooks);
+  const favoriteList = useFavoritesStore((s) => s.byProject[projectId] ?? EMPTY);
   const selectedAgent = useDashboardUIStore((s) => s.selectedAgent);
   const selectedSkill = useDashboardUIStore((s) => s.selectedSkill);
   const selectedSessionId = useDashboardUIStore((s) => s.selectedSessionId);
@@ -64,6 +46,18 @@ export function PanelsArea({
   const setScopeTab = useDashboardUIStore((s) => s.setScopeTab);
   const onSelectAgent = useDashboardUIStore((s) => s.selectAgent);
   const onSelectSkill = useDashboardUIStore((s) => s.selectSkill);
+
+  const projectAgents = agents.filter((a) => a.scope === "project" || (a.scope === "user" && a.linked));
+  const userAgents = agents.filter((a) => a.scope === "user" && !a.linked);
+  const projectSkills = skills.filter((s) => s.scope !== "user");
+  const userSkills = skills.filter((s) => s.scope === "user");
+
+  const isFav = (type: 'agent' | 'skill' | 'hook', name: string) =>
+    favoriteList.some((f) => f.item_type === type && f.item_name === name);
+  const favAgents = agents.filter((a) => isFav('agent', a.id));
+  const favSkills = skills.filter((s) => isFav('skill', s.name));
+  const favHooks = hooks.filter((h) => isFav('hook', `${h.event}:${h.matcher}`));
+  const hasFavorites = favAgents.length + favSkills.length + favHooks.length > 0;
   return (
     <div className="flex-1 flex flex-col min-h-0">
       {/* Spacer pushes panels to bottom when all are closed */}

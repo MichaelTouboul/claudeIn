@@ -5,7 +5,7 @@ import { useProject } from '@/store/ProjectContext';
 import { useChatsStore } from '@/store/useChatsStore';
 import { useDashboardStore } from '@/store/useDashboardStore';
 import { useDashboardUIStore } from '@/store/useDashboardUIStore';
-import { EMPTY, useFavoritesStore, useInitFavorites } from '@/store/useFavoritesStore';
+import { useFavoritesStore, useInitFavorites } from '@/store/useFavoritesStore';
 
 import { ActiveSessions } from './ActiveSessions/ActiveSessions';
 import { MainContent } from './MainContent/MainContent';
@@ -30,32 +30,14 @@ if (typeof document !== "undefined" && !document.getElementById("chat-animations
 // ─── Main component ───
 
 export function ProjectDashboard() {
-  const { projectId, projectPath, isUserProject } = useProject();
+  const { projectId, projectPath } = useProject();
   const agents = useDashboardStore((s) => s.agents);
-  const skills = useDashboardStore((s) => s.skills);
-  const hooks = useDashboardStore((s) => s.hooks);
   const toggleLink = useDashboardStore((s) => s.toggleLink);
   useInitFavorites(projectId);
-  const favoriteList = useFavoritesStore((s) => s.byProject[projectId] ?? EMPTY);
-  const isFavorite = (type: 'agent' | 'skill' | 'hook', name: string) =>
-    favoriteList.some((f) => f.item_type === type && f.item_name === name);
-  const toggleFavorite = (type: 'agent' | 'skill' | 'hook', name: string) =>
-    useFavoritesStore.getState().toggle(projectId, type, name);
   const { sessions, loading: sessionsLoading, conversation, conversationLoading, selectSession } = useSessions(projectPath);
   const addOpenChat = useChatsStore((s) => s.addOpenChat);
 
   const { width: sidebarWidth, ref: sidebarRef, startDrag: handleResizeDragStart } = useResizableSidebar();
-
-  const projectAgents = agents.filter((a) => a.scope === "project" || (a.scope === "user" && a.linked));
-  const userAgents = agents.filter((a) => a.scope === "user" && !a.linked);
-
-  const projectSkills = skills.filter((s) => s.scope !== "user");
-  const userSkills = skills.filter((s) => s.scope === "user");
-
-  const favAgents = agents.filter((a) => isFavorite("agent", a.id));
-  const favSkills = skills.filter((s) => isFavorite("skill", s.name));
-  const favHooks = hooks.filter((h) => isFavorite("hook", `${h.event}:${h.matcher}`));
-  const hasFavorites = favAgents.length + favSkills.length + favHooks.length > 0;
 
   const handleToggleLink = (agentName: string, currentlyLinked: boolean) =>
     toggleLink(agentName, currentlyLinked);
@@ -82,7 +64,7 @@ export function ProjectDashboard() {
         alert(`Add sub-agent to ${agentName} — coming soon`);
         break;
       case "toggle-favorite":
-        toggleFavorite("agent", agentName);
+        useFavoritesStore.getState().toggle(projectId, "agent", agentName);
         break;
     }
   };
@@ -113,15 +95,6 @@ export function ProjectDashboard() {
         <PanelsArea
           sessions={sessions}
           sessionsLoading={sessionsLoading}
-          isUserProject={isUserProject}
-          projectAgents={projectAgents}
-          userAgents={userAgents}
-          projectSkills={projectSkills}
-          userSkills={userSkills}
-          favAgents={favAgents}
-          favSkills={favSkills}
-          favHooks={favHooks}
-          hasFavorites={hasFavorites}
           onAgentAction={handleAgentAction}
           onSelectSession={handleSelectSession}
           onToggleLink={handleToggleLink}
