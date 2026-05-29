@@ -2,10 +2,11 @@ import { useCallback,useRef, useState } from "react";
 
 import { useAutoChatTitles } from '@/hooks/useAutoChatTitles';
 import { useFavorites } from '@/hooks/useFavorites';
-import type { Project, SkillFile } from '@/hooks/useProjects';
+import type { SkillFile } from '@/hooks/useProjects';
 import { useResizableSidebar } from '@/hooks/useResizableSidebar';
 import type { SessionSummary } from '@/hooks/useSessions';
 import { useSessions } from '@/hooks/useSessions';
+import { useProject } from '@/store/ProjectContext';
 import { useDashboardStore } from '@/store/useDashboardStore';
 import type { AgentFile } from '@/types/agent.types';
 
@@ -30,17 +31,10 @@ if (typeof document !== "undefined" && !document.getElementById("chat-animations
   document.head.appendChild(style);
 }
 
-export type ProjectDashboardProps = {
-  project: Project;
-  onRefresh: () => void;
-};
-
 // ─── Main component ───
 
-export function ProjectDashboard({
-  project,
-  onRefresh,
-}: ProjectDashboardProps) {
+export function ProjectDashboard() {
+  const { projectId, projectPath, isUserProject } = useProject();
   const agents = useDashboardStore((s) => s.agents);
   const skills = useDashboardStore((s) => s.skills);
   const hooks = useDashboardStore((s) => s.hooks);
@@ -51,8 +45,8 @@ export function ProjectDashboard({
   const [openPanels, setOpenPanels] = useState<Set<string>>(() => new Set());
   const [scopeTab, setScopeTab] = useState<"project" | "user">("project");
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
-  const { isFavorite, toggle: toggleFavorite } = useFavorites(project.id);
-  const { sessions, loading: sessionsLoading, conversation, conversationLoading, selectSession } = useSessions(project.path);
+  const { isFavorite, toggle: toggleFavorite } = useFavorites(projectId);
+  const { sessions, loading: sessionsLoading, conversation, conversationLoading, selectSession } = useSessions(projectPath);
   const [resumeChat, setResumeChat] = useState<{ agentName: string; sessionId: string; message: string } | null>(null);
   const [openChats, setOpenChats] = useState<OpenChat[]>([]);
   const chatIdCounter = useRef(0);
@@ -83,8 +77,6 @@ export function ProjectDashboard({
   };
 
   const { width: sidebarWidth, ref: sidebarRef, startDrag: handleResizeDragStart } = useResizableSidebar();
-
-  const isUserProject = project.id === "user";
 
   const projectAgents = agents.filter((a) => a.scope === "project" || (a.scope === "user" && a.linked));
   const userAgents = agents.filter((a) => a.scope === "user" && !a.linked);
@@ -202,7 +194,6 @@ export function ProjectDashboard({
           onSelectSkill={handleSelectSkill}
           onSelectSession={handleSelectSession}
           onToggleLink={handleToggleLink}
-          onRefresh={onRefresh}
         />
 
         <ResizeHandle onMouseDown={handleResizeDragStart} />
@@ -217,12 +208,8 @@ export function ProjectDashboard({
         conversation={conversation}
         conversationLoading={conversationLoading}
         sessions={sessions}
-        projectName={project.name || project.id}
-        projectId={project.id}
-        projectPath={project.path}
         isFavorite={isFavorite}
         toggleFavorite={toggleFavorite}
-        onRefresh={onRefresh}
         onAgentUpdated={(a) => setSelectedAgent(a)}
         onSelectAgent={handleSelectAgent}
         onSessionResume={handleSessionResume}

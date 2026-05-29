@@ -1,6 +1,7 @@
 import { GitBranch, History, Terminal } from "lucide-react";
 
 import type { SessionSummary } from '@/hooks/useSessions';
+import { useProject } from '@/store/ProjectContext';
 import type { AgentFile } from '@/types/agent.types';
 
 import type { MainView } from '../types';
@@ -8,9 +9,6 @@ import type { MainView } from '../types';
 export type LandingPageProps = {
   agents: AgentFile[];
   sessions: SessionSummary[];
-  projectName: string;
-  projectId: string;
-  projectPath: string;
   onSetView: (view: MainView) => void;
   onAddOpenChat: (agentName: string, title: string) => string;
   onStartChat: (agentName: string, sessionId: string, message: string) => void;
@@ -21,15 +19,13 @@ export type LandingPageProps = {
 export function LandingPage({
   agents,
   sessions,
-  projectName,
-  projectId,
-  projectPath,
   onSetView,
   onAddOpenChat,
   onStartChat,
   onSelectAgent,
   onSelectSession,
 }: LandingPageProps) {
+  const { projectName, projectId, projectPath } = useProject();
   return (
     <div className="h-full overflow-y-auto">
       <div className="max-w-2xl mx-auto px-8 py-10 space-y-8">

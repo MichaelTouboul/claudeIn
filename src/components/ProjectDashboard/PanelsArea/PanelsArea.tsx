@@ -8,6 +8,7 @@ import { Accordion } from '@/components/_ui/Accordion';
 import { SessionList } from '@/components/SessionList/SessionList';
 import type { HookConfig, SkillFile } from '@/hooks/useProjects';
 import type { SessionSummary } from '@/hooks/useSessions';
+import { useProject } from '@/store/ProjectContext';
 import { useDashboardStore } from '@/store/useDashboardStore';
 import type { AgentFile } from '@/types/agent.types';
 
@@ -42,7 +43,6 @@ export type PanelsAreaProps = {
   onSelectSkill: (s: SkillFile) => void;
   onSelectSession: (s: SessionSummary) => void;
   onToggleLink: (agentName: string, linked: boolean) => void;
-  onRefresh: () => void;
 };
 
 export function PanelsArea({
@@ -71,8 +71,8 @@ export function PanelsArea({
   onSelectSkill,
   onSelectSession,
   onToggleLink,
-  onRefresh,
 }: PanelsAreaProps) {
+  const { refresh } = useProject();
   const agents = useDashboardStore((s) => s.agents);
   const skills = useDashboardStore((s) => s.skills);
   const hooks = useDashboardStore((s) => s.hooks);
@@ -232,7 +232,7 @@ export function PanelsArea({
             count={panel.count}
             open={openPanels.has(panel.key)}
             onToggle={() => onTogglePanel(panel.key)}
-            onRefresh={onRefresh}
+            onRefresh={refresh}
             flex
           >
             {panel.content}

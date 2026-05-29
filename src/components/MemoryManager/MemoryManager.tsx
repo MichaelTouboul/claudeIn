@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/_ui/Button";
 import { api } from "@/services/api";
+import { useProject } from "@/store/ProjectContext";
 import type { AgentFile, MemoryFile } from "@/types/agent.types";
 
 const MAX_LINES = 200;
@@ -50,13 +51,12 @@ function MemoryFileCard({
   file,
   agentName,
   isIndex,
-  onRefresh,
 }: {
   file: MemoryFile;
   agentName: string;
   isIndex: boolean;
-  onRefresh: () => void;
 }) {
+  const { refresh } = useProject();
   const [editing, setEditing] = useState(false);
   const [content, setContent] = useState(file.content);
   const [saving, setSaving] = useState(false);
@@ -70,7 +70,7 @@ function MemoryFileCard({
     try {
       await api.updateMemoryFile(agentName, file.name, content);
       setEditing(false);
-      onRefresh();
+      await refresh();
     } finally {
       setSaving(false);
     }
@@ -79,7 +79,7 @@ function MemoryFileCard({
   const remove = async () => {
     if (!confirm(`Delete ${file.name}?`)) return;
     await api.deleteMemoryFile(agentName, file.name);
-    onRefresh();
+    await refresh();
   };
 
   return (
@@ -162,13 +162,12 @@ function MemoryFileCard({
 
 export type MemoryManagerProps = {
   agent: AgentFile;
-  onRefresh: () => void;
 };
 
 export function MemoryManager({
   agent,
-  onRefresh,
 }: MemoryManagerProps) {
+  const { refresh } = useProject();
   const [creating, setCreating] = useState(false);
   const [newFileName, setNewFileName] = useState("");
   const [newContent, setNewContent] = useState("");
@@ -200,7 +199,7 @@ export function MemoryManager({
       setCreating(false);
       setNewFileName("");
       setNewContent("");
-      onRefresh();
+      await refresh();
     } finally {
       setSaving(false);
     }
@@ -254,12 +253,12 @@ export function MemoryManager({
           />
         </div> : null}
 
-      {indexFile ? <MemoryFileCard file={indexFile} agentName={agent.id} isIndex onRefresh={onRefresh} /> : null}
+      {indexFile ? <MemoryFileCard file={indexFile} agentName={agent.id} isIndex /> : null}
 
       {topicFiles.length > 0 ? <div className="space-y-2">
           <h4 className="text-[10px] font-semibold text-fg-subtle uppercase tracking-[0.12em]">Topic Files</h4>
           {topicFiles.map((f) => (
-            <MemoryFileCard key={f.name} file={f} agentName={agent.id} isIndex={false} onRefresh={onRefresh} />
+            <MemoryFileCard key={f.name} file={f} agentName={agent.id} isIndex={false} />
           ))}
         </div> : null}
 

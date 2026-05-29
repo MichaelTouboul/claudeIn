@@ -22,12 +22,8 @@ export type MainContentProps = {
   conversation: SessionConversation | null;
   conversationLoading: boolean;
   sessions: SessionSummary[];
-  projectName: string;
-  projectId: string;
-  projectPath: string;
   isFavorite: (type: 'agent' | 'skill' | 'hook', name: string) => boolean;
   toggleFavorite: (type: 'agent' | 'skill' | 'hook', name: string) => void;
-  onRefresh: () => void;
   onAgentUpdated: (agent: AgentFile) => void;
   onSelectAgent: (a: AgentFile) => void;
   onSessionResume: (sessionId: string, message: string) => void;
@@ -45,12 +41,8 @@ export function MainContent({
   conversation,
   conversationLoading,
   sessions,
-  projectName,
-  projectId,
-  projectPath,
   isFavorite,
   toggleFavorite,
-  onRefresh,
   onAgentUpdated,
   onSelectAgent,
   onSessionResume,
@@ -102,7 +94,6 @@ export function MainContent({
           <AgentDetail
             agent={selectedAgent}
             onDelete={() => {}}
-            onRefresh={onRefresh}
             onAgentUpdated={onAgentUpdated}
             isFavorite={isFavorite("agent", selectedAgent.id)}
             onToggleFavorite={() => toggleFavorite("agent", selectedAgent.id)}
@@ -137,9 +128,6 @@ export function MainContent({
           <LandingPage
             agents={agents}
             sessions={sessions}
-            projectName={projectName}
-            projectId={projectId}
-            projectPath={projectPath}
             onSetView={onSetView}
             onAddOpenChat={onAddOpenChat}
             onStartChat={onStartChat}

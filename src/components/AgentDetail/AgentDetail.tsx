@@ -24,7 +24,6 @@ const tabIcons: Record<Tab, React.ReactNode> = {
 export type AgentDetailProps = {
   agent: AgentFile;
   onDelete: (name: string) => void;
-  onRefresh: () => void;
   onAgentUpdated?: (agent: AgentFile) => void;
   isFavorite?: boolean;
   onToggleFavorite?: () => void;
@@ -33,7 +32,6 @@ export type AgentDetailProps = {
 export function AgentDetail({
   agent,
   onDelete,
-  onRefresh,
   onAgentUpdated,
   isFavorite,
   onToggleFavorite,
@@ -163,7 +161,7 @@ export function AgentDetail({
         <div className="flex-1 overflow-y-auto p-6">
           {tab === "overview" ? <FrontmatterTable agent={agent} editing={editing} draft={draft} onDraftChange={handleDraftChange} /> : null}
           {tab === "prompt" ? <MarkdownBody content={agent.body} /> : null}
-          {tab === "memory" ? <MemoryManager agent={agent} onRefresh={onRefresh} /> : null}
+          {tab === "memory" ? <MemoryManager agent={agent} /> : null}
           {tab === "files" ? (
             <div className="space-y-4">
               {agent.annexFiles.length === 0 ? (

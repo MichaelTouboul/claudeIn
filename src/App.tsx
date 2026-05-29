@@ -10,6 +10,7 @@ import { StatsBar } from "@/components/StatsBar/StatsBar";
 
 import { useProjects } from "./hooks/useProjects";
 import { useStats } from "./hooks/useStats";
+import { ProjectProvider } from "./store/ProjectContext";
 import { useAppStore } from "./store/useAppStore";
 import { useDashboardStore } from "./store/useDashboardStore";
 import { useEventsStore,useInitEvents } from "./store/useEventsStore";
@@ -22,7 +23,6 @@ export default function App() {
   const agents = useDashboardStore((s) => s.agents);
   const dashLoading = useDashboardStore((s) => s.loading);
   const loadDashboard = useDashboardStore((s) => s.load);
-  const refresh = useDashboardStore((s) => s.refresh);
 
   useEffect(() => {
     if (selectedProject?.id) {
@@ -153,7 +153,9 @@ export default function App() {
             Loading dashboard...
           </div>
         ) : dashboard ? (
-          <ProjectDashboard project={dashboard.project} onRefresh={refresh} />
+          <ProjectProvider project={dashboard.project}>
+            <ProjectDashboard />
+          </ProjectProvider>
         ) : null}
 
         <EventConsole events={events} agentColorMap={agentColorMap} />
