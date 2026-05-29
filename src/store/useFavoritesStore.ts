@@ -6,6 +6,10 @@ export type FavoriteItem = {
   item_name: string;
 };
 
+export const EMPTY: FavoriteItem[] = [];
+
+let currentLoadId = 0;
+
 type FavoritesState = {
   byProject: Record<string, FavoriteItem[]>;
   load: (projectId: string) => Promise<void>;
@@ -16,7 +20,9 @@ export const useFavoritesStore = create<FavoritesState>((set, get) => ({
   byProject: {},
 
   load: async (projectId) => {
+    const id = ++currentLoadId;
     const data = await window.api.getFavorites(projectId);
+    if (id !== currentLoadId) return; // superseded by a newer load
     set((s) => ({ byProject: { ...s.byProject, [projectId]: data } }));
   },
 

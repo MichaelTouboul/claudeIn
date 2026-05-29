@@ -4,7 +4,7 @@ import { Button } from '@/components/_ui/Button';
 import { AgentContextMenu } from '@/components/AgentContextMenu/AgentContextMenu';
 import { useProject } from '@/store/ProjectContext';
 import { useEventsStore } from '@/store/useEventsStore';
-import { useFavoritesStore } from '@/store/useFavoritesStore';
+import { EMPTY, useFavoritesStore } from '@/store/useFavoritesStore';
 import type { AgentFile } from '@/types/agent.types';
 
 import { ContextBar } from '../ContextBar/ContextBar';
@@ -31,7 +31,7 @@ export function OrchestratorTree({
   const { projectId } = useProject();
   const activeAgents = useEventsStore((s) => s.activeAgents);
   const agentContexts = useEventsStore((s) => s.agentContexts);
-  const favoriteList = useFavoritesStore((s) => s.byProject[projectId] || []);
+  const favoriteList = useFavoritesStore((s) => s.byProject[projectId] ?? EMPTY);
   const isAgentFavorite = (name: string) =>
     favoriteList.some((f) => f.item_type === 'agent' && f.item_name === name);
 

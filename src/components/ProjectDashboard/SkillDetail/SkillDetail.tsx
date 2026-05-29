@@ -37,13 +37,13 @@ export function SkillDetail({ skill }: SkillDetailProps) {
         <div className="flex items-center gap-2 mb-1">
           <Wrench size={16} className="text-active" />
           <h2 className="text-lg font-bold text-white">{skill.name}</h2>
-          {onToggleFavorite ? <button
-              onClick={onToggleFavorite}
-              className="p-1 rounded hover:bg-surface-2 transition-colors"
-              title={isFavorite ? "Remove from favorites" : "Add to favorites"}
-            >
-              <Star size={16} className={isFavorite ? "text-yellow-400 fill-yellow-400" : "text-fg-subtle hover:text-yellow-400"} />
-            </button> : null}
+          <button
+            onClick={onToggleFavorite}
+            className="p-1 rounded hover:bg-surface-2 transition-colors"
+            title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+          >
+            <Star size={16} className={isFavorite ? "text-yellow-400 fill-yellow-400" : "text-fg-subtle hover:text-yellow-400"} />
+          </button>
           <span className={`text-xs px-2 py-0.5 rounded-full ${
             skill.scope === "user" ? "bg-yellow-500/15 text-yellow-400" : "bg-accent/15 text-accent"
           }`}>
