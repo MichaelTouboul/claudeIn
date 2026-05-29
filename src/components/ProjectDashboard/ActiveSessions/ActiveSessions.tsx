@@ -1,6 +1,6 @@
 import { useDashboardStore } from '@/store/useDashboardStore';
+import { useDashboardUIStore } from '@/store/useDashboardUIStore';
 import { useEventsStore } from '@/store/useEventsStore';
-import type { AgentFile } from '@/types/agent.types';
 
 const colorHex: Record<string, string> = {
   cyan: '#06b6d4', blue: '#3b82f6', green: '#22c55e',
@@ -8,17 +8,12 @@ const colorHex: Record<string, string> = {
   purple: '#a855f7', pink: '#ec4899',
 };
 
-export type ActiveSessionsProps = {
-  onSelectAgent: (agent: AgentFile) => void;
-};
-
-export function ActiveSessions({
-  onSelectAgent,
-}: ActiveSessionsProps) {
+export function ActiveSessions() {
   const agents = useDashboardStore((s) => s.agents);
   const activeAgents = useEventsStore((s) => s.activeAgents);
   const agentContexts = useEventsStore((s) => s.agentContexts);
   const waitingAgents = useEventsStore((s) => s.waitingAgents);
+  const selectAgent = useDashboardUIStore((s) => s.selectAgent);
   if (activeAgents.size === 0) return null;
 
   return (
@@ -49,7 +44,7 @@ export function ActiveSessions({
             <button
               key={agentName}
               onClick={() => {
-                if (agent) onSelectAgent(agent);
+                if (agent) selectAgent(agent);
               }}
               className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors"
               style={{ background: 'transparent' }}

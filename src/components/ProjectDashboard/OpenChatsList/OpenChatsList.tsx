@@ -1,8 +1,8 @@
 import { MessageSquare } from 'lucide-react';
 
 import { useDashboardStore } from '@/store/useDashboardStore';
+import { useDashboardUIStore } from '@/store/useDashboardUIStore';
 import { useEventsStore } from '@/store/useEventsStore';
-import type { AgentFile } from '@/types/agent.types';
 
 import type { OpenChat } from '../types';
 
@@ -14,15 +14,14 @@ const colorHex: Record<string, string> = {
 
 export type OpenChatsListProps = {
   openChats: OpenChat[];
-  onSelectAgent: (agent: AgentFile) => void;
 };
 
 export function OpenChatsList({
   openChats,
-  onSelectAgent,
 }: OpenChatsListProps) {
   const agents = useDashboardStore((s) => s.agents);
   const activeAgents = useEventsStore((s) => s.activeAgents);
+  const selectAgent = useDashboardUIStore((s) => s.selectAgent);
   if (openChats.length === 0) return null;
 
   return (
@@ -45,7 +44,7 @@ export function OpenChatsList({
             <button
               key={chat.id}
               onClick={() => {
-                if (agent) onSelectAgent(agent);
+                if (agent) selectAgent(agent);
               }}
               className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors text-left"
               style={{

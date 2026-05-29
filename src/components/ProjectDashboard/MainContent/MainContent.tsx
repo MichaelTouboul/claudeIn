@@ -5,49 +5,41 @@ import { AgentDetail } from '@/components/AgentDetail/AgentDetail';
 import { AgentTree } from '@/components/AgentTree/AgentTree';
 import { CostDashboard } from '@/components/CostDashboard/CostDashboard';
 import { SessionViewer } from '@/components/SessionViewer/SessionViewer';
-import type { SkillFile } from '@/hooks/useProjects';
 import type { SessionConversation,SessionSummary } from '@/hooks/useSessions';
 import { useDashboardStore } from '@/store/useDashboardStore';
-import type { AgentFile } from '@/types/agent.types';
+import { useDashboardUIStore } from '@/store/useDashboardUIStore';
 
 import { SkillDetail } from '../SkillDetail/SkillDetail';
 import type { MainView } from '../types';
 import { LandingPage } from './LandingPage';
 
 export type MainContentProps = {
-  view: MainView;
-  selectedAgent: AgentFile | null;
-  selectedSkill: SkillFile | null;
-  resumeChat: { agentName: string; sessionId: string; message: string } | null;
   conversation: SessionConversation | null;
   conversationLoading: boolean;
   sessions: SessionSummary[];
-  onAgentUpdated: (agent: AgentFile) => void;
-  onSelectAgent: (a: AgentFile) => void;
   onSessionResume: (sessionId: string, message: string) => void;
-  onSetView: (view: MainView) => void;
   onAddOpenChat: (agentName: string, title: string) => string;
   onStartChat: (agentName: string, sessionId: string, message: string) => void;
   onSelectSession: (s: SessionSummary) => void;
 };
 
 export function MainContent({
-  view,
-  selectedAgent,
-  selectedSkill,
-  resumeChat,
   conversation,
   conversationLoading,
   sessions,
-  onAgentUpdated,
-  onSelectAgent,
   onSessionResume,
-  onSetView,
   onAddOpenChat,
   onStartChat,
   onSelectSession,
 }: MainContentProps) {
   const agents = useDashboardStore((s) => s.agents);
+  const view = useDashboardUIStore((s) => s.view);
+  const selectedAgent = useDashboardUIStore((s) => s.selectedAgent);
+  const selectedSkill = useDashboardUIStore((s) => s.selectedSkill);
+  const resumeChat = useDashboardUIStore((s) => s.resumeChat);
+  const setView = useDashboardUIStore((s) => s.setView);
+  const onSelectAgent = useDashboardUIStore((s) => s.selectAgent);
+  const onAgentUpdated = useDashboardUIStore((s) => s.setSelectedAgent);
   return (
     <div className="flex-1 flex flex-col">
       <div
@@ -64,7 +56,7 @@ export function MainContent({
         ]).map((tab) => (
           <button
             key={tab.key}
-            onClick={() => onSetView(tab.key)}
+            onClick={() => setView(tab.key)}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200"
             style={{
               fontFamily: 'var(--font-mono)',
@@ -118,7 +110,7 @@ export function MainContent({
           <LandingPage
             agents={agents}
             sessions={sessions}
-            onSetView={onSetView}
+            onSetView={setView}
             onAddOpenChat={onAddOpenChat}
             onStartChat={onStartChat}
             onSelectAgent={onSelectAgent}

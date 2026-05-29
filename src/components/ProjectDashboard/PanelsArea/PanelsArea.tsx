@@ -10,6 +10,7 @@ import type { HookConfig, SkillFile } from '@/hooks/useProjects';
 import type { SessionSummary } from '@/hooks/useSessions';
 import { useProject } from '@/store/ProjectContext';
 import { useDashboardStore } from '@/store/useDashboardStore';
+import { useDashboardUIStore } from '@/store/useDashboardUIStore';
 import type { AgentFile } from '@/types/agent.types';
 
 import { AgentList } from '../AgentList/AgentList';
@@ -20,11 +21,6 @@ import { SkillRow } from '../SkillRow/SkillRow';
 export type PanelsAreaProps = {
   sessions: SessionSummary[];
   sessionsLoading: boolean;
-  selectedAgent: AgentFile | null;
-  selectedSkill: SkillFile | null;
-  selectedSessionId: string | null;
-  openPanels: Set<string>;
-  scopeTab: 'project' | 'user';
   isUserProject: boolean;
   projectAgents: AgentFile[];
   userAgents: AgentFile[];
@@ -34,11 +30,7 @@ export type PanelsAreaProps = {
   favSkills: SkillFile[];
   favHooks: HookConfig[];
   hasFavorites: boolean;
-  onTogglePanel: (panel: string) => void;
-  onSetScopeTab: (tab: 'project' | 'user') => void;
   onAgentAction: (action: string, agentName: string) => void;
-  onSelectAgent: (a: AgentFile) => void;
-  onSelectSkill: (s: SkillFile) => void;
   onSelectSession: (s: SessionSummary) => void;
   onToggleLink: (agentName: string, linked: boolean) => void;
 };
@@ -46,11 +38,6 @@ export type PanelsAreaProps = {
 export function PanelsArea({
   sessions,
   sessionsLoading,
-  selectedAgent,
-  selectedSkill,
-  selectedSessionId,
-  openPanels,
-  scopeTab,
   isUserProject,
   projectAgents,
   userAgents,
@@ -60,11 +47,7 @@ export function PanelsArea({
   favSkills,
   favHooks,
   hasFavorites,
-  onTogglePanel,
-  onSetScopeTab,
   onAgentAction,
-  onSelectAgent,
-  onSelectSkill,
   onSelectSession,
   onToggleLink,
 }: PanelsAreaProps) {
@@ -72,6 +55,15 @@ export function PanelsArea({
   const agents = useDashboardStore((s) => s.agents);
   const skills = useDashboardStore((s) => s.skills);
   const hooks = useDashboardStore((s) => s.hooks);
+  const selectedAgent = useDashboardUIStore((s) => s.selectedAgent);
+  const selectedSkill = useDashboardUIStore((s) => s.selectedSkill);
+  const selectedSessionId = useDashboardUIStore((s) => s.selectedSessionId);
+  const openPanels = useDashboardUIStore((s) => s.openPanels);
+  const scopeTab = useDashboardUIStore((s) => s.scopeTab);
+  const togglePanel = useDashboardUIStore((s) => s.togglePanel);
+  const setScopeTab = useDashboardUIStore((s) => s.setScopeTab);
+  const onSelectAgent = useDashboardUIStore((s) => s.selectAgent);
+  const onSelectSkill = useDashboardUIStore((s) => s.selectSkill);
   return (
     <div className="flex-1 flex flex-col min-h-0">
       {/* Spacer pushes panels to bottom when all are closed */}
@@ -118,7 +110,7 @@ export function PanelsArea({
               style={{ background: 'var(--color-surface-0)', border: '1px solid var(--color-border-subtle)' }}
             >
               <button
-                onClick={() => onSetScopeTab("project")}
+                onClick={() => setScopeTab("project")}
                 className="flex-1 flex items-center justify-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-md transition-all duration-200"
                 style={scopeTab === "project" ? {
                   background: 'var(--color-accent-dim)',
@@ -133,7 +125,7 @@ export function PanelsArea({
                 <span style={{ fontFamily: 'var(--font-mono)', fontFeatureSettings: "'tnum' 1", fontSize: '10px', opacity: 0.6 }}>{projectAgents.length}</span>
               </button>
               <button
-                onClick={() => onSetScopeTab("user")}
+                onClick={() => setScopeTab("user")}
                 className="flex-1 flex items-center justify-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-md transition-all duration-200"
                 style={scopeTab === "user" ? {
                   background: 'rgba(234, 179, 8, 0.1)',
@@ -227,7 +219,7 @@ export function PanelsArea({
             icon={panel.icon}
             count={panel.count}
             open={openPanels.has(panel.key)}
-            onToggle={() => onTogglePanel(panel.key)}
+            onToggle={() => togglePanel(panel.key)}
             onRefresh={refresh}
             flex
           >

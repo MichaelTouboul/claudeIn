@@ -1,21 +1,20 @@
 import { useCallback,useRef, useState } from "react";
 
 import { useAutoChatTitles } from '@/hooks/useAutoChatTitles';
-import type { SkillFile } from '@/hooks/useProjects';
 import { useResizableSidebar } from '@/hooks/useResizableSidebar';
 import type { SessionSummary } from '@/hooks/useSessions';
 import { useSessions } from '@/hooks/useSessions';
 import { useProject } from '@/store/ProjectContext';
 import { useDashboardStore } from '@/store/useDashboardStore';
+import { useDashboardUIStore } from '@/store/useDashboardUIStore';
 import { EMPTY, useFavoritesStore, useInitFavorites } from '@/store/useFavoritesStore';
-import type { AgentFile } from '@/types/agent.types';
 
 import { ActiveSessions } from './ActiveSessions/ActiveSessions';
 import { MainContent } from './MainContent/MainContent';
 import { OpenChatsList } from './OpenChatsList/OpenChatsList';
 import { PanelsArea } from './PanelsArea/PanelsArea';
 import { ResizeHandle } from './ResizeHandle/ResizeHandle';
-import type { MainView, OpenChat } from './types';
+import type { OpenChat } from './types';
 
 // Inject animation keyframes
 if (typeof document !== "undefined" && !document.getElementById("chat-animations")) {
@@ -39,12 +38,6 @@ export function ProjectDashboard() {
   const skills = useDashboardStore((s) => s.skills);
   const hooks = useDashboardStore((s) => s.hooks);
   const toggleLink = useDashboardStore((s) => s.toggleLink);
-  const [view, setView] = useState<MainView>("none");
-  const [selectedAgent, setSelectedAgent] = useState<AgentFile | null>(null);
-  const [selectedSkill, setSelectedSkill] = useState<SkillFile | null>(null);
-  const [openPanels, setOpenPanels] = useState<Set<string>>(() => new Set());
-  const [scopeTab, setScopeTab] = useState<"project" | "user">("project");
-  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   useInitFavorites(projectId);
   const favoriteList = useFavoritesStore((s) => s.byProject[projectId] ?? EMPTY);
   const isFavorite = (type: 'agent' | 'skill' | 'hook', name: string) =>
@@ -52,7 +45,6 @@ export function ProjectDashboard() {
   const toggleFavorite = (type: 'agent' | 'skill' | 'hook', name: string) =>
     useFavoritesStore.getState().toggle(projectId, type, name);
   const { sessions, loading: sessionsLoading, conversation, conversationLoading, selectSession } = useSessions(projectPath);
-  const [resumeChat, setResumeChat] = useState<{ agentName: string; sessionId: string; message: string } | null>(null);
   const [openChats, setOpenChats] = useState<OpenChat[]>([]);
   const chatIdCounter = useRef(0);
 
@@ -71,15 +63,6 @@ export function ProjectDashboard() {
   }, []);
 
   useAutoChatTitles({ setOpenChats });
-
-  const togglePanel = (panel: string) => {
-    setOpenPanels((prev) => {
-      const next = new Set(prev);
-      if (next.has(panel)) next.delete(panel);
-      else next.add(panel);
-      return next;
-    });
-  };
 
   const { width: sidebarWidth, ref: sidebarRef, startDrag: handleResizeDragStart } = useResizableSidebar();
 
@@ -101,7 +84,7 @@ export function ProjectDashboard() {
     switch (action) {
       case "edit": {
         const agent = agents.find((a) => a.id === agentName);
-        if (agent) { setSelectedAgent(agent); setView("agent"); }
+        if (agent) useDashboardUIStore.getState().selectAgent(agent);
         break;
       }
       case "rename":
@@ -124,31 +107,18 @@ export function ProjectDashboard() {
     }
   };
 
-  const handleSelectAgent = (a: AgentFile) => {
-    setSelectedAgent(a);
-    setSelectedSkill(null);
-    setView("agent");
-  };
-
-  const handleSelectSkill = (s: SkillFile) => {
-    setSelectedSkill(s);
-    setSelectedAgent(null);
-    setView("skill");
-  };
-
   const handleSessionResume = (sessionId: string, message: string) => {
     const session = sessions.find((s) => s.sessionId === sessionId);
     const agentName = session?.agentName || "claude";
     addOpenChat(agentName, `Resume: ${session?.title || agentName}`);
-    setResumeChat({ agentName, sessionId, message });
-    setView("chat");
+    useDashboardUIStore.getState().setResumeChat({ agentName, sessionId, message });
+    useDashboardUIStore.getState().setView("chat");
   };
 
   const handleSelectSession = (s: SessionSummary) => {
     addOpenChat(s.agentName || "claude", s.title || s.firstPrompt || "Session");
-    setSelectedSessionId(s.sessionId);
+    useDashboardUIStore.getState().selectSession(s.sessionId);
     selectSession(s.filePath);
-    setView("session");
   };
 
   return (
@@ -164,23 +134,13 @@ export function ProjectDashboard() {
         }}
       >
 
-        <ActiveSessions
-          onSelectAgent={(a) => { setSelectedAgent(a); setSelectedSkill(null); setView("agent"); }}
-        />
+        <ActiveSessions />
 
-        <OpenChatsList
-          openChats={openChats}
-          onSelectAgent={(a) => { setSelectedAgent(a); setSelectedSkill(null); setView("agent"); }}
-        />
+        <OpenChatsList openChats={openChats} />
 
         <PanelsArea
           sessions={sessions}
           sessionsLoading={sessionsLoading}
-          selectedAgent={selectedAgent}
-          selectedSkill={selectedSkill}
-          selectedSessionId={selectedSessionId}
-          openPanels={openPanels}
-          scopeTab={scopeTab}
           isUserProject={isUserProject}
           projectAgents={projectAgents}
           userAgents={userAgents}
@@ -190,11 +150,7 @@ export function ProjectDashboard() {
           favSkills={favSkills}
           favHooks={favHooks}
           hasFavorites={hasFavorites}
-          onTogglePanel={togglePanel}
-          onSetScopeTab={setScopeTab}
           onAgentAction={handleAgentAction}
-          onSelectAgent={handleSelectAgent}
-          onSelectSkill={handleSelectSkill}
           onSelectSession={handleSelectSession}
           onToggleLink={handleToggleLink}
         />
@@ -204,19 +160,12 @@ export function ProjectDashboard() {
       </div>
 
       <MainContent
-        view={view}
-        selectedAgent={selectedAgent}
-        selectedSkill={selectedSkill}
-        resumeChat={resumeChat}
         conversation={conversation}
         conversationLoading={conversationLoading}
         sessions={sessions}
-        onAgentUpdated={(a) => setSelectedAgent(a)}
-        onSelectAgent={handleSelectAgent}
         onSessionResume={handleSessionResume}
-        onSetView={setView}
         onAddOpenChat={addOpenChat}
-        onStartChat={(agentName, sessionId, message) => setResumeChat({ agentName, sessionId, message })}
+        onStartChat={(agentName, sessionId, message) => useDashboardUIStore.getState().setResumeChat({ agentName, sessionId, message })}
         onSelectSession={handleSelectSession}
       />
     </div>
