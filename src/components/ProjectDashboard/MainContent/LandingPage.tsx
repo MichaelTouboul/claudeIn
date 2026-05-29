@@ -25,7 +25,7 @@ export function LandingPage({
   onSelectAgent,
   onSelectSession,
 }: LandingPageProps) {
-  const { projectName, projectId, projectPath } = useProject();
+  const { projectName, projectPath } = useProject();
   return (
     <div className="h-full overflow-y-auto">
       <div className="max-w-2xl mx-auto px-8 py-10 space-y-8">
@@ -36,7 +36,7 @@ export function LandingPage({
             className="text-lg font-semibold"
             style={{ color: 'var(--color-text-primary)' }}
           >
-            {projectName || projectId}
+            {projectName}
           </h2>
           <p
             className="text-xs mt-1"
