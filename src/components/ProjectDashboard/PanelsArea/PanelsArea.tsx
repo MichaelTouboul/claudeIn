@@ -42,10 +42,10 @@ export function PanelsArea({
   const selectedSessionId = useDashboardUIStore((s) => s.selectedSessionId);
   const openPanels = useDashboardUIStore((s) => s.openPanels);
   const scopeTab = useDashboardUIStore((s) => s.scopeTab);
-  const togglePanel = useDashboardUIStore((s) => s.togglePanel);
-  const setScopeTab = useDashboardUIStore((s) => s.setScopeTab);
-  const onSelectAgent = useDashboardUIStore((s) => s.selectAgent);
-  const onSelectSkill = useDashboardUIStore((s) => s.selectSkill);
+  const togglePanel = useDashboardUIStore.getState().togglePanel;
+  const setScopeTab = useDashboardUIStore.getState().setScopeTab;
+  const onSelectAgent = useDashboardUIStore.getState().selectAgent;
+  const onSelectSkill = useDashboardUIStore.getState().selectSkill;
 
   const projectAgents = agents.filter((a) => a.scope === "project" || (a.scope === "user" && a.linked));
   const userAgents = agents.filter((a) => a.scope === "user" && !a.linked);

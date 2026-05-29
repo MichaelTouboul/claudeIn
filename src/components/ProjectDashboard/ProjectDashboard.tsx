@@ -31,7 +31,6 @@ if (typeof document !== "undefined" && !document.getElementById("chat-animations
 
 export function ProjectDashboard() {
   const { projectId, projectPath } = useProject();
-  const agents = useDashboardStore((s) => s.agents);
   const toggleLink = useDashboardStore((s) => s.toggleLink);
   useInitFavorites(projectId);
   const { sessions, loading: sessionsLoading, conversation, conversationLoading, selectSession } = useSessions(projectPath);
@@ -45,7 +44,7 @@ export function ProjectDashboard() {
   const handleAgentAction = (action: string, agentName: string) => {
     switch (action) {
       case "edit": {
-        const agent = agents.find((a) => a.id === agentName);
+        const agent = useDashboardStore.getState().agents.find((a) => a.id === agentName);
         if (agent) useDashboardUIStore.getState().selectAgent(agent);
         break;
       }
