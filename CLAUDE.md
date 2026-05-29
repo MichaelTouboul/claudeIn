@@ -4,85 +4,67 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-A dashboard for managing and monitoring Claude Code agents. It scans the local machine for projects with `.claude/` directories, reads their agent `.md` files (with gray-matter frontmatter), and presents a UI to browse, edit, spawn, and track agents across projects. Events from running agents are ingested via a shell hook and stored in PostgreSQL.
+An Electron desktop app: a manager and dashboard for Claude Code agents. It scans the local machine for projects with `.claude/` directories, reads their agent `.md` files (with gray-matter frontmatter), and presents a UI to browse, edit, spawn, and track agents. Events from running agents are stored in a local SQLite database (via sql.js/WASM).
 
 ## Commands
 
 ```bash
-# Full stack dev (PostgreSQL + server + client + open browser)
-npm start
-
-# Or run pieces individually
-npm run dev           # server + client concurrent (needs PG already running)
-npm run dev:server    # tsx watch on port 3456
-npm run dev:client    # vite on port 5173
-
-# Build
-npm run build
+npm run dev        # electron-vite dev (main + renderer with HMR)
+npm run build      # electron-vite build
+npm run package    # electron-builder (distributable)
+npm run lint       # eslint src
+npm run lint:fix   # eslint src --fix
+npm run typecheck  # tsc --noEmit -p tsconfig.web.json
 ```
 
-No test suite exists yet. No linter is configured.
-
-## Infrastructure
-
-- **PostgreSQL**: runs via `docker-compose.yml` on port **5433** (5432 is occupied). Container name: `agent-manager-db`. Data persisted in a Docker volume `pgdata`.
-- **`start.sh`**: one-command dev launcher — starts PostgreSQL (waits for healthcheck), installs deps if needed, starts server (`tsx watch`) and client (Vite HMR), opens browser. `Ctrl+C` tears everything down cleanly.
+Build check used in agent verification: `npx electron-vite build`
 
 ## Architecture
 
-Monorepo with npm workspaces: `server/` and `client/`.
+Two process boundaries in Electron:
 
-### Server (Express + PostgreSQL)
+### Main process — `electron/`
 
-- **Entry**: `server/src/index.ts` — Express on port 3456 (or `PORT` env)
-- **Database**: PostgreSQL via `pg` pool. Connection: `localhost:5433` (via `PG_PORT` env), user/pass `tastewise/tastewise`, database `agent_manager`. Tables auto-created in `initDb()`: `events`, `missions`, `agent_project_links`
-- **Routes** (all under `/api`):
-  - `/agents` — CRUD for agent `.md` files on disk (`~/.claude/agents/`)
-  - `/projects` — scans `$HOME` (depth 3) for directories containing `.claude/`, returns dashboard data (agents, skills, hooks)
-  - `/projects/:id/dashboard` — aggregated view merging project-scope + user-scope agents/skills, with link status
-  - `/events` — event ingestion, querying, SSE stream at `/events/stream`
-  - `/hooks` — receives POST from the shell hook script
-  - `/spawn` — spawns `claude` CLI as a child process with `--print --output-format stream-json`, manages sessions in-memory
-  - `/missions` — mission lifecycle tied to sessions
-  - `/costs` — cost analytics by day/agent/tool
-- **SSE**: `services/sse.ts` — broadcasts events to all connected clients in real-time
-- **Agent files**: parsed from `~/.claude/agents/` using `gray-matter`. Each agent has frontmatter (`name`, `description`, `model`, `color`, `tools`, etc.), a markdown body, optional `memory/` subdirectory, and annex files (including `.env`)
-- **Spawn service**: runs `claude --print --output-format stream-json --agent <name>` as a child process, parses the streaming JSON output, and forwards messages via SSE
+- **`electron/main.ts`** — app entry, BrowserWindow lifecycle
+- **`electron/preload.ts`** — `contextBridge` that exposes `window.api` to the renderer
+- **`electron/ipc/`** — IPC handlers, one file per domain (`agents.ipc.ts`, `projects.ipc.ts`, `spawn.ipc.ts`, `sessions.ipc.ts`, `events.ipc.ts`, `costs.ipc.ts`, `memory.ipc.ts`, `favorites.ipc.ts`, `missions.ipc.ts`); registered via `ipc/index.ts`
+- **`electron/services/`** — business logic (`db.ts` for sql.js WASM SQLite, `agent.service.ts`, `project.service.ts`, `session.service.ts`, `spawn.service.ts`, `broadcast.ts`, …)
+- **`electron/types/`** — types shared with the renderer
 
-### Client (React + Vite + Tailwind)
+### Renderer — `src/`
 
-- **Entry**: `client/src/main.tsx` → `App.tsx`
-- **Vite** proxies `/api` to `localhost:3456`
-- **Path alias**: `@/` maps to `client/src/`
-- **Key components**:
-  - `ProjectSwitcher` / `ProjectDashboard` — project selection and main dashboard
-  - `AgentDetail` / `AgentForm` / `AgentContextMenu` — agent viewing/editing
-  - `AgentGraph` / `AgentMesh` — visualize agent relationships (@xyflow/react, react-force-graph-2d)
-  - `EventConsole` — live SSE event feed
-  - `CostDashboard` — cost analytics with recharts
-  - `ChatPanel` — interactive chat with spawned agents
-  - `MemoryViewer` — view/edit agent memory files
-- **Hooks**: `useSSE` (EventSource to `/api/events/stream`), `useAgents`, `useProjects`, `useStats`
-- **Styling**: Tailwind CSS 3, dark theme (gray-950 background)
+- **`src/App.tsx`** — root component
+- **`src/components/`** — UI components; feature components live at the root, generic primitives in `src/components/_ui/`
+- **`src/hooks/`** — `useIPC.ts`, `useSessions.ts`, `useProjects.ts`, `useFavorites.ts`, etc.
+- **`src/services/api.ts`** — thin wrapper over `window.api`
+- **`src/store/useAppStore.ts`** — global state with zustand
+- **`src/env.d.ts`** — TypeScript declaration of `window.api` (the IPC contract)
+- **`src/index.css`** — design system CSS custom properties
+- **`src/lib/cn.ts`** — `cn()` utility (`clsx` + `tailwind-merge`)
 
-### Data Flow
+### IPC contract
 
-1. Claude Code hook (`server/src/hooks/post-event.sh`) POSTs events to `/api/hooks/event`
-2. Server ingests to PostgreSQL `events` table, updates related `missions` row
-3. Server broadcasts via SSE to all connected clients
-4. Client `useSSE` hook receives and displays in `EventConsole`
+The full `window.api` surface is declared in `src/env.d.ts`. All renderer ↔ main communication goes through this interface — **no `fetch()`, no direct Node access in the renderer**. IPC channel naming convention: `domain:action` (e.g. `sessions:list`, `agents:update`).
 
-### Project Scanning
+### Database
 
-`project.service.ts` walks `$HOME` up to 3 levels deep looking for `.claude/` directories. Each found directory becomes a "project". The special "User Scope" project represents `~/.claude/` itself. Projects are cached for 60 seconds.
-
-### Agent-Project Links
-
-User-scope agents (from `~/.claude/agents/`) can be "linked" to specific projects via the `agent_project_links` table. Linking an agent also auto-links its sub-agents (detected by backtick-quoted `tw-*` patterns in the agent body).
+`electron/services/db.ts` uses **sql.js** (WASM SQLite). Persisted at `~/.claude-agent-manager/data.db`. Local file only — no network database, no Docker dependency.
 
 ## Key Conventions
 
-- Server imports use `.js` extensions (TypeScript with ESM-style resolution via bundler moduleResolution)
-- Agent identity is the `name` field from frontmatter, used as the primary key everywhere
-- Types are shared by convention (duplicate files in `server/src/types/` and `client/src/types/`), not via a shared package
-- No ORM — raw SQL queries via `pg` pool
+- **Path alias:** `@/` → `src/`
+- **Tailwind CSS 4** + PostCSS. Never use hardcoded Tailwind color utilities (e.g. `bg-gray-800`). Styling goes through CSS custom properties (`var(--color-*)`) defined in `src/index.css`, applied via `style={{}}`.
+- **Design tokens:** `--color-surface-{0-3}`, `--color-border`, `--color-text-{primary,secondary,muted}`, `--color-accent` (cyan), `--color-active`, `--color-danger`. Fonts: `--font-mono` (JetBrains Mono) for code/data, `--font-sans` (IBM Plex Sans) for UI labels.
+- **`_ui/` primitives** are built on Radix UI (behavior) + `cva` (typed variants) + `cn`. Feature components import from `_ui/` — they never touch Radix or `cva` directly.
+- **300-line hard limit** on every file (`.tsx`, `.ts`, `.css`). Enforced by ESLint `max-lines: error`.
+- **ESLint flat config** (`eslint.config.mjs`). Zero tolerance: **0 errors AND 0 warnings** before any diff lands. `reportUnusedDisableDirectives: error` — inline `// eslint-disable` comments are forbidden unless explicitly approved.
+- **No `any`** — `@typescript-eslint/no-explicit-any: error`.
+- **Named imports only** — no default exports except `src/App.tsx` and `src/main.tsx`.
+- **sql.js is synchronous** — use `try/catch`, not `.catch()`.
+- **React version:** 19 (configured in eslint settings). `@types/react` is `^19.x`.
+
+## More Detail
+
+- **Frontend conventions** (component structure, design system, TypeScript patterns, React patterns, linting policy): `.claude/agents/am-frontend.md`
+- **Development orchestration** (workflow phases, sub-agents, IPC consistency rules): `.claude/agents/am-dev.md`
+- **Decision playbooks**: `.claude/playbooks/` (`state-management.md`, `component-placement.md`)
