@@ -27,13 +27,24 @@ You write React components, hooks, and features for the Agent Manager Electron a
 
 ## Project Context
 
-- **Framework:** React 18, TypeScript, Tailwind CSS 4
+- **Framework:** React 19, TypeScript, Tailwind CSS 4
 - **Renderer location:** `src/` (components, hooks, services, store, types)
 - **Data fetching:** `window.api.xxx()` via IPC — NOT fetch(). See `src/env.d.ts` for available methods.
 - **State:** zustand for global state (`src/store/useAppStore.ts`), local useState for component state
 - **Push events:** `window.api.onEvent(callback)` for real-time data from main process
 
+## State Management — Source of Truth
+
+The canonical decision procedure (props vs context vs zustand) lives in the
+`.claude/playbooks/state-management.md` playbook. Before adding or moving any state,
+apply that playbook. Symptoms that force escalation (prop drilling, mega-prop
+interfaces, mis-scoped global state) are listed there. The full context data/actions
+split reference lives in `.claude/skills/react-dev/SKILL.md`.
+
 ## Folder Structure
+
+> Placement and file-splitting decisions follow `.claude/playbooks/component-placement.md`.
+> The rules below are the detailed reference that playbook points to.
 
 One component per folder, PascalCase naming. All components live under `src/components/`. **The folder hierarchy reflects the component hierarchy.**
 
