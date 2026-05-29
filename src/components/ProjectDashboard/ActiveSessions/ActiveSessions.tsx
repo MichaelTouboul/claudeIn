@@ -1,4 +1,4 @@
-import type { AgentContext } from '@/hooks/useIPC';
+import { useEventsStore } from '@/store/useEventsStore';
 import type { AgentFile } from '@/types/agent.types';
 
 const colorHex: Record<string, string> = {
@@ -9,19 +9,16 @@ const colorHex: Record<string, string> = {
 
 export type ActiveSessionsProps = {
   agents: AgentFile[];
-  activeAgents: Set<string>;
-  agentContexts: Map<string, AgentContext>;
-  waitingAgents?: Set<string>;
   onSelectAgent: (agent: AgentFile) => void;
 };
 
 export function ActiveSessions({
   agents,
-  activeAgents,
-  agentContexts,
-  waitingAgents,
   onSelectAgent,
 }: ActiveSessionsProps) {
+  const activeAgents = useEventsStore((s) => s.activeAgents);
+  const agentContexts = useEventsStore((s) => s.agentContexts);
+  const waitingAgents = useEventsStore((s) => s.waitingAgents);
   if (activeAgents.size === 0) return null;
 
   return (
@@ -44,7 +41,7 @@ export function ActiveSessions({
         {Array.from(activeAgents).map((agentName) => {
           const agent = agents.find((a) => a.frontmatter.name === agentName || a.id === agentName);
           const ctx = agentContexts.get(agentName);
-          const isWaiting = waitingAgents?.has(agentName);
+          const isWaiting = waitingAgents.has(agentName);
           const agentColor = agent?.frontmatter?.color;
           const dotColor = colorHex[agentColor || ''] || '#06b6d4';
 

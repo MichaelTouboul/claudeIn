@@ -1,7 +1,7 @@
 import { ChevronDown, ChevronUp,Terminal } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-import type { LiveEvent } from "../../hooks/useIPC";
+import type { LiveEvent } from "@/types/events.types";
 
 const eventColorMap: Record<string, string> = {
   PreToolUse: "#facc15",

@@ -5,7 +5,6 @@ import { AgentDetail } from '@/components/AgentDetail/AgentDetail';
 import { AgentTree } from '@/components/AgentTree/AgentTree';
 import { CostDashboard } from '@/components/CostDashboard/CostDashboard';
 import { SessionViewer } from '@/components/SessionViewer/SessionViewer';
-import type { AgentContext } from '@/hooks/useIPC';
 import type { SkillFile } from '@/hooks/useProjects';
 import type { SessionConversation,SessionSummary } from '@/hooks/useSessions';
 import type { AgentFile } from '@/types/agent.types';
@@ -22,9 +21,6 @@ export type MainContentProps = {
   resumeChat: { agentName: string; sessionId: string; message: string } | null;
   conversation: SessionConversation | null;
   conversationLoading: boolean;
-  activeAgents: Set<string>;
-  agentContexts: Map<string, AgentContext>;
-  currentTools?: Map<string, string>;
   sessions: SessionSummary[];
   projectName: string;
   projectId: string;
@@ -49,9 +45,6 @@ export function MainContent({
   resumeChat,
   conversation,
   conversationLoading,
-  activeAgents,
-  agentContexts,
-  currentTools,
   sessions,
   projectName,
   projectId,
@@ -123,9 +116,6 @@ export function MainContent({
         ) : view === "tree" ? (
           <AgentTree
             agents={agents}
-            activeAgents={activeAgents}
-            agentContexts={agentContexts}
-            currentTools={currentTools}
             selectedId={selectedAgent?.id ?? null}
             onSelect={onSelectAgent}
           />

@@ -25,8 +25,8 @@ interface Window {
     killSession: (sessionId: string) => Promise<boolean>;
     getSessions: () => Promise<import("./types/spawn.types").SpawnSession[]>;
 
-    getRecentEvents: (limit?: number) => Promise<import("./hooks/useIPC").LiveEvent[]>;
-    getEventsByAgent: (name: string, limit?: number) => Promise<import("./hooks/useIPC").LiveEvent[]>;
+    getRecentEvents: (limit?: number) => Promise<import("./types/events.types").LiveEvent[]>;
+    getEventsByAgent: (name: string, limit?: number) => Promise<import("./types/events.types").LiveEvent[]>;
     getStats: () => Promise<import("./hooks/useStats").Stats>;
 
     getProjectMemory: (projectId: string) => Promise<import("./types/agent.types").MemoryFile[]>;

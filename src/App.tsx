@@ -8,18 +8,22 @@ import { ProjectDashboard } from '@/components/ProjectDashboard/ProjectDashboard
 import { ProjectSwitcher } from "@/components/ProjectSwitcher/ProjectSwitcher";
 import { StatsBar } from "@/components/StatsBar/StatsBar";
 
-import { useIPC } from "./hooks/useIPC";
 import { useDashboard,useProjects } from "./hooks/useProjects";
 import { useStats } from "./hooks/useStats";
 import { useAppStore } from "./store/useAppStore";
+import { useEventsStore,useInitEvents } from "./store/useEventsStore";
 
 export default function App() {
   const { projects, loading: projectsLoading } = useProjects();
   const selectedProject = useAppStore((s) => s.selectedProject);
   const setSelectedProject = useAppStore((s) => s.setSelectedProject);
   const { dashboard, loading: dashLoading, refresh } = useDashboard(selectedProject?.id ?? null);
-  const { events, connected, activeAgents, agentContexts, currentTools, waitingAgents } = useIPC();
-  const { stats } = useStats(events.length);
+  useInitEvents();
+  const events = useEventsStore((s) => s.events);
+  const eventsLength = useEventsStore((s) => s.events.length);
+  const connected = useEventsStore((s) => s.connected);
+  const activeCount = useEventsStore((s) => s.activeAgents.size);
+  const { stats } = useStats(eventsLength);
   const [chatOpen, setChatOpen] = useState(false);
   const prevProjectPath = useRef<string | null>(null);
 
@@ -75,7 +79,7 @@ export default function App() {
 
         <div className="flex-1" />
 
-        <StatsBar stats={stats} activeCount={activeAgents.size} connected={connected} />
+        <StatsBar stats={stats} activeCount={activeCount} connected={connected} />
 
         <Button
           intent="outline"
@@ -141,10 +145,6 @@ export default function App() {
             agents={dashboard.agents}
             skills={dashboard.skills}
             hooks={dashboard.hooks}
-            activeAgents={activeAgents}
-            agentContexts={agentContexts}
-            currentTools={currentTools}
-            waitingAgents={waitingAgents}
             onRefresh={refresh}
           />
         ) : null}

@@ -1,7 +1,7 @@
 import { Link, Unlink } from "lucide-react";
 
 import { AgentContextMenu } from '@/components/AgentContextMenu/AgentContextMenu';
-import type { AgentContext } from '@/hooks/useIPC';
+import { useEventsStore } from '@/store/useEventsStore';
 import type { AgentFile } from '@/types/agent.types';
 
 import { ContextBar } from '../ContextBar/ContextBar';
@@ -10,8 +10,6 @@ import { colorMap } from '../utils';
 export type AgentRowProps = {
   agent: AgentFile;
   selected: boolean;
-  active?: boolean;
-  context?: AgentContext;
   onSelect: (a: AgentFile) => void;
   onAgentAction: (action: string, agentName: string) => void;
   onToggleLink?: (name: string) => void;
@@ -22,14 +20,14 @@ export type AgentRowProps = {
 export function AgentRow({
   agent,
   selected,
-  active,
-  context,
   onSelect,
   onAgentAction,
   onToggleLink,
   linkAction,
   isAgentFavorite,
 }: AgentRowProps) {
+  const active = useEventsStore((s) => s.activeAgents.has(agent.id));
+  const context = useEventsStore((s) => s.agentContexts.get(agent.id));
   return (
     <div className="flex items-center group">
       <button

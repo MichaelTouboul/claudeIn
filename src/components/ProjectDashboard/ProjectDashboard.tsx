@@ -2,7 +2,6 @@ import { useCallback,useRef, useState } from "react";
 
 import { useAutoChatTitles } from '@/hooks/useAutoChatTitles';
 import { useFavorites } from '@/hooks/useFavorites';
-import type { AgentContext } from '@/hooks/useIPC';
 import type { HookConfig, Project,SkillFile } from '@/hooks/useProjects';
 import { useResizableSidebar } from '@/hooks/useResizableSidebar';
 import type { SessionSummary } from '@/hooks/useSessions';
@@ -35,10 +34,6 @@ export type ProjectDashboardProps = {
   agents: AgentFile[];
   skills: SkillFile[];
   hooks: HookConfig[];
-  activeAgents: Set<string>;
-  agentContexts: Map<string, AgentContext>;
-  currentTools?: Map<string, string>;
-  waitingAgents?: Set<string>;
   onRefresh: () => void;
 };
 
@@ -49,10 +44,6 @@ export function ProjectDashboard({
   agents,
   skills,
   hooks,
-  activeAgents,
-  agentContexts,
-  currentTools,
-  waitingAgents,
   onRefresh,
 }: ProjectDashboardProps) {
   const [view, setView] = useState<MainView>("none");
@@ -184,16 +175,12 @@ export function ProjectDashboard({
 
         <ActiveSessions
           agents={agents}
-          activeAgents={activeAgents}
-          agentContexts={agentContexts}
-          waitingAgents={waitingAgents}
           onSelectAgent={(a) => { setSelectedAgent(a); setSelectedSkill(null); setView("agent"); }}
         />
 
         <OpenChatsList
           agents={agents}
           openChats={openChats}
-          activeAgents={activeAgents}
           onSelectAgent={(a) => { setSelectedAgent(a); setSelectedSkill(null); setView("agent"); }}
         />
 
@@ -203,8 +190,6 @@ export function ProjectDashboard({
           hooks={hooks}
           sessions={sessions}
           sessionsLoading={sessionsLoading}
-          activeAgents={activeAgents}
-          agentContexts={agentContexts}
           selectedAgent={selectedAgent}
           selectedSkill={selectedSkill}
           selectedSessionId={selectedSessionId}
@@ -243,9 +228,6 @@ export function ProjectDashboard({
         resumeChat={resumeChat}
         conversation={conversation}
         conversationLoading={conversationLoading}
-        activeAgents={activeAgents}
-        agentContexts={agentContexts}
-        currentTools={currentTools}
         sessions={sessions}
         projectName={project.name || project.id}
         projectId={project.id}

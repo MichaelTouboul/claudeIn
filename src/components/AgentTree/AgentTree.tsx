@@ -2,25 +2,18 @@ import { ChevronDown,ChevronRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { Button } from '@/components/_ui/Button';
-import type { AgentContext } from '@/hooks/useIPC';
 import type { AgentFile } from '@/types/agent.types';
 
 import { TreeNode } from './TreeNode/TreeNode';
 
 export type AgentTreeProps = {
   agents: AgentFile[];
-  activeAgents: Set<string>;
-  agentContexts: Map<string, AgentContext>;
-  currentTools?: Map<string, string>;
   selectedId: string | null;
   onSelect: (a: AgentFile) => void;
 };
 
 export function AgentTree({
   agents,
-  activeAgents,
-  agentContexts,
-  currentTools,
   selectedId,
   onSelect,
 }: AgentTreeProps) {
@@ -84,9 +77,6 @@ export function AgentTree({
                   <TreeNode
                     agent={orch}
                     depth={0}
-                    isActive={activeAgents.has(orch.id)}
-                    context={agentContexts.get(orch.id)}
-                    currentTool={currentTools?.get(orch.id)}
                     selected={selectedId === orch.id}
                     onSelect={onSelect}
                   />
@@ -99,9 +89,6 @@ export function AgentTree({
                       key={sub.id}
                       agent={sub}
                       depth={1}
-                      isActive={activeAgents.has(sub.id)}
-                      context={agentContexts.get(sub.id)}
-                      currentTool={currentTools?.get(sub.id)}
                       selected={selectedId === sub.id}
                       onSelect={onSelect}
                     />
@@ -118,9 +105,6 @@ export function AgentTree({
             key={a.id}
             agent={a}
             depth={0}
-            isActive={activeAgents.has(a.id)}
-            context={agentContexts.get(a.id)}
-            currentTool={currentTools?.get(a.id)}
             selected={selectedId === a.id}
             onSelect={onSelect}
           />

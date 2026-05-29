@@ -6,7 +6,6 @@ import { type ReactNode } from "react";
 
 import { Accordion } from '@/components/_ui/Accordion';
 import { SessionList } from '@/components/SessionList/SessionList';
-import type { AgentContext } from '@/hooks/useIPC';
 import type { HookConfig,SkillFile } from '@/hooks/useProjects';
 import type { SessionSummary } from '@/hooks/useSessions';
 import type { AgentFile } from '@/types/agent.types';
@@ -22,8 +21,6 @@ export type PanelsAreaProps = {
   hooks: HookConfig[];
   sessions: SessionSummary[];
   sessionsLoading: boolean;
-  activeAgents: Set<string>;
-  agentContexts: Map<string, AgentContext>;
   selectedAgent: AgentFile | null;
   selectedSkill: SkillFile | null;
   selectedSessionId: string | null;
@@ -56,8 +53,6 @@ export function PanelsArea({
   hooks,
   sessions,
   sessionsLoading,
-  activeAgents,
-  agentContexts,
   selectedAgent,
   selectedSkill,
   selectedSessionId,
@@ -98,7 +93,7 @@ export function PanelsArea({
           <>
             {favAgents.length > 0 ? <>
                 <SectionLabel icon={<Bot size={10} className="text-accent" />} label="Agents" />
-                <AgentList agents={favAgents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} isAgentFavorite={(n) => isFavorite("agent", n)} activeAgents={activeAgents} agentContexts={agentContexts} />
+                <AgentList agents={favAgents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} isAgentFavorite={(n) => isFavorite("agent", n)} />
               </> : null}
             {favSkills.length > 0 ? <>
                 <SectionLabel icon={<Wrench size={10} className="text-active" />} label="Skills" />
@@ -121,7 +116,7 @@ export function PanelsArea({
         icon: <Bot size={11} className="text-accent" />,
         count: agents.length,
         content: isUserProject ? (
-          <AgentList agents={agents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} isAgentFavorite={(n) => isFavorite("agent", n)} activeAgents={activeAgents} agentContexts={agentContexts} />
+          <AgentList agents={agents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} isAgentFavorite={(n) => isFavorite("agent", n)} />
         ) : (
           <div>
             <div
@@ -161,7 +156,7 @@ export function PanelsArea({
             </div>
             {scopeTab === "project" ? (
               projectAgents.length > 0 ? (
-                <AgentList agents={projectAgents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} onToggleLink={(name) => onToggleLink(name, true)} linkAction="unlink" isAgentFavorite={(n) => isFavorite("agent", n)} activeAgents={activeAgents} agentContexts={agentContexts} />
+                <AgentList agents={projectAgents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} onToggleLink={(name) => onToggleLink(name, true)} linkAction="unlink" isAgentFavorite={(n) => isFavorite("agent", n)} />
               ) : (
                 <div className="px-3 py-6 text-center">
                   <p className="text-xs text-fg-muted mb-1.5">No project agents</p>
@@ -170,7 +165,7 @@ export function PanelsArea({
               )
             ) : (
               userAgents.length > 0 ? (
-                <AgentList agents={userAgents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} onToggleLink={(name) => onToggleLink(name, false)} linkAction="link" isAgentFavorite={(n) => isFavorite("agent", n)} activeAgents={activeAgents} agentContexts={agentContexts} />
+                <AgentList agents={userAgents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} onToggleLink={(name) => onToggleLink(name, false)} linkAction="link" isAgentFavorite={(n) => isFavorite("agent", n)} />
               ) : (
                 <p className="px-3 py-6 text-xs text-fg-muted text-center">No user agents</p>
               )

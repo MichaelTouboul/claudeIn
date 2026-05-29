@@ -2,7 +2,7 @@ import { Cog, Link, Network, Unlink } from "lucide-react";
 
 import { Button } from '@/components/_ui/Button';
 import { AgentContextMenu } from '@/components/AgentContextMenu/AgentContextMenu';
-import type { AgentContext } from '@/hooks/useIPC';
+import { useEventsStore } from '@/store/useEventsStore';
 import type { AgentFile } from '@/types/agent.types';
 
 import { ContextBar } from '../ContextBar/ContextBar';
@@ -16,8 +16,6 @@ export type OrchestratorTreeProps = {
   onToggleLink?: (name: string) => void;
   linkAction?: "link" | "unlink";
   isAgentFavorite?: (name: string) => boolean;
-  activeAgents?: Set<string>;
-  agentContexts?: Map<string, AgentContext>;
 };
 
 export function OrchestratorTree({
@@ -29,16 +27,17 @@ export function OrchestratorTree({
   onToggleLink,
   linkAction,
   isAgentFavorite,
-  activeAgents,
-  agentContexts,
 }: OrchestratorTreeProps) {
+  const activeAgents = useEventsStore((s) => s.activeAgents);
+  const agentContexts = useEventsStore((s) => s.agentContexts);
+
   const agentMap = new Map(allAgents.map((a) => [a.id, a]));
   const subs = orchestrator.subAgents
     .map((id) => agentMap.get(id))
     .filter((a): a is AgentFile => !!a);
 
-  const orchActive = activeAgents?.has(orchestrator.id);
-  const orchCtx = agentContexts?.get(orchestrator.id);
+  const orchActive = activeAgents.has(orchestrator.id);
+  const orchCtx = agentContexts.get(orchestrator.id);
 
   return (
     <div className="mb-1">
@@ -68,8 +67,8 @@ export function OrchestratorTree({
       </div>
       {subs.length > 0 ? <div className="ml-4 border-l border-border pl-1 space-y-0.5">
           {subs.map((sub) => {
-            const subActive = activeAgents?.has(sub.id);
-            const subCtx = agentContexts?.get(sub.id);
+            const subActive = activeAgents.has(sub.id);
+            const subCtx = agentContexts.get(sub.id);
             return (
             <div key={sub.id} className="flex items-center group">
               <button

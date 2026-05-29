@@ -1,7 +1,8 @@
 import { Cog, Network, Wrench } from 'lucide-react';
 
-import type { AgentContext } from '@/hooks/useIPC';
+import { useEventsStore } from '@/store/useEventsStore';
 import type { AgentFile } from '@/types/agent.types';
+import type { AgentContext } from '@/types/events.types';
 
 const colorValues: Record<string, string> = {
   cyan: "#06b6d4", blue: "#3b82f6", green: "#22c55e",
@@ -58,9 +59,6 @@ function formatTokens(n: number): string {
 export type TreeNodeProps = {
   agent: AgentFile;
   depth: number;
-  isActive: boolean;
-  context?: AgentContext;
-  currentTool?: string;
   selected: boolean;
   onSelect: (a: AgentFile) => void;
 };
@@ -68,12 +66,12 @@ export type TreeNodeProps = {
 export function TreeNode({
   agent,
   depth,
-  isActive,
-  context,
-  currentTool,
   selected,
   onSelect,
 }: TreeNodeProps) {
+  const isActive = useEventsStore((s) => s.activeAgents.has(agent.id));
+  const context = useEventsStore((s) => s.agentContexts.get(agent.id));
+  const currentTool = useEventsStore((s) => s.currentTools.get(agent.id));
   const color = colorValues[agent.frontmatter.color || ""] || "#6b7280";
   const model = agent.frontmatter.model || "inherit";
   const isOrchestrator = agent.subAgents.length > 0;
