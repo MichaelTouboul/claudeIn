@@ -34,8 +34,6 @@ export type PanelsAreaProps = {
   favSkills: SkillFile[];
   favHooks: HookConfig[];
   hasFavorites: boolean;
-  isFavorite: (type: 'agent' | 'skill' | 'hook', name: string) => boolean;
-  toggleFavorite: (type: 'agent' | 'skill' | 'hook', name: string) => void;
   onTogglePanel: (panel: string) => void;
   onSetScopeTab: (tab: 'project' | 'user') => void;
   onAgentAction: (action: string, agentName: string) => void;
@@ -62,8 +60,6 @@ export function PanelsArea({
   favSkills,
   favHooks,
   hasFavorites,
-  isFavorite,
-  toggleFavorite,
   onTogglePanel,
   onSetScopeTab,
   onAgentAction,
@@ -91,18 +87,18 @@ export function PanelsArea({
           <>
             {favAgents.length > 0 ? <>
                 <SectionLabel icon={<Bot size={10} className="text-accent" />} label="Agents" />
-                <AgentList agents={favAgents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} isAgentFavorite={(n) => isFavorite("agent", n)} />
+                <AgentList agents={favAgents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} />
               </> : null}
             {favSkills.length > 0 ? <>
                 <SectionLabel icon={<Wrench size={10} className="text-active" />} label="Skills" />
                 {favSkills.map((s) => (
-                  <SkillRow key={s.filePath} skill={s} selected={selectedSkill?.filePath === s.filePath} isFavorite onSelect={onSelectSkill} onToggleFavorite={() => toggleFavorite("skill", s.name)} />
+                  <SkillRow key={s.filePath} skill={s} selected={selectedSkill?.filePath === s.filePath} onSelect={onSelectSkill} />
                 ))}
               </> : null}
             {favHooks.length > 0 ? <>
                 <SectionLabel icon={<Settings size={10} className="text-yellow-400" />} label="Hooks" />
                 {favHooks.map((h) => (
-                  <HookRow key={`${h.event}:${h.matcher}`} hook={h} isFavorite onToggleFavorite={() => toggleFavorite("hook", `${h.event}:${h.matcher}`)} />
+                  <HookRow key={`${h.event}:${h.matcher}`} hook={h} />
                 ))}
               </> : null}
           </>
@@ -114,7 +110,7 @@ export function PanelsArea({
         icon: <Bot size={11} className="text-accent" />,
         count: agents.length,
         content: isUserProject ? (
-          <AgentList agents={agents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} isAgentFavorite={(n) => isFavorite("agent", n)} />
+          <AgentList agents={agents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} />
         ) : (
           <div>
             <div
@@ -154,7 +150,7 @@ export function PanelsArea({
             </div>
             {scopeTab === "project" ? (
               projectAgents.length > 0 ? (
-                <AgentList agents={projectAgents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} onToggleLink={(name) => onToggleLink(name, true)} linkAction="unlink" isAgentFavorite={(n) => isFavorite("agent", n)} />
+                <AgentList agents={projectAgents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} onToggleLink={(name) => onToggleLink(name, true)} linkAction="unlink" />
               ) : (
                 <div className="px-3 py-6 text-center">
                   <p className="text-xs text-fg-muted mb-1.5">No project agents</p>
@@ -163,7 +159,7 @@ export function PanelsArea({
               )
             ) : (
               userAgents.length > 0 ? (
-                <AgentList agents={userAgents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} onToggleLink={(name) => onToggleLink(name, false)} linkAction="link" isAgentFavorite={(n) => isFavorite("agent", n)} />
+                <AgentList agents={userAgents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} onToggleLink={(name) => onToggleLink(name, false)} linkAction="link" />
               ) : (
                 <p className="px-3 py-6 text-xs text-fg-muted text-center">No user agents</p>
               )
@@ -178,21 +174,21 @@ export function PanelsArea({
         count: projectSkills.length + userSkills.length,
         content: isUserProject ? (
           skills.map((s) => (
-            <SkillRow key={s.filePath} skill={s} selected={selectedSkill?.filePath === s.filePath} isFavorite={isFavorite("skill", s.name)} onSelect={onSelectSkill} onToggleFavorite={() => toggleFavorite("skill", s.name)} />
+            <SkillRow key={s.filePath} skill={s} selected={selectedSkill?.filePath === s.filePath} onSelect={onSelectSkill} />
           ))
         ) : (
           <>
             {projectSkills.length > 0 ? <>
                 <SectionLabel icon={<Globe size={10} className="text-accent" />} label="Project" />
                 {projectSkills.map((s) => (
-                  <SkillRow key={s.filePath} skill={s} selected={selectedSkill?.filePath === s.filePath} isFavorite={isFavorite("skill", s.name)} onSelect={onSelectSkill} onToggleFavorite={() => toggleFavorite("skill", s.name)} />
+                  <SkillRow key={s.filePath} skill={s} selected={selectedSkill?.filePath === s.filePath} onSelect={onSelectSkill} />
                 ))}
               </> : null}
             {userSkills.length > 0 ? <>
                 <SectionLabel icon={<User size={10} className="text-fg-muted" />} label="User" />
                 <div className="opacity-60">
                   {userSkills.map((s) => (
-                    <SkillRow key={s.filePath} skill={s} selected={selectedSkill?.filePath === s.filePath} isFavorite={isFavorite("skill", s.name)} onSelect={onSelectSkill} onToggleFavorite={() => toggleFavorite("skill", s.name)} />
+                    <SkillRow key={s.filePath} skill={s} selected={selectedSkill?.filePath === s.filePath} onSelect={onSelectSkill} />
                   ))}
                 </div>
               </> : null}
@@ -220,7 +216,7 @@ export function PanelsArea({
         icon: <Settings size={11} className="text-yellow-400" />,
         count: hooks.length,
         content: hooks.map((h) => (
-          <HookRow key={`${h.event}:${h.matcher}`} hook={h} isFavorite={isFavorite("hook", `${h.event}:${h.matcher}`)} onToggleFavorite={() => toggleFavorite("hook", `${h.event}:${h.matcher}`)} />
+          <HookRow key={`${h.event}:${h.matcher}`} hook={h} />
         )),
       } : null,
       ].filter(Boolean) as { key: string; label: string; icon: ReactNode; count: number; content: ReactNode }[])

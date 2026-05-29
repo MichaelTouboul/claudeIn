@@ -1,7 +1,9 @@
 import { Link, Unlink } from "lucide-react";
 
 import { AgentContextMenu } from '@/components/AgentContextMenu/AgentContextMenu';
+import { useProject } from '@/store/ProjectContext';
 import { useEventsStore } from '@/store/useEventsStore';
+import { useFavoritesStore } from '@/store/useFavoritesStore';
 import type { AgentFile } from '@/types/agent.types';
 
 import { ContextBar } from '../ContextBar/ContextBar';
@@ -14,7 +16,6 @@ export type AgentRowProps = {
   onAgentAction: (action: string, agentName: string) => void;
   onToggleLink?: (name: string) => void;
   linkAction?: "link" | "unlink";
-  isAgentFavorite?: (name: string) => boolean;
 };
 
 export function AgentRow({
@@ -24,10 +25,13 @@ export function AgentRow({
   onAgentAction,
   onToggleLink,
   linkAction,
-  isAgentFavorite,
 }: AgentRowProps) {
+  const { projectId } = useProject();
   const active = useEventsStore((s) => s.activeAgents.has(agent.id));
   const context = useEventsStore((s) => s.agentContexts.get(agent.id));
+  const isFavorite = useFavoritesStore((s) =>
+    (s.byProject[projectId] || []).some((f) => f.item_type === 'agent' && f.item_name === agent.id)
+  );
   return (
     <div className="flex items-center group">
       <button
@@ -41,7 +45,7 @@ export function AgentRow({
         <span className="relative truncate text-sm font-medium">{agent.id}</span>
       </button>
       <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-        <AgentContextMenu agentName={agent.id} isOrchestrator={agent.subAgents.length > 0} isFavorite={isAgentFavorite?.(agent.id)} onAction={onAgentAction} />
+        <AgentContextMenu agentName={agent.id} isOrchestrator={agent.subAgents.length > 0} isFavorite={isFavorite} onAction={onAgentAction} />
       </div>
       {onToggleLink && linkAction ? <button
           onClick={() => onToggleLink(agent.id)}

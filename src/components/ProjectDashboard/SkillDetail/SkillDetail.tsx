@@ -3,6 +3,8 @@ import { useState } from 'react';
 
 import { AgentChat } from '@/components/AgentChat/AgentChat';
 import type { SkillFile } from '@/hooks/useProjects';
+import { useProject } from '@/store/ProjectContext';
+import { useFavoritesStore } from '@/store/useFavoritesStore';
 
 import type { SkillTab } from '../types';
 import { SkillFiles } from './SkillFiles';
@@ -11,11 +13,14 @@ import { SkillPrompt } from './SkillPrompt';
 
 export type SkillDetailProps = {
   skill: SkillFile;
-  isFavorite?: boolean;
-  onToggleFavorite?: () => void;
 };
 
-export function SkillDetail({ skill, isFavorite, onToggleFavorite }: SkillDetailProps) {
+export function SkillDetail({ skill }: SkillDetailProps) {
+  const { projectId } = useProject();
+  const isFavorite = useFavoritesStore((s) =>
+    (s.byProject[projectId] || []).some((f) => f.item_type === 'skill' && f.item_name === skill.name)
+  );
+  const onToggleFavorite = () => useFavoritesStore.getState().toggle(projectId, 'skill', skill.name);
   const [tab, setTab] = useState<SkillTab>("chat");
 
   const tabs: { key: SkillTab; label: string }[] = [

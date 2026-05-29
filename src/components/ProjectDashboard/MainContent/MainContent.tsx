@@ -22,8 +22,6 @@ export type MainContentProps = {
   conversation: SessionConversation | null;
   conversationLoading: boolean;
   sessions: SessionSummary[];
-  isFavorite: (type: 'agent' | 'skill' | 'hook', name: string) => boolean;
-  toggleFavorite: (type: 'agent' | 'skill' | 'hook', name: string) => void;
   onAgentUpdated: (agent: AgentFile) => void;
   onSelectAgent: (a: AgentFile) => void;
   onSessionResume: (sessionId: string, message: string) => void;
@@ -41,8 +39,6 @@ export function MainContent({
   conversation,
   conversationLoading,
   sessions,
-  isFavorite,
-  toggleFavorite,
   onAgentUpdated,
   onSelectAgent,
   onSessionResume,
@@ -95,15 +91,9 @@ export function MainContent({
             agent={selectedAgent}
             onDelete={() => {}}
             onAgentUpdated={onAgentUpdated}
-            isFavorite={isFavorite("agent", selectedAgent.id)}
-            onToggleFavorite={() => toggleFavorite("agent", selectedAgent.id)}
           />
         ) : view === "skill" && selectedSkill ? (
-          <SkillDetail
-            skill={selectedSkill}
-            isFavorite={isFavorite("skill", selectedSkill.name)}
-            onToggleFavorite={() => toggleFavorite("skill", selectedSkill.name)}
-          />
+          <SkillDetail skill={selectedSkill} />
         ) : view === "tree" ? (
           <AgentTree
             agents={agents}

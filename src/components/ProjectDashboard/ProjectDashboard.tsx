@@ -1,13 +1,13 @@
 import { useCallback,useRef, useState } from "react";
 
 import { useAutoChatTitles } from '@/hooks/useAutoChatTitles';
-import { useFavorites } from '@/hooks/useFavorites';
 import type { SkillFile } from '@/hooks/useProjects';
 import { useResizableSidebar } from '@/hooks/useResizableSidebar';
 import type { SessionSummary } from '@/hooks/useSessions';
 import { useSessions } from '@/hooks/useSessions';
 import { useProject } from '@/store/ProjectContext';
 import { useDashboardStore } from '@/store/useDashboardStore';
+import { useFavoritesStore, useInitFavorites } from '@/store/useFavoritesStore';
 import type { AgentFile } from '@/types/agent.types';
 
 import { ActiveSessions } from './ActiveSessions/ActiveSessions';
@@ -45,7 +45,12 @@ export function ProjectDashboard() {
   const [openPanels, setOpenPanels] = useState<Set<string>>(() => new Set());
   const [scopeTab, setScopeTab] = useState<"project" | "user">("project");
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
-  const { isFavorite, toggle: toggleFavorite } = useFavorites(projectId);
+  useInitFavorites(projectId);
+  const favoriteList = useFavoritesStore((s) => s.byProject[projectId] || []);
+  const isFavorite = (type: 'agent' | 'skill' | 'hook', name: string) =>
+    favoriteList.some((f) => f.item_type === type && f.item_name === name);
+  const toggleFavorite = (type: 'agent' | 'skill' | 'hook', name: string) =>
+    useFavoritesStore.getState().toggle(projectId, type, name);
   const { sessions, loading: sessionsLoading, conversation, conversationLoading, selectSession } = useSessions(projectPath);
   const [resumeChat, setResumeChat] = useState<{ agentName: string; sessionId: string; message: string } | null>(null);
   const [openChats, setOpenChats] = useState<OpenChat[]>([]);
@@ -185,8 +190,6 @@ export function ProjectDashboard() {
           favSkills={favSkills}
           favHooks={favHooks}
           hasFavorites={hasFavorites}
-          isFavorite={isFavorite}
-          toggleFavorite={toggleFavorite}
           onTogglePanel={togglePanel}
           onSetScopeTab={setScopeTab}
           onAgentAction={handleAgentAction}
@@ -208,8 +211,6 @@ export function ProjectDashboard() {
         conversation={conversation}
         conversationLoading={conversationLoading}
         sessions={sessions}
-        isFavorite={isFavorite}
-        toggleFavorite={toggleFavorite}
         onAgentUpdated={(a) => setSelectedAgent(a)}
         onSelectAgent={handleSelectAgent}
         onSessionResume={handleSessionResume}

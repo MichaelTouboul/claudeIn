@@ -11,7 +11,6 @@ export type AgentListProps = {
   onAgentAction: (action: string, agentName: string) => void;
   onToggleLink?: (name: string) => void;
   linkAction?: "link" | "unlink";
-  isAgentFavorite?: (name: string) => boolean;
 };
 
 export function AgentList({
@@ -22,7 +21,6 @@ export function AgentList({
   onAgentAction,
   onToggleLink,
   linkAction,
-  isAgentFavorite,
 }: AgentListProps) {
   const agentIds = new Set(allAgents.map((a) => a.id));
   const subAgentIds = new Set<string>();
@@ -47,7 +45,6 @@ export function AgentList({
           onAgentAction={onAgentAction}
           onToggleLink={onToggleLink}
           linkAction={linkAction}
-          isAgentFavorite={isAgentFavorite}
         />
       ))}
       {standalones.map((a) => (
@@ -59,7 +56,6 @@ export function AgentList({
           onAgentAction={onAgentAction}
           onToggleLink={onToggleLink}
           linkAction={linkAction}
-          isAgentFavorite={isAgentFavorite}
         />
       ))}
     </div>

@@ -5,6 +5,8 @@ import { MarkdownBody } from '@/components/_ui/MarkdownBody';
 import { AgentChat } from '@/components/AgentChat/AgentChat';
 import { MemoryManager } from '@/components/MemoryManager/MemoryManager';
 import { api } from '@/services/api';
+import { useProject } from '@/store/ProjectContext';
+import { useFavoritesStore } from '@/store/useFavoritesStore';
 import type { AgentFile, AgentFrontmatter } from '@/types/agent.types';
 
 import { DetailHeader } from './DetailHeader/DetailHeader';
@@ -25,17 +27,18 @@ export type AgentDetailProps = {
   agent: AgentFile;
   onDelete: (name: string) => void;
   onAgentUpdated?: (agent: AgentFile) => void;
-  isFavorite?: boolean;
-  onToggleFavorite?: () => void;
 };
 
 export function AgentDetail({
   agent,
   onDelete,
   onAgentUpdated,
-  isFavorite,
-  onToggleFavorite,
 }: AgentDetailProps) {
+  const { projectId } = useProject();
+  const isFavorite = useFavoritesStore((s) =>
+    (s.byProject[projectId] || []).some((f) => f.item_type === 'agent' && f.item_name === agent.id)
+  );
+  const onToggleFavorite = () => useFavoritesStore.getState().toggle(projectId, 'agent', agent.id);
   const [tab, setTab] = useState<Tab>("chat");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [editing, setEditing] = useState(false);

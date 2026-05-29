@@ -39,7 +39,7 @@ interface Window {
     getCostsByAgentPerDay: (days?: number) => Promise<import("./types/costs.types").CostsByAgent[]>;
     getCostsByTool: (days?: number) => Promise<import("./types/costs.types").CostsByTool[]>;
 
-    getFavorites: (projectId: string) => Promise<import("./hooks/useFavorites").FavoriteItem[]>;
+    getFavorites: (projectId: string) => Promise<import("./store/useFavoritesStore").FavoriteItem[]>;
     addFavorite: (projectId: string, type: string, name: string) => Promise<void>;
     removeFavorite: (projectId: string, type: string, name: string) => Promise<void>;
 

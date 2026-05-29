@@ -2,22 +2,25 @@ import { Wrench } from 'lucide-react';
 
 import { ItemContextMenu } from '@/components/ItemContextMenu/ItemContextMenu';
 import type { SkillFile } from '@/hooks/useProjects';
+import { useProject } from '@/store/ProjectContext';
+import { useFavoritesStore } from '@/store/useFavoritesStore';
 
 export type SkillRowProps = {
   skill: SkillFile;
   selected: boolean;
-  isFavorite: boolean;
   onSelect: (s: SkillFile) => void;
-  onToggleFavorite: () => void;
 };
 
 export function SkillRow({
   skill,
   selected,
-  isFavorite,
   onSelect,
-  onToggleFavorite,
 }: SkillRowProps) {
+  const { projectId } = useProject();
+  const isFavorite = useFavoritesStore((s) =>
+    (s.byProject[projectId] || []).some((f) => f.item_type === 'skill' && f.item_name === skill.name)
+  );
+  const onToggleFavorite = () => useFavoritesStore.getState().toggle(projectId, 'skill', skill.name);
   return (
     <div className="flex items-center group">
       <button

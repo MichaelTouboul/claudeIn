@@ -2,7 +2,9 @@ import { Cog, Link, Network, Unlink } from "lucide-react";
 
 import { Button } from '@/components/_ui/Button';
 import { AgentContextMenu } from '@/components/AgentContextMenu/AgentContextMenu';
+import { useProject } from '@/store/ProjectContext';
 import { useEventsStore } from '@/store/useEventsStore';
+import { useFavoritesStore } from '@/store/useFavoritesStore';
 import type { AgentFile } from '@/types/agent.types';
 
 import { ContextBar } from '../ContextBar/ContextBar';
@@ -15,7 +17,6 @@ export type OrchestratorTreeProps = {
   onAgentAction: (action: string, agentName: string) => void;
   onToggleLink?: (name: string) => void;
   linkAction?: "link" | "unlink";
-  isAgentFavorite?: (name: string) => boolean;
 };
 
 export function OrchestratorTree({
@@ -26,10 +27,13 @@ export function OrchestratorTree({
   onAgentAction,
   onToggleLink,
   linkAction,
-  isAgentFavorite,
 }: OrchestratorTreeProps) {
+  const { projectId } = useProject();
   const activeAgents = useEventsStore((s) => s.activeAgents);
   const agentContexts = useEventsStore((s) => s.agentContexts);
+  const favoriteList = useFavoritesStore((s) => s.byProject[projectId] || []);
+  const isAgentFavorite = (name: string) =>
+    favoriteList.some((f) => f.item_type === 'agent' && f.item_name === name);
 
   const agentMap = new Map(allAgents.map((a) => [a.id, a]));
   const subs = orchestrator.subAgents
@@ -53,7 +57,7 @@ export function OrchestratorTree({
           <span className="relative truncate text-sm font-medium">{orchestrator.id}</span>
         </button>
         <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-          <AgentContextMenu agentName={orchestrator.id} isOrchestrator isFavorite={isAgentFavorite?.(orchestrator.id)} onAction={onAgentAction} />
+          <AgentContextMenu agentName={orchestrator.id} isOrchestrator isFavorite={isAgentFavorite(orchestrator.id)} onAction={onAgentAction} />
         </div>
         {onToggleLink && linkAction ? <Button
             intent={linkAction === "link" ? "ghost" : "danger"}
@@ -82,7 +86,7 @@ export function OrchestratorTree({
                 <span className="relative truncate text-xs font-medium">{sub.id}</span>
               </button>
               <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                <AgentContextMenu agentName={sub.id} isOrchestrator={false} isFavorite={isAgentFavorite?.(sub.id)} onAction={onAgentAction} />
+                <AgentContextMenu agentName={sub.id} isOrchestrator={false} isFavorite={isAgentFavorite(sub.id)} onAction={onAgentAction} />
               </div>
             </div>
           );
