@@ -115,3 +115,26 @@ Show a prominent "Stop generating" button in the AgentChat message area when the
 **Added:** 2026-05-27
 
 When browsing past sessions in the SessionViewer, there's no way to continue the conversation. Add a prompt input at the bottom of the viewer that resumes the session by spawning a new Claude Code process with `--resume` / `resume_session_id`. The user can type a follow-up message and the session picks up where it left off, transitioning to the AgentChat view.
+
+---
+
+## Playwright E2E / UI Verification
+**Status:** Idea
+**Complexity:** Medium
+**Added:** 2026-05-29
+
+End-to-end UI verification for the Electron app using Playwright's Electron API (`_electron.launch`), not the generic browser-MCP flow.
+
+**Why the Electron API specifically:**
+- The renderer depends on `window.api` (the contextBridge from `electron/preload.ts`). In a plain browser (e.g. pointing the Playwright MCP at the Vite dev URL `http://localhost:5173`), `window.api` is `undefined`, so every IPC-driven view breaks. Generic browser automation only works for purely presentational components or with a stubbed `window.api`.
+- `_electron.launch({ args: ['.'] })` boots the real app; `app.firstWindow()` returns a normal Playwright `Page`, then standard click/fill/assert/screenshot APIs apply.
+
+**Setup sketch:**
+- `npm i -D @playwright/test playwright`
+- A small launch helper + a first smoke test (open app → assert main layout renders → screenshot)
+- Build first (`electron-vite build`) or drive the dev build
+- Add `test:e2e` script to `package.json`
+
+**Possible integration:**
+- Wire a UI-verification step into `/am-feature` Phase 6 (an `am-reviewer` extension or a dedicated `am-e2e` agent that launches Playwright-Electron and captures a screenshot for review).
+- Note: `am-frontend` already lists `mcp__playwright__*` in its tools, so the intent predates this note.
