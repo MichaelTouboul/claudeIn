@@ -6,6 +6,7 @@ import { AgentTree } from '@/components/AgentTree/AgentTree';
 import { CostDashboard } from '@/components/CostDashboard/CostDashboard';
 import { SessionViewer } from '@/components/SessionViewer/SessionViewer';
 import type { SessionConversation,SessionSummary } from '@/hooks/useSessions';
+import { useChatsStore } from '@/store/useChatsStore';
 import { useDashboardStore } from '@/store/useDashboardStore';
 import { useDashboardUIStore } from '@/store/useDashboardUIStore';
 
@@ -35,9 +36,13 @@ export function MainContent({
   const setResumeChat = useDashboardUIStore((s) => s.setResumeChat);
   const onSelectAgent = useDashboardUIStore((s) => s.selectAgent);
   const onAgentUpdated = useDashboardUIStore((s) => s.setSelectedAgent);
+  const addOpenChat = useChatsStore((s) => s.addOpenChat);
 
   const onSessionResume = (sessionId: string, message: string) => {
-    setResumeChat({ agentName: 'claude', sessionId, message });
+    const session = sessions.find((s) => s.sessionId === sessionId);
+    const agentName = session?.agentName || 'claude';
+    addOpenChat(agentName, `Resume: ${session?.title || agentName}`);
+    setResumeChat({ agentName, sessionId, message });
     setView('chat');
   };
   return (
