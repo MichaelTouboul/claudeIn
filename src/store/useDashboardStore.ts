@@ -15,6 +15,8 @@ type DashboardState = {
   deleteAgent: (agentName: string) => Promise<void>;
 };
 
+let currentLoadId = 0;
+
 export const useDashboardStore = create<DashboardState>((set, get) => ({
   project: null,
   agents: [],
@@ -23,8 +25,10 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
   loading: false,
 
   load: async (projectId: string) => {
+    const id = ++currentLoadId;
     set({ loading: true });
     const data = await window.api.getDashboard(projectId);
+    if (id !== currentLoadId) return; // superseded
     set({
       project: data.project,
       agents: data.agents,

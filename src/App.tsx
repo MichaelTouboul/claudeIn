@@ -20,8 +20,6 @@ export default function App() {
   const setSelectedProject = useAppStore((s) => s.setSelectedProject);
   const project = useDashboardStore((s) => s.project);
   const agents = useDashboardStore((s) => s.agents);
-  const skills = useDashboardStore((s) => s.skills);
-  const hooks = useDashboardStore((s) => s.hooks);
   const dashLoading = useDashboardStore((s) => s.loading);
   const loadDashboard = useDashboardStore((s) => s.load);
   const refresh = useDashboardStore((s) => s.refresh);
@@ -32,13 +30,12 @@ export default function App() {
     }
   }, [selectedProject?.id, loadDashboard]);
 
-  const dashboard = project ? { project, agents, skills, hooks } : null;
+  const dashboard = project ? { project } : null;
   useInitEvents();
   const events = useEventsStore((s) => s.events);
-  const eventsLength = useEventsStore((s) => s.events.length);
   const connected = useEventsStore((s) => s.connected);
   const activeCount = useEventsStore((s) => s.activeAgents.size);
-  const { stats } = useStats(eventsLength);
+  const { stats } = useStats(events.length);
   const [chatOpen, setChatOpen] = useState(false);
   const prevProjectPath = useRef<string | null>(null);
 
