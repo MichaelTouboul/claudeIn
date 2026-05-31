@@ -1,5 +1,6 @@
 import { type RefObject, useCallback } from 'react';
 
+import type { RichEditorHandle } from '@/components/AgentChat/RichEditor/RichEditor';
 import type { QueueItem } from '@/components/AgentChat/types';
 import type { ChatMessage, SpawnSession } from '@/types/spawn.types';
 
@@ -15,11 +16,10 @@ type UseAgentChatActionsParams = {
   agentName: string;
   projectPath: string | undefined;
   claudeSessionId: string | null;
-  inputRef: RefObject<HTMLTextAreaElement | null>;
+  editorRef: RefObject<RichEditorHandle | null>;
   pendingUserMsgs: RefObject<Set<string>>;
   setInput: SetState<string>;
   setAttachedFiles: SetState<AttachedFile[]>;
-  setShowSlash: SetState<boolean>;
   setQueue: SetState<QueueItem[]>;
   setMessages: SetState<ChatMessage[]>;
   setAwaitingResponse: SetState<boolean>;
@@ -37,11 +37,10 @@ export function useAgentChatActions({
   agentName,
   projectPath,
   claudeSessionId,
-  inputRef,
+  editorRef,
   pendingUserMsgs,
   setInput,
   setAttachedFiles,
-  setShowSlash,
   setQueue,
   setMessages,
   setAwaitingResponse,
@@ -57,8 +56,8 @@ export function useAgentChatActions({
 
     setInput('');
     setAttachedFiles([]);
-    setShowSlash(false);
-    inputRef.current?.focus();
+    editorRef.current?.clear();
+    editorRef.current?.focus();
 
     if (awaitingResponse) {
       setQueue((prev) => [...prev, { id: crypto.randomUUID(), text: fullText }]);
@@ -83,7 +82,7 @@ export function useAgentChatActions({
         setAwaitingResponse(false);
       }
     }
-  }, [input, attachedFiles, awaitingResponse, session, isRunning, agentName, projectPath, claudeSessionId, inputRef, pendingUserMsgs, setInput, setAttachedFiles, setShowSlash, setQueue, setMessages, setAwaitingResponse, setWaitingInput, setSession, setClaudeSessionId]);
+  }, [input, attachedFiles, awaitingResponse, session, isRunning, agentName, projectPath, claudeSessionId, editorRef, pendingUserMsgs, setInput, setAttachedFiles, setQueue, setMessages, setAwaitingResponse, setWaitingInput, setSession, setClaudeSessionId]);
 
   const handleAttach = useCallback(async () => {
     const paths = await window.api.openFilePicker();
@@ -103,8 +102,8 @@ export function useAgentChatActions({
     }
 
     setAttachedFiles((prev) => [...prev, ...newFiles]);
-    inputRef.current?.focus();
-  }, [inputRef, setAttachedFiles]);
+    editorRef.current?.focus();
+  }, [editorRef, setAttachedFiles]);
 
   const handleQuickReply = useCallback(async (value: string) => {
     const msg: ChatMessage = { id: crypto.randomUUID(), role: 'user', content: value, timestamp: new Date().toISOString() };

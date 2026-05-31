@@ -4,6 +4,7 @@ import { type RefObject } from 'react';
 import { Button } from '@/components/_ui/Button';
 import type { SpawnSession } from '@/types/spawn.types';
 
+import { RichEditor, type RichEditorHandle } from '../RichEditor/RichEditor';
 import type { SlashCommand } from '../slashCommands';
 
 export type AttachedFile = { path: string; dataUrl: string | null };
@@ -18,9 +19,10 @@ export type AgentChatInputProps = {
   showSlash: boolean;
   slashIndex: number;
   filteredCommands: SlashCommand[];
-  inputRef: RefObject<HTMLTextAreaElement | null>;
+  editorRef: RefObject<RichEditorHandle | null>;
   onInputChange: (val: string) => void;
-  onKeyDown: (e: React.KeyboardEvent) => void;
+  onPlainTextChange: (plain: string) => void;
+  onSlashEnter: () => boolean;
   onSelectSlash: (cmd: string) => void;
   onRemoveAttachment: (index: number) => void;
   onAttach: () => void;
@@ -37,9 +39,10 @@ export function AgentChatInput({
   showSlash,
   slashIndex,
   filteredCommands,
-  inputRef,
+  editorRef,
   onInputChange,
-  onKeyDown,
+  onPlainTextChange,
+  onSlashEnter,
   onSelectSlash,
   onRemoveAttachment,
   onAttach,
@@ -110,19 +113,15 @@ export function AgentChatInput({
         <div className={`flex items-center text-sm shrink-0 pt-1.5 ${waitingInput ? "text-yellow-400" : "text-accent"}`}>
           <ChevronRight size={14} />
         </div>
-        <textarea
-          ref={inputRef}
-          value={input}
-          onChange={(e) => onInputChange(e.target.value)}
-          onKeyDown={onKeyDown}
+        <RichEditor
+          handleRef={editorRef}
           placeholder={waitingInput ? "Type your response (yes / no / ...)..." : session && isRunning ? "Send a message..." : "Type a prompt or / for commands..."}
-          rows={1}
-          className="flex-1 bg-transparent text-fg text-sm resize-none focus:outline-none font-mono placeholder-gray-700 leading-relaxed"
-          onInput={(e) => {
-            const el = e.currentTarget;
-            el.style.height = "auto";
-            el.style.height = Math.min(el.scrollHeight, 120) + "px";
+          onChange={(markdown, plain) => {
+            onInputChange(markdown);
+            onPlainTextChange(plain);
           }}
+          onSubmit={onSend}
+          onEnter={onSlashEnter}
         />
         <Button intent="ghost" size="icon" onClick={onAttach} title="Attach file">
           <Paperclip size={16} />
