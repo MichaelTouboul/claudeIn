@@ -16,10 +16,6 @@ contextBridge.exposeInMainWorld("api", {
   getProject: (id: string) => ipcRenderer.invoke("projects:get", id),
   getDashboard: (id: string) => ipcRenderer.invoke("projects:dashboard", id),
 
-  getLinks: (projectId: string) => ipcRenderer.invoke("links:list", projectId),
-  linkAgent: (agentName: string, projectId: string) => ipcRenderer.invoke("links:add", agentName, projectId),
-  unlinkAgent: (agentName: string, projectId: string) => ipcRenderer.invoke("links:remove", agentName, projectId),
-
   spawn: (opts: { agent_name?: string; mission: string; cwd?: string; resume_session_id?: string }) =>
     ipcRenderer.invoke("spawn:start", opts),
   getSession: (sessionId: string) => ipcRenderer.invoke("spawn:get", sessionId),

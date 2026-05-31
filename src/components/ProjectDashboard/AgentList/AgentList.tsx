@@ -9,8 +9,6 @@ export type AgentListProps = {
   selectedId: string | null;
   onSelect: (a: AgentFile) => void;
   onAgentAction: (action: string, agentName: string) => void;
-  onToggleLink?: (name: string) => void;
-  linkAction?: "link" | "unlink";
 };
 
 export function AgentList({
@@ -19,8 +17,6 @@ export function AgentList({
   selectedId,
   onSelect,
   onAgentAction,
-  onToggleLink,
-  linkAction,
 }: AgentListProps) {
   const agentIds = new Set(allAgents.map((a) => a.id));
   const subAgentIds = new Set<string>();
@@ -43,8 +39,6 @@ export function AgentList({
           selectedId={selectedId}
           onSelect={onSelect}
           onAgentAction={onAgentAction}
-          onToggleLink={onToggleLink}
-          linkAction={linkAction}
         />
       ))}
       {standalones.map((a) => (
@@ -54,8 +48,6 @@ export function AgentList({
           selected={selectedId === a.id}
           onSelect={onSelect}
           onAgentAction={onAgentAction}
-          onToggleLink={onToggleLink}
-          linkAction={linkAction}
         />
       ))}
     </div>

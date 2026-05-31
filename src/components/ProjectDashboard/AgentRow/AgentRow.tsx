@@ -1,5 +1,3 @@
-import { Link, Unlink } from "lucide-react";
-
 import { AgentContextMenu } from '@/components/AgentContextMenu/AgentContextMenu';
 import { ContextBar } from '@/components/ContextBar/ContextBar';
 import { useProject } from '@/store/ProjectContext';
@@ -14,8 +12,6 @@ export type AgentRowProps = {
   selected: boolean;
   onSelect: (a: AgentFile) => void;
   onAgentAction: (action: string, agentName: string) => void;
-  onToggleLink?: (name: string) => void;
-  linkAction?: "link" | "unlink";
 };
 
 export function AgentRow({
@@ -23,8 +19,6 @@ export function AgentRow({
   selected,
   onSelect,
   onAgentAction,
-  onToggleLink,
-  linkAction,
 }: AgentRowProps) {
   const { projectId } = useProject();
   const active = useEventsStore((s) => s.activeAgents.has(agent.id));
@@ -47,16 +41,6 @@ export function AgentRow({
       <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
         <AgentContextMenu agentName={agent.id} isOrchestrator={agent.subAgents.length > 0} isFavorite={isFavorite} onAction={onAgentAction} />
       </div>
-      {onToggleLink && linkAction ? <button
-          onClick={() => onToggleLink(agent.id)}
-          className={`p-1.5 mr-1 rounded shrink-0 transition-colors ${
-            linkAction === "link"
-              ? "text-fg-subtle hover:text-active hover:bg-active/10"
-              : "text-active/60 hover:text-danger hover:bg-danger/10"
-          }`}
-        >
-          {linkAction === "link" ? <Link size={12} /> : <Unlink size={12} />}
-        </button> : null}
     </div>
   );
 }

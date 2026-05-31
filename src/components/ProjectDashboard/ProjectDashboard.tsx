@@ -31,15 +31,11 @@ if (typeof document !== "undefined" && !document.getElementById("chat-animations
 
 export function ProjectDashboard() {
   const { projectId, projectPath } = useProject();
-  const toggleLink = useDashboardStore((s) => s.toggleLink);
   useInitFavorites(projectId);
   const { sessions, loading: sessionsLoading, conversation, conversationLoading, selectSession } = useSessions(projectPath);
   const addOpenChat = useChatsStore((s) => s.addOpenChat);
 
   const { width: sidebarWidth, ref: sidebarRef, startDrag: handleResizeDragStart } = useResizableSidebar();
-
-  const handleToggleLink = (agentName: string, currentlyLinked: boolean) =>
-    toggleLink(agentName, currentlyLinked);
 
   const handleAgentAction = (action: string, agentName: string) => {
     switch (action) {
@@ -96,7 +92,6 @@ export function ProjectDashboard() {
           sessionsLoading={sessionsLoading}
           onAgentAction={handleAgentAction}
           onSelectSession={handleSelectSession}
-          onToggleLink={handleToggleLink}
         />
 
         <ResizeHandle onMouseDown={handleResizeDragStart} />

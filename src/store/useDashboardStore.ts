@@ -11,7 +11,6 @@ type DashboardState = {
   loading: boolean;
   load: (projectId: string) => Promise<void>;
   refresh: () => Promise<void>;
-  toggleLink: (agentName: string, currentlyLinked: boolean) => Promise<void>;
   deleteAgent: (agentName: string) => Promise<void>;
 };
 
@@ -42,17 +41,6 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
     const id = get().project?.id;
     if (!id) return;
     await get().load(id);
-  },
-
-  toggleLink: async (agentName, currentlyLinked) => {
-    const id = get().project?.id;
-    if (!id) return;
-    if (currentlyLinked) {
-      await window.api.unlinkAgent(agentName, id);
-    } else {
-      await window.api.linkAgent(agentName, id);
-    }
-    await get().refresh();
   },
 
   deleteAgent: async (agentName) => {

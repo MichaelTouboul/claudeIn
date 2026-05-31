@@ -15,10 +15,6 @@ interface Window {
     getProject: (id: string) => Promise<import("./hooks/useProjects").Project | null>;
     getDashboard: (id: string) => Promise<import("./hooks/useProjects").Dashboard>;
 
-    getLinks: (projectId: string) => Promise<string[]>;
-    linkAgent: (agentName: string, projectId: string) => Promise<void>;
-    unlinkAgent: (agentName: string, projectId: string) => Promise<void>;
-
     spawn: (opts: { agent_name?: string; mission: string; cwd?: string; resume_session_id?: string }) => Promise<import("./types/spawn.types").SpawnSession>;
     getSession: (sessionId: string) => Promise<import("./types/spawn.types").SpawnSession | null>;
     sendInput: (sessionId: string, text: string) => Promise<boolean>;

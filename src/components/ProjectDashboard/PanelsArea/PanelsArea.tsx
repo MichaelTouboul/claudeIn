@@ -22,7 +22,6 @@ export type PanelsAreaProps = {
   sessionsLoading: boolean;
   onAgentAction: (action: string, agentName: string) => void;
   onSelectSession: (s: SessionSummary) => void;
-  onToggleLink: (agentName: string, linked: boolean) => void;
 };
 
 export function PanelsArea({
@@ -30,7 +29,6 @@ export function PanelsArea({
   sessionsLoading,
   onAgentAction,
   onSelectSession,
-  onToggleLink,
 }: PanelsAreaProps) {
   const { projectId, isUserProject, refresh } = useProject();
   const agents = useDashboardStore((s) => s.agents);
@@ -47,8 +45,8 @@ export function PanelsArea({
   const onSelectAgent = useDashboardUIStore.getState().selectAgent;
   const onSelectSkill = useDashboardUIStore.getState().selectSkill;
 
-  const projectAgents = agents.filter((a) => a.scope === "project" || (a.scope === "user" && a.linked));
-  const userAgents = agents.filter((a) => a.scope === "user" && !a.linked);
+  const projectAgents = agents.filter((a) => a.scope === "project");
+  const userAgents = agents.filter((a) => a.scope === "user");
   const projectSkills = skills.filter((s) => s.scope !== "user");
   const userSkills = skills.filter((s) => s.scope === "user");
 
@@ -136,7 +134,7 @@ export function PanelsArea({
             </div>
             {scopeTab === "project" ? (
               projectAgents.length > 0 ? (
-                <AgentList agents={projectAgents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} onToggleLink={(name) => onToggleLink(name, true)} linkAction="unlink" />
+                <AgentList agents={projectAgents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} />
               ) : (
                 <div className="px-3 py-6 text-center">
                   <p className="text-xs text-fg-muted mb-1.5">No project agents</p>
@@ -145,7 +143,7 @@ export function PanelsArea({
               )
             ) : (
               userAgents.length > 0 ? (
-                <AgentList agents={userAgents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} onToggleLink={(name) => onToggleLink(name, false)} linkAction="link" />
+                <AgentList agents={userAgents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} />
               ) : (
                 <p className="px-3 py-6 text-xs text-fg-muted text-center">No user agents</p>
               )
