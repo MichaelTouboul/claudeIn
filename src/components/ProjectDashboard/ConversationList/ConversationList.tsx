@@ -1,11 +1,8 @@
 import { MessageSquare } from 'lucide-react';
 
-import { useChatsStore } from '@/store/useChatsStore';
 import { useDashboardStore } from '@/store/useDashboardStore';
-import { useDashboardUIStore } from '@/store/useDashboardUIStore';
 import { useEventsStore } from '@/store/useEventsStore';
-
-import { annotateConversations, type ConversationStatus } from './conversations';
+import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
 const colorHex: Record<string, string> = {
   cyan: '#06b6d4', blue: '#3b82f6', green: '#22c55e',
@@ -13,23 +10,18 @@ const colorHex: Record<string, string> = {
   purple: '#a855f7', pink: '#ec4899',
 };
 
-const statusDot: Record<ConversationStatus, { color: string; pulse: boolean }> = {
-  live: { color: '#22c55e', pulse: true },
-  waiting: { color: '#eab308', pulse: true },
-  idle: { color: 'var(--color-text-muted)', pulse: false },
-};
-
 export function ConversationList() {
-  const openChats = useChatsStore((s) => s.openChats);
+  const dashboards = useWorkspaceStore((s) => s.dashboards);
+  const activeDashboardId = useWorkspaceStore((s) => s.activeDashboardId);
+  const setActiveTab = useWorkspaceStore((s) => s.setActiveTab);
   const agents = useDashboardStore((s) => s.agents);
   const activeAgents = useEventsStore((s) => s.activeAgents);
   const waitingAgents = useEventsStore((s) => s.waitingAgents);
-  const setActiveConversation = useDashboardUIStore((s) => s.setActiveConversation);
-  const setView = useDashboardUIStore((s) => s.setView);
 
-  const conversations = annotateConversations(openChats, activeAgents, waitingAgents);
+  const active = dashboards.find((d) => d.id === activeDashboardId);
+  const tabs = active?.tabs.filter((t) => t.kind === 'chat' || t.kind === 'agent') ?? [];
 
-  if (conversations.length === 0) {
+  if (tabs.length === 0) {
     return (
       <p className="px-3 py-2 text-xs" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
         No active conversations.
@@ -39,30 +31,30 @@ export function ConversationList() {
 
   return (
     <div className="px-3 pb-2 space-y-0.5">
-      {conversations.map((conv) => {
-        const agent = agents.find((a) => a.frontmatter.name === conv.agentName || a.id === conv.agentName);
-        const dot = statusDot[conv.status];
+      {tabs.map((tab) => {
+        const name = tab.agentName ?? '';
+        const agent = agents.find((a) => a.id === name);
+        const status = waitingAgents.has(name) ? 'waiting' : activeAgents.has(name) ? 'live' : 'idle';
+        const dotColor = status === 'live' ? '#22c55e' : status === 'waiting' ? '#eab308' : 'var(--color-text-muted)';
         const iconColor = colorHex[agent?.frontmatter?.color || ''] || '#06b6d4';
+        const isActive = tab.id === active?.activeTabId;
         return (
           <button
-            key={conv.id}
-            onClick={() => {
-              setActiveConversation(conv.id);
-              setView('project');
-            }}
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
             className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors text-left"
-            style={{ background: 'transparent', animation: conv.isNew ? 'chatSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1)' : undefined }}
+            style={{ background: isActive ? 'var(--color-surface-2)' : 'transparent' }}
             onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-surface-2)')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = isActive ? 'var(--color-surface-2)' : 'transparent')}
           >
             <MessageSquare size={12} style={{ color: iconColor }} className="shrink-0" />
             <span className="text-xs truncate" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>
-              {conv.title}
+              {tab.title}
             </span>
             <span
               className="w-1.5 h-1.5 rounded-full shrink-0 ml-auto"
-              style={{ backgroundColor: dot.color, animation: dot.pulse ? 'pulse 1s ease-in-out infinite' : undefined }}
-              title={conv.status}
+              style={{ backgroundColor: dotColor, animation: status !== 'idle' ? 'pulse 1s ease-in-out infinite' : undefined }}
+              title={status}
             />
           </button>
         );
