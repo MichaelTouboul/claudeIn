@@ -1,8 +1,9 @@
+import { X } from 'lucide-react';
 import { type ReactNode } from 'react';
 
 import { cn } from '@/lib/cn';
 
-export type TabItem = { key: string; label: string; icon?: ReactNode };
+export type TabItem = { key: string; label: string; icon?: ReactNode; onClose?: (key: string) => void };
 
 export type TabsProps = {
   tabs: TabItem[];
@@ -60,6 +61,27 @@ export function Tabs({ tabs, active, onChange, className }: TabsProps) {
           >
             {tab.icon ?? null}
             {tab.label}
+            {tab.onClose ? (
+              <span
+                role="button"
+                aria-label={`Close ${tab.label}`}
+                tabIndex={0}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  tab.onClose?.(tab.key);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.stopPropagation();
+                    tab.onClose?.(tab.key);
+                  }
+                }}
+                className="ml-1 inline-flex items-center justify-center w-3.5 h-3.5 rounded opacity-50 hover:opacity-100"
+                style={{ color: 'var(--color-text-muted)' }}
+              >
+                <X size={11} />
+              </span>
+            ) : null}
           </button>
         );
       })}

@@ -30,4 +30,12 @@ describe('Tabs', () => {
     fireEvent.keyDown(screen.getByRole('tab', { name: 'Chat' }), { key: 'ArrowRight' });
     expect(onChange).toHaveBeenCalledWith('context');
   });
+
+  it('renders a close affordance only when onClose is given and fires it', () => {
+    const onClose = vi.fn();
+    render(<Tabs tabs={[{ key: 'a', label: 'A', onClose }, { key: 'b', label: 'B' }]} active="a" onChange={() => {}} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Close A' }));
+    expect(onClose).toHaveBeenCalledWith('a');
+    expect(screen.queryByRole('button', { name: 'Close B' })).toBeNull();
+  });
 });
