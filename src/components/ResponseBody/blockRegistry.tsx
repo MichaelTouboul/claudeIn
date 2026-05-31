@@ -2,6 +2,7 @@ import { type ComponentPropsWithoutRef } from 'react';
 import type { Components } from 'react-markdown';
 
 import { CodeBlock } from './blocks/CodeBlock/CodeBlock';
+import { TableBlock } from './blocks/TableBlock/TableBlock';
 
 /** Detect a fenced block-code's language from react-markdown's `language-xxx` className. */
 function langFromClassName(className: string | undefined): string | null {
@@ -33,5 +34,7 @@ export const blockComponents: Components = {
   code: Code,
   // CodeBlock renders its own <pre>; unwrap react-markdown's wrapper to avoid <pre><pre>.
   pre: ({ children }: ComponentPropsWithoutRef<'pre'>) => <>{children}</>,
-  // table/img/etc. fall back to react-markdown defaults until their rich blocks land.
+  // TableBlock parses the hast `node` itself → no thead/tbody/tr/td overrides needed.
+  table: ({ node }) => <TableBlock node={node} raw="" />,
+  // img/etc. fall back to react-markdown defaults until their rich blocks land.
 };

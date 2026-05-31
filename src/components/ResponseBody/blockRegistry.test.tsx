@@ -25,8 +25,9 @@ describe('blockRegistry', () => {
     expect(screen.queryByRole('button', { name: 'Copy' })).not.toBeInTheDocument();
   });
 
-  it('renders a GFM table as a real <table>', () => {
+  it('routes a GFM table to TableBlock (MUI DataGrid)', () => {
     renderMd('| a | b |\n| - | - |\n| 1 | 2 |');
-    expect(screen.getByRole('table')).toBeInTheDocument();
+    expect(screen.getByRole('grid')).toBeInTheDocument();
+    expect(screen.getByText('1')).toBeInTheDocument();
   });
 });
