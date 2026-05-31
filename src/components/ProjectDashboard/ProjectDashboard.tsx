@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+
 import { useResizableSidebar } from '@/hooks/useResizableSidebar';
 import type { SessionSummary } from '@/hooks/useSessions';
 import { useSessions } from '@/hooks/useSessions';
@@ -46,6 +48,14 @@ export function ProjectDashboard() {
   const addOpenChat = useChatsStore((s) => s.addOpenChat);
 
   const { width: sidebarWidth, ref: sidebarRef, startDrag: handleResizeDragStart } = useResizableSidebar();
+
+  useEffect(() => {
+    const ui = useDashboardUIStore.getState();
+    ui.setView('project');
+    ui.setProjectTab('chat');
+    ui.setActiveConversation(null);
+    ui.setSelectedAgent(null);
+  }, [projectPath]);
 
   const handleAgentAction = (action: string, agentName: string) => {
     switch (action) {
