@@ -4,6 +4,60 @@ Ideas and features to build later. Not planned, not prioritized — just capture
 
 > For the prioritized plan, product strategy, competitive landscape, and repos to study, see **`docs/roadmap.md`**. This file is the raw idea backlog.
 
+> Effort scale: **Low** (~half day) · **Medium** (~1 day) · **High** (multi-day). Scope tags: **MVP**, **Post-MVP**, **After Phase 0** (Phase 0 = UI/UX skeleton).
+
+---
+
+## Batch captured 2026-05-31
+
+### Real-time mirror of `.claude` (root + per-project)
+**Scope:** After Phase 0 · **Effort:** High · **Status:** Idea
+Everything in the app should be **real-time** and **perfectly mirror** the on-disk `.claude` — both the root `~/.claude` and each project's `.claude/`. Agents, skills, hooks, MCP, settings, and especially **running agents / active conversations** must reflect actual state live, not a snapshot you opened in-app. This supersedes and absorbs the **Live Agent Activity Visualization** entry below: that animated runtime tree is one surface of this broader "the UI is a live mirror of `.claude`" goal. **Sequencing: build this only after Phase 0** (the UI/UX skeleton) is in place.
+
+### Per-project Dashboard with tabs (skeleton)
+**Scope:** MVP · **Effort:** Medium · **Status:** Idea
+Two kinds of dashboard:
+- **Project dashboard** — tabbed: **Chat · Context · Task (Jira ticket) · Plan**. For MVP, only **Chat** is functional; the other tabs are **skeletons** (empty shells, no logic yet).
+- **Agent dashboard** — keep as it is today (works well, no change).
+
+### Action-awaited notifications
+**Scope:** MVP · **Effort:** Medium · **Status:** Idea
+Signal when an agent is waiting for user input, in **two places by scope**:
+- **Project scope** → badge/indicator on the conversation in the **left sidebar**.
+- **User scope** → notification on the **dashboard tab** itself.
+
+### `/` and `@` autocomplete menus
+**Scope:** MVP · **Effort:** Medium · **Status:** Idea
+In the chat input, typing **`/`** must surface **all available commands/functions**; **`@`** must surface its full set (files/agents/etc.) the same way. (The Lexical editor already has the slash-query seam — `matchSlashQuery` in `RichEditor/serialize.ts`.)
+
+### Click an active agent → show its activity
+**Scope:** MVP · **Effort:** Medium · **Status:** Idea
+Clicking an active agent (in the Activity zone) opens a view of **what that agent is doing right now** — current tool, progress, live stream.
+
+### Header global usage bar
+**Scope:** MVP · **Effort:** Low–Medium · **Status:** Idea
+A global **usage progress bar in the app header**, like Claude's "Plan usage limits → Current session N% used · Resets in Xh" (reference screenshot 2026-05-31). Shows session/plan budget consumed at a glance.
+
+### Visualize background tasks
+**Scope:** MVP · **Effort:** Medium · **Status:** Idea · needs a small product decision
+A surface for **background tasks** in flight. Open product question to resolve first: **how to differentiate an "agent" from a "session"** in this view (vocabulary + visual model).
+
+### Table export (PDF / Excel)
+**Scope:** PDF = MVP · Excel = TBD · **Effort:** PDF Low, Excel Medium · **Status:** Idea
+For a `TableBlock` rendered in chat, allow **export to PDF** (MVP — trivial) and **export to Excel** (decide based on effort; not committed). Lives on the block's toolbar/`BlockShell`.
+
+### Right action sidebar
+**Scope:** Post-MVP · **Effort:** Medium · **Status:** Idea
+A **right-hand sidebar** hosting contextual actions to be defined later (e.g. edit a file, edit a table…). For now just reserve the architectural slot.
+
+### Launch page refactor
+**Scope:** MVP · **Effort:** Medium (TBD) · **Status:** Idea
+Refactor the launch / landing page. Details to come — captured here so it isn't lost.
+
+### Code converter in chat
+**Scope:** Post-MVP · **Effort:** Medium–High · **Status:** Idea
+In-chat conversion of a code block between languages (TS → JS → Python, etc.). Already noted as a deferred block follow-on (Claude-powered block transform on `ResponseBody` blocks).
+
 ---
 
 ## Live Agent Activity Visualization
