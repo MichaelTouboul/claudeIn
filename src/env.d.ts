@@ -52,5 +52,11 @@ interface Window {
     generateTitle: (userMessage: string, assistantMessage: string) => Promise<string>;
 
     onEvent: (cb: (data: unknown) => void) => () => void;
+
+    ptyCreate: (projectPath: string, cwd: string, cols: number, rows: number) => Promise<void>;
+    ptyWrite: (projectPath: string, data: string) => void;
+    ptyResize: (projectPath: string, cols: number, rows: number) => void;
+    ptyKill: (projectPath: string) => void;
+    onPtyData: (cb: (p: { projectPath: string; data: string }) => void) => () => void;
   };
 }

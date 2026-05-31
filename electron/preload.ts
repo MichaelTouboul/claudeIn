@@ -61,4 +61,15 @@ contextBridge.exposeInMainWorld("api", {
     ipcRenderer.on("push-event", handler);
     return () => { ipcRenderer.removeListener("push-event", handler); };
   },
+
+  ptyCreate: (projectPath: string, cwd: string, cols: number, rows: number) =>
+    ipcRenderer.invoke("pty:create", projectPath, cwd, cols, rows),
+  ptyWrite: (projectPath: string, data: string) => ipcRenderer.send("pty:write", projectPath, data),
+  ptyResize: (projectPath: string, cols: number, rows: number) => ipcRenderer.send("pty:resize", projectPath, cols, rows),
+  ptyKill: (projectPath: string) => ipcRenderer.send("pty:kill", projectPath),
+  onPtyData: (cb: (p: { projectPath: string; data: string }) => void) => {
+    const handler = (_e: unknown, p: { projectPath: string; data: string }) => cb(p);
+    ipcRenderer.on("pty:data", handler);
+    return () => { ipcRenderer.removeListener("pty:data", handler); };
+  },
 });
