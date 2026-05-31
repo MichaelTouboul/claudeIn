@@ -24,7 +24,9 @@ export function ConversationList() {
   const agents = useDashboardStore((s) => s.agents);
   const activeAgents = useEventsStore((s) => s.activeAgents);
   const waitingAgents = useEventsStore((s) => s.waitingAgents);
-  const selectAgent = useDashboardUIStore((s) => s.selectAgent);
+  const setActiveConversation = useDashboardUIStore((s) => s.setActiveConversation);
+  const setProjectTab = useDashboardUIStore((s) => s.setProjectTab);
+  const setView = useDashboardUIStore((s) => s.setView);
 
   const conversations = annotateConversations(openChats, activeAgents, waitingAgents);
 
@@ -45,7 +47,11 @@ export function ConversationList() {
         return (
           <button
             key={conv.id}
-            onClick={() => { if (agent) selectAgent(agent); }}
+            onClick={() => {
+              setActiveConversation(conv.id);
+              setProjectTab('chat');
+              setView('project');
+            }}
             className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors text-left"
             style={{ background: 'transparent', animation: conv.isNew ? 'chatSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1)' : undefined }}
             onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-surface-2)')}
