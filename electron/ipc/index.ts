@@ -8,6 +8,7 @@ import { registerFavoriteHandlers } from "./favorites.ipc";
 import { registerMissionHandlers } from "./missions.ipc";
 import { registerSessionHandlers } from "./sessions.ipc";
 import { registerDialogHandlers } from "./dialog.ipc";
+import { registerPtyHandlers } from "./pty.ipc";
 
 export function registerAllHandlers(): void {
   registerAgentHandlers();
@@ -20,4 +21,5 @@ export function registerAllHandlers(): void {
   registerMissionHandlers();
   registerSessionHandlers();
   registerDialogHandlers();
+  registerPtyHandlers();
 }
