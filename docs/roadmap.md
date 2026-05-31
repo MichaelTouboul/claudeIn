@@ -34,7 +34,7 @@ Build the **UX skeleton** of a view-menu with switchable panes (mirroring Anthro
 | **Diff** | ✅ build | Parity must-have (inline accept/reject per hunk). |
 | **Plan** | ✅ build | Cheap; good visibility into plan mode. |
 | **Files** | ✅ browser only | Overlaps ecosystem visualization. Browser yes, full editor no (don't clone an IDE). |
-| **Terminal** | 🚧 shell `coming soon` | Anthropic gives it free; you already have a real terminal. Heavy, no differentiation. |
+| **Terminal** | 🔨 **building** | Owner override (2026-05-31): real xterm + node-pty terminal in a tabbed bottom panel. Accepts the Anthropic-parity + native-module cost knowingly. Design: `docs/superpowers/specs/2026-05-31-integrated-terminal-design.md`. |
 | **Preview** | 🚧 shell `coming soon` | HTML/PDF/server pane — Anthropic has it; heavy to do well. |
 | **Background tasks** | 🚧 shell `coming soon` | Anthropic's Dispatch/Routines-lite; outside the moat. |
 
