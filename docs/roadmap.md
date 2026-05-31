@@ -25,7 +25,22 @@ The vehicle + ecosystem visualization (the one area where the base already beats
 - **Multi-project parallel sessions (cross-repo)** — CHEAP: each session is an independent `claude` process with its own cwd, no shared state, no git collision. Just manage N processes + N views + a switcher/dashboard. *(reuse: project scanning + SQLite event store)*
 - **Live token/context gauge** — sets up Phase 1. *(reuse: event store)*
 
-**Do NOT build** (Anthropic gives free, or wrong scope): worktrees / same-repo concurrent agents, checkpoints, preview pane, integrated terminal, voice, our own kanban.
+#### Pane shell — "shell yes, content progressive" (decided)
+
+Build the **UX skeleton** of a view-menu with switchable panes (mirroring Anthropic's `Preview / Diff / Terminal / Files / Background tasks / Plan` menu) so the app has the familiar, expected shape. But **fill only the cheap/on-strategy panes now**; the heavy table-stakes panes ship as labelled `coming soon` placeholders until after the moat (Phase 1).
+
+| Pane | Phase 0 | Why |
+|---|---|---|
+| **Diff** | ✅ build | Parity must-have (inline accept/reject per hunk). |
+| **Plan** | ✅ build | Cheap; good visibility into plan mode. |
+| **Files** | ✅ browser only | Overlaps ecosystem visualization. Browser yes, full editor no (don't clone an IDE). |
+| **Terminal** | 🚧 shell `coming soon` | Anthropic gives it free; you already have a real terminal. Heavy, no differentiation. |
+| **Preview** | 🚧 shell `coming soon` | HTML/PDF/server pane — Anthropic has it; heavy to do well. |
+| **Background tasks** | 🚧 shell `coming soon` | Anthropic's Dispatch/Routines-lite; outside the moat. |
+
+Rule: the **shape** is Phase 0; the **expensive content** (Terminal/Preview/Background) waits until the Context Optimizer (Phase 1) ships. Don't let pane-filling crowd out the moat.
+
+**Do NOT build at all** (wrong scope, not just deferred): worktrees / same-repo concurrent agents, checkpoints, voice, our own kanban task system.
 
 > Distinction that matters: **cross-repo** parallel sessions = trivial (separate processes). **Same-repo** concurrent agents = hard (needs worktrees) — deferred/skip; not our need.
 
