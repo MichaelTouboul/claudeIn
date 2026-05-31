@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(npm install *)",
+      "Bash(npm ci)",
+      "Bash(npm run *)",
+      "Bash(npx electron-vite *)",
+      "Bash(npx electron-rebuild *)",
+      "Bash(electron-rebuild *)",
+      "Bash(npx vitest *)",
+      "Bash(npx tsc *)",
+      "Bash(node *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(find *)",
+      "Bash(grep *)"
+    ]
+  }
+}

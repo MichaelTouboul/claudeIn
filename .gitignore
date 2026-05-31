@@ -3,5 +3,6 @@ dist/
 out/
 .vite/
 .a5c/
+.claude/worktrees/
 *.log
 .DS_Store
