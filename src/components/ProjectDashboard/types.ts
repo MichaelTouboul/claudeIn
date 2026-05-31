@@ -1,4 +1,6 @@
-export type MainView = 'agent' | 'skill' | 'hook' | 'tree' | 'costs' | 'session' | 'chat' | 'none';
+export type MainView = 'agent' | 'skill' | 'hook' | 'tree' | 'costs' | 'session' | 'chat' | 'project' | 'none';
+
+export type ProjectTab = 'chat' | 'context' | 'task' | 'plan';
 
 export type OpenChat = {
   id: string;
