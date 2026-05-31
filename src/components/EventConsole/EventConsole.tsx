@@ -1,5 +1,4 @@
-import { ChevronDown, ChevronUp,Terminal } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import type { LiveEvent } from "@/types/events.types";
 
@@ -31,71 +30,43 @@ export function EventConsole({
   events,
   agentColorMap,
 }: EventConsoleProps) {
-  const [expanded, setExpanded] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (scrollRef.current && expanded) {
+    if (scrollRef.current) {
       scrollRef.current.scrollTop = 0;
     }
-  }, [events.length, expanded]);
+  }, [events.length]);
 
   return (
     <div
-      className="transition-all duration-200"
-      style={{
-        borderTop: '1px solid var(--color-border)',
-        background: 'var(--color-surface-0)',
-        height: expanded ? '13rem' : '2.25rem',
-      }}
+      ref={scrollRef}
+      className="h-full overflow-y-auto px-4 py-1 font-mono text-xs leading-5"
+      style={{ background: 'var(--color-surface-0)' }}
     >
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center gap-2 px-4 py-2 text-xs font-medium transition-colors"
-        style={{
-          color: 'var(--color-text-secondary)',
-          background: 'var(--color-surface-1)',
-          fontFamily: 'var(--font-mono)',
-        }}
-      >
-        <Terminal size={12} style={{ color: 'var(--color-accent)' }} />
-        <span>Event Console</span>
-        <span className="ml-1" style={{ color: 'var(--color-text-muted)', fontVariantNumeric: 'tabular-nums' }}>
-          {events.length} events
-        </span>
-        <span className="ml-auto" style={{ color: 'var(--color-text-muted)' }}>
-          {expanded ? <ChevronDown size={12} /> : <ChevronUp size={12} />}
-        </span>
-      </button>
-
-      {expanded ? <div
-          ref={scrollRef}
-          className="h-[calc(100%-36px)] overflow-y-auto px-4 py-1 font-mono text-xs leading-5"
-        >
-          {events.length === 0 ? (
-            <p className="py-2" style={{ color: 'var(--color-text-muted)' }}>Waiting for events...</p>
-          ) : (
-            events.map((e) => {
-              const agentHex = agentColorValues[agentColorMap.get(e.agent_name) || ""] || "var(--color-text-secondary)";
-              const typeHex = eventColorMap[e.event_type] || "var(--color-text-muted)";
-              return (
-                <div
-                  key={e.id}
-                  className="flex gap-3 rounded px-1 transition-colors hover:bg-surface-1"
-                  style={{ fontVariantNumeric: 'tabular-nums' }}
-                >
-                  <span className="shrink-0" style={{ color: 'var(--color-text-muted)' }}>{formatTime(e.created_at)}</span>
-                  <span className="shrink-0 w-24" style={{ color: typeHex }}>{e.event_type}</span>
-                  <span className="shrink-0 w-32 truncate" style={{ color: agentHex }}>{e.agent_name}</span>
-                  <span className="truncate" style={{ color: 'var(--color-text-muted)' }}>{e.tool_name || ""}</span>
-                  {e.tokens_in > 0 ? <span className="ml-auto shrink-0" style={{ color: 'var(--color-text-muted)' }}>
-                      {e.tokens_in + e.tokens_out} tok · ${e.cost_usd.toFixed(4)}
-                    </span> : null}
-                </div>
-              );
-            })
-          )}
-        </div> : null}
+      {events.length === 0 ? (
+        <p className="py-2" style={{ color: 'var(--color-text-muted)' }}>Waiting for events...</p>
+      ) : (
+        events.map((e) => {
+          const agentHex = agentColorValues[agentColorMap.get(e.agent_name) || ""] || "var(--color-text-secondary)";
+          const typeHex = eventColorMap[e.event_type] || "var(--color-text-muted)";
+          return (
+            <div
+              key={e.id}
+              className="flex gap-3 rounded px-1 transition-colors hover:bg-surface-1"
+              style={{ fontVariantNumeric: 'tabular-nums' }}
+            >
+              <span className="shrink-0" style={{ color: 'var(--color-text-muted)' }}>{formatTime(e.created_at)}</span>
+              <span className="shrink-0 w-24" style={{ color: typeHex }}>{e.event_type}</span>
+              <span className="shrink-0 w-32 truncate" style={{ color: agentHex }}>{e.agent_name}</span>
+              <span className="truncate" style={{ color: 'var(--color-text-muted)' }}>{e.tool_name || ""}</span>
+              {e.tokens_in > 0 ? <span className="ml-auto shrink-0" style={{ color: 'var(--color-text-muted)' }}>
+                  {e.tokens_in + e.tokens_out} tok · ${e.cost_usd.toFixed(4)}
+                </span> : null}
+            </div>
+          );
+        })
+      )}
     </div>
   );
 }
