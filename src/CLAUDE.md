@@ -70,6 +70,7 @@ All styling uses CSS custom properties defined in `index.css`:
 - `var(--font-mono)` for code/data, `var(--font-sans)` for UI labels. `tabular-nums` for numbers.
 - Hover states via `onMouseEnter`/`onMouseLeave` (inline style changes).
 - Utility classes available: `surface-grain`, `glow-cyan`, `glow-active`.
+- **Interactive block exception:** components under `components/ResponseBody/blocks/` MAY embed a third-party UI library (e.g. MUI DataGrid, Shiki) behind `BlockShell`. Bridge the library's theme to the CSS-var tokens. This is the ONE place the "no styles outside the design system" rule is relaxed; everywhere else still uses the CSS-var system.
 
 ## `_ui/` primitives stack
 

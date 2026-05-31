@@ -1,6 +1,7 @@
 import { Bot, ChevronRight, Shield, Wrench } from 'lucide-react';
 
 import { renderContentWithImages } from '@/components/_ui/InlineImage';
+import { ResponseBody } from '@/components/ResponseBody/ResponseBody';
 import type { ChatMessage } from '@/types/spawn.types';
 
 import { PERMISSION_PATTERNS, replyStyles } from '../quickReplies';
@@ -59,9 +60,9 @@ export function MessageRow({ msg, isLast, quickReplies, onQuickReply }: MessageR
         </span>
         <span className="text-xs text-fg-subtle opacity-0 group-hover:opacity-100">{time}</span>
       </div>
-      <pre className={`text-sm whitespace-pre-wrap font-mono ml-5 leading-relaxed ${hasPermission ? "text-yellow-200/80" : "text-fg"}`}>
-        {renderContentWithImages(msg.content)}
-      </pre>
+      <div className="ml-5">
+        <ResponseBody content={msg.content} />
+      </div>
       {isLast && quickReplies ? <div className="flex flex-wrap gap-2 ml-5 mt-2">
           {quickReplies.map((r) => (
             <button
