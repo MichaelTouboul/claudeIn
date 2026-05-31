@@ -1,3 +1,5 @@
+import { exec } from "node:child_process";
+
 import { ipcMain, dialog, BrowserWindow } from "electron";
 import fs from "fs";
 import path from "path";
@@ -34,5 +36,25 @@ export function registerDialogHandlers(): void {
     } catch {
       return null;
     }
+  });
+
+  ipcMain.handle("dialog:generate-title", async (_e, userMessage: string, assistantMessage: string) => {
+    const prompt = `Generate a concise title (3-6 words max) for this conversation. Reply ONLY with the title, nothing else — no quotes, no period, no explanation.
+
+User: ${userMessage.slice(0, 200)}
+Assistant: ${assistantMessage.slice(0, 200)}`;
+    return new Promise<string>((resolve) => {
+      const proc = exec("claude --print --max-turns 1", { timeout: 15000, encoding: "utf-8", env: { ...process.env } }, (error, stdout) => {
+        if (error || !stdout.trim()) {
+          let fallback = userMessage.replace(/[\n\r]+/g, " ").trim();
+          if (fallback.length > 50) fallback = fallback.slice(0, 47) + "...";
+          resolve(fallback);
+        } else {
+          resolve(stdout.trim().slice(0, 60));
+        }
+      });
+      proc.stdin?.write(prompt);
+      proc.stdin?.end();
+    });
   });
 }
