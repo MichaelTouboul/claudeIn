@@ -2,7 +2,7 @@ import { Bot, MessageSquare } from "lucide-react";
 import { useEffect, useMemo,useRef,useState } from "react";
 
 import { Button } from "@/components/_ui/Button";
-import { EventConsole } from "@/components/EventConsole/EventConsole";
+import { BottomPanel } from "@/components/BottomPanel/BottomPanel";
 import { GlobalChatModal } from "@/components/GlobalChatModal/GlobalChatModal";
 import { ProjectDashboard } from '@/components/ProjectDashboard/ProjectDashboard';
 import { ProjectSwitcher } from "@/components/ProjectSwitcher/ProjectSwitcher";
@@ -160,7 +160,7 @@ export default function App() {
           </ProjectProvider>
         ) : null}
 
-        <EventConsole events={events} agentColorMap={agentColorMap} />
+        <BottomPanel events={events} agentColorMap={agentColorMap} projectPath={selectedProject?.path ?? null} />
       </div>
 
       {chatOpen ? <GlobalChatModal onClose={() => setChatOpen(false)} /> : null}

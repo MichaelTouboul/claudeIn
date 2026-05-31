@@ -2,6 +2,7 @@ import { app, BrowserWindow } from "electron";
 import path from "path";
 import { initDb } from "./services/db";
 import { registerAllHandlers } from "./ipc";
+import { killAll } from "./services/pty.service";
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -49,3 +50,5 @@ app.on("window-all-closed", () => {
     app.quit();
   }
 });
+
+app.on("will-quit", () => killAll());
