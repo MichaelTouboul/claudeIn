@@ -53,4 +53,40 @@ describe('useWorkspaceStore', () => {
     expect(useWorkspaceStore.getState().activeDashboardId).toBeNull();
     expect(useAppStore.getState().selectedProject).toBeNull();
   });
+
+  it('a new dashboard starts with one default chat tab', () => {
+    useWorkspaceStore.getState().openDashboard(proj('a'));
+    const d = useWorkspaceStore.getState().dashboards[0];
+    expect(d.tabs).toHaveLength(1);
+    expect(d.tabs[0].kind).toBe('chat');
+    expect(d.activeTabId).toBe(d.tabs[0].id);
+  });
+
+  it('addTab appends a tab to the active dashboard and activates it', () => {
+    useWorkspaceStore.getState().openDashboard(proj('a'));
+    const id = useWorkspaceStore.getState().addTab({ kind: 'agent', title: 'x', agentName: 'x' });
+    const d = useWorkspaceStore.getState().dashboards[0];
+    expect(d.tabs).toHaveLength(2);
+    expect(d.activeTabId).toBe(id);
+  });
+
+  it('addTab dedupes an agent tab by agentName (re-activates)', () => {
+    useWorkspaceStore.getState().openDashboard(proj('a'));
+    const id1 = useWorkspaceStore.getState().addTab({ kind: 'agent', title: 'x', agentName: 'x' });
+    useWorkspaceStore.getState().addTab({ kind: 'chat', title: 'Chat' });
+    const id2 = useWorkspaceStore.getState().addTab({ kind: 'agent', title: 'x', agentName: 'x' });
+    expect(id2).toBe(id1);
+    expect(useWorkspaceStore.getState().dashboards[0].tabs.filter((t) => t.kind === 'agent')).toHaveLength(1);
+    expect(useWorkspaceStore.getState().dashboards[0].activeTabId).toBe(id1);
+  });
+
+  it('closeTab on the last tab re-seeds a default chat tab', () => {
+    useWorkspaceStore.getState().openDashboard(proj('a'));
+    const only = useWorkspaceStore.getState().dashboards[0].tabs[0].id;
+    useWorkspaceStore.getState().closeTab(only);
+    const d = useWorkspaceStore.getState().dashboards[0];
+    expect(d.tabs).toHaveLength(1);
+    expect(d.tabs[0].kind).toBe('chat');
+    expect(d.tabs[0].id).not.toBe(only);
+  });
 });

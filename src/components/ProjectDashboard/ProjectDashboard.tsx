@@ -4,14 +4,14 @@ import { useResizableSidebar } from '@/hooks/useResizableSidebar';
 import type { SessionSummary } from '@/hooks/useSessions';
 import { useSessions } from '@/hooks/useSessions';
 import { useProject } from '@/store/ProjectContext';
-import { useChatsStore } from '@/store/useChatsStore';
 import { useDashboardStore } from '@/store/useDashboardStore';
 import { useDashboardUIStore } from '@/store/useDashboardUIStore';
 import { useFavoritesStore, useInitFavorites } from '@/store/useFavoritesStore';
+import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
 import { ConversationList } from './ConversationList/ConversationList';
-import { MainContent } from './MainContent/MainContent';
 import { PanelsArea } from './PanelsArea/PanelsArea';
+import { ProjectView } from './ProjectView/ProjectView';
 import { ResizeHandle } from './ResizeHandle/ResizeHandle';
 
 // Inject animation keyframes
@@ -44,8 +44,7 @@ function ZoneHeader({ label }: { label: string }) {
 export function ProjectDashboard() {
   const { projectId, projectPath } = useProject();
   useInitFavorites(projectId);
-  const { sessions, loading: sessionsLoading, conversation, conversationLoading, selectSession } = useSessions(projectPath);
-  const addOpenChat = useChatsStore((s) => s.addOpenChat);
+  const { sessions, loading: sessionsLoading } = useSessions(projectPath);
 
   const { width: sidebarWidth, ref: sidebarRef, startDrag: handleResizeDragStart } = useResizableSidebar();
 
@@ -84,9 +83,11 @@ export function ProjectDashboard() {
   };
 
   const handleSelectSession = (s: SessionSummary) => {
-    addOpenChat(s.agentName || "claude", s.title || s.firstPrompt || "Session");
-    useDashboardUIStore.getState().selectSession(s.sessionId);
-    selectSession(s.filePath);
+    useWorkspaceStore.getState().addTab({
+      kind: 'chat',
+      title: s.title || s.firstPrompt || 'Session',
+      agentName: s.agentName || '',
+    });
   };
 
   return (
@@ -117,11 +118,7 @@ export function ProjectDashboard() {
 
       </div>
 
-      <MainContent
-        conversation={conversation}
-        conversationLoading={conversationLoading}
-        sessions={sessions}
-      />
+      <ProjectView />
     </div>
   );
 }
