@@ -7,6 +7,7 @@ import { GlobalChatModal } from "@/components/GlobalChatModal/GlobalChatModal";
 import { ProjectDashboard } from '@/components/ProjectDashboard/ProjectDashboard';
 import { ProjectSwitcher } from "@/components/ProjectSwitcher/ProjectSwitcher";
 import { StatsBar } from "@/components/StatsBar/StatsBar";
+import { WorkspaceBar } from "@/components/Workspace/WorkspaceBar/WorkspaceBar";
 
 import { useProjects } from "./hooks/useProjects";
 import { useStats } from "./hooks/useStats";
@@ -15,11 +16,12 @@ import { useAppStore } from "./store/useAppStore";
 import { useInitChatTitles } from "./store/useChatsStore";
 import { useDashboardStore } from "./store/useDashboardStore";
 import { useEventsStore,useInitEvents } from "./store/useEventsStore";
+import { useWorkspaceStore } from "./store/useWorkspaceStore";
 
 export default function App() {
   const { projects, loading: projectsLoading } = useProjects();
   const selectedProject = useAppStore((s) => s.selectedProject);
-  const setSelectedProject = useAppStore((s) => s.setSelectedProject);
+  const openDashboard = useWorkspaceStore((s) => s.openDashboard);
   const project = useDashboardStore((s) => s.project);
   const agents = useDashboardStore((s) => s.agents);
   const dashLoading = useDashboardStore((s) => s.loading);
@@ -89,7 +91,7 @@ export default function App() {
         <ProjectSwitcher
           projects={projects}
           selected={selectedProject}
-          onSelect={setSelectedProject}
+          onSelect={openDashboard}
         />
 
         <div className="flex-1" />
@@ -110,6 +112,7 @@ export default function App() {
 
       {/* Main content */}
       <div className="flex-1 min-h-0 flex flex-col">
+        <WorkspaceBar />
         {!selectedProject ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center max-w-3xl mx-auto px-8">
@@ -124,7 +127,7 @@ export default function App() {
                 {projects.slice(0, 9).map((p) => (
                   <button
                     key={p.id}
-                    onClick={() => setSelectedProject(p)}
+                    onClick={() => openDashboard(p)}
                     className="text-left rounded-lg p-4 transition-all duration-200 hover:translate-y-[-1px] group"
                     style={{
                       background: 'var(--color-surface-2)',
