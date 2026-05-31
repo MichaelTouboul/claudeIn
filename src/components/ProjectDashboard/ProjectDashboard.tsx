@@ -7,9 +7,8 @@ import { useDashboardStore } from '@/store/useDashboardStore';
 import { useDashboardUIStore } from '@/store/useDashboardUIStore';
 import { useFavoritesStore, useInitFavorites } from '@/store/useFavoritesStore';
 
-import { ActiveSessions } from './ActiveSessions/ActiveSessions';
+import { ConversationList } from './ConversationList/ConversationList';
 import { MainContent } from './MainContent/MainContent';
-import { OpenChatsList } from './OpenChatsList/OpenChatsList';
 import { PanelsArea } from './PanelsArea/PanelsArea';
 import { ResizeHandle } from './ResizeHandle/ResizeHandle';
 
@@ -28,6 +27,17 @@ if (typeof document !== "undefined" && !document.getElementById("chat-animations
 }
 
 // ─── Main component ───
+
+function ZoneHeader({ label }: { label: string }) {
+  return (
+    <div
+      className="px-3 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-widest"
+      style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}
+    >
+      {label}
+    </div>
+  );
+}
 
 export function ProjectDashboard() {
   const { projectId, projectPath } = useProject();
@@ -83,10 +93,10 @@ export function ProjectDashboard() {
         }}
       >
 
-        <ActiveSessions />
+        <ZoneHeader label="Activité" />
+        <ConversationList />
 
-        <OpenChatsList />
-
+        <ZoneHeader label="Bibliothèque" />
         <PanelsArea
           sessions={sessions}
           sessionsLoading={sessionsLoading}
