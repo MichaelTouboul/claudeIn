@@ -3,6 +3,7 @@ import { useCallback,useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/_ui/Button";
 import { renderContentWithImages } from '@/components/_ui/InlineImage';
+import { ResponseBody } from "@/components/ResponseBody/ResponseBody";
 import type { SessionConversation } from "@/hooks/useSessions";
 
 function formatTokens(n: number): string {
@@ -159,12 +160,9 @@ export function SessionViewer({
                         </span>
                       ))}
                     </div> : null}
-                  <pre
-                    className="text-sm whitespace-pre-wrap ml-5 leading-relaxed"
-                    style={{ color: 'var(--color-text-primary)' }}
-                  >
-                    {renderContentWithImages(msg.content)}
-                  </pre>
+                  <div className="ml-5">
+                    <ResponseBody content={msg.content} />
+                  </div>
                 </div>
               )}
             </div>
