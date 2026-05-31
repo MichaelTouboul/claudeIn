@@ -1,12 +1,13 @@
 import { AgentChat } from '@/components/AgentChat/AgentChat';
 import { useAppStore } from '@/store/useAppStore';
-import { useChatsStore } from '@/store/useChatsStore';
-import { useDashboardUIStore } from '@/store/useDashboardUIStore';
 
-export function ChatTab() {
+export type ChatTabProps = {
+  agentName: string;
+  tabId: string;
+};
+
+export function ChatTab({ agentName, tabId }: ChatTabProps) {
   const projectPath = useAppStore((s) => s.selectedProject?.path);
-  const activeConversationId = useDashboardUIStore((s) => s.activeConversationId);
-  const openChats = useChatsStore((s) => s.openChats);
 
   if (!projectPath) {
     return (
@@ -18,13 +19,9 @@ export function ChatTab() {
     );
   }
 
-  const active = openChats.find((c) => c.id === activeConversationId);
-  const agentName = active?.agentName ?? '';
-  const key = active?.id ?? 'general';
-
   return (
     <div className="flex-1 min-h-0 h-full p-3">
-      <AgentChat key={key} agentName={agentName} />
+      <AgentChat key={tabId} agentName={agentName} />
     </div>
   );
 }
