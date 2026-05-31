@@ -6,6 +6,39 @@ Ideas and features to build later. Not planned, not prioritized — just capture
 
 ---
 
+## Live Agent Activity Visualization
+**Status:** Idea
+**Complexity:** High (multi-session, real-time)
+**Added:** 2026-05-31
+
+A fluid, pleasant way to **watch agents and sub-agents work in real time** — one of the platform's signature advantages and a core part of Pillar #2 (visualize the ecosystem). This is the **Activité** axis (the runtime), as opposed to the **Définitions** axis (the static catalog of agents/skills/hooks). See `docs/roadmap.md` and the sidebar IA discussion.
+
+**The need:**
+- See every **conversation in progress** at a glance.
+- Expand each into its **live agent → sub-agent tree**: who is running, who is idle/done/waiting, who spawned whom.
+- Per node: current activity (which tool is running), and **context/token budget** (the `ContextBar` already exists for this).
+- Make it feel *alive and nice* — smooth transitions when a sub-agent spawns or finishes, status pulses, gentle expand/collapse — not a raw scrolling log.
+
+**Conceptual clarity (decided):** "orchestrator" and "sub-agent" are **not agent types** — they describe a **runtime relation** (who delegates to whom inside a given conversation). The visualization renders that relation live; it does not need a new static category.
+
+**Existing building blocks to reuse:**
+- `AgentTree` / `OrchestratorTree` (hierarchical agent views) — repurpose for the live runtime tree.
+- `ContextBar` (per-agent token/cost/context %).
+- `EventConsole` + the events store — the live hook-event stream (`PreToolUse`, `PostToolUse`, `SubagentStart`, `SubagentStop`, `Usage`) is the data feed.
+- `spawn.service` (running `claude` processes).
+
+**Challenges:**
+- Deriving a clean tree + node states (active / idle / waiting-for-input / done / error) from the raw event stream.
+- Keeping it real-time and smooth without re-render storms (selector-based zustand, animate only what changed).
+- Mapping `SubagentStart/Stop` events to spawn/teardown animations.
+- Scaling to several concurrent conversations / many sub-agents.
+
+**Relation to other work:**
+- This is the heart of the **sidebar redesign** (Définitions vs Activité): Zone 1 "En cours" = this visualization.
+- Pairs with multi-project (Phase 0): watch activity across projects.
+
+---
+
 ## Rich Text Editor for Chat Input
 **Status:** Idea
 **Complexity:** High (2-3h+)
