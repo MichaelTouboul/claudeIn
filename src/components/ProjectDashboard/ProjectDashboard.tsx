@@ -112,7 +112,6 @@ export function ProjectDashboard() {
         conversation={conversation}
         conversationLoading={conversationLoading}
         sessions={sessions}
-        onSelectSession={handleSelectSession}
       />
     </div>
   );

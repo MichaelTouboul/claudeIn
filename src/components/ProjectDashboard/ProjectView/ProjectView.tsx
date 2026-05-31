@@ -1,6 +1,6 @@
 import { BarChart3, ListTodo, Map as MapIcon, MessageSquare } from 'lucide-react';
 
-import { Tabs, type TabItem } from '@/components/_ui/Tabs';
+import { type TabItem,Tabs } from '@/components/_ui/Tabs';
 import { useDashboardUIStore } from '@/store/useDashboardUIStore';
 
 import type { ProjectTab } from '../types';
