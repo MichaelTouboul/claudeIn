@@ -6,3 +6,6 @@ out/
 .claude/worktrees/
 *.log
 .DS_Store
+
+# Superpowers brainstorm visual companion
+.superpowers/
