@@ -4,7 +4,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-An Electron desktop app: a manager and dashboard for Claude Code agents. It scans the local machine for projects with `.claude/` directories, reads their agent `.md` files (with gray-matter frontmatter), and presents a UI to browse, edit, spawn, and track agents. Events from running agents are stored in a local SQLite database (via sql.js/WASM).
+An Electron desktop app that **optimizes the experience of using Claude Code** — a rich GUI companion that goes beyond what the raw terminal can offer. The goal is not to "manage agents" but to make day-to-day Claude Code usage faster, clearer, and more pleasant.
+
+**North star:** everything the CLI makes tedious or invisible, this app makes effortless and visible.
+
+Pillars driving the roadmap:
+1. **UX beyond the terminal** — a real chat surface: copy/paste, image rendering, syntax-highlighted code & diffs, markdown, persistent scrollback.
+2. **Visualize the Claude Code ecosystem** — memories (`CLAUDE.md`/memory files), sub-agents, skills, MCP servers, hooks, settings — browsable and editable.
+3. **Multi-project dashboards** — run and watch several projects/sessions at once.
+4. **In-app task management** — view a Jira ticket inside the app and drive the work from it.
+5. **Automatic context optimization** — curate and shrink the context window *for* the user (smart compaction, file selection, memory pruning) so they don't have to manage it by hand.
+
+Today it already scans local projects with `.claude/` directories, reads agent `.md` files (gray-matter frontmatter), and tracks running-session events in a local SQLite database (sql.js/WASM). That scanning is a feature, not the mission — the mission is the five pillars above.
 
 ## Commands
 

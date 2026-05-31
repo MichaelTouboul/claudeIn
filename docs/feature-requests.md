@@ -2,6 +2,8 @@
 
 Ideas and features to build later. Not planned, not prioritized — just captured.
 
+> For the prioritized plan, product strategy, competitive landscape, and repos to study, see **`docs/roadmap.md`**. This file is the raw idea backlog.
+
 ---
 
 ## Rich Text Editor for Chat Input
