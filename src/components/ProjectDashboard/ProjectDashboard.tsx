@@ -52,7 +52,6 @@ export function ProjectDashboard() {
   useEffect(() => {
     const ui = useDashboardUIStore.getState();
     ui.setView('project');
-    ui.setProjectTab('chat');
     ui.setActiveConversation(null);
     ui.setSelectedAgent(null);
   }, [projectPath]);

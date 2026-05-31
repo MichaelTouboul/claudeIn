@@ -10,16 +10,10 @@ beforeEach(() => useDashboardUIStore.setState(initial, true));
 const fakeAgent = { id: 'a1' } as AgentFile;
 
 describe('useDashboardUIStore dashboard navigation', () => {
-  it('defaults to the project view on the chat tab', () => {
+  it('defaults to the project view', () => {
     const s = useDashboardUIStore.getState();
     expect(s.view).toBe('project');
-    expect(s.projectTab).toBe('chat');
     expect(s.activeConversationId).toBeNull();
-  });
-
-  it('setProjectTab switches the active project tab', () => {
-    useDashboardUIStore.getState().setProjectTab('context');
-    expect(useDashboardUIStore.getState().projectTab).toBe('context');
   });
 
   it('setActiveConversation records the conversation id', () => {
