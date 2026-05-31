@@ -93,10 +93,14 @@ Level 2 — Agent Dashboard (click an agent in Library)
     placeholder. No logic.
 - **MODIFY `src/components/ProjectDashboard/MainContent/MainContent.tsx`** —
   - Remove the hardcoded header-tab row (`Tree` / `Session` / `Costs`) and the
-    `tree`, `session`, `costs` render branches.
-  - Add a `view === 'project'` branch → `<ProjectView />` (and make it the
-    fallback default instead of `LandingPage`).
-  - Keep `agent`, `skill`, `chat` (resume) branches.
+    `tree` and `costs` render branches.
+  - Add a `view === 'project'` branch → `<ProjectView />` and make it the
+    fallback default (replacing `LandingPage` as the default).
+  - **Keep** the `session` branch — session viewing stays reachable from the
+    Library → History sidebar (it just loses its header tab). Keep `agent`,
+    `skill`, `chat` (resume) branches.
+  - Drop the now-unused `LandingPage` import/render (the component file stays on
+    disk for the launch-page refactor; it's simply no longer the default).
 - **MODIFY `src/components/ProjectDashboard/types.ts`** — add `'project'` to the
   `MainView` union; add a `ProjectTab = 'chat' | 'context' | 'task' | 'plan'`
   type.
@@ -131,9 +135,10 @@ Level 2 — Agent Dashboard (click an agent in Library)
 - **Context tab, no live data** → gauge shows 0%; `CostDashboard` already
   renders empty states for its charts.
 - **Task / Plan tabs** → always their static placeholder; nothing can error.
-- **Removed views**: `AgentTree` and `SessionViewer` components are **kept in
-  the codebase** (not deleted) but no longer routed from `MainContent`. Session
-  history remains reachable via the Library → History sidebar section.
+- **Removed views**: `AgentTree` is **kept in the codebase** (not deleted) but
+  no longer routed from `MainContent` (the Tree header tab is gone).
+  `SessionViewer` **stays routed** via the `session` view so the Library →
+  History sidebar still opens past sessions.
 
 ## Testing
 
