@@ -43,10 +43,3 @@ export type HookConfig = {
   matcher: string;
   command: string;
 };
-
-export type ProjectDashboard = {
-  project: Project;
-  agents: import("./agent.types").AgentFile[];
-  skills: SkillFile[];
-  hooks: HookConfig[];
-};

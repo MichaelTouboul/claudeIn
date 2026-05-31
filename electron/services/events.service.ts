@@ -94,20 +94,3 @@ export function getStats() {
     )
     .get();
 }
-
-export function getStatsPerAgent() {
-  return getDb()
-    .prepare(
-      `SELECT
-      agent_name,
-      COUNT(*) AS events_count,
-      COALESCE(SUM(tokens_in), 0) AS tokens_in,
-      COALESCE(SUM(tokens_out), 0) AS tokens_out,
-      COALESCE(SUM(cost_usd), 0) AS cost_usd,
-      MAX(created_at) AS last_active
-    FROM events
-    GROUP BY agent_name
-    ORDER BY cost_usd DESC`
-    )
-    .all();
-}

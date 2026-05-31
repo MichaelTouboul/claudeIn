@@ -267,12 +267,6 @@ export function getSession(sessionId: string): SpawnSession | null {
   return sessions.get(sessionId)?.session || null;
 }
 
-export function getActiveSessions(): SpawnSession[] {
-  return Array.from(sessions.values())
-    .map((e) => e.session)
-    .filter((s) => s.status === "running");
-}
-
 export function getAllSessions(): SpawnSession[] {
   return Array.from(sessions.values()).map((e) => e.session);
 }
