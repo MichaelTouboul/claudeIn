@@ -1,6 +1,5 @@
 import { ipcMain } from "electron";
 import * as projectService from "../services/project.service";
-import * as linksService from "../services/links.service";
 
 export function registerProjectHandlers(): void {
   ipcMain.handle("projects:list", (_e, forceRefresh?: boolean) =>
@@ -19,28 +18,19 @@ export function registerProjectHandlers(): void {
       projectService.getProjectHooks(projectId),
     ]);
 
-    let linkedAgentNames: string[] = [];
     let userAgents: typeof agents = [];
     let userSkills: typeof skills = [];
 
     if (projectId !== "user") {
-      linkedAgentNames = linksService.getLinksForProject(projectId);
       userAgents = await projectService.getProjectAgents("user");
       userSkills = await projectService.getProjectSkills("user");
     }
 
-    const linkedSet = new Set(linkedAgentNames);
-    const taggedUserAgents = userAgents.map((a) => ({
-      ...a,
-      scope: "user" as const,
-      linked: linkedSet.has(a.id),
-    }));
-
     return {
       project,
       agents: [
-        ...agents.map((a) => ({ ...a, scope: "project" as const, linked: true })),
-        ...taggedUserAgents,
+        ...agents.map((a) => ({ ...a, scope: "project" as const })),
+        ...userAgents.map((a) => ({ ...a, scope: "user" as const })),
       ],
       skills: [
         ...skills,
@@ -48,31 +38,5 @@ export function registerProjectHandlers(): void {
       ],
       hooks,
     };
-  });
-
-  ipcMain.handle("links:list", (_e, projectId: string) =>
-    linksService.getLinksForProject(projectId));
-
-  ipcMain.handle("links:add", async (_e, agentName: string, projectId: string) => {
-    const userAgents = await projectService.getProjectAgents("user");
-    const agent = userAgents.find((a) => a.id === agentName);
-    linksService.linkAgent(agentName, projectId);
-    if (agent && agent.subAgents.length > 0) {
-      const existingIds = new Set(userAgents.map((a) => a.id));
-      for (const sub of agent.subAgents) {
-        if (existingIds.has(sub)) linksService.linkAgent(sub, projectId);
-      }
-    }
-  });
-
-  ipcMain.handle("links:remove", async (_e, agentName: string, projectId: string) => {
-    const userAgents = await projectService.getProjectAgents("user");
-    const agent = userAgents.find((a) => a.id === agentName);
-    linksService.unlinkAgent(agentName, projectId);
-    if (agent && agent.subAgents.length > 0) {
-      for (const sub of agent.subAgents) {
-        linksService.unlinkAgent(sub, projectId);
-      }
-    }
   });
 }

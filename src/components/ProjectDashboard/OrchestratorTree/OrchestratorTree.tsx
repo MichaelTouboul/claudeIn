@@ -1,6 +1,5 @@
-import { Cog, Link, Network, Unlink } from "lucide-react";
+import { Cog, Network } from "lucide-react";
 
-import { Button } from '@/components/_ui/Button';
 import { AgentContextMenu } from '@/components/AgentContextMenu/AgentContextMenu';
 import { ContextBar } from '@/components/ContextBar/ContextBar';
 import { useProject } from '@/store/ProjectContext';
@@ -14,8 +13,6 @@ export type OrchestratorTreeProps = {
   selectedId: string | null;
   onSelect: (a: AgentFile) => void;
   onAgentAction: (action: string, agentName: string) => void;
-  onToggleLink?: (name: string) => void;
-  linkAction?: "link" | "unlink";
 };
 
 export function OrchestratorTree({
@@ -24,8 +21,6 @@ export function OrchestratorTree({
   selectedId,
   onSelect,
   onAgentAction,
-  onToggleLink,
-  linkAction,
 }: OrchestratorTreeProps) {
   const { projectId } = useProject();
   const activeAgents = useEventsStore((s) => s.activeAgents);
@@ -58,15 +53,6 @@ export function OrchestratorTree({
         <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
           <AgentContextMenu agentName={orchestrator.id} isOrchestrator isFavorite={isAgentFavorite(orchestrator.id)} onAction={onAgentAction} />
         </div>
-        {onToggleLink && linkAction ? <Button
-            intent={linkAction === "link" ? "ghost" : "danger"}
-            size="icon"
-            onClick={() => onToggleLink(orchestrator.id)}
-            title={linkAction === "link" ? "Link orchestrator + sub-agents" : "Unlink all"}
-            className="mr-1"
-          >
-            {linkAction === "link" ? <Link size={12} /> : <Unlink size={12} />}
-          </Button> : null}
       </div>
       {subs.length > 0 ? <div className="ml-4 border-l border-border pl-1 space-y-0.5">
           {subs.map((sub) => {
