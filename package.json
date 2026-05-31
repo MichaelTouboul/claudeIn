@@ -53,9 +53,13 @@
     "vitest": "^2.1.8"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@lexical/list": "^0.45.0",
     "@lexical/markdown": "^0.45.0",
     "@lexical/react": "^0.45.0",
+    "@mui/material": "^9.0.1",
+    "@mui/x-data-grid": "^9.3.0",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-slot": "^1.2.4",
