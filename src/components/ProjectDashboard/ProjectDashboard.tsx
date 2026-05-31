@@ -93,10 +93,10 @@ export function ProjectDashboard() {
         }}
       >
 
-        <ZoneHeader label="Activité" />
+        <ZoneHeader label="Activity" />
         <ConversationList />
 
-        <ZoneHeader label="Bibliothèque" />
+        <ZoneHeader label="Library" />
         <PanelsArea
           sessions={sessions}
           sessionsLoading={sessionsLoading}
