@@ -136,5 +136,4 @@ End-to-end UI verification for the Electron app using Playwright's Electron API 
 - Add `test:e2e` script to `package.json`
 
 **Possible integration:**
-- Wire a UI-verification step into `/am-feature` Phase 6 (an `am-reviewer` extension or a dedicated `am-e2e` agent that launches Playwright-Electron and captures a screenshot for review).
-- Note: `am-frontend` already lists `mcp__playwright__*` in its tools, so the intent predates this note.
+- Wire a UI-verification step into the dev workflow — launch Playwright-Electron, assert the layout renders, capture a screenshot for review (e.g. via the `verify` skill or a dedicated E2E smoke test).

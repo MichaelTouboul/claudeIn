@@ -52,19 +52,69 @@ The full `window.api` surface is declared in `src/env.d.ts`. All renderer ↔ ma
 
 ## Key Conventions
 
-- **Path alias:** `@/` → `src/`
-- **Tailwind CSS 4** + PostCSS. Never use hardcoded Tailwind color utilities (e.g. `bg-gray-800`). Styling goes through CSS custom properties (`var(--color-*)`) defined in `src/index.css`, applied via `style={{}}`.
-- **Design tokens:** `--color-surface-{0-3}`, `--color-border`, `--color-text-{primary,secondary,muted}`, `--color-accent` (cyan), `--color-active`, `--color-danger`. Fonts: `--font-mono` (JetBrains Mono) for code/data, `--font-sans` (IBM Plex Sans) for UI labels.
-- **`_ui/` primitives** are built on Radix UI (behavior) + `cva` (typed variants) + `cn`. Feature components import from `_ui/` — they never touch Radix or `cva` directly.
-- **300-line hard limit** on every file (`.tsx`, `.ts`, `.css`). Enforced by ESLint `max-lines: error`.
-- **ESLint flat config** (`eslint.config.mjs`). Zero tolerance: **0 errors AND 0 warnings** before any diff lands. `reportUnusedDisableDirectives: error` — inline `// eslint-disable` comments are forbidden unless explicitly approved.
-- **No `any`** — `@typescript-eslint/no-explicit-any: error`.
+Everything below applies to **both** sides (front and back). Side-specific rules live in `electron/CLAUDE.md` and `src/CLAUDE.md`.
+
+- **Path alias:** `@/` → `src/`. Always import via `@/…`; never use `../../../` beyond one level up.
+
+### TypeScript
+
+Everything is typed. **No `any`** (`@typescript-eslint/no-explicit-any: error`). Don't create type aliases that just rename an existing type — reuse the source type.
+
+Choosing the right construct:
+- **`interface`** — object shapes that may be extended or implemented.
+- **`type`** — unions, intersections, mapped/conditional types, function signatures.
+- **`Record<K, V>`** — object maps (`Record<AgentId, Agent>`), never `{ [key: string]: Agent }`.
+- **Inline literal union** (`'valid' | 'invalid'`) — finite string sets used in 1–2 places. No enum.
+- **`enum`** — only when **both**: values used in **3+ files** AND you need a runtime object to iterate (e.g. `Object.values(...)` for select options). Otherwise use an `as const` object:
+  ```ts
+  export const AgentStatus = { Active: 'active', Idle: 'idle', Stopped: 'stopped' } as const;
+  export type AgentStatus = (typeof AgentStatus)[keyof typeof AgentStatus];
+  ```
+
+Shared types go in a `types/` folder with a barrel `index.ts`. File naming by kind:
+- `*.interface.ts` — `interface` declarations
+- `*.type.ts` — `type` aliases
+- `*.enum.ts` — `enum` declarations
+
+### Imports
+
 - **Named imports only** — no default exports except `src/App.tsx` and `src/main.tsx`.
-- **sql.js is synchronous** — use `try/catch`, not `.catch()`.
-- **React version:** 19 (configured in eslint settings). `@types/react` is `^19.x`.
+- **React:** `import { useEffect } from 'react'`. **Never** `import * as React from 'react'`, never `import React from 'react'` (the JSX transform handles it).
+- Prefer `import type { … }` for type-only imports; use inline `type` for mixed imports (`import { spawn, type SpawnOptions } from 'node:child_process'`).
+- **No file extensions** in import paths (`@/lib/cn`, not `@/lib/cn.ts`).
+- Import **ordering/grouping is handled by the formatter plugin** — don't hand-manage it.
 
-## More Detail
+### File size — 300-line hard limit
 
-- **Frontend conventions** (component structure, design system, TypeScript patterns, React patterns, linting policy): `.claude/agents/am-frontend.md`
-- **Development orchestration** (workflow phases, sub-agents, IPC consistency rules): `.claude/agents/am-dev.md`
-- **Decision playbooks**: `.claude/playbooks/` (`state-management.md`, `component-placement.md`)
+**No file may exceed 300 lines** (`.tsx`, `.ts`, `.css`). Enforced by ESLint `max-lines: error` — non-negotiable.
+
+When a file approaches the limit, split it (in order of preference):
+1. Extract a logical unit into its own module (front: a sub-component; back: a sub-service).
+2. Extract pure helpers into a sibling file (e.g. `utils.ts`).
+3. Extract local types into a sibling file (e.g. `types.ts`).
+
+If the file you're about to write would exceed 300 lines, **STOP and split first** — never write the oversized file.
+
+### Linting policy
+
+**0 errors AND 0 warnings** before any diff lands (`eslint.config.mjs`, flat config). `error` blocks the build; `warn` is still a defect — both are the same standard.
+
+```bash
+npm run lint       # must report 0 errors AND 0 warnings
+npm run lint:fix   # auto-fix what's mechanically fixable
+npm run typecheck  # tsc --noEmit — 0 errors
+```
+
+A `warn` means **stop and think before fixing** (e.g. `react-hooks/exhaustive-deps`), not "ignore". When a rule fires:
+1. **Fix the code first** — most signals point at a real issue.
+2. If the rule is a genuinely bad fit for the project, fix it **globally in `eslint.config.mjs`** (turn `off` or downgrade to `warn`) — not per-file.
+3. **Inline `// eslint-disable` is forbidden** unless explicitly approved for a single callsite with a documented reason. `reportUnusedDisableDirectives: error` fails the build on stale disables.
+
+## Scoped conventions
+
+Detailed conventions live next to the code and load automatically when you work there:
+
+- **`electron/CLAUDE.md`** — main process ("back"): IPC handlers, services, sql.js, how to add a `window.api` method.
+- **`src/CLAUDE.md`** — renderer ("front"): design system, `_ui/` primitives, **state management** (props/context/zustand), React patterns.
+
+This root file holds only what is transversal to both sides.
