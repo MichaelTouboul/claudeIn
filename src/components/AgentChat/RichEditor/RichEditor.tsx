@@ -14,6 +14,7 @@ import { type Ref, useEffect, useImperativeHandle } from 'react';
 import { CHAT_TRANSFORMERS } from './markdownTransformers';
 import { SUBMIT_INTENT, SubmitPlugin } from './plugins/SubmitPlugin';
 import { editorToMarkdown } from './serialize';
+import { Toolbar } from './Toolbar';
 
 export type RichEditorHandle = { clear: () => void; focus: () => void };
 
@@ -69,6 +70,7 @@ export function RichEditor({ onChange, onSubmit, onEnter, handleRef, placeholder
       }}
     >
       <div className="relative flex-1">
+        <Toolbar />
         <RichTextPlugin
           contentEditable={
             <ContentEditable
