@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-import type { MainView } from "@/components/ProjectDashboard/types";
+import type { MainView, ProjectTab } from "@/components/ProjectDashboard/types";
 import type { AgentFile } from "@/types/agent.types";
 import type { SkillFile } from "@/types/dashboard.types";
 
@@ -14,6 +14,8 @@ type DashboardUIState = {
   openPanels: Set<string>;
   scopeTab: "project" | "user";
   resumeChat: ResumeChat;
+  projectTab: ProjectTab;
+  activeConversationId: string | null;
 
   setView: (view: MainView) => void;
   selectAgent: (a: AgentFile) => void;
@@ -23,16 +25,21 @@ type DashboardUIState = {
   setScopeTab: (tab: "project" | "user") => void;
   setResumeChat: (r: ResumeChat) => void;
   setSelectedAgent: (a: AgentFile | null) => void;
+  setProjectTab: (tab: ProjectTab) => void;
+  setActiveConversation: (id: string | null) => void;
+  backToProject: () => void;
 };
 
 export const useDashboardUIStore = create<DashboardUIState>((set) => ({
-  view: "none",
+  view: "project",
   selectedAgent: null,
   selectedSkill: null,
   selectedSessionId: null,
   openPanels: new Set(),
   scopeTab: "project",
   resumeChat: null,
+  projectTab: "chat",
+  activeConversationId: null,
 
   setView: (view) => set({ view }),
   selectAgent: (a) => set({ selectedAgent: a, selectedSkill: null, view: "agent" }),
@@ -48,4 +55,7 @@ export const useDashboardUIStore = create<DashboardUIState>((set) => ({
   setScopeTab: (tab) => set({ scopeTab: tab }),
   setResumeChat: (resumeChat) => set({ resumeChat }),
   setSelectedAgent: (selectedAgent) => set({ selectedAgent }),
+  setProjectTab: (projectTab) => set({ projectTab }),
+  setActiveConversation: (activeConversationId) => set({ activeConversationId }),
+  backToProject: () => set({ view: "project", selectedAgent: null, selectedSkill: null }),
 }));

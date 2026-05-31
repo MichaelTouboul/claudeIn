@@ -1,10 +1,11 @@
-import { Brain, Database, FileText, Settings, Terminal } from 'lucide-react';
+import { Brain, ChevronLeft, Database, FileText, Settings, Terminal } from 'lucide-react';
 import { useState } from 'react';
 
 import { MarkdownBody } from '@/components/_ui/MarkdownBody';
 import { AgentChat } from '@/components/AgentChat/AgentChat';
 import { api } from '@/services/api';
 import { useProject } from '@/store/ProjectContext';
+import { useDashboardUIStore } from '@/store/useDashboardUIStore';
 import { useFavoritesStore } from '@/store/useFavoritesStore';
 import type { AgentFile, AgentFrontmatter } from '@/types/agent.types';
 
@@ -39,6 +40,7 @@ export function AgentDetail({
     (s.byProject[projectId] || []).some((f) => f.item_type === 'agent' && f.item_name === agent.id)
   );
   const onToggleFavorite = () => useFavoritesStore.getState().toggle(projectId, 'agent', agent.id);
+  const backToProject = useDashboardUIStore((s) => s.backToProject);
   const [tab, setTab] = useState<Tab>("chat");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -102,6 +104,16 @@ export function AgentDetail({
       className={`flex-1 flex flex-col h-full ${editing ? "ring-inset rounded-lg" : ""}`}
       style={editing ? { boxShadow: 'inset 0 0 0 2px rgba(6,182,212,0.2)' } : undefined}
     >
+      <button
+        onClick={backToProject}
+        className="flex items-center gap-1 px-4 pt-2 text-xs transition-colors w-fit"
+        style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}
+        onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-text-secondary)')}
+        onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-text-muted)')}
+      >
+        <ChevronLeft size={12} />
+        Back to project
+      </button>
       <DetailHeader
         agent={agent}
         editing={editing}
