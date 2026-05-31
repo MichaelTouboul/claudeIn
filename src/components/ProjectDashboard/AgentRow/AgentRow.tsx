@@ -1,12 +1,12 @@
 import { Link, Unlink } from "lucide-react";
 
 import { AgentContextMenu } from '@/components/AgentContextMenu/AgentContextMenu';
+import { ContextBar } from '@/components/ContextBar/ContextBar';
 import { useProject } from '@/store/ProjectContext';
 import { useEventsStore } from '@/store/useEventsStore';
 import { useFavoritesStore } from '@/store/useFavoritesStore';
 import type { AgentFile } from '@/types/agent.types';
 
-import { ContextBar } from '../ContextBar/ContextBar';
 import { colorMap } from '../utils';
 
 export type AgentRowProps = {

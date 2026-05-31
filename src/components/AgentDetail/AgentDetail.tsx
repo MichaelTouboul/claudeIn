@@ -3,7 +3,6 @@ import { useState } from 'react';
 
 import { MarkdownBody } from '@/components/_ui/MarkdownBody';
 import { AgentChat } from '@/components/AgentChat/AgentChat';
-import { MemoryManager } from '@/components/MemoryManager/MemoryManager';
 import { api } from '@/services/api';
 import { useProject } from '@/store/ProjectContext';
 import { useFavoritesStore } from '@/store/useFavoritesStore';
@@ -11,6 +10,7 @@ import type { AgentFile, AgentFrontmatter } from '@/types/agent.types';
 
 import { DetailHeader } from './DetailHeader/DetailHeader';
 import { FrontmatterTable } from './FrontmatterTable/FrontmatterTable';
+import { MemoryManager } from './MemoryManager/MemoryManager';
 
 const TABS = ["overview", "chat", "prompt", "memory", "files"] as const;
 type Tab = (typeof TABS)[number];

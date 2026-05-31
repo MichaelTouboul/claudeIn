@@ -1,4 +1,4 @@
-import { formatTokens, progressColor } from '../utils';
+import { formatTokens, progressColor } from '@/components/ProjectDashboard/utils';
 
 export type ContextBarProps = {
   percent: number;

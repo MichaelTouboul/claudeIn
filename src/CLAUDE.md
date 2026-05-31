@@ -42,7 +42,7 @@ components/
 - One folder per component; folder name = component name. A `.css` file exists **only when the component has its own styles** — never create an empty one.
 - A component used by a **single parent** lives **inside that parent's folder**. Two independently-used components are **sibling folders**.
 - **Promotion rule:** as soon as a child is used by **more than one parent**, promote it → to `_ui/` if it's a generic primitive, otherwise to `components/` root (sibling of its former parents).
-- **Max nesting: 2 levels.** Deeper = a signal to flatten or promote.
+- **Nesting follows real ownership — no hard depth cap.** Nest a single-owner child inside its true parent **even at depth 3–4** if that's where the component hierarchy actually puts it (e.g. `ProjectDashboard/MainContent/SessionViewer/`). The folder tree must mirror the component tree; do **not** hoist a single-owner child to the root just to stay shallow. (This is folder depth only — the 300-line file limit and code-nesting concerns are separate.) Depth beyond ~4 is a smell worth questioning the component decomposition, not a rule violation.
 - `_ui/` holds **reusable primitives with no domain knowledge**. **Only** `_ui/` components get an `index.ts` barrel; feature components do not.
 - Do **not** restructure `hooks/`, `services/`, `store/`, `types/` — they stay flat. One-folder-per-thing is for components only.
 

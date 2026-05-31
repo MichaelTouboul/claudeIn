@@ -2,12 +2,11 @@ import { Cog, Link, Network, Unlink } from "lucide-react";
 
 import { Button } from '@/components/_ui/Button';
 import { AgentContextMenu } from '@/components/AgentContextMenu/AgentContextMenu';
+import { ContextBar } from '@/components/ContextBar/ContextBar';
 import { useProject } from '@/store/ProjectContext';
 import { useEventsStore } from '@/store/useEventsStore';
 import { EMPTY, useFavoritesStore } from '@/store/useFavoritesStore';
 import type { AgentFile } from '@/types/agent.types';
-
-import { ContextBar } from '../ContextBar/ContextBar';
 
 export type OrchestratorTreeProps = {
   orchestrator: AgentFile;
