@@ -10,23 +10,22 @@ beforeEach(() => useDashboardUIStore.setState(initial, true));
 const fakeAgent = { id: 'a1' } as AgentFile;
 
 describe('useDashboardUIStore dashboard navigation', () => {
-  it('defaults to the project view', () => {
+  it('defaults to no selected agent', () => {
     const s = useDashboardUIStore.getState();
-    expect(s.view).toBe('project');
-    expect(s.activeConversationId).toBeNull();
-  });
-
-  it('setActiveConversation records the conversation id', () => {
-    useDashboardUIStore.getState().setActiveConversation('chat-7');
-    expect(useDashboardUIStore.getState().activeConversationId).toBe('chat-7');
-  });
-
-  it('backToProject returns to the project view and clears the selected agent', () => {
-    useDashboardUIStore.getState().selectAgent(fakeAgent);
-    expect(useDashboardUIStore.getState().view).toBe('agent');
-    useDashboardUIStore.getState().backToProject();
-    const s = useDashboardUIStore.getState();
-    expect(s.view).toBe('project');
     expect(s.selectedAgent).toBeNull();
+  });
+
+  it('selectAgent records the agent and clears any selected skill', () => {
+    useDashboardUIStore.getState().selectAgent(fakeAgent);
+    const s = useDashboardUIStore.getState();
+    expect(s.selectedAgent).toBe(fakeAgent);
+    expect(s.selectedSkill).toBeNull();
+  });
+
+  it('backToProject clears the selected agent', () => {
+    useDashboardUIStore.getState().selectAgent(fakeAgent);
+    expect(useDashboardUIStore.getState().selectedAgent).toBe(fakeAgent);
+    useDashboardUIStore.getState().backToProject();
+    expect(useDashboardUIStore.getState().selectedAgent).toBeNull();
   });
 });

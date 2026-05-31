@@ -1,5 +1,3 @@
-export type MainView = 'agent' | 'skill' | 'hook' | 'tree' | 'costs' | 'session' | 'chat' | 'project' | 'none';
-
 export type UtilityView = 'context' | 'task' | 'plan';
 
 export type OpenChat = {

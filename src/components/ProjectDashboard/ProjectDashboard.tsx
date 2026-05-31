@@ -49,10 +49,7 @@ export function ProjectDashboard() {
   const { width: sidebarWidth, ref: sidebarRef, startDrag: handleResizeDragStart } = useResizableSidebar();
 
   useEffect(() => {
-    const ui = useDashboardUIStore.getState();
-    ui.setView('project');
-    ui.setActiveConversation(null);
-    ui.setSelectedAgent(null);
+    useDashboardUIStore.getState().setSelectedAgent(null);
   }, [projectPath]);
 
   const handleAgentAction = (action: string, agentName: string) => {
