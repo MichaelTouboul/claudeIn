@@ -25,7 +25,6 @@ export function ConversationList() {
   const activeAgents = useEventsStore((s) => s.activeAgents);
   const waitingAgents = useEventsStore((s) => s.waitingAgents);
   const setActiveConversation = useDashboardUIStore((s) => s.setActiveConversation);
-  const setProjectTab = useDashboardUIStore((s) => s.setProjectTab);
   const setView = useDashboardUIStore((s) => s.setView);
 
   const conversations = annotateConversations(openChats, activeAgents, waitingAgents);
@@ -49,7 +48,6 @@ export function ConversationList() {
             key={conv.id}
             onClick={() => {
               setActiveConversation(conv.id);
-              setProjectTab('chat');
               setView('project');
             }}
             className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors text-left"
