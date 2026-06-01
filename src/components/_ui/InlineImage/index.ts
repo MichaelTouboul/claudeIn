@@ -1,5 +1,2 @@
-export {
-  InlineImage,
-  type InlineImageProps,
-  renderContentWithImages,
-} from './InlineImage';
+export { InlineImage, type InlineImageProps } from './InlineImage';
+export { renderContentWithImages } from './renderContent';
