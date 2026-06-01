@@ -12,14 +12,12 @@ Ideas and features to build later. Not planned, not prioritized — just capture
 
 Items below cut across `feature-requests.md`, `bugs.md`, `chores.md`. They share a surface, so building them as one effort is cheaper than one-by-one. Rough build order top-to-bottom.
 
-### A · App shell & window chrome  — MVP, **do first**
-The top-level layout, in one restructure. Unblocks the footer, the full-height sidebar, and the window-framing bug at once.
-- chore: **Restructure components into an app shell** (`App › Header / Main / {Sidebar | Dashboard{Dashboard, Console}} / Footer`)
-- feature: **Footer status band** (git branch, VS Code-style)
+### A · App shell & window chrome  — MVP
+✅ The app-shell restructure (Header/Workspace/DashboardArea/Footer, fixed no-scroll layout, full-height sidebar) is **done**. Remaining in this cluster:
+- feature: **Footer status band** (git branch, VS Code-style — the Footer slot exists, needs content)
 - feature: **Header global usage bar**
 - feature: **Rename app + logo** (header branding)
-- bug: **App must fit the window cleanly** (no-scroll + macOS title-bar overlap)
-- bug: **Left sidebar doesn't extend to the bottom**
+- bug: **macOS title-bar overlaps header UI**
 
 ### B · Chat input UX  — MVP
 All touch the Lexical chat input (`AgentChat/RichEditor`).
@@ -42,12 +40,8 @@ All consume the live hook-event stream / `.claude` state. Share the same data pl
 - feature: **Visualize background tasks**
 - feature: **Action-awaited notifications**
 
-### E · Code-quality agent suite  — chores, batch
-All are `.claude/agents/*` in the same frontmatter format — build in one batch (e.g. via the agent-skill-creator).
-- chore: **state-home finder** (zustand/context/props)
-- chore: **`_ui/` promotion finder**
-- chore: **folder/component structure cleaner**
-- chore: **ARIA skill + agent**
+### ✅ E · Code-quality agent suite + `_ui/` consolidation — DONE
+The finder/cleaner agents + `aria-requirements` skill + `accessibility-auditor` now live in `.claude/`; the `_ui/` primitive consolidation (Radix Dialog/Popover/Progress + a11y pass) shipped.
 
 ### F · Sessions & persistence  — Post-MVP
 All about session data / persisted view state.

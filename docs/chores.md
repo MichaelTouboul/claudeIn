@@ -6,28 +6,22 @@ Maintenance / cleanup tasks — not features, not bugs. Companion to `docs/featu
 
 ---
 
-## Batch captured 2026-06-01
+## Open
 
-> Done (2026-06-01): the code-quality agent suite — `state-home-finder`, `ui-promotion-finder`, `component-structure-cleaner`, the `aria-requirements` skill, and `accessibility-auditor` — now live in `.claude/agents/` + `.claude/skills/`. Agent frontmatter format reference: [[reference-agent-frontmatter-format]] (saved in memory).
+### `_ui/` Radix follow-ups (deferred from the consolidation)
+**Effort:** Low–Medium · **Status:** Open
+"Watch, not yet" items deferred from the `_ui/` primitive consolidation:
+- rewrap `_ui/Tabs` over `@radix-ui/react-tabs` (a11y / keyboard hardening)
+- `AgentDetail/EditField`'s native `<select>` → a `_ui/Select` over Radix Select
+- `Sidebar/ResizeHandle` → Radix Separator (note: it's a *drag* handle; Separator is presentational only — low value)
 
-### Restructure components into a clear app shell
-**Effort:** Medium–High · **Status:** In progress (spec + plan done; executing in a worktree)
-Reshape the top-level component tree into an explicit shell. Naming decided: `Workspace` (middle) / `DashboardArea` (right) / `Dashboard` (top pane) / `Console` (bottom).
+Low urgency — do when next working in those areas.
 
-```
-App
-├── Header
-├── Workspace
-│   ├── Sidebar          (left — full height)
-│   └── DashboardArea    (right)
-│       ├── WorkspaceBar (project tabs)
-│       ├── Dashboard    (internal tabs + bodies)
-│       └── Console      (terminal panel)
-└── Footer
-```
+---
 
-Spec: `docs/superpowers/specs/2026-06-01-app-shell-restructure-design.md`. Pairs with the sidebar-full-height + window-framing bugs and the Footer feature.
+## Done (2026-06-01)
 
-### `_ui/` primitive consolidation (Radix + ARIA)
-**Effort:** Medium–High · **Status:** In progress (spec + plan done; executing in a worktree)
-From the `ui-promotion-finder` audit: fix the `_ui/InlineImage` `window.api` leak (→ `useImageDataUrl` hook); promote `ContextBar` to `_ui/` over Radix Progress; replace the hand-rolled overlays (`GlobalChatModal`, `UtilityPanel`) with a Radix-backed `_ui/Dialog` (center + drawer); replace the three triplicated outside-click dropdowns (`ProjectSwitcher`, `ProjectPicker`, `AddTabMenu`) with `_ui/Popover`. ARIA via Radix + the `aria-requirements` skill. Spec: `docs/superpowers/specs/2026-06-01-primitive-consolidation-design.md`. Follow-up: `accessibility-auditor` + `dead-code-sweeper` after merge. **Deferred:** `_ui/Tabs`→Radix Tabs, `EditField`→Select, `ResizeHandle`→Separator.
+- **Code-quality agent suite** — `state-home-finder`, `ui-promotion-finder`, `component-structure-cleaner`, the `aria-requirements` skill, `accessibility-auditor`, `dead-code-sweeper` in `.claude/`. (Format ref saved in memory.)
+- **App shell restructure** — `App › Header / Workspace{Sidebar | DashboardArea{WorkspaceBar, Dashboard, Console}} / Footer`, fixed no-scroll layout, full-height sidebar.
+- **`_ui/` primitive consolidation** — InlineImage IPC leak fixed; `ContextBar` → `_ui/` over Radix Progress; `_ui/Dialog` (center+drawer) + `_ui/Popover` replacing hand-rolled overlays/dropdowns; a11y pass (accessible names + form labels).
+- **Dead-code sweeps** — orphaned view-router + leftover modules removed across the refactors.
