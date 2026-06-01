@@ -8,6 +8,61 @@ Ideas and features to build later. Not planned, not prioritized — just capture
 
 ---
 
+## Dev clusters (build together)
+
+Items below cut across `feature-requests.md`, `bugs.md`, `chores.md`. They share a surface, so building them as one effort is cheaper than one-by-one. Rough build order top-to-bottom.
+
+### A · App shell & window chrome  — MVP, **do first**
+The top-level layout, in one restructure. Unblocks the footer, the full-height sidebar, and the window-framing bug at once.
+- chore: **Restructure components into an app shell** (`App › Header / Main / {Sidebar | Dashboard{Dashboard, Console}} / Footer`)
+- feature: **Footer status band** (git branch, VS Code-style)
+- feature: **Header global usage bar**
+- feature: **Rename app + logo** (header branding)
+- bug: **App must fit the window cleanly** (no-scroll + macOS title-bar overlap)
+- bug: **Left sidebar doesn't extend to the bottom**
+
+### B · Chat input UX  — MVP
+All touch the Lexical chat input (`AgentChat/RichEditor`).
+- feature: **`/` and `@` autocomplete menus**
+- feature: **Upload button → dropdown** of upload types
+- bug: **Placeholder overlaps the format bar**
+- bug: **Cursor focus on a proposed interaction**
+- feature: **Audio prompt input** (Post-MVP — defer within this cluster)
+
+### C · ResponseBody block actions  — mixed
+Both are block-toolbar actions on `ResponseBody` blocks (`BlockShell`).
+- feature: **Table export (PDF / Excel)** (PDF = MVP)
+- feature: **Code converter in chat** (Post-MVP)
+
+### D · Live runtime activity  — After Phase 0 (big)
+All consume the live hook-event stream / `.claude` state. Share the same data plumbing.
+- feature: **Real-time mirror of `.claude`** (umbrella)
+- feature: **Live Agent Activity Visualization**
+- feature: **Click an active agent → show its activity**
+- feature: **Visualize background tasks**
+- feature: **Action-awaited notifications**
+
+### E · Code-quality agent suite  — chores, batch
+All are `.claude/agents/*` in the same frontmatter format — build in one batch (e.g. via the agent-skill-creator).
+- chore: **state-home finder** (zustand/context/props)
+- chore: **`_ui/` promotion finder**
+- chore: **folder/component structure cleaner**
+- chore: **ARIA skill + agent**
+
+### F · Sessions & persistence  — Post-MVP
+All about session data / persisted view state.
+- feature: **Dashboard Persistence**
+- feature: **Session Search**
+- feature: **Session Resume** (note: references the removed `SessionViewer` — reframe on pickup)
+- feature: **Session Usage Analytics**
+
+### G · Ship  — Future
+- feature: **Auto-Update** · feature: **Packaging & Distribution**
+
+**Standalone** (no natural cluster): Agent Templates · Optimization Insights · Stop Thinking Button · Playwright E2E.
+
+---
+
 ## Batch captured 2026-05-31
 
 ### Real-time mirror of `.claude` (root + per-project)
