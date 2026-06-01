@@ -89,4 +89,61 @@ describe('useWorkspaceStore', () => {
     expect(d.tabs[0].kind).toBe('chat');
     expect(d.tabs[0].id).not.toBe(only);
   });
+
+  it('openDashboard sets project scope and cwd = project.path', () => {
+    const a = proj('a');
+    useWorkspaceStore.getState().openDashboard(a);
+    const d = useWorkspaceStore.getState().dashboards[0];
+    expect(d.scope).toEqual({ kind: 'project', project: a });
+    expect(d.cwd).toBe('/p/a');
+  });
+
+  it('openLauncher creates a launcher dashboard, activates it, no tabs, clears selectedProject', () => {
+    useAppStore.setState({ selectedProject: proj('a') });
+    const id = useWorkspaceStore.getState().openLauncher();
+    const s = useWorkspaceStore.getState();
+    const d = s.dashboards.find((x) => x.id === id)!;
+    expect(s.activeDashboardId).toBe(id);
+    expect(d.scope.kind).toBe('launcher');
+    expect(d.tabs).toHaveLength(0);
+    expect(d.cwd).toBe('');
+    expect(useAppStore.getState().selectedProject).toBeNull();
+  });
+
+  it('resolveLauncher to project transforms scope, sets cwd and seeds a chat tab', () => {
+    const id = useWorkspaceStore.getState().openLauncher();
+    const a = proj('a');
+    useWorkspaceStore.getState().resolveLauncher(id, { to: 'project', project: a });
+    const d = useWorkspaceStore.getState().dashboards.find((x) => x.id === id)!;
+    expect(d.scope).toEqual({ kind: 'project', project: a });
+    expect(d.cwd).toBe('/p/a');
+    expect(d.tabs).toHaveLength(1);
+    expect(d.tabs[0].kind).toBe('chat');
+    expect(d.activeTabId).toBe(d.tabs[0].id);
+    expect(useAppStore.getState().selectedProject?.id).toBe('a');
+  });
+
+  it('resolveLauncher to discussion sets user scope, cwd = home, empty agentName', () => {
+    useWorkspaceStore.getState().setHomeDir('/home/me');
+    const id = useWorkspaceStore.getState().openLauncher();
+    useWorkspaceStore.getState().resolveLauncher(id, { to: 'discussion' });
+    const d = useWorkspaceStore.getState().dashboards.find((x) => x.id === id)!;
+    expect(d.scope.kind).toBe('user');
+    expect(d.cwd).toBe('/home/me');
+    expect(d.tabs).toHaveLength(1);
+    expect(d.tabs[0].kind).toBe('chat');
+    expect(d.tabs[0].agentName).toBe('');
+    expect(useAppStore.getState().selectedProject).toBeNull();
+  });
+
+  it('resolveLauncher to agent sets user scope, cwd = home, agentName + title', () => {
+    useWorkspaceStore.getState().setHomeDir('/home/me');
+    const id = useWorkspaceStore.getState().openLauncher();
+    useWorkspaceStore.getState().resolveLauncher(id, { to: 'agent', agentName: 'tw-dev' });
+    const d = useWorkspaceStore.getState().dashboards.find((x) => x.id === id)!;
+    expect(d.scope.kind).toBe('user');
+    expect(d.cwd).toBe('/home/me');
+    expect(d.tabs[0].agentName).toBe('tw-dev');
+    expect(d.tabs[0].title).toBe('tw-dev');
+  });
 });
