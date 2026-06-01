@@ -258,3 +258,8 @@ A thin designed **footer band** at the bottom of the window showing status — e
 ### Audio prompt input
 **Scope:** Post-MVP · **Effort:** Medium–High · **Status:** Idea
 Let the user dictate a prompt by **audio** (speech-to-text) instead of typing.
+
+### Dashboard `+` button behaviour
+**Scope:** MVP · **Effort:** Medium · **Status:** Idea · not yet wired
+The dashboard's **`+` button is not active yet**. It should open a **new dashboard** (Chrome-style new tab), then offer a choice: **New discussion** or a **user-scope agent** (an agent from `~/.claude`, not tied to a project).
+- **Design question:** this implies a dashboard isn't necessarily project-scoped — a `+` can spawn a **user-scope** dashboard (discussion or user agent) alongside the project-scoped ones. Resolve how user-scope vs project-scope dashboards coexist in the tab bar (today the `+` opens a project picker). Pairs with the workspace tabs / **Cluster A**.
