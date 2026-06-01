@@ -1,5 +1,5 @@
 import { ChevronRight, Loader2, Paperclip, Send, X } from 'lucide-react';
-import { type RefObject } from 'react';
+import { type RefObject, useEffect } from 'react';
 
 import { Button } from '@/components/_ui/Button';
 import type { SpawnSession } from '@/types/spawn.types';
@@ -48,6 +48,14 @@ export function AgentChatInput({
   onAttach,
   onSend,
 }: AgentChatInputProps) {
+  // When the agent surfaces a user-interaction prompt (waitingInput flips true),
+  // auto-focus the editor so the user can respond without clicking first.
+  useEffect(() => {
+    if (waitingInput) {
+      editorRef.current?.focus();
+    }
+  }, [waitingInput, editorRef]);
+
   return (
     <div className={`relative border-t p-3 ${waitingInput ? "border-yellow-500/50 bg-yellow-500/5" : "border-border"}`}>
       {/* Attached files preview */}

@@ -69,26 +69,28 @@ export function RichEditor({ onChange, onSubmit, onEnter, handleRef, placeholder
         theme: {},
       }}
     >
-      <div className="relative flex-1">
+      <div className="flex-1">
         <Toolbar />
-        <RichTextPlugin
-          contentEditable={
-            <ContentEditable
-              className="text-sm font-mono leading-relaxed focus:outline-none min-h-[24px] max-h-[120px] overflow-y-auto"
-              style={{ color: 'var(--color-text-primary)' }}
-              aria-placeholder={placeholder}
-              placeholder={
-                <div
-                  className="pointer-events-none absolute left-0 top-0 text-sm"
-                  style={{ color: 'var(--color-text-muted)' }}
-                >
-                  {placeholder}
-                </div>
-              }
-            />
-          }
-          ErrorBoundary={LexicalErrorBoundary}
-        />
+        <div className="relative">
+          <RichTextPlugin
+            contentEditable={
+              <ContentEditable
+                className="text-sm font-mono leading-relaxed focus:outline-none min-h-[24px] max-h-[120px] overflow-y-auto"
+                style={{ color: 'var(--color-text-primary)' }}
+                aria-placeholder={placeholder}
+                placeholder={
+                  <div
+                    className="pointer-events-none absolute left-0 top-0 text-sm"
+                    style={{ color: 'var(--color-text-muted)' }}
+                  >
+                    {placeholder}
+                  </div>
+                }
+              />
+            }
+            ErrorBoundary={LexicalErrorBoundary}
+          />
+        </div>
         <ListPlugin />
         <HistoryPlugin />
         <MarkdownShortcutPlugin transformers={CHAT_TRANSFORMERS} />

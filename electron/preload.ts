@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer } from "electron";
 
 contextBridge.exposeInMainWorld("api", {
+  platform: process.platform,
   getAgents: () => ipcRenderer.invoke("agents:list"),
   getAgent: (name: string) => ipcRenderer.invoke("agents:get", name),
   getFolders: () => ipcRenderer.invoke("agents:folders"),
