@@ -1,6 +1,7 @@
 import { BarChart3, ListTodo, Map as MapIcon, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
+import { Dialog } from '@/components/_ui/Dialog';
 import { type TabItem, Tabs } from '@/components/_ui/Tabs';
 import type { UtilityView } from '@/components/Workspace/types';
 
@@ -22,25 +23,13 @@ export type UtilityPanelProps = {
 export function UtilityPanel({ open, onClose }: UtilityPanelProps) {
   const [view, setView] = useState<UtilityView>('context');
 
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
-
-  if (!open) return null;
-
   return (
-    <div className="absolute inset-0 z-40 flex justify-end">
-      <button
-        aria-label="Close panel"
-        onClick={onClose}
-        className="absolute inset-0"
-        style={{ background: 'rgba(0,0,0,0.4)' }}
-      />
+    <Dialog
+      open={open}
+      onOpenChange={(o) => { if (!o) onClose(); }}
+      variant="drawer-right"
+      title="Context / Task / Plan"
+    >
       <div
         className="relative h-full flex flex-col w-[480px] max-w-[90%]"
         style={{
@@ -57,6 +46,7 @@ export function UtilityPanel({ open, onClose }: UtilityPanelProps) {
           <button
             onClick={onClose}
             title="Close"
+            aria-label="Close panel"
             className="flex items-center justify-center w-7 h-7 rounded-md shrink-0"
             style={{ color: 'var(--color-text-muted)' }}
             onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-surface-2)')}
@@ -71,6 +61,6 @@ export function UtilityPanel({ open, onClose }: UtilityPanelProps) {
           {view === 'plan' ? <PlanTab /> : null}
         </div>
       </div>
-    </div>
+    </Dialog>
   );
 }

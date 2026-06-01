@@ -2,6 +2,7 @@ import { MessageSquare,Minus, X } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from '@/components/_ui/Button';
+import { Dialog } from '@/components/_ui/Dialog';
 import { AgentChat } from '@/components/AgentChat/AgentChat';
 
 export type GlobalChatModalProps = {
@@ -42,14 +43,7 @@ export function GlobalChatModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <button
-        type="button"
-        aria-label="Close chat"
-        className="absolute inset-0 cursor-default"
-        style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}
-        onClick={onClose}
-      />
+    <Dialog open onOpenChange={(o) => { if (!o) onClose(); }} variant="center" title="Claude Code chat">
       <div
         className="relative w-[720px] h-[82vh] rounded-2xl flex flex-col"
         style={{
@@ -114,7 +108,7 @@ export function GlobalChatModal({
             <Button intent="ghost" size="icon" onClick={() => setMinimized(true)} title="Minimize">
               <Minus size={14} />
             </Button>
-            <Button intent="ghost" size="icon" onClick={onClose}>
+            <Button intent="ghost" size="icon" onClick={onClose} title="Close" aria-label="Close chat">
               <X size={14} />
             </Button>
           </div>
@@ -124,6 +118,6 @@ export function GlobalChatModal({
           <AgentChat agentName="_main" />
         </div>
       </div>
-    </div>
+    </Dialog>
   );
 }
