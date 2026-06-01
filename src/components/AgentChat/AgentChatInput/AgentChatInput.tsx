@@ -81,6 +81,8 @@ export function AgentChatInput({
               )}
               <button
                 onClick={() => onRemoveAttachment(i)}
+                title="Remove attachment"
+                aria-label="Remove attachment"
                 className="absolute -top-1.5 -right-1.5 p-0.5 rounded-full opacity-0 group-hover/attach:opacity-100 transition-opacity"
                 style={{ background: "#374151", color: "#d1d5db" }}
               >
@@ -131,6 +133,7 @@ export function AgentChatInput({
           size="icon"
           onClick={onSend}
           disabled={(!input.trim() && attachedFiles.length === 0) || spawning}
+          title="Send"
         >
           {spawning ? (
             <Loader2 size={16} className="animate-spin" />

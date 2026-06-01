@@ -137,7 +137,7 @@ function MemoryFileCard({
             ) : (
               <>
                 <Button intent="ghost" size="sm" onClick={() => setEditing(true)}>edit</Button>
-                {!isIndex ? <Button intent="danger" size="icon" onClick={remove}>
+                {!isIndex ? <Button intent="danger" size="icon" onClick={remove} title={`Delete ${file.name}`}>
                     <Trash2 size={10} />
                   </Button> : null}
               </>
@@ -148,6 +148,7 @@ function MemoryFileCard({
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
+              aria-label={`Edit ${file.name}`}
               className="w-full h-56 bg-surface-1/80 text-fg text-xs font-mono p-3 rounded-lg border border-border/60 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/20 resize-y leading-relaxed"
             />
           ) : (
@@ -229,6 +230,7 @@ export function MemoryManager({
               value={newFileName}
               onChange={(e) => setNewFileName(e.target.value)}
               placeholder="topic-name.md"
+              aria-label="New topic file name"
               className="flex-1 bg-surface-1/80 border border-border/60 text-fg text-sm rounded px-3 py-1.5 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/20 font-mono"
               autoFocus
             />
@@ -240,7 +242,7 @@ export function MemoryManager({
             >
               {saving ? "Creating..." : "Create"}
             </Button>
-            <Button intent="ghost" size="icon" onClick={() => setCreating(false)}>
+            <Button intent="ghost" size="icon" onClick={() => setCreating(false)} title="Cancel">
               <X size={14} />
             </Button>
           </div>
@@ -248,6 +250,7 @@ export function MemoryManager({
             value={newContent}
             onChange={(e) => setNewContent(e.target.value)}
             placeholder="Initial content (optional)"
+            aria-label="New topic content"
             rows={4}
             className="w-full bg-surface-1/80 border border-border/60 text-fg text-xs font-mono p-3 rounded-lg focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/20 resize-y leading-relaxed"
           />
