@@ -71,7 +71,7 @@ export function Sidebar() {
         alert(`Add sub-agent to ${agentName} — coming soon`);
         break;
       case "toggle-favorite":
-        useFavoritesStore.getState().toggle(projectId, "agent", agentName);
+        if (projectId) void useFavoritesStore.getState().toggle(projectId, "agent", agentName);
         break;
     }
   };

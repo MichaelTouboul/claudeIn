@@ -18,9 +18,11 @@ export type SkillDetailProps = {
 export function SkillDetail({ skill }: SkillDetailProps) {
   const { projectId } = useProject();
   const isFavorite = useFavoritesStore((s) =>
-    (s.byProject[projectId] || []).some((f) => f.item_type === 'skill' && f.item_name === skill.name)
+    (s.byProject[projectId ?? ''] || []).some((f) => f.item_type === 'skill' && f.item_name === skill.name)
   );
-  const onToggleFavorite = () => useFavoritesStore.getState().toggle(projectId, 'skill', skill.name);
+  const onToggleFavorite = () => {
+    if (projectId) void useFavoritesStore.getState().toggle(projectId, 'skill', skill.name);
+  };
   const [tab, setTab] = useState<SkillTab>("chat");
 
   const tabs: { key: SkillTab; label: string }[] = [

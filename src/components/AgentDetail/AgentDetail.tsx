@@ -37,9 +37,11 @@ export function AgentDetail({
 }: AgentDetailProps) {
   const { projectId } = useProject();
   const isFavorite = useFavoritesStore((s) =>
-    (s.byProject[projectId] || []).some((f) => f.item_type === 'agent' && f.item_name === agent.id)
+    (s.byProject[projectId ?? ''] || []).some((f) => f.item_type === 'agent' && f.item_name === agent.id)
   );
-  const onToggleFavorite = () => useFavoritesStore.getState().toggle(projectId, 'agent', agent.id);
+  const onToggleFavorite = () => {
+    if (projectId) void useFavoritesStore.getState().toggle(projectId, 'agent', agent.id);
+  };
   const backToProject = useDashboardUIStore((s) => s.backToProject);
   const [tab, setTab] = useState<Tab>("chat");
   const [confirmDelete, setConfirmDelete] = useState(false);
