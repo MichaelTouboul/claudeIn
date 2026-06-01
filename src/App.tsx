@@ -1,11 +1,11 @@
 import { Bot } from "lucide-react";
-import { useEffect, useMemo,useRef,useState } from "react";
+import { useEffect,useRef,useState } from "react";
 
-import { BottomPanel } from "@/components/BottomPanel/BottomPanel";
 import { Footer } from "@/components/Footer/Footer";
 import { GlobalChatModal } from "@/components/GlobalChatModal/GlobalChatModal";
 import { Header } from "@/components/Header/Header";
 import { ProjectDashboard } from '@/components/ProjectDashboard/ProjectDashboard';
+import { Console } from "@/components/Workspace/DashboardArea/Console/Console";
 import { WorkspaceBar } from "@/components/Workspace/WorkspaceBar/WorkspaceBar";
 
 import { useProjects } from "./hooks/useProjects";
@@ -22,7 +22,6 @@ export default function App() {
   const selectedProject = useAppStore((s) => s.selectedProject);
   const openDashboard = useWorkspaceStore((s) => s.openDashboard);
   const project = useDashboardStore((s) => s.project);
-  const agents = useDashboardStore((s) => s.agents);
   const dashLoading = useDashboardStore((s) => s.loading);
   const loadDashboard = useDashboardStore((s) => s.load);
 
@@ -58,14 +57,6 @@ export default function App() {
       }
     };
   }, [selectedProject]);
-
-  const agentColorMap = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const a of agents) {
-      map.set(a.id, a.frontmatter.color || "cyan");
-    }
-    return map;
-  }, [agents]);
 
   if (projectsLoading) {
     return (
@@ -143,7 +134,7 @@ export default function App() {
           </ProjectProvider>
         ) : null}
 
-        <BottomPanel events={events} agentColorMap={agentColorMap} projectPath={selectedProject?.path ?? null} />
+        <Console />
       </div>
 
       <Footer />

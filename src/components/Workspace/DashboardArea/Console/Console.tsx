@@ -1,20 +1,28 @@
 import { Activity, ChevronDown, ChevronUp, Terminal as TerminalIcon } from 'lucide-react';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 
 import { EventConsole } from '@/components/EventConsole/EventConsole';
-import type { LiveEvent } from '@/types/events.types';
+import { useAppStore } from '@/store/useAppStore';
+import { useDashboardStore } from '@/store/useDashboardStore';
+import { useEventsStore } from '@/store/useEventsStore';
 
 import { TerminalView } from './TerminalView/TerminalView';
 
 type Tab = 'terminal' | 'events';
 
-export type BottomPanelProps = {
-  events: LiveEvent[];
-  agentColorMap: Map<string, string>;
-  projectPath: string | null;
-};
+export function Console() {
+  const events = useEventsStore((s) => s.events);
+  const agents = useDashboardStore((s) => s.agents);
+  const projectPath = useAppStore((s) => s.selectedProject?.path ?? null);
 
-export function BottomPanel({ events, agentColorMap, projectPath }: BottomPanelProps) {
+  const agentColorMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const a of agents) {
+      map.set(a.id, a.frontmatter.color || 'cyan');
+    }
+    return map;
+  }, [agents]);
+
   const [tab, setTab] = useState<Tab>('terminal');
   const [expanded, setExpanded] = useState(true);
 
