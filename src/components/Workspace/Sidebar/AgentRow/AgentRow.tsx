@@ -24,7 +24,7 @@ export function AgentRow({
   const active = useEventsStore((s) => s.activeAgents.has(agent.id));
   const context = useEventsStore((s) => s.agentContexts.get(agent.id));
   const isFavorite = useFavoritesStore((s) =>
-    (s.byProject[projectId] || []).some((f) => f.item_type === 'agent' && f.item_name === agent.id)
+    (s.byProject[projectId ?? ''] || []).some((f) => f.item_type === 'agent' && f.item_name === agent.id)
   );
   return (
     <div className="flex items-center group">

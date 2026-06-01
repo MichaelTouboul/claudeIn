@@ -37,7 +37,7 @@ export function PanelsArea({
   const agents = useDashboardStore((s) => s.agents);
   const skills = useDashboardStore((s) => s.skills);
   const hooks = useDashboardStore((s) => s.hooks);
-  const favoriteList = useFavoritesStore((s) => s.byProject[projectId] ?? EMPTY);
+  const favoriteList = useFavoritesStore((s) => s.byProject[projectId ?? ''] ?? EMPTY);
   const selectedAgent = useDashboardUIStore((s) => s.selectedAgent);
   const selectedSkill = useDashboardUIStore((s) => s.selectedSkill);
   const selectedSessionId = useDashboardUIStore((s) => s.selectedSessionId);

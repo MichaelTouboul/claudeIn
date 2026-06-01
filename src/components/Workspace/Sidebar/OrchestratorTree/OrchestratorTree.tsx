@@ -25,7 +25,7 @@ export function OrchestratorTree({
   const { projectId } = useProject();
   const activeAgents = useEventsStore((s) => s.activeAgents);
   const agentContexts = useEventsStore((s) => s.agentContexts);
-  const favoriteList = useFavoritesStore((s) => s.byProject[projectId] ?? EMPTY);
+  const favoriteList = useFavoritesStore((s) => s.byProject[projectId ?? ''] ?? EMPTY);
   const isAgentFavorite = (name: string) =>
     favoriteList.some((f) => f.item_type === 'agent' && f.item_name === name);
 

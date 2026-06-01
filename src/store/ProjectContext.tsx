@@ -5,25 +5,25 @@ import type { Project } from "@/types/dashboard.types";
 import { useDashboardStore } from "./useDashboardStore";
 
 type ProjectContextValue = {
-  project: Project;
-  projectId: string;
-  projectName: string;
-  projectPath: string;
+  project: Project | null;
+  projectId: string | null;
+  projectName: string | null;
+  projectPath: string | null;
   isUserProject: boolean;
   refresh: () => Promise<void>;
 };
 
 const ProjectContext = createContext<ProjectContextValue | null>(null);
 
-export function ProjectProvider({ project, children }: { project: Project; children: ReactNode }) {
+export function ProjectProvider({ project, children }: { project: Project | null; children: ReactNode }) {
   const refresh = useDashboardStore((s) => s.refresh);
   const value = useMemo<ProjectContextValue>(
     () => ({
       project,
-      projectId: project.id,
-      projectName: project.name || project.id,
-      projectPath: project.path,
-      isUserProject: project.id === "user",
+      projectId: project?.id ?? null,
+      projectName: project ? project.name || project.id : null,
+      projectPath: project?.path ?? null,
+      isUserProject: project?.id === "user",
       refresh,
     }),
     [project, refresh]

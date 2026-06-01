@@ -18,9 +18,11 @@ export function SkillRow({
 }: SkillRowProps) {
   const { projectId } = useProject();
   const isFavorite = useFavoritesStore((s) =>
-    (s.byProject[projectId] || []).some((f) => f.item_type === 'skill' && f.item_name === skill.name)
+    (s.byProject[projectId ?? ''] || []).some((f) => f.item_type === 'skill' && f.item_name === skill.name)
   );
-  const onToggleFavorite = () => useFavoritesStore.getState().toggle(projectId, 'skill', skill.name);
+  const onToggleFavorite = () => {
+    if (projectId) void useFavoritesStore.getState().toggle(projectId, 'skill', skill.name);
+  };
   return (
     <div className="flex items-center group">
       <button
