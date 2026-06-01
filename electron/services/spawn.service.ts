@@ -11,11 +11,24 @@ const sessions = new Map<string, { session: SpawnSession; process: ChildProcess 
  * `--append-system-prompt`. Suppresses the default reflexive "want me to…?" /
  * follow-up-question pattern at the end of every turn. This is the supported
  * mechanism for tone control — not a post-processing filter on the output.
+ *
+ * The CLI rebuilds the system prompt on every `--print` invocation and does NOT
+ * persist it into the resumed transcript, so this flag must be re-passed on each
+ * spawn — fresh AND `--resume` — for the steering to survive across turns. It is
+ * added unconditionally below (before the resume/fresh branch) so it always is.
+ *
+ * Wording is deliberately firm and absolute: the earlier softer phrasing ("only
+ * ask when you genuinely need…") left the model an out it took on nearly every
+ * turn, which is the exact behaviour being suppressed.
  */
 const NO_FOLLOWUP_SYSTEM_PROMPT =
-  "Do not end your responses with follow-up questions, offers of further help, " +
-  "or \"want me to…?\" style prompts. Stop once the task or answer is complete. " +
-  "Only ask a question when you genuinely need information to proceed.";
+  "End every response the moment the answer or task is complete. " +
+  "Never append a follow-up question, a suggestion of next steps, an offer of " +
+  "further help, or any \"want me to…?\" / \"would you like…?\" / \"let me know if…\" " +
+  "style closing line. Do not ask whether to proceed. The only time you may end " +
+  "with a question is when you are genuinely blocked and literally cannot continue " +
+  "without a specific piece of information from the user; in that case ask exactly " +
+  "that one question and nothing else. Otherwise, stop.";
 
 function parseStreamLine(line: string): StreamEvent | null {
   try {
@@ -44,6 +57,9 @@ function extractText(event: StreamEvent): string | null {
 export function spawnAgent(agentName: string, mission: string, cwd?: string, resumeSessionId?: string): SpawnSession {
   const sessionId = randomUUID();
 
+  // `--append-system-prompt` is added here, ahead of the resume/fresh branch, so
+  // the no-follow-up steering is re-passed on EVERY turn — including `--resume`,
+  // where the CLI does not carry a prior turn's appended prompt forward.
   const args = [
     "--print",
     "--output-format", "stream-json",
