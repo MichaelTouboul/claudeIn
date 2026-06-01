@@ -11,7 +11,6 @@ import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
 import { ConversationList } from './ConversationList/ConversationList';
 import { PanelsArea } from './PanelsArea/PanelsArea';
-import { ProjectView } from './ProjectView/ProjectView';
 import { ResizeHandle } from './ResizeHandle/ResizeHandle';
 
 // Inject animation keyframes
@@ -28,8 +27,6 @@ if (typeof document !== "undefined" && !document.getElementById("chat-animations
   document.head.appendChild(style);
 }
 
-// ─── Main component ───
-
 function ZoneHeader({ label }: { label: string }) {
   return (
     <div
@@ -41,7 +38,7 @@ function ZoneHeader({ label }: { label: string }) {
   );
 }
 
-export function ProjectDashboard() {
+export function Sidebar() {
   const { projectId, projectPath } = useProject();
   useInitFavorites(projectId);
   const { sessions, loading: sessionsLoading } = useSessions(projectPath);
@@ -88,34 +85,27 @@ export function ProjectDashboard() {
   };
 
   return (
-    <div className="flex-1 flex h-full">
-      {/* Sidebar with accordions */}
-      <div
-        ref={sidebarRef}
-        className="flex flex-col h-full shrink-0 relative"
-        style={{
-          width: `${sidebarWidth}px`,
-          background: 'var(--color-surface-1)',
-          borderRight: '1px solid var(--color-border)',
-        }}
-      >
+    <div
+      ref={sidebarRef}
+      className="flex flex-col h-full shrink-0 relative"
+      style={{
+        width: `${sidebarWidth}px`,
+        background: 'var(--color-surface-1)',
+        borderRight: '1px solid var(--color-border)',
+      }}
+    >
+      <ZoneHeader label="Activity" />
+      <ConversationList />
 
-        <ZoneHeader label="Activity" />
-        <ConversationList />
+      <ZoneHeader label="Library" />
+      <PanelsArea
+        sessions={sessions}
+        sessionsLoading={sessionsLoading}
+        onAgentAction={handleAgentAction}
+        onSelectSession={handleSelectSession}
+      />
 
-        <ZoneHeader label="Library" />
-        <PanelsArea
-          sessions={sessions}
-          sessionsLoading={sessionsLoading}
-          onAgentAction={handleAgentAction}
-          onSelectSession={handleSelectSession}
-        />
-
-        <ResizeHandle onMouseDown={handleResizeDragStart} />
-
-      </div>
-
-      <ProjectView />
+      <ResizeHandle onMouseDown={handleResizeDragStart} />
     </div>
   );
 }

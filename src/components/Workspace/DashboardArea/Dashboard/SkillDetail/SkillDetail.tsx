@@ -2,11 +2,11 @@ import { Star, Terminal, Wrench } from 'lucide-react';
 import { useState } from 'react';
 
 import { AgentChat } from '@/components/AgentChat/AgentChat';
+import type { SkillTab } from '@/components/Workspace/types';
 import type { SkillFile } from '@/hooks/useProjects';
 import { useProject } from '@/store/ProjectContext';
 import { useFavoritesStore } from '@/store/useFavoritesStore';
 
-import type { SkillTab } from '../types';
 import { SkillFiles } from './SkillFiles';
 import { SkillOverview } from './SkillOverview';
 import { SkillPrompt } from './SkillPrompt';

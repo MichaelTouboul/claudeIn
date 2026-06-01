@@ -15,6 +15,23 @@ This is the **sandboxed** side: Chromium + React 19, the UI. It has **no Node ac
 - **`env.d.ts`** — TypeScript declaration of `window.api` (the IPC contract the front sees).
 - **`index.css`** — design system CSS custom properties. **`lib/cn.ts`** — `cn()` (`clsx` + `tailwind-merge`).
 
+### App shell
+
+`App.tsx` is a thin, fixed `h-full flex flex-col` shell (no page scroll — only inner panes scroll): `Header` · `Workspace` (flex-1) · `Footer`. The shell tree:
+
+```
+components/
+├── Header/                  ← top bar (logo, ProjectSwitcher, StatsBar, Chat)
+├── Footer/                  ← thin status band (placeholder for now)
+└── Workspace/               ← middle shell
+    ├── Workspace.tsx        ← Sidebar | DashboardArea (or project picker empty-state)
+    ├── WorkspaceBar/        ← project tabs    ProjectPicker/
+    ├── Sidebar/             ← Activity + Library (ConversationList, PanelsArea, …)
+    └── DashboardArea/       ← WorkspaceBar + Dashboard + Console
+        ├── Dashboard/       ← internal tabs + bodies (InternalTabBar, UtilityPanel, SkillDetail, ChatTab)
+        └── Console/         ← terminal / events panel (TerminalView)
+```
+
 ## Talking to the back
 
 - **No `fetch()`, no direct Node access.** Every renderer → main call goes through `window.api` (typed in `env.d.ts`), ideally via `services/api.ts`.
@@ -42,7 +59,7 @@ components/
 - One folder per component; folder name = component name. A `.css` file exists **only when the component has its own styles** — never create an empty one.
 - A component used by a **single parent** lives **inside that parent's folder**. Two independently-used components are **sibling folders**.
 - **Promotion rule:** as soon as a child is used by **more than one parent**, promote it → to `_ui/` if it's a generic primitive, otherwise to `components/` root (sibling of its former parents).
-- **Nesting follows real ownership — no hard depth cap.** Nest a single-owner child inside its true parent **even at depth 3–4** if that's where the component hierarchy actually puts it (e.g. `ProjectDashboard/MainContent/SessionViewer/`). The folder tree must mirror the component tree; do **not** hoist a single-owner child to the root just to stay shallow. (This is folder depth only — the 300-line file limit and code-nesting concerns are separate.) Depth beyond ~4 is a smell worth questioning the component decomposition, not a rule violation.
+- **Nesting follows real ownership — no hard depth cap.** Nest a single-owner child inside its true parent **even at depth 3–4** if that's where the component hierarchy actually puts it (e.g. `Workspace/DashboardArea/Dashboard/InternalTabBar/`). The folder tree must mirror the component tree; do **not** hoist a single-owner child to the root just to stay shallow. (This is folder depth only — the 300-line file limit and code-nesting concerns are separate.) Depth beyond ~4 is a smell worth questioning the component decomposition, not a rule violation.
 - `_ui/` holds **reusable primitives with no domain knowledge**. **Only** `_ui/` components get an `index.ts` barrel; feature components do not.
 - Do **not** restructure `hooks/`, `services/`, `store/`, `types/` — they stay flat. One-folder-per-thing is for components only.
 

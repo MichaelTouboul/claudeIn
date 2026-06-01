@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { create } from "zustand";
 
-import type { OpenChat } from "@/components/ProjectDashboard/types";
+import type { OpenChat } from "@/components/Workspace/types";
 
 type ChatsState = {
   openChats: OpenChat[];

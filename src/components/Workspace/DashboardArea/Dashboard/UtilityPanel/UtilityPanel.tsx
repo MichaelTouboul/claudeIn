@@ -2,8 +2,8 @@ import { BarChart3, ListTodo, Map as MapIcon, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { type TabItem, Tabs } from '@/components/_ui/Tabs';
+import type { UtilityView } from '@/components/Workspace/types';
 
-import type { UtilityView } from '../types';
 import { ContextTab } from './ContextTab/ContextTab';
 import { PlanTab } from './PlanTab/PlanTab';
 import { TaskTab } from './TaskTab/TaskTab';

@@ -5,12 +5,12 @@ import { useDashboardStore } from '@/store/useDashboardStore';
 import { useDashboardUIStore } from '@/store/useDashboardUIStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
-import { InternalTabBar } from '../InternalTabBar/InternalTabBar';
-import { SkillDetail } from '../SkillDetail/SkillDetail';
-import { UtilityPanel } from '../UtilityPanel/UtilityPanel';
 import { ChatTab } from './ChatTab/ChatTab';
+import { InternalTabBar } from './InternalTabBar/InternalTabBar';
+import { SkillDetail } from './SkillDetail/SkillDetail';
+import { UtilityPanel } from './UtilityPanel/UtilityPanel';
 
-export function ProjectView() {
+export function Dashboard() {
   const [panelOpen, setPanelOpen] = useState(false);
   const dashboards = useWorkspaceStore((s) => s.dashboards);
   const activeDashboardId = useWorkspaceStore((s) => s.activeDashboardId);
