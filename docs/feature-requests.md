@@ -14,12 +14,6 @@ Ideas and features to build later. Not planned, not prioritized — just capture
 **Scope:** After Phase 0 · **Effort:** High · **Status:** Idea
 Everything in the app should be **real-time** and **perfectly mirror** the on-disk `.claude` — both the root `~/.claude` and each project's `.claude/`. Agents, skills, hooks, MCP, settings, and especially **running agents / active conversations** must reflect actual state live, not a snapshot you opened in-app. This supersedes and absorbs the **Live Agent Activity Visualization** entry below: that animated runtime tree is one surface of this broader "the UI is a live mirror of `.claude`" goal. **Sequencing: build this only after Phase 0** (the UI/UX skeleton) is in place.
 
-### Per-project Dashboard with tabs (skeleton)
-**Scope:** MVP · **Effort:** Medium · **Status:** Idea
-Two kinds of dashboard:
-- **Project dashboard** — tabbed: **Chat · Context · Task (Jira ticket) · Plan**. For MVP, only **Chat** is functional; the other tabs are **skeletons** (empty shells, no logic yet).
-- **Agent dashboard** — keep as it is today (works well, no change).
-
 ### Action-awaited notifications
 **Scope:** MVP · **Effort:** Medium · **Status:** Idea
 Signal when an agent is waiting for user input, in **two places by scope**:
@@ -93,48 +87,11 @@ A fluid, pleasant way to **watch agents and sub-agents work in real time** — o
 
 ---
 
-## Rich Text Editor for Chat Input
-**Status:** Idea
-**Complexity:** High (2-3h+)
-**Added:** 2026-05-27
-
-Replace the plain textarea in AgentChat with a rich text editor (Quill-style). Bold, italic, code blocks. The key idea: Claude should interpret formatting semantically — bold words get more weight, code blocks are treated as literals, etc.
-
-**Challenges:**
-- `claude --print` accepts plain text stdin, not HTML/markdown
-- Needs a conversion layer: HTML → structured prompt with emphasis instructions
-- Claude doesn't natively weight bold text — requires prompt engineering ("words in **bold** are high-priority")
-- UX inconsistency with terminal Claude Code (plain text)
-
-**Possible approach:**
-- Use a lightweight editor like TipTap (ProseMirror-based, React-native)
-- Convert to markdown on submit
-- Inject a system instruction: "The user's prompt uses markdown formatting. **Bold** indicates emphasis. `code` indicates literal values."
-- Start simple: just support **bold** and `code` — not full WYSIWYG
-
----
-
-## Terminal PTY (Bottom Panel)
-**Status:** Planned — next major feature
-**Complexity:** High (full day)
-
-xterm.js + node-pty integrated as a bottom panel (VS Code-style). Run Claude Code directly from the app instead of switching to an external terminal. Multiple terminal tabs. Session resume.
-
----
-
 ## Dashboard Persistence
 **Status:** Planned
 **Complexity:** Medium
 
 Save/restore dashboard state per project. Multiple named dashboards per project. Each dashboard = a saved view with open tabs, selected agent, scroll positions.
-
----
-
-## Project-Scoped Chat
-**Status:** Planned
-**Complexity:** Medium
-
-Chat with Claude Code in the context of a project but not tied to a specific agent. Appears in the main content area (not the GlobalChatModal). Useful for general project questions.
 
 ---
 

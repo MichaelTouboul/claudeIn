@@ -6,14 +6,6 @@ Maintenance / cleanup tasks — not features, not bugs. Companion to `docs/featu
 
 ---
 
-## Batch captured 2026-05-31
-
-### Dead-code sweep
-**Effort:** Low–Medium · **Status:** Done (2026-05-31) — reusable agent at `.claude/agents/dead-code-sweeper.md`
-Run an agent to find and remove **dead code** across the repo (unused exports, unreferenced components/services/types, orphaned files left over from removed features such as the agent-link removal and the deleted `ActiveSessions`/`OpenChatsList`).
-
----
-
 ## Batch captured 2026-06-01
 
 > **Agent frontmatter format (applies to every "create agent" chore below):** new agent definitions MUST follow the format documented at
