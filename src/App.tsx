@@ -1,12 +1,10 @@
-import { Bot, MessageSquare } from "lucide-react";
+import { Bot } from "lucide-react";
 import { useEffect, useMemo,useRef,useState } from "react";
 
-import { Button } from "@/components/_ui/Button";
 import { BottomPanel } from "@/components/BottomPanel/BottomPanel";
 import { GlobalChatModal } from "@/components/GlobalChatModal/GlobalChatModal";
+import { Header } from "@/components/Header/Header";
 import { ProjectDashboard } from '@/components/ProjectDashboard/ProjectDashboard';
-import { ProjectSwitcher } from "@/components/ProjectSwitcher/ProjectSwitcher";
-import { StatsBar } from "@/components/StatsBar/StatsBar";
 import { WorkspaceBar } from "@/components/Workspace/WorkspaceBar/WorkspaceBar";
 
 import { useProjects } from "./hooks/useProjects";
@@ -81,34 +79,15 @@ export default function App() {
 
   return (
     <div className="h-full flex flex-col surface-grain" style={{ background: 'var(--color-surface-0)', color: 'var(--color-text-primary)' }}>
-      {/* Top bar */}
-      <div className="titlebar-drag flex items-center gap-4 pl-20 pr-4 py-2" style={{ background: 'var(--color-surface-1)', borderBottom: '1px solid var(--color-border)' }}>
-        <div className="flex items-center gap-2.5">
-          <Bot size={16} className="text-accent" />
-          <span className="text-[13px] font-semibold tracking-[0.02em]" style={{ fontFamily: 'var(--font-mono)' }}>Agent Manager</span>
-        </div>
-
-        <ProjectSwitcher
-          projects={projects}
-          selected={selectedProject}
-          onSelect={openDashboard}
-        />
-
-        <div className="flex-1" />
-
-        <StatsBar stats={stats} activeCount={activeCount} connected={connected} />
-
-        <Button
-          intent="outline"
-          size="sm"
-          onClick={() => setChatOpen(true)}
-          className="glow-cyan text-accent"
-          style={{ fontFamily: 'var(--font-mono)', border: '1px solid rgba(6, 182, 212, 0.25)' }}
-        >
-          <MessageSquare size={12} />
-          Chat
-        </Button>
-      </div>
+      <Header
+        projects={projects}
+        selectedProject={selectedProject}
+        onSelectProject={openDashboard}
+        stats={stats}
+        activeCount={activeCount}
+        connected={connected}
+        onOpenChat={() => setChatOpen(true)}
+      />
 
       {/* Main content */}
       <div className="flex-1 min-h-0 flex flex-col">
