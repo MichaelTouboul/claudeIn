@@ -5,7 +5,7 @@ import { useEventsStore } from '@/store/useEventsStore';
 import { useFavoritesStore } from '@/store/useFavoritesStore';
 import type { AgentFile } from '@/types/agent.types';
 
-import { colorMap } from '../utils';
+import { colorMap } from '../../utils';
 
 export type AgentRowProps = {
   agent: AgentFile;
