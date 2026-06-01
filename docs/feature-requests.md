@@ -226,3 +226,23 @@ End-to-end UI verification for the Electron app using Playwright's Electron API 
 
 **Possible integration:**
 - Wire a UI-verification step into the dev workflow — launch Playwright-Electron, assert the layout renders, capture a screenshot for review (e.g. via the `verify` skill or a dedicated E2E smoke test).
+
+---
+
+## Batch captured 2026-06-01
+
+### Rename the app + logo
+**Scope:** MVP · **Effort:** Low (rename) + Medium (logo) · **Status:** Idea · naming decision
+Rename the app to **ClaudIn** or **ClaudeIn** (to decide) and create a **logo**. Merge this with the **Header global usage bar** feature request (they touch the same header). Covers product name across `package.json`, window title, header branding, about.
+
+### Upload button → dropdown of upload types
+**Scope:** MVP · **Effort:** Low–Medium · **Status:** Idea
+The upload button next to the prompt input should become a **dropdown** offering the classic upload sources/types (image, file, folder, paste, …) instead of a single action.
+
+### Footer status band (VS Code-style)
+**Scope:** MVP · **Effort:** Low · **Status:** Idea
+A thin designed **footer band** at the bottom of the window showing status — e.g. the current **git branch** — like the VS Code / "Visual" status bar. Pairs with the component-restructure chore (the shell gets a `Footer`).
+
+### Audio prompt input
+**Scope:** Post-MVP · **Effort:** Medium–High · **Status:** Idea
+Let the user dictate a prompt by **audio** (speech-to-text) instead of typing.

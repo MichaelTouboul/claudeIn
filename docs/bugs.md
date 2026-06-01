@@ -27,3 +27,11 @@ There are "Tree" and "Session" surfaces whose purpose is unclear (user doesn't k
 ### Chat input placeholder overlaps the format bar
 **Effort:** Low · **Status:** Open · UI
 In the Lexical chat input, the placeholder text ("Type a prompt or / for commands…") **overlaps/collides with the formatting toolbar** (reference screenshot 2026-05-31). Fix the layering/positioning so placeholder and toolbar don't render on top of each other.
+
+---
+
+## Batch captured 2026-06-01
+
+### App must fit the window cleanly (no scroll; mac title bar overlap)
+**Effort:** Medium · **Status:** Open · UI
+The app must render **fully inside the window**, like Cursor — the user should **never have to scroll** to reveal the header or footer; the shell should be a fixed full-height layout (header / body / footer) with only inner panes scrolling. Also: the **macOS window title bar overlaps/crushes header UI elements** — reserve the traffic-light/title-bar zone (e.g. `titleBarStyle: 'hiddenInset'` + safe-area padding) so nothing renders under it. Pairs with the component-restructure chore (App shell) and the Footer feature.
