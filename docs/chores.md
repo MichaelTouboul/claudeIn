@@ -27,3 +27,7 @@ App
 ```
 
 Spec: `docs/superpowers/specs/2026-06-01-app-shell-restructure-design.md`. Pairs with the sidebar-full-height + window-framing bugs and the Footer feature.
+
+### `_ui/` primitive consolidation (Radix + ARIA)
+**Effort:** Medium–High · **Status:** In progress (spec + plan done; executing in a worktree)
+From the `ui-promotion-finder` audit: fix the `_ui/InlineImage` `window.api` leak (→ `useImageDataUrl` hook); promote `ContextBar` to `_ui/` over Radix Progress; replace the hand-rolled overlays (`GlobalChatModal`, `UtilityPanel`) with a Radix-backed `_ui/Dialog` (center + drawer); replace the three triplicated outside-click dropdowns (`ProjectSwitcher`, `ProjectPicker`, `AddTabMenu`) with `_ui/Popover`. ARIA via Radix + the `aria-requirements` skill. Spec: `docs/superpowers/specs/2026-06-01-primitive-consolidation-design.md`. Follow-up: `accessibility-auditor` + `dead-code-sweeper` after merge. **Deferred:** `_ui/Tabs`→Radix Tabs, `EditField`→Select, `ResizeHandle`→Separator.
