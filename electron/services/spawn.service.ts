@@ -6,6 +6,17 @@ import type { SpawnSession, ChatMessage, StreamEvent } from "../types/spawn.type
 
 const sessions = new Map<string, { session: SpawnSession; process: ChildProcess }>();
 
+/**
+ * Steering appended to every spawned session via Claude Code's first-class
+ * `--append-system-prompt`. Suppresses the default reflexive "want me to…?" /
+ * follow-up-question pattern at the end of every turn. This is the supported
+ * mechanism for tone control — not a post-processing filter on the output.
+ */
+const NO_FOLLOWUP_SYSTEM_PROMPT =
+  "Do not end your responses with follow-up questions, offers of further help, " +
+  "or \"want me to…?\" style prompts. Stop once the task or answer is complete. " +
+  "Only ask a question when you genuinely need information to proceed.";
+
 function parseStreamLine(line: string): StreamEvent | null {
   try {
     return JSON.parse(line);
@@ -38,6 +49,7 @@ export function spawnAgent(agentName: string, mission: string, cwd?: string, res
     "--output-format", "stream-json",
     "--verbose",
     "--max-turns", "50",
+    "--append-system-prompt", NO_FOLLOWUP_SYSTEM_PROMPT,
   ];
 
   if (resumeSessionId) {
