@@ -4,6 +4,7 @@ import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
 import { DashboardSurface } from './DashboardSurface/DashboardSurface';
 import { InternalTabBar } from './InternalTabBar/InternalTabBar';
+import { LauncherView } from './LauncherView/LauncherView';
 import { UtilityPanel } from './UtilityPanel/UtilityPanel';
 
 export function Dashboard() {
@@ -19,7 +20,7 @@ export function Dashboard() {
       {isLauncher ? null : <InternalTabBar onOpenPanel={() => setPanelOpen(true)} />}
 
       <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
-        {isLauncher && active ? <div data-launcher-placeholder={active.id} /> : null}
+        {isLauncher && active ? <LauncherView dashboardId={active.id} /> : null}
         <DashboardSurface />
       </div>
 
