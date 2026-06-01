@@ -1,5 +1,5 @@
 import { ChevronRight, Loader2, Paperclip, Send, X } from 'lucide-react';
-import { type RefObject, useEffect, useState } from 'react';
+import { type RefObject, useState } from 'react';
 
 import { Button } from '@/components/_ui/Button';
 import type { SpawnSession } from '@/types/spawn.types';
@@ -43,13 +43,10 @@ export function AgentChatInput({
   const [plainText, setPlainText] = useState('');
   const menus = useInputMenus(plainText);
 
-  // When the agent surfaces a user-interaction prompt (waitingInput flips true),
-  // auto-focus the editor so the user can respond without clicking first.
-  useEffect(() => {
-    if (waitingInput) {
-      editorRef.current?.focus();
-    }
-  }, [waitingInput, editorRef]);
+  // Auto-focus when a turn finishes lives in AgentChat (on `spawn_exit`), since
+  // the old `waitingInput`-based effect here never fired: `claude --print` is
+  // one-shot, so the backend never emits `spawn_input_request`. `waitingInput`
+  // is still consumed below for styling and the placeholder.
 
   const handleSelect = (id: string) => {
     if (menus.kind === 'slash') {
