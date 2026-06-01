@@ -8,7 +8,7 @@ import { ListPlugin } from '@lexical/react/LexicalListPlugin';
 import { MarkdownShortcutPlugin } from '@lexical/react/LexicalMarkdownShortcutPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
-import { $getRoot, type LexicalEditor } from 'lexical';
+import { $getRoot, $getSelection, $isRangeSelection, $isTextNode, type LexicalEditor } from 'lexical';
 import { type Ref, useEffect, useImperativeHandle } from 'react';
 
 import { CHAT_TRANSFORMERS } from './markdownTransformers';
@@ -16,13 +16,20 @@ import { SUBMIT_INTENT, SubmitPlugin } from './plugins/SubmitPlugin';
 import { editorToMarkdown } from './serialize';
 import { Toolbar } from './Toolbar';
 
-export type RichEditorHandle = { clear: () => void; focus: () => void };
+export type RichEditorHandle = {
+  clear: () => void;
+  focus: () => void;
+  /** Replace the trailing `@token` at the caret with `@name ` (mention insertion). */
+  insertMention: (name: string) => void;
+};
 
 export type RichEditorProps = {
   onChange: (markdown: string, plainText: string) => void;
   onSubmit: () => void;
-  /** Returns true if Enter was consumed by the slash popup. */
+  /** Returns true if Enter was consumed by the slash/mention menu. */
   onEnter: () => boolean;
+  /** Returns true if an ↑/↓/Esc key was consumed by an open menu. */
+  onNavKey: (key: string) => boolean;
   handleRef: Ref<RichEditorHandle>;
   placeholder: string;
 };
@@ -51,13 +58,27 @@ function HandlePlugin({ handleRef }: { handleRef: Ref<RichEditorHandle> }) {
     () => ({
       clear: () => editor.update(() => $getRoot().clear()),
       focus: () => editor.focus(),
+      insertMention: (name: string) =>
+        editor.update(() => {
+          const selection = $getSelection();
+          if (!$isRangeSelection(selection) || !selection.isCollapsed()) return;
+          const node = selection.anchor.getNode();
+          if (!$isTextNode(node)) return;
+          const text = node.getTextContent();
+          const offset = selection.anchor.offset;
+          // Find the `@` that opens the token the caret sits in.
+          const at = text.slice(0, offset).lastIndexOf('@');
+          if (at < 0) return;
+          selection.setTextNodeRange(node, at, node, offset);
+          selection.insertText(`@${name} `);
+        }),
     }),
     [editor]
   );
   return null;
 }
 
-export function RichEditor({ onChange, onSubmit, onEnter, handleRef, placeholder }: RichEditorProps) {
+export function RichEditor({ onChange, onSubmit, onEnter, onNavKey, handleRef, placeholder }: RichEditorProps) {
   return (
     <LexicalComposer
       initialConfig={{
@@ -94,7 +115,7 @@ export function RichEditor({ onChange, onSubmit, onEnter, handleRef, placeholder
         <ListPlugin />
         <HistoryPlugin />
         <MarkdownShortcutPlugin transformers={CHAT_TRANSFORMERS} />
-        <SubmitPlugin onEnter={onEnter} />
+        <SubmitPlugin onEnter={onEnter} onNavKey={onNavKey} />
         <SubmitBridge onSubmit={onSubmit} />
         <HandlePlugin handleRef={handleRef} />
         <OnChangePlugin

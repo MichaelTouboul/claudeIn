@@ -1,11 +1,12 @@
 import { ChevronRight, Loader2, Paperclip, Send, X } from 'lucide-react';
-import { type RefObject, useEffect } from 'react';
+import { type RefObject, useEffect, useState } from 'react';
 
 import { Button } from '@/components/_ui/Button';
 import type { SpawnSession } from '@/types/spawn.types';
 
 import { RichEditor, type RichEditorHandle } from '../RichEditor/RichEditor';
-import type { SlashCommand } from '../slashCommands';
+import { InputMenu } from './InputMenu';
+import { useInputMenus } from './useInputMenus';
 
 export type AttachedFile = { path: string; dataUrl: string | null };
 
@@ -16,13 +17,9 @@ export type AgentChatInputProps = {
   isRunning: boolean;
   spawning: boolean;
   session: SpawnSession | null;
-  showSlash: boolean;
-  slashIndex: number;
-  filteredCommands: SlashCommand[];
   editorRef: RefObject<RichEditorHandle | null>;
   onInputChange: (val: string) => void;
-  onPlainTextChange: (plain: string) => void;
-  onSlashEnter: () => boolean;
+  /** Execute a chosen slash command (e.g. `/compact`). */
   onSelectSlash: (cmd: string) => void;
   onRemoveAttachment: (index: number) => void;
   onAttach: () => void;
@@ -36,18 +33,16 @@ export function AgentChatInput({
   isRunning,
   spawning,
   session,
-  showSlash,
-  slashIndex,
-  filteredCommands,
   editorRef,
   onInputChange,
-  onPlainTextChange,
-  onSlashEnter,
   onSelectSlash,
   onRemoveAttachment,
   onAttach,
   onSend,
 }: AgentChatInputProps) {
+  const [plainText, setPlainText] = useState('');
+  const menus = useInputMenus(plainText);
+
   // When the agent surfaces a user-interaction prompt (waitingInput flips true),
   // auto-focus the editor so the user can respond without clicking first.
   useEffect(() => {
@@ -55,6 +50,45 @@ export function AgentChatInput({
       editorRef.current?.focus();
     }
   }, [waitingInput, editorRef]);
+
+  const handleSelect = (id: string) => {
+    if (menus.kind === 'slash') {
+      onSelectSlash(id);
+      editorRef.current?.clear();
+    } else if (menus.kind === 'mention') {
+      editorRef.current?.insertMention(id);
+    }
+    editorRef.current?.focus();
+  };
+
+  // Enter inside an open menu = select the highlight (consumes the key).
+  const handleEnter = (): boolean => {
+    if (menus.kind && menus.activeId) {
+      handleSelect(menus.activeId);
+      return true;
+    }
+    return false;
+  };
+
+  // ↑/↓ to move, Esc to dismiss; only while a menu is open. Other keys pass through.
+  const handleNavKey = (key: string): boolean => {
+    if (!menus.kind) return false;
+    if (key === 'ArrowDown') {
+      menus.move(1);
+      return true;
+    }
+    if (key === 'ArrowUp') {
+      menus.move(-1);
+      return true;
+    }
+    if (key === 'Escape') {
+      // Dismiss by clearing the open token: clearing the editor is too aggressive,
+      // so we simply blur the menu via a focus bounce (re-render hides it on next type).
+      editorRef.current?.focus();
+      return true;
+    }
+    return false;
+  };
 
   return (
     <div className={`relative border-t p-3 ${waitingInput ? "border-yellow-500/50 bg-yellow-500/5" : "border-border"}`}>
@@ -101,22 +135,14 @@ export function AgentChatInput({
         </div>
       ) : null}
 
-      {/* Slash command popup */}
-      {showSlash && filteredCommands.length > 0 ? (
-        <div className="absolute bottom-full left-3 right-3 mb-1 bg-surface-2 border border-border rounded-lg shadow-xl max-h-48 overflow-y-auto py-1">
-          {filteredCommands.map((cmd, i) => (
-            <button
-              key={cmd.cmd}
-              onClick={() => onSelectSlash(cmd.cmd)}
-              className={`w-full flex items-center gap-3 px-3 py-1.5 text-xs transition-colors ${
-                i === slashIndex ? "bg-accent/20 text-accent" : "text-fg hover:bg-surface-3"
-              }`}
-            >
-              <span className="font-mono text-yellow-400 w-28 text-left">{cmd.cmd}</span>
-              <span className="text-fg-muted">{cmd.desc}</span>
-            </button>
-          ))}
-        </div>
+      {/* Slash / mention command menu (mutually exclusive). */}
+      {menus.kind ? (
+        <InputMenu
+          groups={menus.groups}
+          activeIndex={menus.activeIndex}
+          mono={menus.kind === 'slash'}
+          onSelect={handleSelect}
+        />
       ) : null}
 
       <div className="flex gap-2 items-end">
@@ -125,13 +151,14 @@ export function AgentChatInput({
         </div>
         <RichEditor
           handleRef={editorRef}
-          placeholder={waitingInput ? "Type your response (yes / no / ...)..." : session && isRunning ? "Send a message..." : "Type a prompt or / for commands..."}
+          placeholder={waitingInput ? "Type your response (yes / no / ...)..." : session && isRunning ? "Send a message..." : "Type a prompt, / for commands or @ to mention..."}
           onChange={(markdown, plain) => {
             onInputChange(markdown);
-            onPlainTextChange(plain);
+            setPlainText(plain);
           }}
           onSubmit={onSend}
-          onEnter={onSlashEnter}
+          onEnter={handleEnter}
+          onNavKey={handleNavKey}
         />
         <Button intent="ghost" size="icon" onClick={onAttach} title="Attach file">
           <Paperclip size={16} />

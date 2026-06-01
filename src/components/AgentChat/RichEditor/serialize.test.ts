@@ -4,7 +4,7 @@ import { createEditor } from 'lexical';
 import { describe, expect, it } from 'vitest';
 
 import { CHAT_TRANSFORMERS } from './markdownTransformers';
-import { editorToMarkdown, matchSlashQuery } from './serialize';
+import { editorToMarkdown, matchMentionQuery, matchSlashQuery } from './serialize';
 
 function editorFromMarkdown(md: string) {
   const editor = createEditor({
@@ -46,5 +46,22 @@ describe('matchSlashQuery', () => {
     expect(matchSlashQuery('hello /comp')).toBeNull();
     expect(matchSlashQuery('/comp x')).toBeNull();
     expect(matchSlashQuery('text')).toBeNull();
+  });
+});
+
+describe('matchMentionQuery', () => {
+  it('returns the token for a trailing @ at the caret', () => {
+    expect(matchMentionQuery('@')).toBe('');
+    expect(matchMentionQuery('@co')).toBe('co');
+    expect(matchMentionQuery('hello @code')).toBe('code');
+    expect(matchMentionQuery('a b @my-agent')).toBe('my-agent');
+  });
+  it('returns null when the @ token is not at the caret', () => {
+    expect(matchMentionQuery('@code here')).toBeNull();
+    expect(matchMentionQuery('plain text')).toBeNull();
+    expect(matchMentionQuery('')).toBeNull();
+  });
+  it('does not fire mid-word (email-like) usage', () => {
+    expect(matchMentionQuery('user@host')).toBeNull();
   });
 });
