@@ -23,6 +23,7 @@ export function EditField({ field, value, onChange }: EditFieldProps) {
       <select
         value={String(value ?? "")}
         onChange={(e) => onChange(e.target.value || undefined)}
+        aria-label={field.label}
         className={base}
         style={fieldStyle}
       >
@@ -39,6 +40,7 @@ export function EditField({ field, value, onChange }: EditFieldProps) {
         type="number"
         value={value !== undefined && value !== null ? String(value) : ""}
         onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
+        aria-label={field.label}
         className={base}
         style={fieldStyle}
         placeholder="—"
@@ -51,6 +53,7 @@ export function EditField({ field, value, onChange }: EditFieldProps) {
       <textarea
         value={String(value ?? "")}
         onChange={(e) => onChange(e.target.value)}
+        aria-label={field.label}
         rows={3}
         className={`${base} resize-y`}
         style={fieldStyle}
@@ -63,6 +66,7 @@ export function EditField({ field, value, onChange }: EditFieldProps) {
       <select
         value={value ? "true" : "false"}
         onChange={(e) => onChange(e.target.value === "true")}
+        aria-label={field.label}
         className={base}
         style={fieldStyle}
       >
@@ -78,6 +82,7 @@ export function EditField({ field, value, onChange }: EditFieldProps) {
       type="text"
       value={strVal}
       onChange={(e) => onChange(e.target.value)}
+      aria-label={field.label}
       className={base}
       style={fieldStyle}
       placeholder="—"

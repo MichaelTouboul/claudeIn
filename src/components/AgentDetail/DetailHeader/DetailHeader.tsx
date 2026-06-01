@@ -121,12 +121,12 @@ export function DetailHeader({
                   >
                     Delete
                   </Button>
-                  <Button intent="ghost" size="icon" onClick={onCancelDelete}>
+                  <Button intent="ghost" size="icon" onClick={onCancelDelete} title="Cancel delete">
                     <X size={14} />
                   </Button>
                 </div>
               ) : (
-                <Button intent="danger" size="icon" onClick={onConfirmDelete}>
+                <Button intent="danger" size="icon" onClick={onConfirmDelete} title="Delete agent">
                   <Trash2 size={14} />
                 </Button>
               )}
