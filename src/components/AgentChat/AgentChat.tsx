@@ -48,6 +48,8 @@ export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: A
   claudeSessionIdRef.current = claudeSessionId;
   const pendingUserMsgs = useRef<Set<string>>(new Set());
   const autoSentRef = useRef(false);
+  const queueRef = useRef<QueueItem[]>(queue);
+  queueRef.current = queue;
 
   const isRunning = session?.status === 'running';
 
@@ -63,6 +65,19 @@ export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: A
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages.length, queue.length]);
+
+  // After a turn finishes, land focus on this chat's input so the user can
+  // reply without clicking first. The app runs `claude --print` (one process
+  // per turn), so a turn completing == `spawn_exit`. Scoped to this instance's
+  // editorRef, so only the tab whose turn just finished gets focus. Guarded
+  // against a backgrounded window (document.hidden). Deferred to the next tick
+  // so focus lands after the DOM settles. Skipped while work auto-flows from
+  // the queue (the next turn is about to start).
+  const focusInputOnTurnComplete = () => {
+    if (queueRef.current.length > 0) return;
+    if (typeof document !== 'undefined' && document.hidden) return;
+    setTimeout(() => editorRef.current?.focus(), 0);
+  };
 
   const sendNextFromQueue = () => {
     setQueue((prev) => {
@@ -112,6 +127,7 @@ export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: A
         if (data.claudeSessionId) setClaudeSessionId(data.claudeSessionId);
         setWaitingInput(false);
         setAwaitingResponse(false);
+        focusInputOnTurnComplete();
       }
     });
     return cleanup;
