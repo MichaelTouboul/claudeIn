@@ -19,7 +19,6 @@ export function TerminalView({ projectPath }: TerminalViewProps) {
       fontWeight: 400,
       fontWeightBold: 600,
       lineHeight: 1.45,
-      letterSpacing: 0.2,
       cursorBlink: true,
       theme: {
         background: token('--color-surface-0', '#06080c'),
