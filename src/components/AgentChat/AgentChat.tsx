@@ -22,12 +22,16 @@ type SpawnEvent =
 
 export type AgentChatProps = {
   agentName: string;
+  cwd?: string;
   resumeSessionId?: string;
   initialMessage?: string;
 };
 
-export function AgentChat({ agentName, resumeSessionId, initialMessage }: AgentChatProps) {
-  const projectPath = useAppStore((s) => s.selectedProject?.path);
+export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: AgentChatProps) {
+  const selectedProjectPath = useAppStore((s) => s.selectedProject?.path);
+  // cwd is the authoritative spawn directory (threaded from dashboard.cwd).
+  // Legacy callers without a cwd prop fall back to the selected project path.
+  const projectPath = cwd ?? selectedProjectPath;
   const [session, setSession] = useState<SpawnSession | null>(null);
   const [claudeSessionId, setClaudeSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
