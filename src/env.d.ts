@@ -12,6 +12,8 @@ interface Window {
     updateMemoryFile: (agentName: string, fileName: string, content: string) => Promise<import("./types/agent.types").MemoryFile>;
     deleteMemoryFile: (agentName: string, fileName: string) => Promise<void>;
 
+    getHomeDir: () => Promise<string>;
+
     getProjects: (forceRefresh?: boolean) => Promise<import("./hooks/useProjects").Project[]>;
     getProject: (id: string) => Promise<import("./hooks/useProjects").Project | null>;
     getDashboard: (id: string) => Promise<import("./hooks/useProjects").Dashboard>;

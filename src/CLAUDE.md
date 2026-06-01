@@ -25,10 +25,10 @@ components/
 ├── Footer/                  ← thin status band (placeholder for now)
 └── Workspace/               ← middle shell
     ├── Workspace.tsx        ← Sidebar | DashboardArea (or project picker empty-state)
-    ├── WorkspaceBar/        ← project tabs    ProjectPicker/
+    ├── WorkspaceBar/        ← dashboard tabs (＋ opens a launcher dashboard)
     ├── Sidebar/             ← Activity + Library (ConversationList, PanelsArea, …)
     └── DashboardArea/       ← WorkspaceBar + Dashboard + Console
-        ├── Dashboard/       ← internal tabs + bodies (InternalTabBar, UtilityPanel, SkillDetail, ChatTab)
+        ├── Dashboard/       ← InternalTabBar, DashboardSurface (keep-alive tab bodies), LauncherView, UtilityPanel, SkillDetail, ChatTab
         └── Console/         ← terminal / events panel (TerminalView)
 ```
 

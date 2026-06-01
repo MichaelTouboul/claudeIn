@@ -1,15 +1,15 @@
-import { X } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
-import { ProjectPicker } from '../ProjectPicker/ProjectPicker';
+import { dashboardLabel } from './tabLabel';
 
 export function WorkspaceBar() {
   const dashboards = useWorkspaceStore((s) => s.dashboards);
   const activeId = useWorkspaceStore((s) => s.activeDashboardId);
   const setActive = useWorkspaceStore((s) => s.setActiveDashboard);
   const closeDashboard = useWorkspaceStore((s) => s.closeDashboard);
-  const openDashboard = useWorkspaceStore((s) => s.openDashboard);
+  const openLauncher = useWorkspaceStore((s) => s.openLauncher);
 
   if (dashboards.length === 0) return null;
 
@@ -34,7 +34,7 @@ export function WorkspaceBar() {
               className="text-xs truncate max-w-[160px] text-left cursor-pointer"
               style={{ color: isActive ? 'var(--color-text-primary)' : 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}
             >
-              {d.project.name}
+              {dashboardLabel(d)}
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); closeDashboard(d.id); }}
@@ -47,7 +47,17 @@ export function WorkspaceBar() {
           </div>
         );
       })}
-      <ProjectPicker onSelect={openDashboard} openIds={dashboards.map((d) => d.project.id)} />
+      <button
+        onClick={() => openLauncher()}
+        title="New tab"
+        aria-label="New tab"
+        className="flex items-center justify-center w-7 h-7 rounded-md transition-colors shrink-0"
+        style={{ color: 'var(--color-text-muted)' }}
+        onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-surface-2)')}
+        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+      >
+        <Plus size={15} />
+      </button>
     </div>
   );
 }

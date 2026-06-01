@@ -12,17 +12,32 @@ export type InternalTab = {
   skillId?: string;
 };
 
+export type DashboardScope =
+  | { kind: 'launcher' }
+  | { kind: 'project'; project: Project }
+  | { kind: 'user' };
+
 export type Dashboard = {
   id: string;
-  project: Project;
+  scope: DashboardScope;
+  cwd: string;
   tabs: InternalTab[];
   activeTabId: string;
 };
 
+export type LauncherChoice =
+  | { to: 'project'; project: Project }
+  | { to: 'discussion' }
+  | { to: 'agent'; agentName: string };
+
 type WorkspaceState = {
   dashboards: Dashboard[];
   activeDashboardId: string | null;
+  homeDir: string;
+  setHomeDir: (dir: string) => void;
   openDashboard: (project: Project) => string;
+  openLauncher: () => string;
+  resolveLauncher: (id: string, choice: LauncherChoice) => void;
   closeDashboard: (id: string) => void;
   setActiveDashboard: (id: string | null) => void;
   addTab: (tab: Omit<InternalTab, 'id'>) => string;
@@ -34,10 +49,17 @@ let counter = 0;
 let tabCounter = 0;
 const newTabId = () => `tab-${++tabCounter}`;
 const defaultChatTab = (): InternalTab => ({ id: newTabId(), kind: 'chat', title: 'Chat' });
+const chatTab = (title: string, agentName: string): InternalTab => ({
+  id: newTabId(), kind: 'chat', title, agentName,
+});
+
+function projectOf(scope: DashboardScope): Project | null {
+  return scope.kind === 'project' ? scope.project : null;
+}
 
 function syncSelectedProject(dashboards: Dashboard[], activeId: string | null): void {
   const active = dashboards.find((d) => d.id === activeId) ?? null;
-  useAppStore.getState().setSelectedProject(active ? active.project : null);
+  useAppStore.getState().setSelectedProject(active ? projectOf(active.scope) : null);
 }
 
 function mapActive(
@@ -51,9 +73,14 @@ function mapActive(
 export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   dashboards: [],
   activeDashboardId: null,
+  homeDir: '',
+
+  setHomeDir: (dir) => set({ homeDir: dir }),
 
   openDashboard: (project) => {
-    const existing = get().dashboards.find((d) => d.project.id === project.id);
+    const existing = get().dashboards.find(
+      (d) => d.scope.kind === 'project' && d.scope.project.id === project.id,
+    );
     if (existing) {
       set({ activeDashboardId: existing.id });
       syncSelectedProject(get().dashboards, existing.id);
@@ -61,10 +88,44 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     }
     const id = `dash-${++counter}`;
     const tab = defaultChatTab();
-    const dashboards = [...get().dashboards, { id, project, tabs: [tab], activeTabId: tab.id }];
+    const dashboard: Dashboard = {
+      id, scope: { kind: 'project', project }, cwd: project.path, tabs: [tab], activeTabId: tab.id,
+    };
+    const dashboards = [...get().dashboards, dashboard];
     set({ dashboards, activeDashboardId: id });
     syncSelectedProject(dashboards, id);
     return id;
+  },
+
+  openLauncher: () => {
+    const id = `dash-${++counter}`;
+    const dashboard: Dashboard = {
+      id, scope: { kind: 'launcher' }, cwd: '', tabs: [], activeTabId: '',
+    };
+    const dashboards = [...get().dashboards, dashboard];
+    set({ dashboards, activeDashboardId: id });
+    syncSelectedProject(dashboards, id);
+    return id;
+  },
+
+  resolveLauncher: (id, choice) => {
+    const home = get().homeDir;
+    const transform = (d: Dashboard): Dashboard => {
+      if (choice.to === 'project') {
+        const tab = defaultChatTab();
+        return {
+          ...d, scope: { kind: 'project', project: choice.project },
+          cwd: choice.project.path, tabs: [tab], activeTabId: tab.id,
+        };
+      }
+      const agentName = choice.to === 'agent' ? choice.agentName : '';
+      const title = choice.to === 'agent' ? choice.agentName : 'Discussion';
+      const tab = chatTab(title, agentName);
+      return { ...d, scope: { kind: 'user' }, cwd: home, tabs: [tab], activeTabId: tab.id };
+    };
+    const dashboards = get().dashboards.map((d) => (d.id === id ? transform(d) : d));
+    set({ dashboards });
+    syncSelectedProject(dashboards, get().activeDashboardId);
   },
 
   closeDashboard: (id) => {

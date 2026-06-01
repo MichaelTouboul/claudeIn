@@ -17,7 +17,12 @@ export default function App() {
   const { projects, loading: projectsLoading } = useProjects();
   const selectedProject = useAppStore((s) => s.selectedProject);
   const openDashboard = useWorkspaceStore((s) => s.openDashboard);
+  const setHomeDir = useWorkspaceStore((s) => s.setHomeDir);
   const loadDashboard = useDashboardStore((s) => s.load);
+
+  useEffect(() => {
+    void window.api.getHomeDir().then(setHomeDir);
+  }, [setHomeDir]);
 
   useEffect(() => {
     if (selectedProject?.id) {
