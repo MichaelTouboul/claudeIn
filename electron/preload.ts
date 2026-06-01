@@ -13,6 +13,8 @@ contextBridge.exposeInMainWorld("api", {
   deleteMemoryFile: (agentName: string, fileName: string) =>
     ipcRenderer.invoke("agents:memory:delete", agentName, fileName),
 
+  getHomeDir: () => ipcRenderer.invoke("system:home-dir"),
+
   getProjects: (forceRefresh?: boolean) => ipcRenderer.invoke("projects:list", forceRefresh),
   getProject: (id: string) => ipcRenderer.invoke("projects:get", id),
   getDashboard: (id: string) => ipcRenderer.invoke("projects:dashboard", id),
