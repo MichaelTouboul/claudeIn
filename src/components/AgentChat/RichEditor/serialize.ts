@@ -20,3 +20,11 @@ export function matchSlashQuery(text: string): string | null {
   const match = /^\/(\w*)$/.exec(text.trim());
   return match ? match[1] : null;
 }
+
+/** Mention detection: returns the query token following a trailing `@...` that the caret
+ *  is currently in (i.e. at the end of the text), else null. The `@` may sit at the start
+ *  of the text or follow whitespace, so we only react to the token being typed. */
+export function matchMentionQuery(text: string): string | null {
+  const match = /(?:^|\s)@([\w-]*)$/.exec(text);
+  return match ? match[1] : null;
+}

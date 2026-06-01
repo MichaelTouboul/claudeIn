@@ -9,8 +9,6 @@ import { AgentChatInput } from './AgentChatInput/AgentChatInput';
 import { AgentChatMessages } from './AgentChatMessages/AgentChatMessages';
 import { detectQuickReplies } from './quickReplies';
 import type { RichEditorHandle } from './RichEditor/RichEditor';
-import { matchSlashQuery } from './RichEditor/serialize';
-import { SLASH_COMMANDS } from './slashCommands';
 import type { QueueItem } from './types';
 
 type SpawnEvent =
@@ -37,9 +35,7 @@ export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: A
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [queue, setQueue] = useState<QueueItem[]>([]);
   const [input, setInput] = useState('');
-  const [plainText, setPlainText] = useState('');
   const [spawning] = useState(false);
-  const [slashIndex, setSlashIndex] = useState(0);
   const [waitingInput, setWaitingInput] = useState(false);
   const [awaitingResponse, setAwaitingResponse] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<Array<{ path: string; dataUrl: string | null }>>([]);
@@ -152,36 +148,13 @@ export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: A
     return detectQuickReplies(lastAssistantMsg.content);
   }, [lastAssistantMsg, messages]);
 
-  const slashQuery = matchSlashQuery(plainText);
-  const showSlash = slashQuery !== null;
-  const filteredCommands = slashQuery === null
-    ? []
-    : SLASH_COMMANDS.filter((c) => c.cmd.slice(1).startsWith(slashQuery));
-
-  useEffect(() => {
-    setSlashIndex(0);
-  }, [slashQuery]);
-
   const handleInputChange = (val: string) => {
     setInput(val);
   };
 
-  const handlePlainTextChange = (plain: string) => {
-    setPlainText(plain);
-  };
-
+  // Executing a slash command reuses the quick-reply path (sends the command text).
   const handleSelectSlash = (cmd: string) => {
     handleQuickReply(cmd);
-    editorRef.current?.clear();
-    editorRef.current?.focus();
-  };
-
-  const onSlashEnter = (): boolean => {
-    if (showSlash && filteredCommands.length > 0) {
-      handleSelectSlash(filteredCommands[slashIndex].cmd);
-      return true;
-    }
-    return false;
   };
 
   useEffect(() => {
@@ -206,9 +179,8 @@ export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: A
       <AgentChatInput
         input={input} attachedFiles={attachedFiles} waitingInput={waitingInput}
         isRunning={isRunning ?? false} spawning={spawning} session={session}
-        showSlash={showSlash} slashIndex={slashIndex} filteredCommands={filteredCommands}
-        editorRef={editorRef} onInputChange={handleInputChange} onPlainTextChange={handlePlainTextChange}
-        onSlashEnter={onSlashEnter} onSelectSlash={handleSelectSlash}
+        editorRef={editorRef} onInputChange={handleInputChange}
+        onSelectSlash={handleSelectSlash}
         onRemoveAttachment={(i) => setAttachedFiles((prev) => prev.filter((_, j) => j !== i))}
         onAttach={handleAttach} onSend={handleSend}
       />
