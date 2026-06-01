@@ -2,6 +2,7 @@ declare module '*.css';
 
 interface Window {
   api: {
+    platform: NodeJS.Platform;
     getAgents: () => Promise<import("./types/agent.types").AgentFile[]>;
     getAgent: (name: string) => Promise<import("./types/agent.types").AgentFile | null>;
     getFolders: () => Promise<string[]>;
