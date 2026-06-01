@@ -1,4 +1,4 @@
-import { ContextBar } from '@/components/ContextBar/ContextBar';
+import { ContextBar } from '@/components/_ui/ContextBar';
 import { CostDashboard } from '@/components/CostDashboard/CostDashboard';
 import { useEventsStore } from '@/store/useEventsStore';
 

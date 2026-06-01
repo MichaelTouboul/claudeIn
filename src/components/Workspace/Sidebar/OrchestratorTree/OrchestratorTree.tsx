@@ -1,7 +1,7 @@
 import { Cog, Network } from "lucide-react";
 
+import { ContextBar } from '@/components/_ui/ContextBar';
 import { AgentContextMenu } from '@/components/AgentContextMenu/AgentContextMenu';
-import { ContextBar } from '@/components/ContextBar/ContextBar';
 import { useProject } from '@/store/ProjectContext';
 import { useEventsStore } from '@/store/useEventsStore';
 import { EMPTY, useFavoritesStore } from '@/store/useFavoritesStore';
