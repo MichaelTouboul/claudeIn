@@ -11,11 +11,23 @@ export function TerminalView({ projectPath }: TerminalViewProps) {
 
   useEffect(() => {
     if (!hostRef.current) return;
+    const css = getComputedStyle(document.documentElement);
+    const token = (name: string, fallback: string) => css.getPropertyValue(name).trim() || fallback;
     const term = new Terminal({
-      fontFamily: 'var(--font-mono), monospace',
-      fontSize: 12,
+      fontFamily: "'JetBrains Mono', var(--font-mono), monospace",
+      fontSize: 13,
+      fontWeight: 400,
+      fontWeightBold: 600,
+      lineHeight: 1.45,
+      letterSpacing: 0.2,
       cursorBlink: true,
-      theme: { background: '#06080c', foreground: '#e2e8f0', cursor: '#06b6d4' },
+      theme: {
+        background: token('--color-surface-0', '#06080c'),
+        foreground: token('--color-text-primary', '#e2e8f0'),
+        cursor: token('--color-accent', '#06b6d4'),
+        cursorAccent: token('--color-surface-0', '#06080c'),
+        selectionBackground: token('--color-accent-dim', 'rgba(6,182,212,0.12)'),
+      },
     });
     const fit = new FitAddon();
     term.loadAddon(fit);
@@ -42,5 +54,11 @@ export function TerminalView({ projectPath }: TerminalViewProps) {
     };
   }, [projectPath]);
 
-  return <div ref={hostRef} className="h-full w-full" style={{ background: 'var(--color-surface-0)' }} />;
+  return (
+    <div
+      ref={hostRef}
+      className="h-full w-full"
+      style={{ background: 'var(--color-surface-0)', padding: '10px 14px', boxSizing: 'border-box' }}
+    />
+  );
 }
