@@ -2,6 +2,7 @@ import { Bot } from "lucide-react";
 import { useEffect, useMemo,useRef,useState } from "react";
 
 import { BottomPanel } from "@/components/BottomPanel/BottomPanel";
+import { Footer } from "@/components/Footer/Footer";
 import { GlobalChatModal } from "@/components/GlobalChatModal/GlobalChatModal";
 import { Header } from "@/components/Header/Header";
 import { ProjectDashboard } from '@/components/ProjectDashboard/ProjectDashboard';
@@ -144,6 +145,8 @@ export default function App() {
 
         <BottomPanel events={events} agentColorMap={agentColorMap} projectPath={selectedProject?.path ?? null} />
       </div>
+
+      <Footer />
 
       {chatOpen ? <GlobalChatModal onClose={() => setChatOpen(false)} /> : null}
     </div>
