@@ -102,6 +102,7 @@ export async function initDb(): Promise<void> {
       tokens_in INTEGER DEFAULT 0,
       tokens_out INTEGER DEFAULT 0,
       cost_usd REAL DEFAULT 0,
+      model TEXT,
       created_at TEXT DEFAULT (datetime('now'))
     );
     CREATE TABLE IF NOT EXISTS missions (
@@ -132,4 +133,20 @@ export async function initDb(): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_missions_status ON missions(status);
     CREATE INDEX IF NOT EXISTS idx_favorites_project ON favorites(project_id);
   `);
+
+  runMigrations();
+}
+
+// Idempotent schema migrations for existing DBs. CREATE TABLE IF NOT EXISTS does
+// not alter a table that already exists, so additive columns are applied here by
+// inspecting PRAGMA table_info and only ALTERing when the column is absent.
+function runMigrations(): void {
+  const eventColumns = wrapper
+    .prepare("PRAGMA table_info(events)")
+    .all()
+    .map((row) => row.name);
+
+  if (!eventColumns.includes("model")) {
+    wrapper.exec("ALTER TABLE events ADD COLUMN model TEXT");
+  }
 }

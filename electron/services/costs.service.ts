@@ -37,6 +37,23 @@ export function getCostsByAgent(days = 30) {
     .all(days);
 }
 
+export function getCostsByModel(days = 30) {
+  return getDb()
+    .prepare(
+      `SELECT
+      COALESCE(model, 'unknown') AS model,
+      COALESCE(SUM(tokens_in), 0) AS tokens_in,
+      COALESCE(SUM(tokens_out), 0) AS tokens_out,
+      COALESCE(SUM(cost_usd), 0) AS cost_usd,
+      COUNT(*) AS events_count
+    FROM events
+    WHERE created_at > datetime('now', '-' || ? || ' days')
+    GROUP BY COALESCE(model, 'unknown')
+    ORDER BY cost_usd DESC`
+    )
+    .all(days);
+}
+
 export function getCostsByAgentPerDay(days = 30) {
   return getDb()
     .prepare(

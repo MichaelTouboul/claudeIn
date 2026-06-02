@@ -38,3 +38,11 @@ export type CostsByTool = {
   cost_usd: number;
   call_count: string;
 };
+
+export type CostsByModel = {
+  model: string;
+  tokens_in: string;
+  tokens_out: string;
+  cost_usd: number;
+  events_count: string;
+};

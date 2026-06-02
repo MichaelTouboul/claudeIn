@@ -41,6 +41,7 @@ contextBridge.exposeInMainWorld("api", {
   getCostsByAgent: (days?: number) => ipcRenderer.invoke("costs:by-agent", days),
   getCostsByAgentPerDay: (days?: number) => ipcRenderer.invoke("costs:by-agent-day", days),
   getCostsByTool: (days?: number) => ipcRenderer.invoke("costs:by-tool", days),
+  getCostsByModel: (days?: number) => ipcRenderer.invoke("costs:by-model", days),
 
   getFavorites: (projectId: string) => ipcRenderer.invoke("favorites:list", projectId),
   addFavorite: (projectId: string, type: string, name: string) =>
