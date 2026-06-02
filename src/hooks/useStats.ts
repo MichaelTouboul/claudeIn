@@ -10,29 +10,15 @@ export type Stats = {
   cost_today: number;
 };
 
-export type AgentStats = {
-  agent_name: string;
-  events_count: string;
-  tokens_in: string;
-  tokens_out: string;
-  cost_usd: number;
-  last_active: string;
-};
-
 export function useStats(refreshTrigger?: number) {
   const [stats, setStats] = useState<Stats | null>(null);
-  const [agentStats, setAgentStats] = useState<AgentStats[]>([]);
 
   const refresh = useCallback(async () => {
     try {
-      const [s, a] = await Promise.all([
-        fetch("/api/events/stats").then((r) => r.json()),
-        fetch("/api/events/stats/agents").then((r) => r.json()),
-      ]);
+      const s = await window.api.getStats();
       setStats(s);
-      setAgentStats(a);
     } catch {
-      // stats endpoint may not be available; ignore silently
+      // stats may not be available; ignore silently
     }
   }, []);
 
@@ -40,5 +26,5 @@ export function useStats(refreshTrigger?: number) {
     refresh();
   }, [refresh, refreshTrigger]);
 
-  return { stats, agentStats, refresh };
+  return { stats, refresh };
 }
