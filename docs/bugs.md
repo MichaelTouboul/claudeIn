@@ -8,9 +8,9 @@ Known defects to fix. Raw memo — not prioritized. Companion to `docs/feature-r
 
 ## Open
 
-### Deleting an agent from its detail tab is a no-op (and leaves a stale tab)
-**Effort:** Low · **Status:** Open (2026-06-02)
-In `src/components/Workspace/DashboardArea/Dashboard/DashboardSurface/TabBody.tsx`, the `agent` branch renders `<AgentDetail … onDelete={() => {}} />` — `onDelete` is a no-op, so the delete-confirm flow in `AgentDetail` (`DetailHeader` → `handleDelete`) does nothing. The deletion logic already exists as a store action (`useDashboardStore.deleteAgent`, used by `Sidebar.tsx`), so the fix is to wire `onDelete` in `TabBody` directly to that action (no prop-drilling through Workspace). Second, related issue: after deletion the `agent` internal tab stays open and falls through to `NotFound` ("Agent not found in this project.") — the tab should be closed/removed in the same step (via `useWorkspaceStore`).
+### Deleting an agent from its detail tab leaves a stale tab (no-op part FIXED)
+**Effort:** Low · **Status:** Partially fixed (2026-06-02)
+The `onDelete` **no-op is fixed**: the renderer-wiring slice (commit on `15986b2c`) wired `TabBody`'s `onDelete` to `useDashboardStore.deleteAgent` (was `() => {}`), so deletion now actually runs and — via the live agents mirror — the agent disappears from the lists without a manual refresh. **Remaining:** after deletion the `agent` internal tab stays open and falls through to `NotFound` ("Agent not found…") — it should be auto-closed/removed in the same step (via `useWorkspaceStore`). Low priority.
 
 ---
 
