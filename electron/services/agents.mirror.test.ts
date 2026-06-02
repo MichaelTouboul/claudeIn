@@ -7,7 +7,11 @@ import path from "path";
 // Mock broadcast now so it's in place for Phase 3's watch test too.
 vi.mock("./broadcast", () => ({ broadcast: vi.fn() }));
 
-import { getAgents } from "./agents.mirror";
+import { broadcast } from "./broadcast";
+import { getAgents, unwatchAgents, watchAgents } from "./agents.mirror";
+import type { AgentsSnapshot } from "../types/agents-mirror.types";
+
+const broadcastMock = vi.mocked(broadcast);
 
 let tmpHome: string;
 let prevHome: string | undefined;
@@ -19,12 +23,37 @@ beforeEach(() => {
   process.env.HOME = tmpHome;
   userAgentsDir = path.join(tmpHome, ".claude", "agents");
   fs.mkdirSync(userAgentsDir, { recursive: true });
+  broadcastMock.mockClear();
 });
 
 afterEach(() => {
+  unwatchAgents(); // always tear down watchers/timers to avoid leaks
   process.env.HOME = prevHome;
   fs.rmSync(tmpHome, { recursive: true, force: true });
 });
+
+function waitFor(predicate: () => boolean, timeout = 3000): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+    const tick = () => {
+      if (predicate()) return resolve();
+      if (Date.now() - start > timeout) return reject(new Error("timeout"));
+      setTimeout(tick, 20);
+    };
+    tick();
+  });
+}
+
+interface AgentsChangedPush {
+  type?: string;
+  snapshot?: AgentsSnapshot;
+}
+
+function changedPushes(): AgentsChangedPush[] {
+  return broadcastMock.mock.calls
+    .map(([d]) => d as AgentsChangedPush)
+    .filter((d) => d.type === "agents_changed");
+}
 
 function writeAgent(dir: string, file: string, frontmatter: Record<string, unknown>, body = "x") {
   fs.mkdirSync(dir, { recursive: true });
@@ -85,5 +114,26 @@ describe("agents.mirror getAgents", () => {
     fs.rmSync(userAgentsDir, { recursive: true, force: true });
     expect(() => getAgents()).not.toThrow();
     expect(getAgents().agents).toEqual([]);
+  });
+});
+
+describe("agents.mirror watchAgents", () => {
+  it("broadcasts a recomputed snapshot when a watched .md changes (incl. nested)", async () => {
+    watchAgents();
+    writeAgent(path.join(userAgentsDir, "sub"), "fresh.md", { name: "fresh", description: "F" });
+    await waitFor(() =>
+      changedPushes().some((d) => d.snapshot?.agents.some((a) => a.id === "fresh")),
+    );
+    const push = changedPushes().find((d) => d.snapshot?.agents.some((a) => a.id === "fresh"));
+    expect(push?.snapshot?.agents.find((a) => a.id === "fresh")?.scope).toBe("user");
+  });
+
+  it("does not re-broadcast when the snapshot is unchanged (diff guard)", async () => {
+    writeAgent(userAgentsDir, "alpha.md", { name: "alpha", description: "A" });
+    watchAgents();
+    // Re-write byte-identical content → snapshot unchanged → no push.
+    writeAgent(userAgentsDir, "alpha.md", { name: "alpha", description: "A" });
+    await new Promise((r) => setTimeout(r, 400)); // past the 150ms debounce
+    expect(changedPushes().length).toBe(0);
   });
 });

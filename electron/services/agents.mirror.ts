@@ -3,6 +3,7 @@ import os from "os";
 import path from "path";
 import matter from "gray-matter";
 import { unionAgents } from "./agents.union";
+import { broadcast } from "./broadcast";
 import type { AgentFrontmatter } from "../types/agent.types";
 import type { AgentScope, AgentSummary, AgentsSnapshot } from "../types/agents-mirror.types";
 
@@ -119,6 +120,87 @@ export function getAgents(projectPath?: string): AgentsSnapshot {
 
 // --- Watch + debounced live broadcast --------------------------------------
 //
-// Added in Phase 3: recursive `fs.watch` on both agents dirs, a module-level
-// RAM-only snapshot, a debounced recompute, a JSON.stringify diff guard, and a
-// `broadcast({ type: 'agents_changed', snapshot })` only on actual change.
+// Watch both agents dirs RECURSIVELY (`fs.watch(dir, { recursive: true })`) —
+// agents nest in subfolders, so the non-recursive `session.service.ts` idiom
+// would miss nested edits. Recursive `fs.watch` is supported on macOS (the
+// target platform) and is confirmed by the nested-write test in
+// agents.mirror.test.ts. Each callback filters to `.md` files (non-`.md` churn
+// and `memory/` writes are ignored — and even if a `memory/` write slips
+// through, the scan skips `memory/`, so the snapshot is unchanged and the diff
+// guard suppresses the broadcast). On a matching change we debounce (~150ms,
+// single trailing timer), recompute, diff against the last snapshot
+// (JSON.stringify deep-equality), and `broadcast({ type: 'agents_changed',
+// snapshot })` only when it actually changed. Mirrors the watch idiom in
+// `settings.service.ts`. The snapshot is RAM-only and is NEVER persisted.
+
+const DEBOUNCE_MS = 150;
+
+// Active directory watchers, keyed by absolute dir path (mirrors settings.service.ts).
+const watchers = new Map<string, fs.FSWatcher>();
+// The scope being watched (undefined = user only). Reset on unwatch.
+let currentScope: string | undefined;
+let isWatching = false;
+// Last broadcast snapshot, serialized for cheap deep-equality. RAM only.
+let lastSerialized: string | null = null;
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+/** The agents dirs to watch for the given scope. */
+function watchDirs(projectPath?: string): string[] {
+  const dirs = [userAgentsDir()];
+  if (projectPath) dirs.push(path.join(projectPath, ".claude", "agents"));
+  return dirs;
+}
+
+/** Debounced recompute → diff → broadcast on actual change. */
+function scheduleRecompute(): void {
+  if (debounceTimer) clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    debounceTimer = null;
+    const snapshot = getAgents(currentScope);
+    const serialized = JSON.stringify(snapshot);
+    if (serialized === lastSerialized) return;
+    lastSerialized = serialized;
+    broadcast({ type: "agents_changed", snapshot });
+  }, DEBOUNCE_MS);
+}
+
+/**
+ * Start watching the agents dirs for the given scope and broadcast a recomputed
+ * snapshot whenever a watched `.md` changes. Re-entrant: a second call replaces
+ * any existing watch instead of double-watching.
+ */
+export function watchAgents(projectPath?: string): void {
+  if (isWatching) unwatchAgents();
+
+  currentScope = projectPath;
+  isWatching = true;
+  // Seed the baseline so the very first change diffs against the current state.
+  lastSerialized = JSON.stringify(getAgents(currentScope));
+
+  for (const dir of watchDirs(projectPath)) {
+    if (!fs.existsSync(dir)) continue; // missing dir → skip, never throw
+    if (watchers.has(dir)) continue;
+    try {
+      const watcher = fs.watch(dir, { recursive: true }, (_event, filename) => {
+        if (filename && !filename.endsWith(".md")) return; // ignore non-.md churn
+        scheduleRecompute();
+      });
+      watchers.set(dir, watcher);
+    } catch {
+      // Watching a dir can fail (perms, transient); skip it rather than throw.
+    }
+  }
+}
+
+/** Stop all watchers, clear the debounce timer, and reset the in-RAM snapshot. */
+export function unwatchAgents(): void {
+  for (const watcher of watchers.values()) watcher.close();
+  watchers.clear();
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+    debounceTimer = null;
+  }
+  currentScope = undefined;
+  isWatching = false;
+  lastSerialized = null;
+}
