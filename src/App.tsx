@@ -16,7 +16,6 @@ import { useWorkspaceStore } from "./store/useWorkspaceStore";
 export default function App() {
   const { projects, loading: projectsLoading } = useProjects();
   const selectedProject = useAppStore((s) => s.selectedProject);
-  const openDashboard = useWorkspaceStore((s) => s.openDashboard);
   const setHomeDir = useWorkspaceStore((s) => s.setHomeDir);
   const loadDashboard = useDashboardStore((s) => s.load);
 
@@ -70,9 +69,6 @@ export default function App() {
   return (
     <div className="h-full flex flex-col surface-grain" style={{ background: 'var(--color-surface-0)', color: 'var(--color-text-primary)' }}>
       <Header
-        projects={projects}
-        selectedProject={selectedProject}
-        onSelectProject={openDashboard}
         stats={stats}
         activeCount={activeCount}
         connected={connected}
