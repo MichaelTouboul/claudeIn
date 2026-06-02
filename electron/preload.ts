@@ -76,6 +76,19 @@ contextBridge.exposeInMainWorld("api", {
     return () => { ipcRenderer.removeListener("push-event", handler); };
   },
 
+  getAgentsMirror: (projectPath?: string) => ipcRenderer.invoke("agents:mirror:get", projectPath),
+  watchAgents: (projectPath?: string) => ipcRenderer.invoke("agents:mirror:watch", projectPath),
+  unwatchAgents: () => ipcRenderer.invoke("agents:mirror:unwatch"),
+  onAgentsChanged: (cb: (snapshot: import("../src/types/agents-mirror.types").AgentsSnapshot) => void) => {
+    const handler = (_e: unknown, data: { type?: string; snapshot?: unknown }) => {
+      if (data?.type === "agents_changed" && data.snapshot) {
+        cb(data.snapshot as import("../src/types/agents-mirror.types").AgentsSnapshot);
+      }
+    };
+    ipcRenderer.on("push-event", handler);
+    return () => { ipcRenderer.removeListener("push-event", handler); };
+  },
+
   ptyCreate: (projectPath: string, cwd: string, cols: number, rows: number) =>
     ipcRenderer.invoke("pty:create", projectPath, cwd, cols, rows),
   ptyWrite: (projectPath: string, data: string) => ipcRenderer.send("pty:write", projectPath, data),
