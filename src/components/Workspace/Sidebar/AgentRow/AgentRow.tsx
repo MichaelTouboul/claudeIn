@@ -3,14 +3,14 @@ import { AgentContextMenu } from '@/components/AgentContextMenu/AgentContextMenu
 import { useProject } from '@/store/ProjectContext';
 import { useEventsStore } from '@/store/useEventsStore';
 import { useFavoritesStore } from '@/store/useFavoritesStore';
-import type { AgentFile } from '@/types/agent.types';
+import type { AgentSummary } from '@/types/agents-mirror.types';
 
 import { colorMap } from '../../utils';
 
 export type AgentRowProps = {
-  agent: AgentFile;
+  agent: AgentSummary;
   selected: boolean;
-  onSelect: (a: AgentFile) => void;
+  onSelect: (a: AgentSummary) => void;
   onAgentAction: (action: string, agentName: string) => void;
 };
 

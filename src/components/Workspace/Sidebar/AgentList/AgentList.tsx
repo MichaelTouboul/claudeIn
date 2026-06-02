@@ -1,13 +1,13 @@
-import type { AgentFile } from '@/types/agent.types';
+import type { AgentSummary } from '@/types/agents-mirror.types';
 
 import { AgentRow } from '../AgentRow/AgentRow';
 import { OrchestratorTree } from '../OrchestratorTree/OrchestratorTree';
 
 export type AgentListProps = {
-  agents: AgentFile[];
-  allAgents: AgentFile[];
+  agents: AgentSummary[];
+  allAgents: AgentSummary[];
   selectedId: string | null;
-  onSelect: (a: AgentFile) => void;
+  onSelect: (a: AgentSummary) => void;
   onAgentAction: (action: string, agentName: string) => void;
 };
 

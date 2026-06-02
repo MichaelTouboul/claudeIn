@@ -12,8 +12,8 @@ import { useDashboardStore } from '@/store/useDashboardStore';
 import { useDashboardUIStore } from '@/store/useDashboardUIStore';
 import { EMPTY, useFavoritesStore } from '@/store/useFavoritesStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
-import type { AgentFile } from '@/types/agent.types';
-import type { SkillFile } from '@/types/dashboard.types';
+import type { AgentSummary } from '@/types/agents-mirror.types';
+import type { SkillSummary } from '@/types/skills-mirror.types';
 
 import { AgentList } from '../AgentList/AgentList';
 import { HookRow } from '../HookRow/HookRow';
@@ -46,8 +46,8 @@ export function PanelsArea({
   const togglePanel = useDashboardUIStore.getState().togglePanel;
   const setScopeTab = useDashboardUIStore.getState().setScopeTab;
   const addTab = useWorkspaceStore((s) => s.addTab);
-  const onSelectAgent = (a: AgentFile) => addTab({ kind: 'agent', title: a.id, agentName: a.id });
-  const onSelectSkill = (s: SkillFile) => addTab({ kind: 'skill', title: s.name, skillId: s.filePath });
+  const onSelectAgent = (a: AgentSummary) => addTab({ kind: 'agent', title: a.id, agentName: a.id });
+  const onSelectSkill = (s: SkillSummary) => addTab({ kind: 'skill', title: s.name, skillId: s.filePath });
 
   const projectAgents = agents.filter((a) => a.scope === "project");
   const userAgents = agents.filter((a) => a.scope === "user");

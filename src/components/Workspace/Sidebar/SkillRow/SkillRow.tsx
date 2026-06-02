@@ -1,14 +1,14 @@
 import { Wrench } from 'lucide-react';
 
 import { ItemContextMenu } from '@/components/ItemContextMenu/ItemContextMenu';
-import type { SkillFile } from '@/hooks/useProjects';
 import { useProject } from '@/store/ProjectContext';
 import { useFavoritesStore } from '@/store/useFavoritesStore';
+import type { SkillSummary } from '@/types/skills-mirror.types';
 
 export type SkillRowProps = {
-  skill: SkillFile;
+  skill: SkillSummary;
   selected: boolean;
-  onSelect: (s: SkillFile) => void;
+  onSelect: (s: SkillSummary) => void;
 };
 
 export function SkillRow({

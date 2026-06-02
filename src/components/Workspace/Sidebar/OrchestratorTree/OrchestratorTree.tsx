@@ -5,13 +5,13 @@ import { AgentContextMenu } from '@/components/AgentContextMenu/AgentContextMenu
 import { useProject } from '@/store/ProjectContext';
 import { useEventsStore } from '@/store/useEventsStore';
 import { EMPTY, useFavoritesStore } from '@/store/useFavoritesStore';
-import type { AgentFile } from '@/types/agent.types';
+import type { AgentSummary } from '@/types/agents-mirror.types';
 
 export type OrchestratorTreeProps = {
-  orchestrator: AgentFile;
-  allAgents: AgentFile[];
+  orchestrator: AgentSummary;
+  allAgents: AgentSummary[];
   selectedId: string | null;
-  onSelect: (a: AgentFile) => void;
+  onSelect: (a: AgentSummary) => void;
   onAgentAction: (action: string, agentName: string) => void;
 };
 
@@ -32,7 +32,7 @@ export function OrchestratorTree({
   const agentMap = new Map(allAgents.map((a) => [a.id, a]));
   const subs = orchestrator.subAgents
     .map((id) => agentMap.get(id))
-    .filter((a): a is AgentFile => !!a);
+    .filter((a): a is AgentSummary => !!a);
 
   const orchActive = activeAgents.has(orchestrator.id);
   const orchCtx = agentContexts.get(orchestrator.id);

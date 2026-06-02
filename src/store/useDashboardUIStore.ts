@@ -1,19 +1,19 @@
 import { create } from "zustand";
 
-import type { AgentFile } from "@/types/agent.types";
-import type { SkillFile } from "@/types/dashboard.types";
+import type { AgentSummary } from "@/types/agents-mirror.types";
+import type { SkillSummary } from "@/types/skills-mirror.types";
 
 type DashboardUIState = {
-  selectedAgent: AgentFile | null;
-  selectedSkill: SkillFile | null;
+  selectedAgent: AgentSummary | null;
+  selectedSkill: SkillSummary | null;
   selectedSessionId: string | null;
   openPanels: Set<string>;
   scopeTab: "project" | "user";
 
-  selectAgent: (a: AgentFile) => void;
+  selectAgent: (a: AgentSummary) => void;
   togglePanel: (panel: string) => void;
   setScopeTab: (tab: "project" | "user") => void;
-  setSelectedAgent: (a: AgentFile | null) => void;
+  setSelectedAgent: (a: AgentSummary | null) => void;
   backToProject: () => void;
 };
 
