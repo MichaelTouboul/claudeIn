@@ -11,6 +11,7 @@ import { registerDialogHandlers } from "./dialog.ipc";
 import { registerPtyHandlers } from "./pty.ipc";
 import { registerSystemHandlers } from "./system.ipc";
 import { registerSettingsHandlers } from "./settings.ipc";
+import { registerActivityHandlers } from "./activity.ipc";
 
 export function registerAllHandlers(): void {
   registerAgentHandlers();
@@ -26,4 +27,5 @@ export function registerAllHandlers(): void {
   registerPtyHandlers();
   registerSystemHandlers();
   registerSettingsHandlers();
+  registerActivityHandlers();
 }
