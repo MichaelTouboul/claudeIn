@@ -1,8 +1,10 @@
 import type { AgentFile } from "../types/agent.types";
+import type { SkillFile } from "../types/dashboard.types";
 
 export const api = {
   getAgents: (): Promise<AgentFile[]> => window.api.getAgents(),
   getAgent: (name: string): Promise<AgentFile | null> => window.api.getAgent(name),
+  getSkill: (filePath: string): Promise<SkillFile | null> => window.api.getSkill(filePath),
   getFolders: (): Promise<string[]> => window.api.getFolders(),
 
   createAgent: (payload: {

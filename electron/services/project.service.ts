@@ -1,8 +1,13 @@
 import fs from "fs/promises";
 import path from "path";
 import matter from "gray-matter";
+import { findSkillsInDir, getSkill } from "./project.skills";
 import type { Project, SkillFile, HookConfig } from "../types/project.types";
 import type { AgentFile, AgentFrontmatter, MemoryFile, AnnexFile } from "../types/agent.types";
+
+// Single-skill full read lives in project.skills (kept out of this file for the
+// 300-line cap); re-exported so the skills IPC keeps importing it from here.
+export { getSkill };
 
 const HOME = process.env.HOME!;
 const USER_CLAUDE_DIR = path.join(HOME, ".claude");
@@ -232,54 +237,6 @@ async function findAgentsInDir(dir: string, scope: "user" | "project"): Promise<
 
   await walk(dir);
   return agents;
-}
-
-async function findSkillsInDir(dir: string, scope: "user" | "project"): Promise<SkillFile[]> {
-  if (!(await exists(dir))) return [];
-  const skills: SkillFile[] = [];
-
-  try {
-    const entries = await fs.readdir(dir, { withFileTypes: true });
-    for (const entry of entries) {
-      if (!entry.isDirectory()) continue;
-      const skillDir = path.join(dir, entry.name);
-      const skillFile = path.join(skillDir, "SKILL.md");
-      if (!(await exists(skillFile))) continue;
-
-      try {
-        const raw = await fs.readFile(skillFile, "utf-8");
-        const { data, content } = matter(raw);
-        const body = content.trim();
-
-        const annexFiles: import("../types/project.types").SkillAnnexFile[] = [];
-        const dirEntries = await fs.readdir(skillDir, { withFileTypes: true });
-        for (const f of dirEntries) {
-          if (f.name === "SKILL.md") continue;
-          const full = path.join(skillDir, f.name);
-          if (f.isDirectory()) {
-            annexFiles.push({ name: f.name, path: full, size: 0, isDirectory: true });
-          } else {
-            const stat = await fs.stat(full);
-            annexFiles.push({ name: f.name, path: full, size: stat.size, isDirectory: false });
-          }
-        }
-
-        skills.push({
-          name: data.name || entry.name,
-          description: data.description || "",
-          filePath: skillFile,
-          scope,
-          body,
-          lineCount: body.split("\n").length,
-          license: data.license || undefined,
-          metadata: data.metadata || undefined,
-          annexFiles,
-        });
-      } catch {}
-    }
-  } catch {}
-
-  return skills;
 }
 
 async function loadMemoryFiles(memDir: string): Promise<MemoryFile[]> {
