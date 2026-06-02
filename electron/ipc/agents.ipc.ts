@@ -1,5 +1,6 @@
 import { ipcMain } from "electron";
 import * as agentService from "../services/agent.service";
+import * as agentsMirror from "../services/agents.mirror";
 
 export function registerAgentHandlers(): void {
   ipcMain.handle("agents:list", () => agentService.getAllAgents());
@@ -12,4 +13,11 @@ export function registerAgentHandlers(): void {
     agentService.updateMemoryFile(agentName, fileName, content));
   ipcMain.handle("agents:memory:delete", (_e, agentName: string, fileName: string) =>
     agentService.deleteMemoryFile(agentName, fileName));
+
+  // Agents mirror (additive): live union of user + project agents.
+  ipcMain.handle("agents:mirror:get", (_e, projectPath?: string) =>
+    agentsMirror.getAgents(projectPath));
+  ipcMain.handle("agents:mirror:watch", (_e, projectPath?: string) =>
+    agentsMirror.watchAgents(projectPath));
+  ipcMain.handle("agents:mirror:unwatch", () => agentsMirror.unwatchAgents());
 }

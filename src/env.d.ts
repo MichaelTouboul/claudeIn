@@ -57,6 +57,11 @@ interface Window {
     unwatchSettings: () => Promise<void>;
     onSettingsChanged: (cb: (snapshot: import("./types/settings.types").SettingsSnapshot) => void) => () => void;
 
+    getAgentsMirror: (projectPath?: string) => Promise<import("./types/agents-mirror.types").AgentsSnapshot>;
+    watchAgents: (projectPath?: string) => Promise<void>;
+    unwatchAgents: () => Promise<void>;
+    onAgentsChanged: (cb: (snapshot: import("./types/agents-mirror.types").AgentsSnapshot) => void) => () => void;
+
     ptyCreate: (projectPath: string, cwd: string, cols: number, rows: number) => Promise<void>;
     ptyWrite: (projectPath: string, data: string) => void;
     ptyResize: (projectPath: string, cols: number, rows: number) => void;
