@@ -39,6 +39,8 @@ interface Window {
     getCostsByTool: (days?: number) => Promise<import("./types/costs.types").CostsByTool[]>;
     getCostsByModel: (days?: number) => Promise<import("./types/costs.types").CostsByModel[]>;
 
+    getActivity: (days?: number) => Promise<import("./types/activity.types").ActivitySnapshot>;
+
     getFavorites: (projectId: string) => Promise<import("./store/useFavoritesStore").FavoriteItem[]>;
     addFavorite: (projectId: string, type: string, name: string) => Promise<void>;
     removeFavorite: (projectId: string, type: string, name: string) => Promise<void>;
