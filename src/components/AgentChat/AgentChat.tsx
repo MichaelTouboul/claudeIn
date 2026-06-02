@@ -1,4 +1,4 @@
-import { useEffect, useMemo,useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useAgentChatActions } from '@/hooks/useAgentChatActions';
 import { useAppStore } from '@/store/useAppStore';
@@ -7,7 +7,7 @@ import type { ChatMessage,SpawnSession } from '@/types/spawn.types';
 import { AgentChatHeader } from './AgentChatHeader/AgentChatHeader';
 import { AgentChatInput } from './AgentChatInput/AgentChatInput';
 import { AgentChatMessages } from './AgentChatMessages/AgentChatMessages';
-import { detectQuickReplies } from './quickReplies';
+import { parseAskPrompt } from './askPrompt';
 import type { RichEditorHandle } from './RichEditor/RichEditor';
 import type { QueueItem } from './types';
 
@@ -50,10 +50,12 @@ export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: A
   const autoSentRef = useRef(false);
   const queueRef = useRef<QueueItem[]>(queue);
   queueRef.current = queue;
+  const messagesRef = useRef<ChatMessage[]>(messages);
+  messagesRef.current = messages;
 
   const isRunning = session?.status === 'running';
 
-  const { handleSend, handleAttach, handleQuickReply, handleKill } = useAgentChatActions({
+  const { handleSend, handleAttach, onAnswer, handleKill } = useAgentChatActions({
     input, attachedFiles, awaitingResponse, session, isRunning: isRunning ?? false,
     agentName, projectPath, claudeSessionId, editorRef, pendingUserMsgs,
     setInput, setAttachedFiles, setQueue, setMessages,
@@ -66,16 +68,25 @@ export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: A
     }
   }, [messages.length, queue.length]);
 
-  // After a turn finishes, land focus on this chat's input so the user can
-  // reply without clicking first. The app runs `claude --print` (one process
-  // per turn), so a turn completing == `spawn_exit`. Scoped to this instance's
-  // editorRef, so only the tab whose turn just finished gets focus. Guarded
-  // against a backgrounded window (document.hidden). Deferred to the next tick
-  // so focus lands after the DOM settles. Skipped while work auto-flows from
-  // the queue (the next turn is about to start).
+  // When a turn finishes (`spawn_exit` — the app runs `claude --print`, one
+  // process per turn), decide focus from the structured prompt in the last agent
+  // message, the deterministic "input needed" signal `--print` never provided:
+  //   • `choice` → the picker self-focuses via its `isActive` effect, so we
+  //     deliberately do NOT focus the input (let the picker grab focus).
+  //   • `text`   → focus this chat's input so the user can type a reply.
+  //   • no prompt → do not steal focus.
+  // Scoped to this instance's editorRef; guarded against a backgrounded window
+  // (document.hidden); deferred to the next tick so focus lands after the DOM
+  // settles; skipped while work auto-flows from the queue (next turn starting).
   const focusInputOnTurnComplete = () => {
     if (queueRef.current.length > 0) return;
     if (typeof document !== 'undefined' && document.hidden) return;
+    const msgs = messagesRef.current;
+    const last = msgs[msgs.length - 1];
+    if (!last || last.role !== 'assistant') return;
+    const prompt = parseAskPrompt(last.content);
+    if (!prompt) return;
+    if (prompt.type === 'choice') return; // the picker takes focus itself
     setTimeout(() => editorRef.current?.focus(), 0);
   };
 
@@ -150,27 +161,13 @@ export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: A
       }).catch(() => setAwaitingResponse(false));
   }, [initialMessage, resumeSessionId, projectPath, agentName]);
 
-  const lastAssistantMsg = useMemo(() => {
-    for (let i = messages.length - 1; i >= 0; i--) {
-      if (messages[i].role === 'assistant') return messages[i];
-    }
-    return null;
-  }, [messages]);
-
-  const quickReplies = useMemo(() => {
-    if (!lastAssistantMsg) return null;
-    const lastMsg = messages[messages.length - 1];
-    if (lastMsg?.role === 'user') return null;
-    return detectQuickReplies(lastAssistantMsg.content);
-  }, [lastAssistantMsg, messages]);
-
   const handleInputChange = (val: string) => {
     setInput(val);
   };
 
-  // Executing a slash command reuses the quick-reply path (sends the command text).
+  // Executing a slash command reuses the answer path (sends the command text).
   const handleSelectSlash = (cmd: string) => {
-    handleQuickReply(cmd);
+    onAnswer(cmd);
   };
 
   useEffect(() => {
@@ -190,7 +187,7 @@ export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: A
       <AgentChatMessages
         agentName={agentName} messages={messages} session={session}
         isRunning={isRunning ?? false} waitingInput={waitingInput} awaitingResponse={awaitingResponse}
-        queue={queue} quickReplies={quickReplies} onQuickReply={handleQuickReply} scrollRef={scrollRef}
+        queue={queue} onAnswer={onAnswer} scrollRef={scrollRef}
       />
       <AgentChatInput
         input={input} attachedFiles={attachedFiles} waitingInput={waitingInput}

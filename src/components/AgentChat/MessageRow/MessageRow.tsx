@@ -4,17 +4,16 @@ import { renderContentWithImages } from '@/components/_ui/InlineImage';
 import { ResponseBody } from '@/components/ResponseBody/ResponseBody';
 import type { ChatMessage } from '@/types/spawn.types';
 
-import { PERMISSION_PATTERNS, replyStyles } from '../quickReplies';
-import type { QuickReply } from '../types';
+import { parseAskPrompt } from '../askPrompt';
+import { AskPrompt } from '../AskPrompt/AskPrompt';
 
 export type MessageRowProps = {
   msg: ChatMessage;
   isLast: boolean;
-  quickReplies: QuickReply[] | null;
-  onQuickReply: (value: string) => void;
+  onAnswer: (value: string) => void;
 };
 
-export function MessageRow({ msg, isLast, quickReplies, onQuickReply }: MessageRowProps) {
+export function MessageRow({ msg, isLast, onAnswer }: MessageRowProps) {
   const isUser = msg.role === "user";
   const isTool = msg.role === "tool";
   const time = new Date(msg.timestamp).toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
@@ -45,35 +44,28 @@ export function MessageRow({ msg, isLast, quickReplies, onQuickReply }: MessageR
     );
   }
 
-  const hasPermission = isLast && quickReplies && PERMISSION_PATTERNS.some((p) => p.test(msg.content));
+  const prompt = parseAskPrompt(msg.content);
+  const isAuthorization =
+    prompt?.type === 'choice' &&
+    prompt.options.some((o) => o.variant === 'accept' || o.variant === 'deny');
 
   return (
     <div className="group">
       <div className="flex items-center gap-2 mb-0.5">
-        {hasPermission ? (
+        {isAuthorization ? (
           <Shield size={12} className="text-yellow-400" />
         ) : (
           <Bot size={12} className="text-fg-muted" />
         )}
-        <span className={`text-xs font-medium ${hasPermission ? "text-yellow-400" : "text-fg-muted"}`}>
-          {hasPermission ? "authorization" : "agent"}
+        <span className={`text-xs font-medium ${isAuthorization ? "text-yellow-400" : "text-fg-muted"}`}>
+          {isAuthorization ? "authorization" : "agent"}
         </span>
         <span className="text-xs text-fg-subtle opacity-0 group-hover:opacity-100">{time}</span>
       </div>
       <div className="ml-5">
         <ResponseBody content={msg.content} />
       </div>
-      {isLast && quickReplies ? <div className="flex flex-wrap gap-2 ml-5 mt-2">
-          {quickReplies.map((r) => (
-            <button
-              key={r.value}
-              onClick={() => onQuickReply(r.value)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${replyStyles[r.variant]}`}
-            >
-              {r.label}
-            </button>
-          ))}
-        </div> : null}
+      {prompt ? <AskPrompt prompt={prompt} isActive={isLast} onAnswer={onAnswer} /> : null}
     </div>
   );
 }

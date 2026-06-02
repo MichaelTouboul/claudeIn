@@ -30,4 +30,18 @@ describe('blockRegistry', () => {
     expect(screen.getByRole('grid')).toBeInTheDocument();
     expect(screen.getByText('1')).toBeInTheDocument();
   });
+
+  it('renders nothing for a valid cam-ask block (consumed by the picker)', () => {
+    renderMd(
+      '```cam-ask\n{"type":"choice","question":"Q","options":[{"label":"A","value":"a"}]}\n```'
+    );
+    expect(screen.queryByText(/"type":"choice"/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Copy' })).not.toBeInTheDocument();
+  });
+
+  it('falls back to CodeBlock for a malformed cam-ask block', () => {
+    renderMd('```cam-ask\n{ not json\n```');
+    expect(screen.getByText(/not json/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Copy' })).toBeInTheDocument();
+  });
 });

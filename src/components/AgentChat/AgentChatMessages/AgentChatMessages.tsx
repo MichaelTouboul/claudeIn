@@ -4,7 +4,7 @@ import { type RefObject } from 'react';
 import type { ChatMessage, SpawnSession } from '@/types/spawn.types';
 
 import { MessageRow } from '../MessageRow/MessageRow';
-import type { QueueItem,QuickReply } from '../types';
+import type { QueueItem } from '../types';
 
 export type AgentChatMessagesProps = {
   agentName: string;
@@ -14,8 +14,7 @@ export type AgentChatMessagesProps = {
   waitingInput: boolean;
   awaitingResponse: boolean;
   queue: QueueItem[];
-  quickReplies: QuickReply[] | null;
-  onQuickReply: (value: string) => void;
+  onAnswer: (value: string) => void;
   scrollRef: RefObject<HTMLDivElement | null>;
 };
 
@@ -27,8 +26,7 @@ export function AgentChatMessages({
   waitingInput,
   awaitingResponse,
   queue,
-  quickReplies,
-  onQuickReply,
+  onAnswer,
   scrollRef,
 }: AgentChatMessagesProps) {
   return (
@@ -51,9 +49,8 @@ export function AgentChatMessages({
         <MessageRow
           key={msg.id}
           msg={msg}
-          isLast={i === messages.length - 1 || (msg.role === "assistant" && i === messages.length - 1)}
-          quickReplies={i === messages.length - 1 && msg.role === "assistant" ? quickReplies : null}
-          onQuickReply={onQuickReply}
+          isLast={i === messages.length - 1}
+          onAnswer={onAnswer}
         />
       ))}
       {isRunning && awaitingResponse && !waitingInput ? (
