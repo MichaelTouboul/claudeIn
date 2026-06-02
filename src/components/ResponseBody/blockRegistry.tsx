@@ -1,12 +1,14 @@
 import { type ComponentPropsWithoutRef } from 'react';
 import type { Components } from 'react-markdown';
 
+import { CAM_ASK_LANG, isValidAskJson } from '@/components/AgentChat/askPrompt';
+
 import { CodeBlock } from './blocks/CodeBlock/CodeBlock';
 import { TableBlock } from './blocks/TableBlock/TableBlock';
 
 /** Detect a fenced block-code's language from react-markdown's `language-xxx` className. */
 function langFromClassName(className: string | undefined): string | null {
-  const match = /language-(\w+)/.exec(className ?? '');
+  const match = /language-([\w-]+)/.exec(className ?? '');
   return match ? match[1] : null;
 }
 
@@ -25,6 +27,11 @@ function Code({ className, children, ...props }: ComponentPropsWithoutRef<'code'
         {children}
       </code>
     );
+  }
+  // A valid cam-ask block is metadata consumed by the AskPrompt picker, not inline content.
+  // A malformed one falls through to a visible CodeBlock for debugging.
+  if (lang === CAM_ASK_LANG && isValidAskJson(src)) {
+    return null;
   }
   return <CodeBlock data={{ lang, src }} raw={src} />;
 }
