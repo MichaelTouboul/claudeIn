@@ -8,6 +8,10 @@ Maintenance / cleanup tasks — not features, not bugs. Companion to `docs/featu
 
 ## Open
 
+### Flaky test: `settings.service` watch broadcast times out under full-suite parallel load
+**Effort:** Low · **Status:** Open (2026-06-02)
+`electron/services/settings.service.test.ts` → `watchSettings > broadcasts a recomputed snapshot when a watched layer changes` intermittently fails with a `waitFor` timeout, but **only** during the full parallel `npm run test` run — it passes 6/6 reliably in isolation (`npm run test -- settings.service`). Observed flaking 3× across the settings, agents-mirror, and per-model-costs merges; never a real regression. Likely fs.watch debounce + `waitFor` budget being starved under CPU contention. Fix: raise the test's `waitFor` timeout (and/or the poll), or make the watch test less timing-sensitive (e.g. await the debounce deterministically). Possibly applies to the analogous `agents.mirror` watch test too — harden both.
+
 ### `_ui/` Radix follow-ups (deferred from the consolidation)
 **Effort:** Low–Medium · **Status:** Open
 "Watch, not yet" items deferred from the `_ui/` primitive consolidation:
