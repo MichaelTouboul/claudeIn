@@ -9,6 +9,7 @@ import { registerSessionHandlers } from "./sessions.ipc";
 import { registerDialogHandlers } from "./dialog.ipc";
 import { registerPtyHandlers } from "./pty.ipc";
 import { registerSystemHandlers } from "./system.ipc";
+import { registerSettingsHandlers } from "./settings.ipc";
 
 export function registerAllHandlers(): void {
   registerAgentHandlers();
@@ -22,4 +23,5 @@ export function registerAllHandlers(): void {
   registerDialogHandlers();
   registerPtyHandlers();
   registerSystemHandlers();
+  registerSettingsHandlers();
 }

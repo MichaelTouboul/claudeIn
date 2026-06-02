@@ -63,6 +63,19 @@ contextBridge.exposeInMainWorld("api", {
     return () => { ipcRenderer.removeListener("push-event", handler); };
   },
 
+  getSettings: (projectPath?: string) => ipcRenderer.invoke("settings:get", projectPath),
+  watchSettings: (projectPath?: string) => ipcRenderer.invoke("settings:watch", projectPath),
+  unwatchSettings: () => ipcRenderer.invoke("settings:unwatch"),
+  onSettingsChanged: (cb: (snapshot: import("../src/types/settings.types").SettingsSnapshot) => void) => {
+    const handler = (_e: unknown, data: { type?: string; snapshot?: unknown }) => {
+      if (data?.type === "settings_changed" && data.snapshot) {
+        cb(data.snapshot as import("../src/types/settings.types").SettingsSnapshot);
+      }
+    };
+    ipcRenderer.on("push-event", handler);
+    return () => { ipcRenderer.removeListener("push-event", handler); };
+  },
+
   ptyCreate: (projectPath: string, cwd: string, cols: number, rows: number) =>
     ipcRenderer.invoke("pty:create", projectPath, cwd, cols, rows),
   ptyWrite: (projectPath: string, data: string) => ipcRenderer.send("pty:write", projectPath, data),
