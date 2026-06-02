@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { mergeLayers } from "./settings.merge";
+import { broadcast } from "./broadcast";
 import { SettingsSource } from "../types/settings.types";
 import type { SettingsLayer, SettingsSnapshot } from "../types/settings.types";
 
@@ -120,12 +121,100 @@ export function getSettings(projectPath?: string): SettingsSnapshot {
   };
 }
 
-// --- Phase 3 (deferred): watch + broadcast live push -----------------------
+// --- Watch + debounced live broadcast --------------------------------------
 //
-// `watchSettings(projectPath?)` / `unwatchSettings()` will live here. They will
-// watch the PARENT directories (~/.claude, the managed dir, <projectPath>/.claude),
-// filter by filename, debounce (~150ms), recompute via getSettings(), diff against
-// a module-level last snapshot, and broadcast({ type: 'settings_changed', snapshot })
-// only on actual change. Mirrors session.service.ts's watch idiom. Not implemented
-// in Phase 2.
-// ---------------------------------------------------------------------------
+// Watch the PARENT directories of every layer (~/.claude, the managed dir, and
+// <projectPath>/.claude when project-scoped) rather than the files directly:
+// editors save via write-then-rename, which a direct file watch misses. Each
+// watcher filters its callback by the relevant filename(s) for that dir. On a
+// matching change we debounce (~150ms, single trailing timer), recompute the
+// snapshot, diff it against the last one (deep-equal on JSON.stringify), and
+// broadcast `settings_changed` only when it actually changed. Mirrors the
+// `fs.watch` + `watchers` Map idiom in `session.service.ts`. In-RAM only — the
+// snapshot lives in a module-level variable and is NEVER persisted.
+
+const DEBOUNCE_MS = 150;
+
+// Active directory watchers, keyed by absolute dir path (mirrors session.service.ts).
+const watchers = new Map<string, fs.FSWatcher>();
+// The scope being watched (undefined = user/managed only). null when not watching.
+let currentScope: string | undefined;
+let isWatching = false;
+// Last broadcast snapshot, serialized for cheap deep-equality. RAM only.
+let lastSerialized: string | null = null;
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+interface WatchTarget {
+  dir: string;
+  files: Set<string>;
+}
+
+/**
+ * Group the layer descriptors for a scope by their parent directory, collecting
+ * the set of filenames to match within each. Watching the dir (not the file)
+ * survives editor write-then-rename saves.
+ */
+function buildWatchTargets(projectPath?: string): WatchTarget[] {
+  const byDir = new Map<string, Set<string>>();
+  for (const { path: filePath } of buildLayerPaths(projectPath)) {
+    const dir = path.dirname(filePath);
+    const files = byDir.get(dir) ?? new Set<string>();
+    files.add(path.basename(filePath));
+    byDir.set(dir, files);
+  }
+  return Array.from(byDir, ([dir, files]) => ({ dir, files }));
+}
+
+/** Debounced recompute → diff → broadcast on actual change. */
+function scheduleRecompute(): void {
+  if (debounceTimer) clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    debounceTimer = null;
+    const snapshot = getSettings(currentScope);
+    const serialized = JSON.stringify(snapshot);
+    if (serialized === lastSerialized) return;
+    lastSerialized = serialized;
+    broadcast({ type: "settings_changed", snapshot });
+  }, DEBOUNCE_MS);
+}
+
+/**
+ * Start watching the layer directories for the given scope and broadcast a
+ * recomputed snapshot whenever a watched settings file changes. Re-entrant:
+ * a second call replaces any existing watch instead of double-watching.
+ */
+export function watchSettings(projectPath?: string): void {
+  if (isWatching) unwatchSettings();
+
+  currentScope = projectPath;
+  isWatching = true;
+  // Seed the baseline so the very first change diffs against the current state.
+  lastSerialized = JSON.stringify(getSettings(currentScope));
+
+  for (const { dir, files } of buildWatchTargets(projectPath)) {
+    if (!fs.existsSync(dir)) continue; // missing dir → skip, never throw
+    if (watchers.has(dir)) continue;
+    try {
+      const watcher = fs.watch(dir, (_event, filename) => {
+        if (filename && !files.has(path.basename(filename))) return;
+        scheduleRecompute();
+      });
+      watchers.set(dir, watcher);
+    } catch {
+      // Watching a dir can fail (perms, transient); skip it rather than throw.
+    }
+  }
+}
+
+/** Stop all watchers, clear the debounce timer, and reset the in-RAM snapshot. */
+export function unwatchSettings(): void {
+  for (const watcher of watchers.values()) watcher.close();
+  watchers.clear();
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+    debounceTimer = null;
+  }
+  currentScope = undefined;
+  isWatching = false;
+  lastSerialized = null;
+}
