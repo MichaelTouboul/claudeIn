@@ -7,7 +7,7 @@ import type { ChatMessage,SpawnSession } from '@/types/spawn.types';
 import { AgentChatHeader } from './AgentChatHeader/AgentChatHeader';
 import { AgentChatInput } from './AgentChatInput/AgentChatInput';
 import { AgentChatMessages } from './AgentChatMessages/AgentChatMessages';
-import { detectQuickReplies } from './quickReplies';
+import { detectQuickReplies } from './askPrompt';
 import type { RichEditorHandle } from './RichEditor/RichEditor';
 import type { QueueItem } from './types';
 

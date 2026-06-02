@@ -4,13 +4,12 @@ import { renderContentWithImages } from '@/components/_ui/InlineImage';
 import { ResponseBody } from '@/components/ResponseBody/ResponseBody';
 import type { ChatMessage } from '@/types/spawn.types';
 
-import { PERMISSION_PATTERNS, replyStyles } from '../quickReplies';
-import type { QuickReply } from '../types';
+import { type AskOption, PERMISSION_PATTERNS, replyStyles } from '../askPrompt';
 
 export type MessageRowProps = {
   msg: ChatMessage;
   isLast: boolean;
-  quickReplies: QuickReply[] | null;
+  quickReplies: AskOption[] | null;
   onQuickReply: (value: string) => void;
 };
 
@@ -68,7 +67,7 @@ export function MessageRow({ msg, isLast, quickReplies, onQuickReply }: MessageR
             <button
               key={r.value}
               onClick={() => onQuickReply(r.value)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${replyStyles[r.variant]}`}
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${replyStyles[r.variant ?? 'neutral']}`}
             >
               {r.label}
             </button>

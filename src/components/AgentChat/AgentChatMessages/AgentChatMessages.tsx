@@ -3,8 +3,9 @@ import { type RefObject } from 'react';
 
 import type { ChatMessage, SpawnSession } from '@/types/spawn.types';
 
+import type { AskOption } from '../askPrompt';
 import { MessageRow } from '../MessageRow/MessageRow';
-import type { QueueItem,QuickReply } from '../types';
+import type { QueueItem } from '../types';
 
 export type AgentChatMessagesProps = {
   agentName: string;
@@ -14,7 +15,7 @@ export type AgentChatMessagesProps = {
   waitingInput: boolean;
   awaitingResponse: boolean;
   queue: QueueItem[];
-  quickReplies: QuickReply[] | null;
+  quickReplies: AskOption[] | null;
   onQuickReply: (value: string) => void;
   scrollRef: RefObject<HTMLDivElement | null>;
 };
