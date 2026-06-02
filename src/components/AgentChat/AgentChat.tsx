@@ -1,4 +1,4 @@
-import { useEffect, useMemo,useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useAgentChatActions } from '@/hooks/useAgentChatActions';
 import { useAppStore } from '@/store/useAppStore';
@@ -7,7 +7,6 @@ import type { ChatMessage,SpawnSession } from '@/types/spawn.types';
 import { AgentChatHeader } from './AgentChatHeader/AgentChatHeader';
 import { AgentChatInput } from './AgentChatInput/AgentChatInput';
 import { AgentChatMessages } from './AgentChatMessages/AgentChatMessages';
-import { detectQuickReplies } from './askPrompt';
 import type { RichEditorHandle } from './RichEditor/RichEditor';
 import type { QueueItem } from './types';
 
@@ -150,20 +149,6 @@ export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: A
       }).catch(() => setAwaitingResponse(false));
   }, [initialMessage, resumeSessionId, projectPath, agentName]);
 
-  const lastAssistantMsg = useMemo(() => {
-    for (let i = messages.length - 1; i >= 0; i--) {
-      if (messages[i].role === 'assistant') return messages[i];
-    }
-    return null;
-  }, [messages]);
-
-  const quickReplies = useMemo(() => {
-    if (!lastAssistantMsg) return null;
-    const lastMsg = messages[messages.length - 1];
-    if (lastMsg?.role === 'user') return null;
-    return detectQuickReplies(lastAssistantMsg.content);
-  }, [lastAssistantMsg, messages]);
-
   const handleInputChange = (val: string) => {
     setInput(val);
   };
@@ -190,7 +175,7 @@ export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: A
       <AgentChatMessages
         agentName={agentName} messages={messages} session={session}
         isRunning={isRunning ?? false} waitingInput={waitingInput} awaitingResponse={awaitingResponse}
-        queue={queue} quickReplies={quickReplies} onQuickReply={handleQuickReply} scrollRef={scrollRef}
+        queue={queue} onAnswer={handleQuickReply} scrollRef={scrollRef}
       />
       <AgentChatInput
         input={input} attachedFiles={attachedFiles} waitingInput={waitingInput}
