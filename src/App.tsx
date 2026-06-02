@@ -76,6 +76,7 @@ export default function App() {
         stats={stats}
         activeCount={activeCount}
         connected={connected}
+        refreshSignal={events.length}
         onOpenChat={() => setChatOpen(true)}
       />
 

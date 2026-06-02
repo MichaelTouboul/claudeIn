@@ -1,4 +1,4 @@
-import { Activity, DollarSign, Radio,Zap } from "lucide-react";
+import { Activity, Radio,Zap } from "lucide-react";
 
 import { formatTokens } from "@/lib/formatTokens";
 
@@ -30,7 +30,6 @@ export function StatsBar({
       <Stat icon={<Activity size={11} />} value={String(activeCount)} color="var(--color-accent)" />
       <Stat icon={<Radio size={11} />} value={stats.events_today} color="#60a5fa" />
       <Stat icon={<Zap size={11} />} value={formatTokens(parseInt(stats.total_tokens_in) + parseInt(stats.total_tokens_out))} color="#facc15" />
-      <Stat icon={<DollarSign size={11} />} value={`$${stats.cost_today.toFixed(2)}`} color="var(--color-active)" />
     </div>
   );
 }
