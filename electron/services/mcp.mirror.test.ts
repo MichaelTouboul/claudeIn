@@ -168,10 +168,16 @@ function waitFor(predicate: () => boolean, timeout = 3000): Promise<void> {
   });
 }
 
+// Yield long enough for the OS-level fs.watch registration to be live before we
+// trigger the change (a same-tick write after watchMcp() can race the watcher
+// becoming active, especially under full-suite load).
+const settle = () => new Promise((r) => setTimeout(r, 50));
+
 describe("mcp.mirror watchMcp", () => {
   it("broadcasts a recomputed snapshot when a watched source file changes", async () => {
     writeJson(path.join(userClaudeDir, "settings.json"), { mcpServers: {} });
     watchMcp();
+    await settle();
     writeJson(path.join(userClaudeDir, "settings.json"), {
       mcpServers: { fresh: { command: "node" } },
     });
@@ -185,6 +191,7 @@ describe("mcp.mirror watchMcp", () => {
   it("reacts to ~/.claude.json (watched in $HOME, strictly filtered)", async () => {
     writeJson(path.join(tmpHome, ".claude.json"), { mcpServers: {} });
     watchMcp();
+    await settle();
     writeJson(path.join(tmpHome, ".claude.json"), {
       mcpServers: { globalSrv: { url: "https://x/mcp", type: "http" } },
     });
@@ -197,6 +204,7 @@ describe("mcp.mirror watchMcp", () => {
   it("does not re-broadcast when the snapshot is unchanged (diff guard)", async () => {
     writeJson(path.join(userClaudeDir, "settings.json"), { mcpServers: { a: { command: "a" } } });
     watchMcp();
+    await settle();
     // Re-write byte-identical content → reconciled snapshot unchanged → no push.
     writeJson(path.join(userClaudeDir, "settings.json"), { mcpServers: { a: { command: "a" } } });
     await new Promise((r) => setTimeout(r, 400)); // past the 150ms debounce

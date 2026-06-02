@@ -70,6 +70,11 @@ interface Window {
     unwatchSkills: () => Promise<void>;
     onSkillsChanged: (cb: (snapshot: import("./types/skills-mirror.types").SkillsSnapshot) => void) => () => void;
 
+    getMcp: (projectPath?: string) => Promise<import("./types/mcp-mirror.types").McpSnapshot>;
+    watchMcp: (projectPath?: string) => Promise<void>;
+    unwatchMcp: () => Promise<void>;
+    onMcpChanged: (cb: (snapshot: import("./types/mcp-mirror.types").McpSnapshot) => void) => () => void;
+
     getMemoryMirror: (projectPath?: string) => Promise<import("./types/memory-mirror.types").MemorySnapshot>;
     watchMemory: (projectPath?: string) => Promise<void>;
     unwatchMemory: () => Promise<void>;
