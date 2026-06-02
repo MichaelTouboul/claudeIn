@@ -70,6 +70,11 @@ interface Window {
     unwatchSkills: () => Promise<void>;
     onSkillsChanged: (cb: (snapshot: import("./types/skills-mirror.types").SkillsSnapshot) => void) => () => void;
 
+    getMemoryMirror: (projectPath?: string) => Promise<import("./types/memory-mirror.types").MemorySnapshot>;
+    watchMemory: (projectPath?: string) => Promise<void>;
+    unwatchMemory: () => Promise<void>;
+    onMemoryChanged: (cb: (snapshot: import("./types/memory-mirror.types").MemorySnapshot) => void) => () => void;
+
     ptyCreate: (projectPath: string, cwd: string, cols: number, rows: number) => Promise<void>;
     ptyWrite: (projectPath: string, data: string) => void;
     ptyResize: (projectPath: string, cols: number, rows: number) => void;

@@ -105,6 +105,19 @@ contextBridge.exposeInMainWorld("api", {
     return () => { ipcRenderer.removeListener("push-event", handler); };
   },
 
+  getMemoryMirror: (projectPath?: string) => ipcRenderer.invoke("memory:mirror:get", projectPath),
+  watchMemory: (projectPath?: string) => ipcRenderer.invoke("memory:mirror:watch", projectPath),
+  unwatchMemory: () => ipcRenderer.invoke("memory:mirror:unwatch"),
+  onMemoryChanged: (cb: (snapshot: import("../src/types/memory-mirror.types").MemorySnapshot) => void) => {
+    const handler = (_e: unknown, data: { type?: string; snapshot?: unknown }) => {
+      if (data?.type === "memory_changed" && data.snapshot) {
+        cb(data.snapshot as import("../src/types/memory-mirror.types").MemorySnapshot);
+      }
+    };
+    ipcRenderer.on("push-event", handler);
+    return () => { ipcRenderer.removeListener("push-event", handler); };
+  },
+
   ptyCreate: (projectPath: string, cwd: string, cols: number, rows: number) =>
     ipcRenderer.invoke("pty:create", projectPath, cwd, cols, rows),
   ptyWrite: (projectPath: string, data: string) => ipcRenderer.send("pty:write", projectPath, data),

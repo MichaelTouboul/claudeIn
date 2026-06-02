@@ -1,8 +1,17 @@
 import { ipcMain } from "electron";
 import * as memoryService from "../services/memory.service";
+import * as memoryMirror from "../services/memory.mirror";
 import * as projectService from "../services/project.service";
 
 export function registerMemoryHandlers(): void {
+  // Memory mirror (additive): live CLAUDE.md hierarchy + auto-memory snapshot.
+  // `memory:mirror:*` prefix avoids colliding with the existing `memory:*` CRUD.
+  ipcMain.handle("memory:mirror:get", (_e, projectPath?: string) =>
+    memoryMirror.getMemory(projectPath));
+  ipcMain.handle("memory:mirror:watch", (_e, projectPath?: string) =>
+    memoryMirror.watchMemory(projectPath));
+  ipcMain.handle("memory:mirror:unwatch", () => memoryMirror.unwatchMemory());
+
   ipcMain.handle("memory:list", async (_e, projectId: string) => {
     const project = await projectService.getProject(projectId);
     if (!project) return [];
