@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import type { AgentFile } from '@/types/agent.types';
+import type { AgentSummary } from '@/types/agents-mirror.types';
 
 import { useDashboardUIStore } from './useDashboardUIStore';
 
 const initial = useDashboardUIStore.getState();
 beforeEach(() => useDashboardUIStore.setState(initial, true));
 
-const fakeAgent = { id: 'a1' } as AgentFile;
+const fakeAgent = { id: 'a1' } as AgentSummary;
 
 describe('useDashboardUIStore dashboard navigation', () => {
   it('defaults to no selected agent', () => {

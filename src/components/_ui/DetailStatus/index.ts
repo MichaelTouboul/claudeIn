@@ -1,0 +1,1 @@
+export { DetailStatus } from './DetailStatus';

@@ -65,6 +65,7 @@ interface Window {
     unwatchAgents: () => Promise<void>;
     onAgentsChanged: (cb: (snapshot: import("./types/agents-mirror.types").AgentsSnapshot) => void) => () => void;
 
+    getSkill: (filePath: string) => Promise<import("./types/dashboard.types").SkillFile | null>;
     getSkillsMirror: (projectPath?: string) => Promise<import("./types/skills-mirror.types").SkillsSnapshot>;
     watchSkills: (projectPath?: string) => Promise<void>;
     unwatchSkills: () => Promise<void>;

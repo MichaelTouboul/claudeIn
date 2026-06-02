@@ -3,36 +3,33 @@ import { useState } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useDashboardStore } from '@/store/useDashboardStore';
-import type { AgentFile } from '@/types/agent.types';
-import type { SkillFile } from '@/types/dashboard.types';
+import type { AgentSummary } from '@/types/agents-mirror.types';
+import type { SkillSummary } from '@/types/skills-mirror.types';
 
 import { InputMenu } from './InputMenu';
 import { useInputMenus } from './useInputMenus';
 
-function makeAgent(name: string): AgentFile {
+function makeAgent(name: string): AgentSummary {
   return {
     id: name,
+    scope: 'project',
     filePath: `/a/${name}.md`,
     relativePath: `${name}.md`,
     folder: '',
     frontmatter: { name, description: '' },
-    body: '',
-    status: 'created',
     subAgents: [],
-    memoryFiles: [],
-    annexFiles: [],
+    shadowed: false,
   };
 }
 
-function makeSkill(name: string): SkillFile {
+function makeSkill(name: string): SkillSummary {
   return {
     name,
     description: '',
-    filePath: `/s/${name}`,
     scope: 'project',
-    body: '',
+    filePath: `/s/${name}`,
     lineCount: 0,
-    annexFiles: [],
+    shadowed: false,
   };
 }
 

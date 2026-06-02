@@ -92,6 +92,7 @@ contextBridge.exposeInMainWorld("api", {
     return () => { ipcRenderer.removeListener("push-event", handler); };
   },
 
+  getSkill: (filePath: string) => ipcRenderer.invoke("skills:get", filePath),
   getSkillsMirror: (projectPath?: string) => ipcRenderer.invoke("skills:mirror:get", projectPath),
   watchSkills: (projectPath?: string) => ipcRenderer.invoke("skills:mirror:watch", projectPath),
   unwatchSkills: () => ipcRenderer.invoke("skills:mirror:unwatch"),
