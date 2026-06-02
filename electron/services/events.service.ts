@@ -10,14 +10,15 @@ type HookEvent = {
   tokens_in?: number;
   tokens_out?: number;
   cost_usd?: number;
+  model?: string;
 };
 
 export function ingestEvent(event: HookEvent) {
   const db = getDb();
 
   const stmt = db.prepare(
-    `INSERT INTO events (agent_name, session_id, event_type, tool_name, payload, tokens_in, tokens_out, cost_usd)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO events (agent_name, session_id, event_type, tool_name, payload, tokens_in, tokens_out, cost_usd, model)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
 
   stmt.run(
@@ -28,7 +29,8 @@ export function ingestEvent(event: HookEvent) {
     JSON.stringify(event.payload || {}),
     event.tokens_in || 0,
     event.tokens_out || 0,
-    event.cost_usd || 0
+    event.cost_usd || 0,
+    event.model || null
   );
 
   const stored = db

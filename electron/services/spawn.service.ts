@@ -221,6 +221,7 @@ function handleStreamEvent(sessionId: string, session: SpawnSession, event: Stre
       event_type: "Usage",
       tokens_in: tokensIn,
       tokens_out: tokensOut,
+      model: event.model || event.message?.model || undefined,
     }); } catch {}
   }
 
