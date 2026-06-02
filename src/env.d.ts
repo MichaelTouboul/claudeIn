@@ -52,6 +52,11 @@ interface Window {
 
     onEvent: (cb: (data: unknown) => void) => () => void;
 
+    getSettings: (projectPath?: string) => Promise<import("./types/settings.types").SettingsSnapshot>;
+    watchSettings: (projectPath?: string) => Promise<void>;
+    unwatchSettings: () => Promise<void>;
+    onSettingsChanged: (cb: (snapshot: import("./types/settings.types").SettingsSnapshot) => void) => () => void;
+
     ptyCreate: (projectPath: string, cwd: string, cols: number, rows: number) => Promise<void>;
     ptyWrite: (projectPath: string, data: string) => void;
     ptyResize: (projectPath: string, cols: number, rows: number) => void;
