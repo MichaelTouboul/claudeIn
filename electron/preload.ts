@@ -90,6 +90,19 @@ contextBridge.exposeInMainWorld("api", {
     return () => { ipcRenderer.removeListener("push-event", handler); };
   },
 
+  getSkillsMirror: (projectPath?: string) => ipcRenderer.invoke("skills:mirror:get", projectPath),
+  watchSkills: (projectPath?: string) => ipcRenderer.invoke("skills:mirror:watch", projectPath),
+  unwatchSkills: () => ipcRenderer.invoke("skills:mirror:unwatch"),
+  onSkillsChanged: (cb: (snapshot: import("../src/types/skills-mirror.types").SkillsSnapshot) => void) => {
+    const handler = (_e: unknown, data: { type?: string; snapshot?: unknown }) => {
+      if (data?.type === "skills_changed" && data.snapshot) {
+        cb(data.snapshot as import("../src/types/skills-mirror.types").SkillsSnapshot);
+      }
+    };
+    ipcRenderer.on("push-event", handler);
+    return () => { ipcRenderer.removeListener("push-event", handler); };
+  },
+
   ptyCreate: (projectPath: string, cwd: string, cols: number, rows: number) =>
     ipcRenderer.invoke("pty:create", projectPath, cwd, cols, rows),
   ptyWrite: (projectPath: string, data: string) => ipcRenderer.send("pty:write", projectPath, data),

@@ -63,6 +63,11 @@ interface Window {
     unwatchAgents: () => Promise<void>;
     onAgentsChanged: (cb: (snapshot: import("./types/agents-mirror.types").AgentsSnapshot) => void) => () => void;
 
+    getSkillsMirror: (projectPath?: string) => Promise<import("./types/skills-mirror.types").SkillsSnapshot>;
+    watchSkills: (projectPath?: string) => Promise<void>;
+    unwatchSkills: () => Promise<void>;
+    onSkillsChanged: (cb: (snapshot: import("./types/skills-mirror.types").SkillsSnapshot) => void) => () => void;
+
     ptyCreate: (projectPath: string, cwd: string, cols: number, rows: number) => Promise<void>;
     ptyWrite: (projectPath: string, data: string) => void;
     ptyResize: (projectPath: string, cols: number, rows: number) => void;
