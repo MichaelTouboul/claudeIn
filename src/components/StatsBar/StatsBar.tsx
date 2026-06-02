@@ -1,5 +1,7 @@
 import { Activity, DollarSign, Radio,Zap } from "lucide-react";
 
+import { formatTokens } from "@/lib/formatTokens";
+
 import type { Stats } from "../../hooks/useStats";
 
 export type StatsBarProps = {
@@ -40,10 +42,4 @@ function Stat({ icon, value, color }: { icon: React.ReactNode; value: string; co
       <span className="font-medium" style={{ fontSize: '11px' }}>{value}</span>
     </div>
   );
-}
-
-function formatTokens(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-  return String(n);
 }
