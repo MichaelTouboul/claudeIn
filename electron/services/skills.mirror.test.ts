@@ -8,7 +8,8 @@ import path from "path";
 vi.mock("./broadcast", () => ({ broadcast: vi.fn() }));
 
 import { broadcast } from "./broadcast";
-import { getSkillsMirror, unwatchSkills } from "./skills.mirror";
+import { getSkillsMirror, unwatchSkills, watchSkills } from "./skills.mirror";
+import type { SkillsSnapshot } from "../types/skills-mirror.types";
 
 const broadcastMock = vi.mocked(broadcast);
 
@@ -30,6 +31,29 @@ afterEach(() => {
   process.env.HOME = prevHome;
   fs.rmSync(tmpHome, { recursive: true, force: true });
 });
+
+function waitFor(predicate: () => boolean, timeout = 3000): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+    const tick = () => {
+      if (predicate()) return resolve();
+      if (Date.now() - start > timeout) return reject(new Error("timeout"));
+      setTimeout(tick, 20);
+    };
+    tick();
+  });
+}
+
+interface SkillsChangedPush {
+  type?: string;
+  snapshot?: SkillsSnapshot;
+}
+
+function changedPushes(): SkillsChangedPush[] {
+  return broadcastMock.mock.calls
+    .map(([d]) => d as SkillsChangedPush)
+    .filter((d) => d.type === "skills_changed");
+}
 
 function writeSkill(
   skillsDir: string,
@@ -105,5 +129,26 @@ describe("skills.mirror getSkillsMirror", () => {
     fs.rmSync(userSkillsDir, { recursive: true, force: true });
     expect(() => getSkillsMirror()).not.toThrow();
     expect(getSkillsMirror().skills).toEqual([]);
+  });
+});
+
+describe("skills.mirror watchSkills", () => {
+  it("broadcasts a recomputed snapshot when a watched SKILL.md changes", async () => {
+    watchSkills();
+    writeSkill(userSkillsDir, "fresh", { name: "fresh", description: "F" });
+    await waitFor(() =>
+      changedPushes().some((d) => d.snapshot?.skills.some((s) => s.name === "fresh")),
+    );
+    const push = changedPushes().find((d) => d.snapshot?.skills.some((s) => s.name === "fresh"));
+    expect(push?.snapshot?.skills.find((s) => s.name === "fresh")?.scope).toBe("user");
+  });
+
+  it("does not re-broadcast when the snapshot is unchanged (diff guard)", async () => {
+    writeSkill(userSkillsDir, "alpha", { name: "alpha", description: "A" });
+    watchSkills();
+    // Re-write byte-identical content → snapshot unchanged → no push.
+    writeSkill(userSkillsDir, "alpha", { name: "alpha", description: "A" });
+    await new Promise((r) => setTimeout(r, 400)); // past the 150ms debounce
+    expect(changedPushes().length).toBe(0);
   });
 });
