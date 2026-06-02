@@ -1,7 +1,7 @@
 import { MessageSquare } from 'lucide-react';
 
 import { Button } from '@/components/_ui/Button';
-import { ConsumptionMeter } from '@/components/Header/ConsumptionMeter/ConsumptionMeter';
+import { ActivityMeter } from '@/components/Header/ActivityMeter/ActivityMeter';
 import { Logo } from '@/components/Logo/Logo';
 import { StatsBar, type StatsBarProps } from '@/components/StatsBar/StatsBar';
 import { cn } from '@/lib/cn';
@@ -24,7 +24,7 @@ export function Header({ stats, activeCount, connected, refreshSignal, onOpenCha
       </div>
       <div className="flex-1" />
       <StatsBar stats={stats} activeCount={activeCount} connected={connected} />
-      {stats ? <ConsumptionMeter fallbackCostToday={stats.cost_today} refreshSignal={refreshSignal} /> : null}
+      <ActivityMeter refreshSignal={refreshSignal} />
       <Button intent="outline" size="sm" onClick={onOpenChat} className="glow-cyan text-accent" style={{ fontFamily: 'var(--font-mono)', border: '1px solid rgba(6, 182, 212, 0.25)' }}>
         <MessageSquare size={12} />
         Chat
