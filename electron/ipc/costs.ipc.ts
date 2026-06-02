@@ -7,4 +7,5 @@ export function registerCostHandlers(): void {
   ipcMain.handle("costs:by-agent", (_e, days?: number) => costsService.getCostsByAgent(days));
   ipcMain.handle("costs:by-agent-day", (_e, days?: number) => costsService.getCostsByAgentPerDay(days));
   ipcMain.handle("costs:by-tool", (_e, days?: number) => costsService.getCostsByTool(days));
+  ipcMain.handle("costs:by-model", (_e, days?: number) => costsService.getCostsByModel(days));
 }
