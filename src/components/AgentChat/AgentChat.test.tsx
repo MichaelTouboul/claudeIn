@@ -7,10 +7,10 @@ import type { SpawnSession } from '@/types/spawn.types';
 import { AgentChat } from './AgentChat';
 import type { RichEditorHandle } from './RichEditor/RichEditor';
 
-// The bug: after a turn completes the input must auto-focus so the user can
-// reply without clicking. The previous fix bound focus to `waitingInput`, which
-// is driven by `spawn_input_request` — an event the one-shot `claude --print`
-// backend never emits. AgentChat now focuses on `spawn_exit` (turn complete).
+// Focus is now driven by the structured `cam-ask` prompt in the last agent
+// message (the deterministic "input needed" signal `claude --print` never
+// provided): `choice` lets the picker self-focus (input NOT focused), `text`
+// focuses the chat input, and a plain turn steals no focus.
 
 const focusSpy = vi.fn();
 
@@ -45,6 +45,29 @@ const session: SpawnSession = {
   claudeSessionId: 'claude-1',
 };
 
+const choiceBlock =
+  '```cam-ask\n{"type":"choice","question":"Pick","options":[{"label":"A","value":"a"}]}\n```';
+const textBlock = '```cam-ask\n{"type":"text","question":"What name?"}\n```';
+
+function emitAssistant(content: string) {
+  eventCb!({
+    type: 'spawn_message',
+    sessionId: 'sess-1',
+    message: { role: 'assistant', content, timestamp: new Date().toISOString() },
+  });
+}
+
+function emitExit() {
+  eventCb!({ type: 'spawn_exit', sessionId: 'sess-1', status: 'done', claudeSessionId: 'claude-1' });
+}
+
+async function renderReady() {
+  render(<AgentChat agentName="tester" cwd="/p" resumeSessionId="claude-1" initialMessage="hi" />);
+  await waitFor(() => expect(spawnMock).toHaveBeenCalled());
+  await waitFor(() => expect(eventCb).not.toBeNull());
+  focusSpy.mockClear();
+}
+
 beforeEach(() => {
   focusSpy.mockClear();
   eventCb = null;
@@ -60,38 +83,37 @@ beforeEach(() => {
   } as unknown as typeof window.api;
 });
 
-describe('AgentChat focus-on-turn-complete', () => {
-  it('focuses the input when the turn finishes (spawn_exit)', async () => {
-    // Auto-send path establishes a session whose id matches our spawn_exit event.
-    render(
-      <AgentChat agentName="tester" cwd="/p" resumeSessionId="claude-1" initialMessage="hi" />
-    );
+describe('AgentChat prompt-driven focus', () => {
+  it('does not focus the input for a choice prompt (the picker self-focuses)', async () => {
+    await renderReady();
+    emitAssistant(choiceBlock);
+    await new Promise((r) => setTimeout(r, 0)); // let the message land in state
+    emitExit();
+    await new Promise((r) => setTimeout(r, 10));
+    expect(focusSpy).not.toHaveBeenCalled();
+  });
 
-    // Wait until the spawn resolved and the session ref is populated.
-    await waitFor(() => expect(spawnMock).toHaveBeenCalled());
-    await waitFor(() => expect(eventCb).not.toBeNull());
-
-    focusSpy.mockClear();
-
-    // The agent finishes its turn: the one-shot process exits.
-    eventCb!({ type: 'spawn_exit', sessionId: 'sess-1', status: 'done', claudeSessionId: 'claude-1' });
-
-    // focusInputOnTurnComplete defers focus to the next tick (setTimeout 0).
+  it('focuses the input for a text prompt', async () => {
+    await renderReady();
+    emitAssistant(textBlock);
+    await new Promise((r) => setTimeout(r, 0)); // let the message land in state
+    emitExit();
     await waitFor(() => expect(focusSpy).toHaveBeenCalled());
+  });
+
+  it('does not steal focus for a plain assistant turn (no prompt)', async () => {
+    await renderReady();
+    emitAssistant('All done, no question here.');
+    emitExit();
+    await new Promise((r) => setTimeout(r, 10));
+    expect(focusSpy).not.toHaveBeenCalled();
   });
 
   it('does not steal focus when the window is hidden', async () => {
     Object.defineProperty(document, 'hidden', { configurable: true, value: true });
-    render(
-      <AgentChat agentName="tester" cwd="/p" resumeSessionId="claude-1" initialMessage="hi" />
-    );
-
-    await waitFor(() => expect(eventCb).not.toBeNull());
-    focusSpy.mockClear();
-
-    eventCb!({ type: 'spawn_exit', sessionId: 'sess-1', status: 'done' });
-
-    // Give the deferred focus a chance to (not) fire.
+    await renderReady();
+    emitAssistant(textBlock);
+    emitExit();
     await new Promise((r) => setTimeout(r, 10));
     expect(focusSpy).not.toHaveBeenCalled();
   });

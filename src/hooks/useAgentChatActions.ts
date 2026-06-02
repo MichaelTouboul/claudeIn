@@ -105,7 +105,7 @@ export function useAgentChatActions({
     editorRef.current?.focus();
   }, [editorRef, setAttachedFiles]);
 
-  const handleQuickReply = useCallback(async (value: string) => {
+  const onAnswer = useCallback(async (value: string) => {
     const msg: ChatMessage = { id: crypto.randomUUID(), role: 'user', content: value, timestamp: new Date().toISOString() };
     setMessages((prev) => [...prev, msg]);
     pendingUserMsgs.current.add(value);
@@ -131,5 +131,5 @@ export function useAgentChatActions({
     await window.api.killSession(session.id);
   }, [session]);
 
-  return { handleSend, handleAttach, handleQuickReply, handleKill };
+  return { handleSend, handleAttach, onAnswer, handleKill };
 }
