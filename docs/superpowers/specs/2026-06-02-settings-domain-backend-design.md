@@ -45,17 +45,19 @@ Low → high precedence (higher overrides lower):
 | Order | Source        | Path |
 |-------|---------------|------|
 | 1     | `user`        | `~/.claude/settings.json` |
-| 2     | `userLocal`   | `~/.claude/settings.local.json` |
-| 3     | `project`     | `<projectPath>/.claude/settings.json` (only if `projectPath` given) |
-| 4     | `projectLocal`| `<projectPath>/.claude/settings.local.json` |
-| 5     | `managed`     | `/Library/Application Support/ClaudeCode/managed-settings.json` (highest) |
+| 2     | `project`     | `<projectPath>/.claude/settings.json` (only if `projectPath` given) |
+| 3     | `projectLocal`| `<projectPath>/.claude/settings.local.json` |
+| 4     | `managed`     | `/Library/Application Support/ClaudeCode/managed-settings.json` (highest) |
 
-> **To verify during implementation:** the official docs list precedence as
-> managed > CLI > project-local > project > user, but do **not** explicitly place a
-> *user-level* `~/.claude/settings.local.json` (which exists on this machine). This
-> design places it between `user` and `project`. Confirm against current docs / actual
-> Claude Code behavior before finalizing, and the managed file name
-> (`managed-settings.json`) likewise.
+> **Open items resolved (2026-06-02, against official docs `code.claude.com/docs/en/settings.md`):**
+> - **There is NO user-level `~/.claude/settings.local.json` layer.** The "local" scope
+>   exists only at the **project** level (`.claude/settings.local.json`). An earlier draft
+>   assumed a `userLocal` layer; it has been **removed**. (A `~/.claude/settings.local.json`
+>   file may physically exist on a machine, but Claude Code does not load it — including it
+>   would make the mirror unfaithful.) The model is therefore **4 layers**, not 5.
+> - **Managed path confirmed:** `/Library/Application Support/ClaudeCode/managed-settings.json`
+>   — directory `ClaudeCode` (no space), under `/Library` (system-level, not `~/Library`).
+>   Absent on a non-MDM machine → that layer is simply `exists: false`.
 
 ## File layout (back conventions)
 
@@ -80,7 +82,6 @@ pure logic (testable without the filesystem) and the split keeps both files unde
 export const SettingsSource = {
   Managed: 'managed',
   User: 'user',
-  UserLocal: 'userLocal',
   Project: 'project',
   ProjectLocal: 'projectLocal',
 } as const;
