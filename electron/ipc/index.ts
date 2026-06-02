@@ -1,5 +1,6 @@
 import { registerAgentHandlers } from "./agents.ipc";
 import { registerSkillHandlers } from "./skills.ipc";
+import { registerMcpHandlers } from "./mcp.ipc";
 import { registerProjectHandlers } from "./projects.ipc";
 import { registerSpawnHandlers } from "./spawn.ipc";
 import { registerEventHandlers } from "./events.ipc";
@@ -16,6 +17,7 @@ import { registerActivityHandlers } from "./activity.ipc";
 export function registerAllHandlers(): void {
   registerAgentHandlers();
   registerSkillHandlers();
+  registerMcpHandlers();
   registerProjectHandlers();
   registerSpawnHandlers();
   registerEventHandlers();

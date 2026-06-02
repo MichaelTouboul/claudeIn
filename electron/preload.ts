@@ -105,6 +105,19 @@ contextBridge.exposeInMainWorld("api", {
     return () => { ipcRenderer.removeListener("push-event", handler); };
   },
 
+  getMcp: (projectPath?: string) => ipcRenderer.invoke("mcp:mirror:get", projectPath),
+  watchMcp: (projectPath?: string) => ipcRenderer.invoke("mcp:mirror:watch", projectPath),
+  unwatchMcp: () => ipcRenderer.invoke("mcp:mirror:unwatch"),
+  onMcpChanged: (cb: (snapshot: import("../src/types/mcp-mirror.types").McpSnapshot) => void) => {
+    const handler = (_e: unknown, data: { type?: string; snapshot?: unknown }) => {
+      if (data?.type === "mcp_changed" && data.snapshot) {
+        cb(data.snapshot as import("../src/types/mcp-mirror.types").McpSnapshot);
+      }
+    };
+    ipcRenderer.on("push-event", handler);
+    return () => { ipcRenderer.removeListener("push-event", handler); };
+  },
+
   getMemoryMirror: (projectPath?: string) => ipcRenderer.invoke("memory:mirror:get", projectPath),
   watchMemory: (projectPath?: string) => ipcRenderer.invoke("memory:mirror:watch", projectPath),
   unwatchMemory: () => ipcRenderer.invoke("memory:mirror:unwatch"),
