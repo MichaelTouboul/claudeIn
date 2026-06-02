@@ -7,7 +7,11 @@ import path from "path";
 // Mock broadcast up front so it's in place for the Phase 3 watch tests too.
 vi.mock("./broadcast", () => ({ broadcast: vi.fn() }));
 
-import { getMcp, unwatchMcp } from "./mcp.mirror";
+import { broadcast } from "./broadcast";
+import { getMcp, unwatchMcp, watchMcp } from "./mcp.mirror";
+import type { McpSnapshot } from "../types/mcp-mirror.types";
+
+const broadcastMock = vi.mocked(broadcast);
 
 let tmpHome: string;
 let prevHome: string | undefined;
@@ -24,6 +28,7 @@ beforeEach(() => {
   process.env.HOME = tmpHome;
   userClaudeDir = path.join(tmpHome, ".claude");
   fs.mkdirSync(userClaudeDir, { recursive: true });
+  broadcastMock.mockClear();
 });
 
 afterEach(() => {
@@ -137,5 +142,64 @@ describe("mcp.mirror getMcp — source reads", () => {
     writeJson(path.join(userClaudeDir, "settings.json"), { mcpServers: { u: { command: "u" } } });
     const snap = getMcp();
     expect(snap.servers.every((s) => s.scope === "user")).toBe(true);
+  });
+});
+
+interface McpChangedPush {
+  type?: string;
+  snapshot?: McpSnapshot;
+}
+
+function changedPushes(): McpChangedPush[] {
+  return broadcastMock.mock.calls
+    .map(([d]) => d as McpChangedPush)
+    .filter((d) => d.type === "mcp_changed");
+}
+
+function waitFor(predicate: () => boolean, timeout = 3000): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+    const tick = () => {
+      if (predicate()) return resolve();
+      if (Date.now() - start > timeout) return reject(new Error("timeout"));
+      setTimeout(tick, 20);
+    };
+    tick();
+  });
+}
+
+describe("mcp.mirror watchMcp", () => {
+  it("broadcasts a recomputed snapshot when a watched source file changes", async () => {
+    writeJson(path.join(userClaudeDir, "settings.json"), { mcpServers: {} });
+    watchMcp();
+    writeJson(path.join(userClaudeDir, "settings.json"), {
+      mcpServers: { fresh: { command: "node" } },
+    });
+    await waitFor(() =>
+      changedPushes().some((d) => d.snapshot?.servers.some((s) => s.name === "fresh")),
+    );
+    const push = changedPushes().find((d) => d.snapshot?.servers.some((s) => s.name === "fresh"));
+    expect(push?.snapshot?.servers.find((s) => s.name === "fresh")?.transport).toBe("stdio");
+  });
+
+  it("reacts to ~/.claude.json (watched in $HOME, strictly filtered)", async () => {
+    writeJson(path.join(tmpHome, ".claude.json"), { mcpServers: {} });
+    watchMcp();
+    writeJson(path.join(tmpHome, ".claude.json"), {
+      mcpServers: { globalSrv: { url: "https://x/mcp", type: "http" } },
+    });
+    await waitFor(() =>
+      changedPushes().some((d) => d.snapshot?.servers.some((s) => s.name === "globalSrv")),
+    );
+    expect(changedPushes().length).toBeGreaterThan(0);
+  });
+
+  it("does not re-broadcast when the snapshot is unchanged (diff guard)", async () => {
+    writeJson(path.join(userClaudeDir, "settings.json"), { mcpServers: { a: { command: "a" } } });
+    watchMcp();
+    // Re-write byte-identical content → reconciled snapshot unchanged → no push.
+    writeJson(path.join(userClaudeDir, "settings.json"), { mcpServers: { a: { command: "a" } } });
+    await new Promise((r) => setTimeout(r, 400)); // past the 150ms debounce
+    expect(changedPushes().length).toBe(0);
   });
 });
