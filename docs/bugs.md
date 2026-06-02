@@ -8,17 +8,21 @@ Known defects to fix. Raw memo — not prioritized. Companion to `docs/feature-r
 
 ## Open
 
+### Deleting an agent from its detail tab is a no-op (and leaves a stale tab)
+**Effort:** Low · **Status:** Open (2026-06-02)
+In `src/components/Workspace/DashboardArea/Dashboard/DashboardSurface/TabBody.tsx`, the `agent` branch renders `<AgentDetail … onDelete={() => {}} />` — `onDelete` is a no-op, so the delete-confirm flow in `AgentDetail` (`DetailHeader` → `handleDelete`) does nothing. The deletion logic already exists as a store action (`useDashboardStore.deleteAgent`, used by `Sidebar.tsx`), so the fix is to wire `onDelete` in `TabBody` directly to that action (no prop-drilling through Workspace). Second, related issue: after deletion the `agent` internal tab stays open and falls through to `NotFound` ("Agent not found in this project.") — the tab should be closed/removed in the same step (via `useWorkspaceStore`).
+
 ### Chat agent asks a question after every response
-**Effort:** Low · **Status:** Re-opened (2026-06-01) → steering strengthened
-Previously marked Fixed via `--append-system-prompt` in `electron/services/spawn.service.ts`, but the user reports the agent STILL ends nearly every turn with a follow-up question. Investigation: `--append-system-prompt` is a valid, parsing flag (`claude` 2.1.159) and the code already passes it on BOTH fresh and `--resume` spawns (added unconditionally before the resume/fresh branch), so the steering does survive resume — the original soft wording ("only ask when you genuinely need…") was the gap, leaving the model an out it took on almost every turn. Strengthened `NO_FOLLOWUP_SYSTEM_PROMPT` to a firm, absolute instruction (never append next-steps/offers/"want me to…?" lines; ask only when literally blocked). NOTE: the live behavioural CLI test (does a resumed turn honour the appended prompt?) could not be run in the worktree sandbox — `claude` invocations are blocked there. Kept Open until confirmed in the real app: if firm wording still does not hold, the steering may need a different mechanism (or reverting).
+**Effort:** Low · **Status:** Re-addressed (2026-06-02) via structured `cam-ask` channeling — **pending real-app confirmation**
+History: first "Fixed" via `--append-system-prompt`, then re-opened (the firm "never ask" wording kept leaking). New approach (the interactive ask-prompts feature, spec `docs/superpowers/specs/2026-06-02-interactive-ask-prompts-design.md`, commit `35f66975`): instead of *forbidding* questions, the steering now **channels** them. `NO_FOLLOWUP_SYSTEM_PROMPT` (extracted to `electron/services/spawn.steering.ts`) tells the agent to never append reflexive prose questions/offers AND, when it genuinely needs a decision, to ask **only** via a single ` ```cam-ask ` JSON block — which the app renders as an interactive picker. Reflexive prose questions thus have no sanctioned outlet. A Vitest test asserts the steering string contains the schema + the "only when blocked / no trailing question" rule. CAVEAT (unchanged): the live behavioural CLI test (does a `--resume` turn honour the steering?) cannot run in the worktree sandbox. **Kept Open until confirmed in the real app** — if reflexive questions still leak, the channeling may need reinforcement.
 
 ---
 
 ## Fixed (2026-06-01)
 
 ### Auto-focus the chat input when the agent finishes a turn
-**Effort:** Low · **Status:** Fixed
-Supersedes the earlier "Cursor focus on a proposed client interaction" fix, which bound focus to `waitingInput` (driven by the backend `spawn_input_request` event). That event never fires: the app runs `claude --print` (one-shot, one process per turn, continued via `--resume`), so `waitingInput` stays false and the focus effect never ran. Focus now lands on the chat input when a turn completes — on the `spawn_exit` event in `src/components/AgentChat/AgentChat.tsx` — deferred to the next tick and guarded against stealing focus from a backgrounded window (`document.hidden`) or when work is auto-flowing from the queue. Scoped per `AgentChat` instance via its own `editorRef`, so only the tab whose turn finished gets focus. The dead `waitingInput` focus effect in `AgentChatInput.tsx` was removed (its styling/placeholder use of `waitingInput` kept). Covered by `src/components/AgentChat/AgentChat.test.tsx`.
+**Effort:** Low · **Status:** Fixed → refined 2026-06-02 (prompt-driven focus)
+Originally: focus forced on **every** `spawn_exit` (a band-aid, because the real `spawn_input_request` "input needed" signal never fires under `--print`). Refined by the interactive ask-prompts feature (commit `3f43d798`): focus is now driven by the parsed `cam-ask` prompt on the last agent message — `choice` → focus the picker (arrows work immediately), `text` → focus the chat input, **no prompt → focus is NOT stolen**. This is the deterministic input-needed signal that was missing. The existing guards (`document.hidden`, auto-flow from the queue, per-`AgentChat` `editorRef`) are kept. Covered by `src/components/AgentChat/AgentChat.test.tsx`.
 
 ### Terminal letter-spacing spread the prompt text
 **Effort:** Low · **Status:** Fixed · UI
