@@ -7,11 +7,15 @@ import type { AgentFile, AgentFrontmatter, MemoryFile, AnnexFile } from "../type
 const HOME = process.env.HOME!;
 const USER_CLAUDE_DIR = path.join(HOME, ".claude");
 const SCAN_DEPTH = 3;
-const SKIP_DIRS = new Set([
+// Exported (additive, read-only) so the memory mirror reuses the SAME skip list
+// and depth cap for its bounded nested-CLAUDE.md walk instead of re-deriving them.
+export const PROJECT_SCAN_DEPTH = SCAN_DEPTH;
+export const PROJECT_SKIP_DIRS = new Set([
   "node_modules", ".git", ".next", "dist", "build", ".cache",
   ".npm", ".nvm", ".cargo", ".rustup", "Library", ".Trash",
   "Applications", ".docker", ".vscode", ".idea",
 ]);
+const SKIP_DIRS = PROJECT_SKIP_DIRS;
 
 async function exists(p: string): Promise<boolean> {
   try { await fs.access(p); return true; } catch { return false; }
