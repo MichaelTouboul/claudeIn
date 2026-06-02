@@ -1,7 +1,8 @@
-import { Bot, MessageSquare } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 
 import { Button } from '@/components/_ui/Button';
 import { ConsumptionMeter } from '@/components/Header/ConsumptionMeter/ConsumptionMeter';
+import { Logo } from '@/components/Logo/Logo';
 import { ProjectSwitcher } from '@/components/ProjectSwitcher/ProjectSwitcher';
 import { StatsBar, type StatsBarProps } from '@/components/StatsBar/StatsBar';
 import { cn } from '@/lib/cn';
@@ -23,8 +24,8 @@ export function Header({ projects, selectedProject, onSelectProject, stats, acti
   return (
     <div className={cn('titlebar-drag flex items-center gap-4 pr-4 py-2 shrink-0', isMac ? 'pl-20' : 'pl-4')} style={{ background: 'var(--color-surface-1)', borderBottom: '1px solid var(--color-border)' }}>
       <div className="flex items-center gap-2.5">
-        <Bot size={16} className="text-accent" />
-        <span className="text-[13px] font-semibold tracking-[0.02em]" style={{ fontFamily: 'var(--font-mono)' }}>Agent Manager</span>
+        <Logo size={18} />
+        <span className="text-[13px] font-semibold tracking-[0.02em]" style={{ fontFamily: 'var(--font-mono)' }}>ClaudeIn</span>
       </div>
       <ProjectSwitcher projects={projects} selected={selectedProject} onSelect={onSelectProject} />
       <div className="flex-1" />
