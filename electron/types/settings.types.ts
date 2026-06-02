@@ -1,7 +1,6 @@
 export const SettingsSource = {
   Managed: 'managed',
   User: 'user',
-  UserLocal: 'userLocal',
   Project: 'project',
   ProjectLocal: 'projectLocal',
 } as const;
