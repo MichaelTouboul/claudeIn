@@ -1,100 +1,120 @@
 # Conversations panel (FE, project-scoped) — design
 
 **Date:** 2026-06-03
-**Status:** Approved (design) — pending implementation
-**Scope:** Frontend Sidebar panel + viewer that surfaces the project's real `~/.claude` session transcripts, live; a small backend `status` addition. First consumer of the conversation live-tail backend.
+**Status:** Approved (design) — pending implementation, split into 3 tranches
+**Scope:** Frontend Sidebar conversations surface + viewer + per-item actions, project-scoped; small backend additions (derived `status`, `conversation_meta` table). First consumer of the conversation live-tail backend.
 
-## Context & decisions
+## Context
 
 The real session transcripts (`useSessions`/`getSessionList`/`getSessionConversation`) are
-**read by no UI today** — the existing `ConversationList` shows open dashboard TABS, not
-on-disk sessions. Conversation status is **not persisted** (established earlier); it's inferred
-from mtime + the live-tail. The conversation live-tail backend (`conversation.tail`,
-`watchConversation`/`onConversationAppended`) is merged but unconsumed.
+surfaced by **no UI** today (the existing `ConversationList` shows open dashboard TABS, not
+on-disk sessions). Conversation status is **not persisted** by Claude Code — inferred from
+mtime + the live-tail. The conversation live-tail backend (`conversation.tail`,
+`watchConversation`/`onConversationAppended`) is merged but unconsumed. Several needed signals
+already exist but are unwired/broken: `useEventsStore` `activeAgents`/`waitingAgents` (running/
+waiting), the `ContextBar` (context %), AI title.
 
-Decisions (from the discussion):
-- Build **both** live + history, **starting project-scoped** (active project; global
-  cross-project + heavy search/virtualization = a later tranche).
-- **Dedicated Sidebar panel** for conversations (list in the sidebar; viewer in an overlay).
-- **Status derived in the backend** (`listSessions` returns `status`), front just displays.
-- A single project-scoped panel serves both: the list = history-for-this-project + at-a-glance
-  live status; opening one = the live viewer.
+Everything here is **project-scoped** (active project). Global cross-project + search/
+virtualization over the full archive = a later effort.
 
-## Backend (small) — add derived `status`
+## Locked design
 
-Add `status: 'live' | 'recent' | 'idle'` to `SessionSummary` (both the backend
-`session.service.listSessions` return and the `src/hooks/useSessions.ts` type), derived from
-the file mtime (`lastActiveAt`) with named thresholds: **live** < ~30 s, **recent** < ~6 h,
-else **idle**. (A snapshot's "live" is approximate; the *precise* live signal is the viewer's
-tail receiving appends.) Everything else already exists — no other backend change.
+### Sidebar — 3 tiers (scope-filtered)
+1. **Live sessions (top):** the scope's currently-active sessions, each with the **AI title**, a
+   **running/waiting indicator**, and the **context progress bar** (reuse `ContextBar`).
+2. **Recent sessions:** in the **existing "Sessions" accordion**, but filtered to the active
+   scope only.
+3. **Older sessions:** a **"Load more"** button → opens a **modal** listing older (presumed
+   closed) sessions of the scope.
 
-## Frontend
+### Selecting a conversation → panel
+Opens the conversation in the panel. On open it offers the **resume choice** like the terminal:
+**compact (recommended) / continue as is** (this is the native `--resume` + compact-on-resume
+flow — spawn `claude --resume <id>` with/without compaction).
 
-### Sidebar: `SessionsPanel` (new, distinct from `ConversationList`)
-- A new Sidebar section listing the **active project's** sessions via `useSessions(projectPath)`
-  (`getSessionList`), already sorted by `lastActiveAt` desc. Each row: `title || firstPrompt`
-  (truncated), a **status badge** (`● live` green-pulse / `recent` / `idle` muted), and small
-  meta (model, messageCount, branch). Empty state when none.
-- **Live list refresh:** on active scope, call `watchSessions(projectPath)` and refetch the
-  list on the existing `session_activity` push (via `onEvent`), debounced; `unwatchSessions`
-  on scope change/unmount. (This is the existing list watcher — reused, not rebuilt.)
-- Naming: the component is `SessionsPanel` to avoid colliding with the open-tabs
-  `ConversationList`; UI label TBD by the user (e.g. "Sessions" / "History") — keep it distinct
-  from the open-tabs list visually.
+### Per-item "…" menu
+`pin` (épingler en haut), `clear`, `compact`, `archive`, `delete`.
+- **Native, live/resume-only:** `clear` / `compact` are **in-session** commands — they only
+  apply to a session ClaudeIn is **driving** (or via the resume flow). NOT standalone actions on
+  a closed transcript. Surface them only for live/piloted sessions.
+- **App-owned (persisted), reversible:** `pin`, `archive`, `delete` — see persistence below.
 
-### Viewer: overlay (`_ui/Dialog`)
-- Clicking a session row opens an overlay viewer. On open: `getSessionConversation(filePath)`
-  → render each `SessionMessage` read-only via `ResponseBody` (markdown/code/diff blocks —
-  consistent with the chat surface, pillar 1), user vs assistant styled like `MessageRow`.
-- **Live-tail (first consumer of `conversation.tail`):** after the initial load, call
-  `watchConversation(filePath)` and subscribe `onConversationAppended` → append delta
-  `SessionMessage[]` (dedupe by `uuid`; ignore deltas for other `filePath`s); the row/viewer
-  shows `live` while appends arrive. `unwatchConversation(filePath)` on close/unmount.
-- Scroll: auto-stick to bottom on new messages unless the user scrolled up (basic tail UX).
+### Three accepted reserves (locked)
+1. `clear`/`compact` = live/resume only (not arbitrary-transcript ops).
+2. **`waiting` indicator** is reliable only for **ClaudeIn-piloted** sessions (`waitingAgents`);
+   external sessions can show **live/appending** (via the tail) but not "waiting for input".
+3. **`delete` = soft-delete by default** (hide in ClaudeIn, keep the `.jsonl` on disk —
+   reversible, and Claude Code's `/resume` still sees it); a separate, confirm-guarded
+   "delete permanently from disk" does the real `rm`.
 
-## Data flow
+## Backend additions
 
+### Derived `status` on `SessionSummary`
+Add `status: 'live' | 'recent' | 'idle'` to `listSessions`/`SessionSummary`, from mtime
+(`lastActiveAt`): **live** < 30 s, **recent** < 6 h, else **idle** (thresholds as named
+constants). Snapshot "live" is approximate; the precise live signal is the tail receiving
+appends + (for piloted sessions) `activeAgents`.
+
+### `conversation_meta` table (app-owned annotations; `~/.claude` untouched)
+```sql
+CREATE TABLE conversation_meta (
+  session_id  TEXT PRIMARY KEY,
+  pinned_at   TEXT,   -- pin (NULL=no; timestamp gives order)
+  archived_at TEXT,   -- archive
+  deleted_at  TEXT,   -- soft-delete
+  note        TEXT
+);
 ```
-useSessions(projectPath).getSessionList ──► SessionsPanel list (status badges, sorted)
-   ▲ refetch on session_activity (watchSessions)
-row click ──► overlay: getSessionConversation(filePath) [initial]
-                       + watchConversation(filePath) ──► onConversationAppended ──► append live
+IPC to set/clear each flag (`conversation:pin`/`unpin`, `:archive`/`unarchive`,
+`:softDelete`/`:restore`, and a guarded `:deleteFromDisk`). The sessions list **LEFT-JOINs**
+this table so the front knows pinned/archived/deleted without touching `~/.claude`. All
+reversible (set column → NULL). Migration is idempotent (PRAGMA-guarded `CREATE TABLE IF NOT
+EXISTS`).
+
+## Implementation tranches (sequential — they share env.d.ts/preload/ipc index)
+
+**Tranche 1 — Sidebar conversations surface (read/navigate).**
+Backend: derived `status` in `listSessions`. Frontend: `SessionsPanel` (distinct from the
+open-tabs `ConversationList`) = 3 tiers — live (AI title + running/waiting voyant via
+`activeAgents`/`waitingAgents` + `ContextBar`), recent in the existing accordion (scope-
+filtered), "Load more" → modal of older sessions. Live list refresh via the existing
+`watchSessions`/`session_activity`. No viewer yet (rows select but open is tranche 2).
+
+**Tranche 2 — Viewer + live-tail + resume/compact.**
+Selecting a session opens it in the panel: `getSessionConversation` initial render (messages via
+`ResponseBody`), then **wire the live-tail** (`watchConversation` + `onConversationAppended`,
+dedupe by `uuid`) — first consumer of `conversation.tail`. Plus the resume choice
+(compact recommended / continue as is) driving `claude --resume`.
+
+**Tranche 3 — "…" menu + `conversation_meta`.**
+The table + IPC + list join; the "…" menu wiring: pin/archive/soft-delete (app-owned,
+reversible) and clear/compact (native, live/piloted only) + "delete permanently" (guarded).
+
+## Testing (per tranche)
+- T1: backend `status` classification at thresholds; `SessionsPanel` renders the 3 tiers,
+  scope filter, status/running/waiting badges, "Load more" opens the modal; refetch on
+  `session_activity`.
+- T2: viewer initial render; live append (mock `onConversationAppended`) dedupe by uuid;
+  resume/compact triggers the right spawn args; not-found state.
+- T3: `conversation_meta` migration idempotent; pin/archive/soft-delete set+clear timestamps;
+  the list join hides soft-deleted + orders pinned first; "delete permanently" guarded.
+
+## File layout (indicative)
 ```
-
-## Error handling / edge cases
-
-- No project scope (launcher/user scope) → panel shows an empty/"select a project" state.
-- `getSessionConversation` fails / file gone → viewer not-found state.
-- Delta for a non-open `filePath` → ignored (match on filePath).
-- Large transcript → initial load may be big; render is read-only `ResponseBody` (acceptable
-  v1; virtualization is a later/archive concern).
-- `status` thresholds are constants in one place (backend); front never recomputes.
-
-## Testing
-
-- **Backend** `listSessions` status: temp dir with files of varying mtime → assert
-  live/recent/idle classification at the thresholds.
-- **`SessionsPanel`** (mock `window.api.getSessionList`): renders rows + status badges sorted;
-  empty state; refetches on a `session_activity` event.
-- **Viewer** (mock `getSessionConversation` + `onConversationAppended`): initial messages
-  render; an appended delta is added live; dedupe by uuid; not-found state.
-
-## File layout
-
+electron/services/session.service.ts                 ← + derived status (thresholds const)
+electron/services/conversation.meta.ts (+ .test)      ← conversation_meta CRUD (pin/archive/softDelete/restore)
+electron/services/db.ts                               ← + conversation_meta table (idempotent migration)
+electron/ipc/sessions.ipc.ts                          ← + conversation:pin/archive/softDelete/... handlers
+electron/preload.ts + src/env.d.ts                    ← + the new methods
+src/hooks/useSessions.ts                              ← + status + meta flags on SessionSummary
+src/components/Workspace/Sidebar/SessionsPanel/...    ← 3-tier panel, rows, "Load more" modal, "…" menu
+src/components/Workspace/Sidebar/SessionsPanel/SessionViewer/... ← panel viewer + live-tail (T2)
 ```
-electron/services/session.service.ts        ← + derived `status` in listSessions (thresholds const)
-src/hooks/useSessions.ts                     ← + `status` on SessionSummary
-src/components/Workspace/Sidebar/SessionsPanel/SessionsPanel.tsx (+ .test)   ← list + status + watchSessions refresh
-src/components/Workspace/Sidebar/SessionsPanel/SessionRow/SessionRow.tsx     ← one row (badge/meta)
-src/components/Workspace/Sidebar/SessionsPanel/SessionViewer/SessionViewer.tsx (+ .test) ← _ui/Dialog overlay; getSessionConversation + live-tail
-src/components/Workspace/Sidebar/Sidebar.tsx (or PanelsArea) ← mount the SessionsPanel section
-```
-(Split viewer message-rendering into a sibling if it nears 300 lines; reuse `ResponseBody`.)
+Reuse `_ui/Dialog` (modal), `_ui/Progress`/`ContextBar` (context %), `ResponseBody` (message
+render), `useEventsStore` (running/waiting). Split files to stay < 300 lines.
 
 ## Out of scope (later)
-
-- Global cross-project sessions view + search/virtualization over the full archive (tranche 2).
-- Resuming/forking a session from the viewer.
-- Renaming/relabeling the existing open-tabs `ConversationList`.
-- Persisting any status.
+- Global cross-project view + search/virtualization over the full archive.
+- The `waiting` signal for external (non-piloted) sessions.
+- Persisting status.
 ```
