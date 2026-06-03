@@ -1,6 +1,6 @@
 # Bugs
 
-Known defects to fix. Raw memo — not prioritized. Companion to `docs/feature-requests.md` (features) and `docs/chores.md` (cleanup).
+Known defects to fix. Raw memo — not prioritized. Companion to the feature backlog (`docs/feature-requests-mvp.md` + `docs/feature-requests-no-mvp.md`) and `docs/chores.md` (cleanup).
 
 > Effort scale: **Low** (~half day) · **Medium** (~1 day) · **High** (multi-day).
 

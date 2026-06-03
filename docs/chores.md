@@ -1,6 +1,6 @@
 # Chores
 
-Maintenance / cleanup tasks — not features, not bugs. Companion to `docs/feature-requests.md` and `docs/bugs.md`.
+Maintenance / cleanup tasks — not features, not bugs. Companion to the feature backlog (`docs/feature-requests-mvp.md` + `docs/feature-requests-no-mvp.md`) and `docs/bugs.md`.
 
 > Effort scale: **Low** (~half day) · **Medium** (~1 day) · **High** (multi-day).
 
