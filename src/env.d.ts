@@ -49,6 +49,14 @@ interface Window {
     getSessionConversation: (filePath: string) => Promise<import("./hooks/useSessions").SessionConversation>;
     watchSessions: (projectPath: string) => Promise<void>;
     unwatchSessions: (projectPath: string) => Promise<void>;
+    watchConversation: (filePath: string) => Promise<void>;
+    unwatchConversation: (filePath: string) => Promise<void>;
+    onConversationAppended: (
+      cb: (data: {
+        filePath: string;
+        messages: import("./hooks/useSessions").SessionMessage[];
+      }) => void,
+    ) => () => void;
     openFilePicker: () => Promise<string[]>;
     readImageAsDataUrl: (filePath: string) => Promise<string | null>;
     generateTitle: (userMessage: string, assistantMessage: string) => Promise<string>;

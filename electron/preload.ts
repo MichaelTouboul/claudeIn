@@ -55,6 +55,28 @@ contextBridge.exposeInMainWorld("api", {
   getSessionConversation: (filePath: string) => ipcRenderer.invoke("sessions:conversation", filePath),
   watchSessions: (projectPath: string) => ipcRenderer.invoke("sessions:watch-start", projectPath),
   unwatchSessions: (projectPath: string) => ipcRenderer.invoke("sessions:watch-stop", projectPath),
+  watchConversation: (filePath: string) => ipcRenderer.invoke("conversation:watch", filePath),
+  unwatchConversation: (filePath: string) => ipcRenderer.invoke("conversation:unwatch", filePath),
+  onConversationAppended: (
+    cb: (data: {
+      filePath: string;
+      messages: import("../src/hooks/useSessions").SessionMessage[];
+    }) => void,
+  ) => {
+    const handler = (
+      _e: unknown,
+      data: { type?: string; filePath?: string; messages?: unknown },
+    ) => {
+      if (data?.type === "conversation_appended" && typeof data.filePath === "string") {
+        cb({
+          filePath: data.filePath,
+          messages: data.messages as import("../src/hooks/useSessions").SessionMessage[],
+        });
+      }
+    };
+    ipcRenderer.on("push-event", handler);
+    return () => { ipcRenderer.removeListener("push-event", handler); };
+  },
   openFilePicker: () => ipcRenderer.invoke("dialog:open-file"),
   readImageAsDataUrl: (filePath: string) => ipcRenderer.invoke("dialog:read-image", filePath),
   generateTitle: (userMessage: string, assistantMessage: string) =>
