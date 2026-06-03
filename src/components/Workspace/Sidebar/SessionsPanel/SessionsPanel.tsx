@@ -94,6 +94,8 @@ export function SessionsPanel({ sessions, loading, refresh }: SessionsPanelProps
                 context={s.agentName ? agentContexts.get(s.agentName) : undefined}
                 selected={selectedId === s.sessionId}
                 onSelect={handleSelect}
+                piloted={Boolean(s.agentName && activeAgents.has(s.agentName))}
+                onChanged={refresh}
               />
             ))}
           </div>
@@ -109,6 +111,7 @@ export function SessionsPanel({ sessions, loading, refresh }: SessionsPanelProps
               session={s}
               selected={selectedId === s.sessionId}
               onSelect={handleSelect}
+              onChanged={refresh}
             />
           ))
         ) : (
@@ -145,6 +148,7 @@ export function SessionsPanel({ sessions, loading, refresh }: SessionsPanelProps
         archived={archived}
         selectedId={selectedId}
         onSelect={handleSelect}
+        onChanged={refresh}
       />
     </div>
   );

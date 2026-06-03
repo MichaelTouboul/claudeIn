@@ -12,6 +12,7 @@ export type LoadMoreModalProps = {
   archived?: SessionSummary[];
   selectedId: string | null;
   onSelect: (filePath: string) => void;
+  onChanged?: () => void;
 };
 
 function SectionLabel({ children }: { children: string }) {
@@ -32,6 +33,7 @@ export function LoadMoreModal({
   archived = [],
   selectedId,
   onSelect,
+  onChanged,
 }: LoadMoreModalProps) {
   return (
     <Dialog
@@ -91,6 +93,7 @@ export function LoadMoreModal({
                 session={s}
                 selected={selectedId === s.sessionId}
                 onSelect={onSelect}
+                onChanged={onChanged}
               />
             ))
           ) : (
@@ -110,6 +113,7 @@ export function LoadMoreModal({
                   session={s}
                   selected={selectedId === s.sessionId}
                   onSelect={onSelect}
+                  onChanged={onChanged}
                 />
               ))}
             </>
