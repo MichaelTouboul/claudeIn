@@ -49,24 +49,6 @@ export function partitionSessions(
   return { live, recent, older, archived };
 }
 
-export type LiveActivity = "running" | "waiting" | "idle";
-
-/**
- * Running/waiting voyant state for a live row. Per reserve 2, `waiting` is only
- * reliable for ClaudeIn-piloted sessions (`waitingAgents`); a non-piloted live
- * session can only be shown as appending, not "waiting for input".
- */
-export function liveActivity(
-  session: SessionSummary,
-  activeAgents: Set<string>,
-  waitingAgents: Set<string>
-): LiveActivity {
-  const name = session.agentName;
-  if (name !== null && waitingAgents.has(name)) return "waiting";
-  if (name !== null && activeAgents.has(name)) return "running";
-  return session.status === "live" ? "running" : "idle";
-}
-
 export function shortModel(model: string | null): string | null {
   if (!model) return null;
   return model.split("-").pop() ?? model;

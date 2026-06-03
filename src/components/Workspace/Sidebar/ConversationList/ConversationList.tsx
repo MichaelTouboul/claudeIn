@@ -54,7 +54,7 @@ export function ConversationList() {
             </span>
             <span
               className="w-1.5 h-1.5 rounded-full shrink-0 ml-auto"
-              style={{ backgroundColor: dotColor, animation: status !== 'idle' ? 'pulse 1s ease-in-out infinite' : undefined }}
+              style={{ backgroundColor: dotColor, animation: status === 'live' ? 'pulse 1s ease-in-out infinite' : undefined }}
               title={status}
             />
           </button>

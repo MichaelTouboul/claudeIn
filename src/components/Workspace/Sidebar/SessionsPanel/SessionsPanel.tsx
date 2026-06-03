@@ -8,7 +8,7 @@ import { useWorkspaceStore } from "@/store/useWorkspaceStore";
 import { LiveSessionRow } from "./LiveSessionRow/LiveSessionRow";
 import { LoadMoreModal } from "./LoadMoreModal/LoadMoreModal";
 import { RecentSessionRow } from "./RecentSessionRow/RecentSessionRow";
-import { liveActivity, partitionSessions } from "./utils";
+import { partitionSessions } from "./utils";
 
 const REFETCH_DEBOUNCE_MS = 400;
 
@@ -32,7 +32,6 @@ function TierLabel({ label }: { label: string }) {
 export function SessionsPanel({ sessions, loading, refresh }: SessionsPanelProps) {
   const { projectPath } = useProject();
   const activeAgents = useEventsStore((s) => s.activeAgents);
-  const waitingAgents = useEventsStore((s) => s.waitingAgents);
   const agentContexts = useEventsStore((s) => s.agentContexts);
   const addTab = useWorkspaceStore((s) => s.addTab);
 
@@ -90,7 +89,6 @@ export function SessionsPanel({ sessions, loading, refresh }: SessionsPanelProps
               <LiveSessionRow
                 key={s.sessionId}
                 session={s}
-                activity={liveActivity(s, activeAgents, waitingAgents)}
                 context={s.agentName ? agentContexts.get(s.agentName) : undefined}
                 selected={selectedId === s.sessionId}
                 onSelect={handleSelect}

@@ -5,24 +5,9 @@ import type { SessionSummary } from "@/hooks/useSessions";
 import type { AgentContext } from "@/types/events.types";
 
 import { SessionRowMenu } from "../SessionRowMenu/SessionRowMenu";
-import type { LiveActivity } from "../utils";
-
-// Pulse keyframe for the running voyant — injected once, design-system colors.
-if (typeof document !== "undefined" && !document.getElementById("sessions-live-pulse")) {
-  const style = document.createElement("style");
-  style.id = "sessions-live-pulse";
-  style.textContent = `
-    @keyframes sessionsLivePulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.7); }
-    }
-  `;
-  document.head.appendChild(style);
-}
 
 export type LiveSessionRowProps = {
   session: SessionSummary;
-  activity: LiveActivity;
   context: AgentContext | undefined;
   selected: boolean;
   onSelect: (filePath: string) => void;
@@ -31,29 +16,8 @@ export type LiveSessionRowProps = {
   onChanged?: () => void;
 };
 
-function Voyant({ activity }: { activity: LiveActivity }) {
-  const color = activity === "waiting" ? "var(--color-accent)" : "var(--color-active)";
-  const label = activity === "waiting" ? "Waiting for input" : "Running";
-  return (
-    <span
-      role="img"
-      aria-label={label}
-      title={label}
-      className="shrink-0 rounded-full"
-      style={{
-        width: 7,
-        height: 7,
-        background: color,
-        boxShadow: `0 0 6px ${color}`,
-        animation: activity === "running" ? "sessionsLivePulse 1.4s ease-in-out infinite" : undefined,
-      }}
-    />
-  );
-}
-
 export function LiveSessionRow({
   session,
-  activity,
   context,
   selected,
   onSelect,
@@ -94,7 +58,6 @@ export function LiveSessionRow({
           />
         ) : null}
         <div className="relative flex items-center gap-2">
-          <Voyant activity={activity} />
           {session.pinned ? <Pin size={10} style={{ color: "var(--color-accent)", flexShrink: 0 }} /> : null}
           <span
             className="text-xs font-medium truncate"
