@@ -19,7 +19,8 @@ export function ConversationList() {
   const waitingAgents = useEventsStore((s) => s.waitingAgents);
 
   const active = dashboards.find((d) => d.id === activeDashboardId);
-  const tabs = active?.tabs.filter((t) => t.kind === 'chat' || t.kind === 'agent') ?? [];
+  const tabs =
+    active?.tabs.filter((t) => t.kind === 'chat' || t.kind === 'agent' || t.kind === 'session') ?? [];
 
   if (tabs.length === 0) {
     return (
