@@ -9,6 +9,7 @@ import type { SessionSummary } from '@/hooks/useSessions';
 import { useProject } from '@/store/ProjectContext';
 import { useDashboardStore } from '@/store/useDashboardStore';
 import { useDashboardUIStore } from '@/store/useDashboardUIStore';
+import { useEventsStore } from '@/store/useEventsStore';
 import { EMPTY, useFavoritesStore } from '@/store/useFavoritesStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 import type { AgentSummary } from '@/types/agents-mirror.types';
@@ -18,6 +19,7 @@ import { AgentList } from '../AgentList/AgentList';
 import { HookRow } from '../HookRow/HookRow';
 import { SectionLabel } from '../SectionLabel/SectionLabel';
 import { SessionsPanel } from '../SessionsPanel/SessionsPanel';
+import { partitionSessions } from '../SessionsPanel/utils';
 import { SkillRow } from '../SkillRow/SkillRow';
 
 export type PanelsAreaProps = {
@@ -37,6 +39,7 @@ export function PanelsArea({
   const agents = useDashboardStore((s) => s.agents);
   const skills = useDashboardStore((s) => s.skills);
   const hooks = useDashboardStore((s) => s.hooks);
+  const activeAgents = useEventsStore((s) => s.activeAgents);
   const favoriteList = useFavoritesStore((s) => s.byProject[projectId ?? ''] ?? EMPTY);
   const selectedAgent = useDashboardUIStore((s) => s.selectedAgent);
   const selectedSkill = useDashboardUIStore((s) => s.selectedSkill);
@@ -59,12 +62,32 @@ export function PanelsArea({
   const favSkills = skills.filter((s) => isFav('skill', s.name));
   const favHooks = hooks.filter((h) => isFav('hook', `${h.event}:${h.matcher}`));
   const hasFavorites = favAgents.length + favSkills.length + favHooks.length > 0;
+
+  // Sessions count mirrors what the panel shows directly: the live + recent
+  // tiers (excludes the older/"load more" bucket and archived sessions).
+  const sessionTiers = partitionSessions(sessions, activeAgents);
+  const sessionsShownCount = sessionTiers.live.length + sessionTiers.recent.length;
+
+  const sessionsPanel = {
+    key: "sessions",
+    label: "Sessions",
+    icon: <History size={11} className="text-purple-400" />,
+    count: sessionsShownCount,
+    content: (
+      <SessionsPanel
+        sessions={sessions}
+        loading={sessionsLoading}
+        refresh={sessionsRefresh}
+      />
+    ),
+  };
   return (
     <div className="flex-1 flex flex-col min-h-0">
       {/* Spacer pushes panels to bottom when all are closed */}
       {!openPanels.size ? <div className="flex-1" /> : null}
 
       {([
+      sessionsPanel,
       hasFavorites ? {
         key: "favorites",
         label: "Favorites",
@@ -182,19 +205,6 @@ export function PanelsArea({
           </>
         ),
       } : null,
-      {
-        key: "sessions",
-        label: "Sessions",
-        icon: <History size={11} className="text-purple-400" />,
-        count: sessions.length,
-        content: (
-          <SessionsPanel
-            sessions={sessions}
-            loading={sessionsLoading}
-            refresh={sessionsRefresh}
-          />
-        ),
-      },
       hooks.length > 0 ? {
         key: "hooks",
         label: "Hooks",

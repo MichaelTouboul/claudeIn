@@ -78,20 +78,16 @@ describe("SessionsPanel", () => {
     expect(screen.getByText(/Load more \(1\)/)).toBeInTheDocument();
   });
 
-  it("promotes a driven (active-agent) session into the Live tier and shows a running voyant", () => {
+  it("promotes a driven (active-agent) session into the Live tier", () => {
     useEventsStore.setState({ activeAgents: new Set(["builder"]) });
     renderPanel([session("driven", "recent", { agentName: "builder" })]);
 
-    // The recent-status session is promoted to Live because its agent is active.
+    // The recent-status session is promoted to Live because its agent is active;
+    // it renders under the Live tier (no live voyant — that now lives in ACTIVITY).
+    expect(screen.getByText("Live")).toBeInTheDocument();
     expect(screen.getByText("Title driven")).toBeInTheDocument();
-    expect(screen.getByLabelText("Running")).toBeInTheDocument();
-  });
-
-  it("shows a waiting voyant for a piloted, waiting session", () => {
-    useEventsStore.setState({ activeAgents: new Set(["pilot"]), waitingAgents: new Set(["pilot"]) });
-    renderPanel([session("wait", "live", { agentName: "pilot" })]);
-
-    expect(screen.getByLabelText("Waiting for input")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Running")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Waiting for input")).not.toBeInTheDocument();
   });
 
   it("shows a status badge on recent rows", () => {
