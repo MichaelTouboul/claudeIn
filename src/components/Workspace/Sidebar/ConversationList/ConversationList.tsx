@@ -33,7 +33,12 @@ export function ConversationList() {
   return (
     <div className="px-3 pb-2 space-y-0.5">
       {tabs.map((tab) => {
-        const name = tab.agentName ?? '';
+        // Live-event sets (activeAgents/waitingAgents) are keyed by the spawn's
+        // agentName, which for the main chat is "_main" (the tab carries an empty
+        // agentName). Normalize empty→"_main" for chat tabs so the dot can match;
+        // other kinds keep their literal agentName. "_main" matches no real agent,
+        // so the icon color simply falls back to the default — which is correct.
+        const name = tab.kind === 'chat' ? tab.agentName || '_main' : tab.agentName ?? '';
         const agent = agents.find((a) => a.id === name);
         const status = waitingAgents.has(name) ? 'waiting' : activeAgents.has(name) ? 'live' : 'idle';
         const dotColor = status === 'live' ? '#22c55e' : status === 'waiting' ? '#eab308' : 'var(--color-text-muted)';
