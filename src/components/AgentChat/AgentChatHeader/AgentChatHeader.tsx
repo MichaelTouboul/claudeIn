@@ -1,6 +1,8 @@
 import { Square, Terminal } from 'lucide-react';
 
 import { Button } from '@/components/_ui/Button';
+import { ContextBar } from '@/components/_ui/ContextBar';
+import { useEventsStore } from '@/store/useEventsStore';
 import type { SpawnSession } from '@/types/spawn.types';
 
 export type AgentChatHeaderProps = {
@@ -12,9 +14,18 @@ export type AgentChatHeaderProps = {
 };
 
 export function AgentChatHeader({ agentName, session, isRunning, waitingInput, onKill }: AgentChatHeaderProps) {
+  const context = useEventsStore((s) => s.agentContexts.get(agentName));
   return (
-    <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-surface-1/50 rounded-t-lg">
-      <div className="flex items-center gap-2">
+    <div className="relative flex items-center justify-between px-4 py-2 border-b border-border bg-surface-1/50 rounded-t-lg">
+      {context && context.percent > 0 ? (
+        <ContextBar
+          percent={context.percent}
+          tokensIn={context.tokensIn}
+          tokensOut={context.tokensOut}
+          costUsd={context.costUsd}
+        />
+      ) : null}
+      <div className="relative flex items-center gap-2">
         <Terminal size={14} className="text-accent" />
         <span className="text-xs font-medium text-fg">
           {session ? `${agentName} — session` : agentName}
@@ -39,7 +50,7 @@ export function AgentChatHeader({ agentName, session, isRunning, waitingInput, o
         ) : null}
       </div>
       {isRunning ? (
-        <Button intent="danger" size="sm" onClick={onKill}>
+        <Button intent="danger" size="sm" onClick={onKill} className="relative">
           <Square size={10} />
           Stop
         </Button>
