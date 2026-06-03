@@ -8,10 +8,6 @@ Maintenance / cleanup tasks — not features, not bugs. Companion to `docs/featu
 
 ## Open
 
-### Flaky test: `settings.service` watch broadcast times out under full-suite parallel load
-**Effort:** Low · **Status:** Open (2026-06-02)
-`electron/services/settings.service.test.ts` → `watchSettings > broadcasts a recomputed snapshot when a watched layer changes` intermittently fails with a `waitFor` timeout, but **only** during the full parallel `npm run test` run — it passes 6/6 reliably in isolation (`npm run test -- settings.service`). Observed flaking 3× across the settings, agents-mirror, and per-model-costs merges; never a real regression. Likely fs.watch debounce + `waitFor` budget being starved under CPU contention. Fix: raise the test's `waitFor` timeout (and/or the poll), or make the watch test less timing-sensitive (e.g. await the debounce deterministically). Possibly applies to the analogous `agents.mirror` watch test too — harden both.
-
 ### `_ui/` Radix follow-ups (deferred from the consolidation)
 **Effort:** Low–Medium · **Status:** Open
 "Watch, not yet" items deferred from the `_ui/` primitive consolidation:
@@ -22,6 +18,10 @@ Maintenance / cleanup tasks — not features, not bugs. Companion to `docs/featu
 Low urgency — do when next working in those areas.
 
 ---
+
+## Done (2026-06-03)
+
+- **Flaky fs.watch broadcast tests stabilized** — the watch-broadcast tests (`settings.service`, `agents.mirror`, `skills.mirror`, `memory.mirror`) timed out under full-parallel `npm run test`: fs.watch registration latency + the ~150ms debounce racing a same-tick write, plus a too-tight `waitFor` budget. Fixed test-side only (no service/debounce changes), mirroring the robust `mcp.mirror`/`conversation.tail` pattern: added a `settle()` await (~80ms) after each `watchX()` and before the first mutation (incl. the diff-guard tests), and raised each `waitFor` timeout to 5000ms. Assertions unchanged (broadcast-fires + diff-guard still asserted). Verified green across 3 consecutive full-suite runs.
 
 ## Done (2026-06-01)
 

@@ -32,7 +32,12 @@ afterEach(() => {
   fs.rmSync(tmpHome, { recursive: true, force: true });
 });
 
-function waitFor(predicate: () => boolean, timeout = 3000): Promise<void> {
+/** macOS recursive fs.watch can take a beat to arm — settle before mutating. */
+function settle(ms = 80): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+function waitFor(predicate: () => boolean, timeout = 5000): Promise<void> {
   return new Promise((resolve, reject) => {
     const start = Date.now();
     const tick = () => {
@@ -135,6 +140,7 @@ describe("skills.mirror getSkillsMirror", () => {
 describe("skills.mirror watchSkills", () => {
   it("broadcasts a recomputed snapshot when a watched SKILL.md changes", async () => {
     watchSkills();
+    await settle();
     writeSkill(userSkillsDir, "fresh", { name: "fresh", description: "F" });
     await waitFor(() =>
       changedPushes().some((d) => d.snapshot?.skills.some((s) => s.name === "fresh")),
@@ -146,6 +152,7 @@ describe("skills.mirror watchSkills", () => {
   it("does not re-broadcast when the snapshot is unchanged (diff guard)", async () => {
     writeSkill(userSkillsDir, "alpha", { name: "alpha", description: "A" });
     watchSkills();
+    await settle();
     // Re-write byte-identical content → snapshot unchanged → no push.
     writeSkill(userSkillsDir, "alpha", { name: "alpha", description: "A" });
     await new Promise((r) => setTimeout(r, 400)); // past the 150ms debounce

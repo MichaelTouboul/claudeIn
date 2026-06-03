@@ -32,7 +32,12 @@ afterEach(() => {
   fs.rmSync(tmpHome, { recursive: true, force: true });
 });
 
-function waitFor(predicate: () => boolean, timeout = 3000): Promise<void> {
+/** macOS recursive fs.watch can take a beat to arm — settle before mutating. */
+function settle(ms = 80): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+function waitFor(predicate: () => boolean, timeout = 5000): Promise<void> {
   return new Promise((resolve, reject) => {
     const start = Date.now();
     const tick = () => {
@@ -120,6 +125,7 @@ describe("agents.mirror getAgents", () => {
 describe("agents.mirror watchAgents", () => {
   it("broadcasts a recomputed snapshot when a watched .md changes (incl. nested)", async () => {
     watchAgents();
+    await settle();
     writeAgent(path.join(userAgentsDir, "sub"), "fresh.md", { name: "fresh", description: "F" });
     await waitFor(() =>
       changedPushes().some((d) => d.snapshot?.agents.some((a) => a.id === "fresh")),
@@ -131,6 +137,7 @@ describe("agents.mirror watchAgents", () => {
   it("does not re-broadcast when the snapshot is unchanged (diff guard)", async () => {
     writeAgent(userAgentsDir, "alpha.md", { name: "alpha", description: "A" });
     watchAgents();
+    await settle();
     // Re-write byte-identical content → snapshot unchanged → no push.
     writeAgent(userAgentsDir, "alpha.md", { name: "alpha", description: "A" });
     await new Promise((r) => setTimeout(r, 400)); // past the 150ms debounce
