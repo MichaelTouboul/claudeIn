@@ -3,6 +3,7 @@ import { useDashboardStore } from '@/store/useDashboardStore';
 import type { InternalTab } from '@/store/useWorkspaceStore';
 
 import { ChatTab } from '../ChatTab/ChatTab';
+import { SessionViewer } from '../SessionViewer/SessionViewer';
 import { SkillDetail } from '../SkillDetail/SkillDetail';
 
 export type TabBodyProps = {
@@ -27,6 +28,11 @@ export function TabBody({ tab, cwd }: TabBodyProps) {
 
   if (tab.kind === 'chat') {
     return <ChatTab tabId={tab.id} agentName={tab.agentName ?? ''} cwd={cwd} />;
+  }
+  if (tab.kind === 'session') {
+    return tab.sessionFilePath && tab.sessionId
+      ? <SessionViewer filePath={tab.sessionFilePath} sessionId={tab.sessionId} title={tab.title} cwd={cwd} />
+      : <NotFound label="Session not found." />;
   }
   if (tab.kind === 'agent') {
     // The summary list is the source of truth for existence; AgentDetail fetches

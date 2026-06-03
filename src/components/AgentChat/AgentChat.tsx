@@ -145,6 +145,15 @@ export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: A
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // "Continue as is" resume entry: when a session is resumed WITHOUT an initial
+  // message (the viewer's plain-resume choice), seed the claude session id so the
+  // FIRST user message is sent as `--resume <id>` rather than spawning fresh.
+  useEffect(() => {
+    if (initialMessage) return; // auto-send path seeds it itself
+    if (!resumeSessionId) return;
+    setClaudeSessionId((prev) => prev ?? resumeSessionId);
+  }, [resumeSessionId, initialMessage]);
+
   useEffect(() => {
     if (autoSentRef.current) return;
     if (!initialMessage || !resumeSessionId || !projectPath) return;
