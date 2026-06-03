@@ -34,7 +34,12 @@ function writeUser(json: string) {
   fs.writeFileSync(path.join(tmpHome, '.claude', 'settings.json'), json);
 }
 
-function waitFor(predicate: () => boolean, timeout = 3000): Promise<void> {
+/** macOS fs.watch can take a beat to arm — settle before mutating. */
+function settle(ms = 80): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+function waitFor(predicate: () => boolean, timeout = 5000): Promise<void> {
   return new Promise((resolve, reject) => {
     const start = Date.now();
     const tick = () => {
@@ -110,6 +115,7 @@ function changedPushes(): SettingsChangedPush[] {
 describe('settings.service watchSettings', () => {
   it('broadcasts a recomputed snapshot when a watched layer changes', async () => {
     watchSettings();
+    await settle();
     writeUser(JSON.stringify({ model: 'opus' }));
 
     await waitFor(() =>
@@ -122,6 +128,7 @@ describe('settings.service watchSettings', () => {
 
   it('does not re-broadcast when the same content is written again (diff guard)', async () => {
     watchSettings();
+    await settle();
 
     writeUser(JSON.stringify({ model: 'opus' }));
     await waitFor(() => changedPushes().length === 1);

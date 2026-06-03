@@ -188,6 +188,7 @@ describe("memory.mirror watchMemory", () => {
   it("does not re-broadcast when the snapshot is unchanged (diff guard)", async () => {
     write(path.join(projDir, "CLAUDE.md"), "# stable");
     watchMemory(projDir);
+    await settle();
     // Re-write byte-identical content → snapshot unchanged → no push.
     write(path.join(projDir, "CLAUDE.md"), "# stable");
     await new Promise((r) => setTimeout(r, 400)); // past the 150ms debounce
