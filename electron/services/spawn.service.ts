@@ -149,6 +149,13 @@ export function spawnAgent(agentName: string, mission: string, cwd?: string, res
     mission,
   });
 
+  broadcast({
+    type: "spawn_message",
+    sessionId,
+    agentName,
+    message: { role: "user", content: mission, timestamp: new Date().toISOString() },
+  });
+
   return session;
 }
 
