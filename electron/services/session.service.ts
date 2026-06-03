@@ -2,7 +2,21 @@ import fs from "fs";
 import path from "path";
 import readline from "readline";
 import { extractAssistantUsage, getProjectsBase } from "./session.transcript";
-import type { SessionSummary, SessionConversation, SessionMessage } from "../types/session.types";
+import type { SessionStatus, SessionSummary, SessionConversation, SessionMessage } from "../types/session.types";
+
+// Status is derived from how recently the transcript file was touched (mtime,
+// surfaced as `lastActiveAt`). Snapshot "live" is approximate — the precise
+// live signal is the tail receiving appends + (for piloted sessions) activeAgents.
+export const LIVE_THRESHOLD_MS = 30_000; // < 30 s → live
+export const RECENT_THRESHOLD_MS = 6 * 60 * 60 * 1000; // < 6 h → recent
+
+export function deriveStatus(lastActiveAt: string | null, now: number = Date.now()): SessionStatus {
+  if (!lastActiveAt) return "idle";
+  const age = now - new Date(lastActiveAt).getTime();
+  if (age < LIVE_THRESHOLD_MS) return "live";
+  if (age < RECENT_THRESHOLD_MS) return "recent";
+  return "idle";
+}
 
 function getSessionsDir(projectPath: string): string {
   const encoded = projectPath.replace(/\//g, "-");
@@ -67,6 +81,7 @@ export async function listSessions(projectPath: string): Promise<SessionSummary[
     }
 
     const meta = await extractMetadata(filePath);
+    const lastActiveAt = stat.mtime.toISOString();
 
     summaries.push({
       sessionId,
@@ -77,9 +92,10 @@ export async function listSessions(projectPath: string): Promise<SessionSummary[
       messageCount: Math.max(1, Math.round(stat.size / 500)),
       branch: meta.branch || null,
       startedAt: meta.startedAt || null,
-      lastActiveAt: stat.mtime.toISOString(),
+      lastActiveAt,
       model: meta.model || null,
       projectDirName: path.basename(dir),
+      status: deriveStatus(lastActiveAt),
     });
   }
 

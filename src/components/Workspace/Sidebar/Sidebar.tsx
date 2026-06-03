@@ -1,13 +1,11 @@
 import { useEffect } from 'react';
 
 import { useResizableSidebar } from '@/hooks/useResizableSidebar';
-import type { SessionSummary } from '@/hooks/useSessions';
 import { useSessions } from '@/hooks/useSessions';
 import { useProject } from '@/store/ProjectContext';
 import { useDashboardStore } from '@/store/useDashboardStore';
 import { useDashboardUIStore } from '@/store/useDashboardUIStore';
 import { useFavoritesStore, useInitFavorites } from '@/store/useFavoritesStore';
-import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
 import { ConversationList } from './ConversationList/ConversationList';
 import { PanelsArea } from './PanelsArea/PanelsArea';
@@ -41,7 +39,7 @@ function ZoneHeader({ label }: { label: string }) {
 export function Sidebar() {
   const { projectId, projectPath } = useProject();
   useInitFavorites(projectId);
-  const { sessions, loading: sessionsLoading } = useSessions(projectPath);
+  const { sessions, loading: sessionsLoading, refresh: sessionsRefresh } = useSessions(projectPath);
 
   const { width: sidebarWidth, ref: sidebarRef, startDrag: handleResizeDragStart } = useResizableSidebar();
 
@@ -76,14 +74,6 @@ export function Sidebar() {
     }
   };
 
-  const handleSelectSession = (s: SessionSummary) => {
-    useWorkspaceStore.getState().addTab({
-      kind: 'chat',
-      title: s.title || s.firstPrompt || 'Session',
-      agentName: s.agentName || '',
-    });
-  };
-
   return (
     <div
       ref={sidebarRef}
@@ -101,8 +91,8 @@ export function Sidebar() {
       <PanelsArea
         sessions={sessions}
         sessionsLoading={sessionsLoading}
+        sessionsRefresh={sessionsRefresh}
         onAgentAction={handleAgentAction}
-        onSelectSession={handleSelectSession}
       />
 
       <ResizeHandle onMouseDown={handleResizeDragStart} />

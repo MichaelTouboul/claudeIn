@@ -1,5 +1,7 @@
 import { useCallback,useEffect, useState } from "react";
 
+export type SessionStatus = "live" | "recent" | "idle";
+
 export type SessionSummary = {
   sessionId: string;
   filePath: string;
@@ -11,6 +13,8 @@ export type SessionSummary = {
   startedAt: string | null;
   lastActiveAt: string | null;
   model: string | null;
+  projectDirName: string;
+  status: SessionStatus;
 };
 
 export type SessionConversation = {
