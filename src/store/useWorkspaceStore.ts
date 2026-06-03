@@ -45,7 +45,25 @@ type WorkspaceState = {
   addTab: (tab: Omit<InternalTab, 'id'>) => string;
   closeTab: (tabId: string) => void;
   setActiveTab: (tabId: string) => void;
+  retitleChatTab: (agentName: string, title: string) => void;
 };
+
+// Auto-generated/placeholder labels we're allowed to overwrite with an AI title.
+// A user-renamed tab won't match any of these, so it's never clobbered.
+const GENERIC_TITLES = new Set(['Chat', 'Discussion', 'New chat']);
+function isGenericTitle(title: string): boolean {
+  return GENERIC_TITLES.has(title) || title.startsWith('Chat with ');
+}
+
+// The main/global chat spawns with an empty agent_name, which the backend
+// defaults to "_main"; its InternalTab carries no agentName. So a retitle for
+// "_main" must also match chat tabs whose agentName is empty/undefined.
+function matchesChatTab(tab: InternalTab, agentName: string): boolean {
+  if (tab.kind !== 'chat') return false;
+  const tabAgent = tab.agentName ?? '';
+  if (agentName === '_main') return tabAgent === '' || tabAgent === '_main';
+  return tabAgent === agentName;
+}
 
 let counter = 0;
 let tabCounter = 0;
@@ -192,5 +210,16 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   setActiveTab: (tabId) => {
     const { dashboards, activeDashboardId } = get();
     set({ dashboards: mapActive(dashboards, activeDashboardId, (d) => ({ ...d, activeTabId: tabId })) });
+  },
+
+  retitleChatTab: (agentName, title) => {
+    set((s) => ({
+      dashboards: s.dashboards.map((d) => ({
+        ...d,
+        tabs: d.tabs.map((t) =>
+          matchesChatTab(t, agentName) && isGenericTitle(t.title) ? { ...t, title } : t,
+        ),
+      })),
+    }));
   },
 }));

@@ -146,4 +146,44 @@ describe('useWorkspaceStore', () => {
     expect(d.tabs[0].agentName).toBe('tw-dev');
     expect(d.tabs[0].title).toBe('tw-dev');
   });
+
+  it('retitleChatTab renames a matching agent chat tab when its title is generic', () => {
+    useWorkspaceStore.getState().openDashboard(proj('a'));
+    const tabId = useWorkspaceStore.getState().addTab({ kind: 'chat', title: 'Chat', agentName: 'tw-dev' });
+    useWorkspaceStore.getState().retitleChatTab('tw-dev', 'Fix the login bug');
+    const tab = useWorkspaceStore.getState().dashboards[0].tabs.find((t) => t.id === tabId)!;
+    expect(tab.title).toBe('Fix the login bug');
+  });
+
+  it('retitleChatTab leaves a user-renamed (non-generic) tab untouched', () => {
+    useWorkspaceStore.getState().openDashboard(proj('a'));
+    const tabId = useWorkspaceStore.getState().addTab({ kind: 'chat', title: 'My custom name', agentName: 'tw-dev' });
+    useWorkspaceStore.getState().retitleChatTab('tw-dev', 'AI title');
+    const tab = useWorkspaceStore.getState().dashboards[0].tabs.find((t) => t.id === tabId)!;
+    expect(tab.title).toBe('My custom name');
+  });
+
+  it('retitleChatTab leaves a non-matching agent tab untouched', () => {
+    useWorkspaceStore.getState().openDashboard(proj('a'));
+    const tabId = useWorkspaceStore.getState().addTab({ kind: 'chat', title: 'Chat', agentName: 'other' });
+    useWorkspaceStore.getState().retitleChatTab('tw-dev', 'AI title');
+    const tab = useWorkspaceStore.getState().dashboards[0].tabs.find((t) => t.id === tabId)!;
+    expect(tab.title).toBe('Chat');
+  });
+
+  it('retitleChatTab for "_main" matches the default chat tab (no agentName)', () => {
+    useWorkspaceStore.getState().openDashboard(proj('a'));
+    // The default chat tab has no agentName; the main chat spawns as "_main".
+    useWorkspaceStore.getState().retitleChatTab('_main', 'Greeting');
+    const tab = useWorkspaceStore.getState().dashboards[0].tabs[0];
+    expect(tab.title).toBe('Greeting');
+  });
+
+  it('retitleChatTab does not touch non-chat tabs', () => {
+    useWorkspaceStore.getState().openDashboard(proj('a'));
+    const agentTabId = useWorkspaceStore.getState().addTab({ kind: 'agent', title: 'Chat', agentName: 'tw-dev' });
+    useWorkspaceStore.getState().retitleChatTab('tw-dev', 'AI title');
+    const tab = useWorkspaceStore.getState().dashboards[0].tabs.find((t) => t.id === agentTabId)!;
+    expect(tab.title).toBe('Chat');
+  });
 });

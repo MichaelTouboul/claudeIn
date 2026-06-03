@@ -5,10 +5,10 @@ import { GlobalChatModal } from "@/components/GlobalChatModal/GlobalChatModal";
 import { Header } from "@/components/Header/Header";
 import { Workspace } from "@/components/Workspace/Workspace";
 
+import { useInitChatTitles } from "./hooks/useInitChatTitles";
 import { useProjects } from "./hooks/useProjects";
 import { useStats } from "./hooks/useStats";
 import { useAppStore } from "./store/useAppStore";
-import { useInitChatTitles } from "./store/useChatsStore";
 import { useDashboardStore } from "./store/useDashboardStore";
 import { useEventsStore, useInitEvents } from "./store/useEventsStore";
 import { useWorkspaceStore } from "./store/useWorkspaceStore";
