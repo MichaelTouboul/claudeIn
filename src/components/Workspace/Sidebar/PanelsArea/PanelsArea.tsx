@@ -5,7 +5,6 @@ Wrench, } from "lucide-react";
 import { type ReactNode } from "react";
 
 import { Accordion } from '@/components/_ui/Accordion';
-import { SessionList } from '@/components/SessionList/SessionList';
 import type { SessionSummary } from '@/hooks/useSessions';
 import { useProject } from '@/store/ProjectContext';
 import { useDashboardStore } from '@/store/useDashboardStore';
@@ -18,20 +17,21 @@ import type { SkillSummary } from '@/types/skills-mirror.types';
 import { AgentList } from '../AgentList/AgentList';
 import { HookRow } from '../HookRow/HookRow';
 import { SectionLabel } from '../SectionLabel/SectionLabel';
+import { SessionsPanel } from '../SessionsPanel/SessionsPanel';
 import { SkillRow } from '../SkillRow/SkillRow';
 
 export type PanelsAreaProps = {
   sessions: SessionSummary[];
   sessionsLoading: boolean;
+  sessionsRefresh: () => Promise<void> | void;
   onAgentAction: (action: string, agentName: string) => void;
-  onSelectSession: (s: SessionSummary) => void;
 };
 
 export function PanelsArea({
   sessions,
   sessionsLoading,
+  sessionsRefresh,
   onAgentAction,
-  onSelectSession,
 }: PanelsAreaProps) {
   const { projectId, isUserProject, refresh } = useProject();
   const agents = useDashboardStore((s) => s.agents);
@@ -40,7 +40,6 @@ export function PanelsArea({
   const favoriteList = useFavoritesStore((s) => s.byProject[projectId ?? ''] ?? EMPTY);
   const selectedAgent = useDashboardUIStore((s) => s.selectedAgent);
   const selectedSkill = useDashboardUIStore((s) => s.selectedSkill);
-  const selectedSessionId = useDashboardUIStore((s) => s.selectedSessionId);
   const openPanels = useDashboardUIStore((s) => s.openPanels);
   const scopeTab = useDashboardUIStore((s) => s.scopeTab);
   const togglePanel = useDashboardUIStore.getState().togglePanel;
@@ -188,13 +187,11 @@ export function PanelsArea({
         label: "Sessions",
         icon: <History size={11} className="text-purple-400" />,
         count: sessions.length,
-        content: sessionsLoading ? (
-          <p className="text-xs text-fg-subtle text-center py-4">Loading sessions...</p>
-        ) : (
-          <SessionList
+        content: (
+          <SessionsPanel
             sessions={sessions}
-            selectedId={selectedSessionId}
-            onSelect={(s) => onSelectSession(s)}
+            loading={sessionsLoading}
+            refresh={sessionsRefresh}
           />
         ),
       },
