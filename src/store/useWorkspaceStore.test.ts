@@ -80,6 +80,32 @@ describe('useWorkspaceStore', () => {
     expect(useWorkspaceStore.getState().dashboards[0].activeTabId).toBe(id1);
   });
 
+  it('addTab dedupes a session tab by sessionFilePath (re-activates, no duplicate)', () => {
+    useWorkspaceStore.getState().openDashboard(proj('a'));
+    const id1 = useWorkspaceStore.getState().addTab({
+      kind: 'session', title: 'Conv', sessionFilePath: '/s/conv.jsonl', sessionId: 'conv',
+    });
+    useWorkspaceStore.getState().addTab({ kind: 'chat', title: 'Chat' });
+    const id2 = useWorkspaceStore.getState().addTab({
+      kind: 'session', title: 'Conv', sessionFilePath: '/s/conv.jsonl', sessionId: 'conv',
+    });
+    expect(id2).toBe(id1);
+    expect(useWorkspaceStore.getState().dashboards[0].tabs.filter((t) => t.kind === 'session')).toHaveLength(1);
+    expect(useWorkspaceStore.getState().dashboards[0].activeTabId).toBe(id1);
+  });
+
+  it('addTab dedupes a session tab by sessionId even when filePath differs', () => {
+    useWorkspaceStore.getState().openDashboard(proj('a'));
+    const id1 = useWorkspaceStore.getState().addTab({
+      kind: 'session', title: 'Conv', sessionFilePath: '/s/conv.jsonl', sessionId: 'conv',
+    });
+    const id2 = useWorkspaceStore.getState().addTab({
+      kind: 'session', title: 'Conv', sessionFilePath: '/other/conv.jsonl', sessionId: 'conv',
+    });
+    expect(id2).toBe(id1);
+    expect(useWorkspaceStore.getState().dashboards[0].tabs.filter((t) => t.kind === 'session')).toHaveLength(1);
+  });
+
   it('closeTab on the last tab re-seeds a default chat tab', () => {
     useWorkspaceStore.getState().openDashboard(proj('a'));
     const only = useWorkspaceStore.getState().dashboards[0].tabs[0].id;

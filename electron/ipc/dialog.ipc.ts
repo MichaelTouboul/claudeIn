@@ -46,9 +46,10 @@ Assistant: ${assistantMessage.slice(0, 200)}`;
     return new Promise<string>((resolve) => {
       const proc = exec("claude --print --max-turns 1", { timeout: 15000, encoding: "utf-8", env: { ...process.env } }, (error, stdout) => {
         if (error || !stdout.trim()) {
-          let fallback = userMessage.replace(/[\n\r]+/g, " ").trim();
-          if (fallback.length > 50) fallback = fallback.slice(0, 47) + "...";
-          resolve(fallback);
+          // On failure return an empty string: the renderer applies a title only
+          // when it's truthy, so the tab keeps its generic 'Chat' label and we
+          // never surface the raw user prompt as the conversation title.
+          resolve("");
         } else {
           resolve(stdout.trim().slice(0, 60));
         }

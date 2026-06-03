@@ -65,6 +65,29 @@ function matchesChatTab(tab: InternalTab, agentName: string): boolean {
   return tabAgent === agentName;
 }
 
+// Finds an already-open tab representing the SAME thing as `tab`, so addTab can
+// focus it instead of duplicating. Identity is per kind:
+//   • agent  → agentName
+//   • skill  → skillId
+//   • session→ same conversation: sessionFilePath OR sessionId match. Matching on
+//     either makes the dedup robust if the same conversation is opened from a
+//     path that differs only cosmetically. (A live `chat` tab does not carry its
+//     session id, so chat↔session dedup is not possible here — see backlog.)
+// chat tabs are never deduped (a user may want several independent chats).
+function findDuplicateTab(tabs: InternalTab[], tab: Omit<InternalTab, 'id'>): InternalTab | undefined {
+  if (tab.kind === 'agent') return tabs.find((t) => t.kind === 'agent' && t.agentName === tab.agentName);
+  if (tab.kind === 'skill') return tabs.find((t) => t.kind === 'skill' && t.skillId === tab.skillId);
+  if (tab.kind === 'session') {
+    return tabs.find(
+      (t) =>
+        t.kind === 'session' &&
+        ((tab.sessionFilePath !== undefined && t.sessionFilePath === tab.sessionFilePath) ||
+          (tab.sessionId !== undefined && t.sessionId === tab.sessionId)),
+    );
+  }
+  return undefined;
+}
+
 let counter = 0;
 let tabCounter = 0;
 const newTabId = () => `tab-${++tabCounter}`;
@@ -171,14 +194,10 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     const { dashboards, activeDashboardId } = get();
     const active = dashboards.find((d) => d.id === activeDashboardId);
     if (!active) return '';
-    if (tab.kind === 'agent' || tab.kind === 'skill' || tab.kind === 'session') {
-      const key =
-        tab.kind === 'agent' ? 'agentName' : tab.kind === 'skill' ? 'skillId' : 'sessionFilePath';
-      const existing = active.tabs.find((t) => t.kind === tab.kind && t[key] === tab[key]);
-      if (existing) {
-        set({ dashboards: mapActive(dashboards, activeDashboardId, (d) => ({ ...d, activeTabId: existing.id })) });
-        return existing.id;
-      }
+    const existing = findDuplicateTab(active.tabs, tab);
+    if (existing) {
+      set({ dashboards: mapActive(dashboards, activeDashboardId, (d) => ({ ...d, activeTabId: existing.id })) });
+      return existing.id;
     }
     const id = newTabId();
     set({
