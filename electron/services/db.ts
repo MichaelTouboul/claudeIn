@@ -132,6 +132,13 @@ export async function initDb(): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_missions_agent ON missions(agent_name);
     CREATE INDEX IF NOT EXISTS idx_missions_status ON missions(status);
     CREATE INDEX IF NOT EXISTS idx_favorites_project ON favorites(project_id);
+    CREATE TABLE IF NOT EXISTS conversation_meta (
+      session_id  TEXT PRIMARY KEY,
+      pinned_at   TEXT,
+      archived_at TEXT,
+      deleted_at  TEXT,
+      note        TEXT
+    );
   `);
 
   runMigrations();

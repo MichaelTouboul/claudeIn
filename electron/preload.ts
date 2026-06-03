@@ -57,6 +57,13 @@ contextBridge.exposeInMainWorld("api", {
   unwatchSessions: (projectPath: string) => ipcRenderer.invoke("sessions:watch-stop", projectPath),
   watchConversation: (filePath: string) => ipcRenderer.invoke("conversation:watch", filePath),
   unwatchConversation: (filePath: string) => ipcRenderer.invoke("conversation:unwatch", filePath),
+  pinConversation: (sessionId: string) => ipcRenderer.invoke("conversation:pin", sessionId),
+  unpinConversation: (sessionId: string) => ipcRenderer.invoke("conversation:unpin", sessionId),
+  archiveConversation: (sessionId: string) => ipcRenderer.invoke("conversation:archive", sessionId),
+  unarchiveConversation: (sessionId: string) => ipcRenderer.invoke("conversation:unarchive", sessionId),
+  softDeleteConversation: (sessionId: string) => ipcRenderer.invoke("conversation:softDelete", sessionId),
+  restoreConversation: (sessionId: string) => ipcRenderer.invoke("conversation:restore", sessionId),
+  deleteConversationFromDisk: (filePath: string) => ipcRenderer.invoke("conversation:deleteFromDisk", filePath),
   onConversationAppended: (
     cb: (data: {
       filePath: string;

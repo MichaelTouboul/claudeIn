@@ -51,6 +51,13 @@ interface Window {
     unwatchSessions: (projectPath: string) => Promise<void>;
     watchConversation: (filePath: string) => Promise<void>;
     unwatchConversation: (filePath: string) => Promise<void>;
+    pinConversation: (sessionId: string) => Promise<void>;
+    unpinConversation: (sessionId: string) => Promise<void>;
+    archiveConversation: (sessionId: string) => Promise<void>;
+    unarchiveConversation: (sessionId: string) => Promise<void>;
+    softDeleteConversation: (sessionId: string) => Promise<void>;
+    restoreConversation: (sessionId: string) => Promise<void>;
+    deleteConversationFromDisk: (filePath: string) => Promise<boolean>;
     onConversationAppended: (
       cb: (data: {
         filePath: string;

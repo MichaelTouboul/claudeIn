@@ -1,0 +1,107 @@
+import fs from "fs";
+import { getDb } from "./db";
+
+// App-owned annotations for on-disk conversations. NEVER writes to ~/.claude —
+// only this app's own SQLite DB. All of pin/archive/soft-delete are reversible
+// (set the column back to NULL). The single destructive op is `deleteFromDisk`,
+// which is the ONLY function here that touches the filesystem.
+
+export type ConversationMeta = {
+  sessionId: string;
+  pinnedAt: string | null;
+  archivedAt: string | null;
+  deletedAt: string | null;
+  note: string | null;
+};
+
+// sql.js is synchronous — wrap in try/catch, never .then()/.catch().
+function nowIso(): string {
+  return new Date().toISOString();
+}
+
+function upsertColumn(sessionId: string, column: "pinned_at" | "archived_at" | "deleted_at", value: string | null): void {
+  const db = getDb();
+  try {
+    db.prepare(
+      `INSERT INTO conversation_meta (session_id, ${column}) VALUES (?, ?)
+       ON CONFLICT(session_id) DO UPDATE SET ${column} = excluded.${column}`
+    ).run(sessionId, value);
+  } catch {
+    // Defensive: a corrupt/missing table should not crash the IPC call.
+  }
+}
+
+export function pin(sessionId: string): void {
+  upsertColumn(sessionId, "pinned_at", nowIso());
+}
+
+export function unpin(sessionId: string): void {
+  upsertColumn(sessionId, "pinned_at", null);
+}
+
+export function archive(sessionId: string): void {
+  upsertColumn(sessionId, "archived_at", nowIso());
+}
+
+export function unarchive(sessionId: string): void {
+  upsertColumn(sessionId, "archived_at", null);
+}
+
+export function softDelete(sessionId: string): void {
+  upsertColumn(sessionId, "deleted_at", nowIso());
+}
+
+export function restore(sessionId: string): void {
+  upsertColumn(sessionId, "deleted_at", null);
+}
+
+export function getMeta(sessionId: string): ConversationMeta | null {
+  const db = getDb();
+  try {
+    const row = db
+      .prepare("SELECT session_id, pinned_at, archived_at, deleted_at, note FROM conversation_meta WHERE session_id = ?")
+      .get(sessionId);
+    if (!row) return null;
+    return {
+      sessionId: row.session_id as string,
+      pinnedAt: (row.pinned_at as string | null) ?? null,
+      archivedAt: (row.archived_at as string | null) ?? null,
+      deletedAt: (row.deleted_at as string | null) ?? null,
+      note: (row.note as string | null) ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function listMeta(): ConversationMeta[] {
+  const db = getDb();
+  try {
+    const rows = db
+      .prepare("SELECT session_id, pinned_at, archived_at, deleted_at, note FROM conversation_meta")
+      .all();
+    return rows.map((row) => ({
+      sessionId: row.session_id as string,
+      pinnedAt: (row.pinned_at as string | null) ?? null,
+      archivedAt: (row.archived_at as string | null) ?? null,
+      deletedAt: (row.deleted_at as string | null) ?? null,
+      note: (row.note as string | null) ?? null,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+// The ONLY destructive path: the real `fs.rm` of the transcript. Guarded — must
+// only ever be reached behind an explicit confirm in the UI. Best-effort clears
+// any app-owned meta row too so a re-created session id starts clean.
+export function deleteFromDisk(filePath: string): boolean {
+  if (!filePath || !filePath.endsWith(".jsonl")) return false;
+  try {
+    if (!fs.existsSync(filePath)) return false;
+    fs.rmSync(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+}

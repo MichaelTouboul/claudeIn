@@ -8,6 +8,7 @@ import { registerMemoryHandlers } from "./memory.ipc";
 import { registerCostHandlers } from "./costs.ipc";
 import { registerFavoriteHandlers } from "./favorites.ipc";
 import { registerSessionHandlers } from "./sessions.ipc";
+import { registerConversationMetaHandlers } from "./conversation.meta.ipc";
 import { registerDialogHandlers } from "./dialog.ipc";
 import { registerPtyHandlers } from "./pty.ipc";
 import { registerSystemHandlers } from "./system.ipc";
@@ -25,6 +26,7 @@ export function registerAllHandlers(): void {
   registerCostHandlers();
   registerFavoriteHandlers();
   registerSessionHandlers();
+  registerConversationMetaHandlers();
   registerDialogHandlers();
   registerPtyHandlers();
   registerSystemHandlers();
