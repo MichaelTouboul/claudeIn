@@ -8,20 +8,16 @@ type SpawnMessageEvent = {
   message?: { role: string; content: string };
 };
 
-const PREVIEW_MAX = 40;
-const PREVIEW_CUT = 37;
-
-function toPreview(content: string): string {
-  const preview = content.replace(/[\n\r]+/g, ' ').trim();
-  return preview.length > PREVIEW_MAX ? `${preview.slice(0, PREVIEW_CUT)}...` : preview;
-}
-
-// Generates conversation titles from the live spawn stream and propagates them
-// to the visible InternalTab (and, through it, the sidebar ConversationList):
-//   • first user message → an instant preview title,
-//   • the assistant reply → an AI-generated title via window.api.generateTitle.
+// Generates conversation titles from the live spawn stream and propagates the
+// result to the visible InternalTab (and, through it, the sidebar
+// ConversationList). The flow is one-shot per conversation:
+//   • first user message → recorded only (the tab keeps its generic 'Chat'
+//     label so it stays overwritable; the raw prompt is never shown as a title),
+//   • the assistant reply → an AI title via window.api.generateTitle, applied
+//     through retitleChatTab.
 // retitleChatTab only overwrites generic placeholder titles, so a tab the user
-// renamed is never clobbered.
+// renamed — or one already given an AI title — is never clobbered. On failure
+// generateTitle resolves to "" and the tab simply stays 'Chat'.
 export function useInitChatTitles() {
   const pendingTitles = useRef<Map<string, string>>(new Map());
   useEffect(() => {
@@ -35,7 +31,6 @@ export function useInitChatTitles() {
       if (role === 'user') {
         if (pendingTitles.current.has(agent)) return;
         pendingTitles.current.set(agent, content);
-        retitle(agent, toPreview(content));
         return;
       }
 
