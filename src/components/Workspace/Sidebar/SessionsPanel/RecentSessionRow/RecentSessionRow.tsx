@@ -53,7 +53,10 @@ export function RecentSessionRow({ session, selected, onSelect, onChanged }: Rec
           >
             {label}
           </span>
-          <Badge variant={STATUS_VARIANT[session.status]} className="ml-auto shrink-0 text-[9px]">
+          <Badge
+            variant={STATUS_VARIANT[session.status]}
+            className="ml-auto shrink-0 text-[9px] transition-opacity group-hover:opacity-0"
+          >
             {session.status}
           </Badge>
         </div>
