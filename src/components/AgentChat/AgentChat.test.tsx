@@ -83,6 +83,25 @@ beforeEach(() => {
   } as unknown as typeof window.api;
 });
 
+describe('AgentChat resume entry', () => {
+  it('auto-send resume passes the session id as resume_session_id', async () => {
+    render(<AgentChat agentName="tester" cwd="/p" resumeSessionId="claude-1" initialMessage="hi" />);
+    await waitFor(() => expect(spawnMock).toHaveBeenCalled());
+    expect(spawnMock).toHaveBeenCalledWith(
+      expect.objectContaining({ resume_session_id: 'claude-1', mission: 'hi', cwd: '/p' }),
+    );
+  });
+
+  it('"continue as is" (resume, no initial message) does NOT spawn fresh on mount', async () => {
+    // The viewer's plain-resume entry mounts AgentChat with resumeSessionId and
+    // no initialMessage: it must seed the claude session id and wait for the
+    // first user message to drive `--resume`, never auto-spawn a fresh session.
+    render(<AgentChat agentName="" cwd="/p" resumeSessionId="claude-1" />);
+    await new Promise((r) => setTimeout(r, 10));
+    expect(spawnMock).not.toHaveBeenCalled();
+  });
+});
+
 describe('AgentChat prompt-driven focus', () => {
   it('does not focus the input for a choice prompt (the picker self-focuses)', async () => {
     await renderReady();

@@ -31,7 +31,7 @@ export function TabBody({ tab, cwd }: TabBodyProps) {
   }
   if (tab.kind === 'session') {
     return tab.sessionFilePath && tab.sessionId
-      ? <SessionViewer filePath={tab.sessionFilePath} sessionId={tab.sessionId} title={tab.title} />
+      ? <SessionViewer filePath={tab.sessionFilePath} sessionId={tab.sessionId} title={tab.title} cwd={cwd} />
       : <NotFound label="Session not found." />;
   }
   if (tab.kind === 'agent') {

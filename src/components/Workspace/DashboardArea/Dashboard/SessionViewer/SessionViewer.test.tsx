@@ -1,9 +1,20 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { SessionConversation, SessionMessage } from "@/hooks/useSessions";
 
 import { SessionViewer } from "./SessionViewer";
+
+// Stub the live-chat so the resume-entry test can assert which props the viewer
+// hands AgentChat without mounting the full editor stack. AgentChat's own resume
+// behaviour (claudeSessionId -> resume_session_id) is covered in its own test.
+const agentChatProps = vi.fn();
+vi.mock("@/components/AgentChat/AgentChat", () => ({
+  AgentChat: (props: { resumeSessionId?: string; cwd?: string }) => {
+    agentChatProps(props);
+    return <div data-testid="agent-chat" />;
+  },
+}));
 
 type AppendCb = (data: { filePath: string; messages: SessionMessage[] }) => void;
 
@@ -46,10 +57,16 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
+function renderViewer() {
+  return render(
+    <SessionViewer filePath={FILE} sessionId="abcdef12" title="My session" cwd="/Users/x/proj" />,
+  );
+}
+
 describe("SessionViewer", () => {
   it("renders the initial conversation read-only and starts the tail", async () => {
     getSessionConversation.mockResolvedValue(conversation([msg("u1", "user", "hello")]));
-    render(<SessionViewer filePath={FILE} sessionId="abcdef12" title="My session" />);
+    renderViewer();
 
     expect(await screen.findByText("hello")).toBeInTheDocument();
     expect(screen.getByText("My session")).toBeInTheDocument();
@@ -58,7 +75,7 @@ describe("SessionViewer", () => {
 
   it("appends live messages and dedupes by uuid", async () => {
     getSessionConversation.mockResolvedValue(conversation([msg("u1", "user", "hello")]));
-    render(<SessionViewer filePath={FILE} sessionId="abcdef12" title="My session" />);
+    renderViewer();
     await screen.findByText("hello");
 
     emitAppend({ filePath: FILE, messages: [msg("a1", "assistant", "world")] });
@@ -72,7 +89,7 @@ describe("SessionViewer", () => {
 
   it("ignores appends for a different filePath", async () => {
     getSessionConversation.mockResolvedValue(conversation([msg("u1", "user", "hello")]));
-    render(<SessionViewer filePath={FILE} sessionId="abcdef12" title="My session" />);
+    renderViewer();
     await screen.findByText("hello");
 
     emitAppend({ filePath: "/sessions/other.jsonl", messages: [msg("x1", "assistant", "stray")] });
@@ -81,15 +98,37 @@ describe("SessionViewer", () => {
 
   it("shows the not-found state when the conversation is missing", async () => {
     getSessionConversation.mockResolvedValue(null);
-    render(<SessionViewer filePath={FILE} sessionId="abcdef12" title="My session" />);
+    renderViewer();
     expect(await screen.findByText("Conversation not found on disk.")).toBeInTheDocument();
   });
 
   it("unwatches the conversation on unmount", async () => {
     getSessionConversation.mockResolvedValue(conversation([msg("u1", "user", "hello")]));
-    const { unmount } = render(<SessionViewer filePath={FILE} sessionId="abcdef12" title="My session" />);
+    const { unmount } = renderViewer();
     await screen.findByText("hello");
     unmount();
     expect(unwatchConversation).toHaveBeenCalledWith(FILE);
+  });
+
+  it("offers the resume choice with Compact disabled as a follow-up", async () => {
+    getSessionConversation.mockResolvedValue(conversation([msg("u1", "user", "hello")]));
+    renderViewer();
+    await screen.findByText("hello");
+
+    expect(screen.getByRole("button", { name: /continue as is/i })).toBeEnabled();
+    expect(screen.getByRole("button", { name: /compact/i })).toBeDisabled();
+  });
+
+  it('"Continue as is" resumes into a live chat with the session id', async () => {
+    getSessionConversation.mockResolvedValue(conversation([msg("u1", "user", "hello")]));
+    renderViewer();
+    await screen.findByText("hello");
+
+    fireEvent.click(screen.getByRole("button", { name: /continue as is/i }));
+
+    expect(await screen.findByTestId("agent-chat")).toBeInTheDocument();
+    expect(agentChatProps).toHaveBeenCalledWith(
+      expect.objectContaining({ resumeSessionId: "abcdef12", cwd: "/Users/x/proj" }),
+    );
   });
 });

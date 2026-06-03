@@ -1,13 +1,16 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
+import { AgentChat } from "@/components/AgentChat/AgentChat";
 import { useConversationTail } from "@/hooks/useConversationTail";
 
+import { ResumeChoice } from "./ResumeChoice/ResumeChoice";
 import { SessionMessageRow } from "./SessionMessageRow/SessionMessageRow";
 
 export type SessionViewerProps = {
   filePath: string;
   sessionId: string;
   title: string;
+  cwd: string;
 };
 
 const SCROLL_BOTTOM_SLACK_PX = 64;
@@ -28,8 +31,9 @@ function CenteredNote({ label }: { label: string }) {
  * via the conversation tail (deduped by uuid in `useConversationTail`). Auto-
  * scrolls to the newest message unless the user has scrolled up.
  */
-export function SessionViewer({ filePath, sessionId, title }: SessionViewerProps) {
+export function SessionViewer({ filePath, sessionId, title, cwd }: SessionViewerProps) {
   const { messages, state } = useConversationTail(filePath);
+  const [resumed, setResumed] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   // Track whether the user is pinned to the bottom; only auto-scroll when so.
@@ -48,6 +52,17 @@ export function SessionViewer({ filePath, sessionId, title }: SessionViewerProps
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages.length]);
 
+  // "Continue as is": resume the on-disk session into a live chat. AgentChat
+  // seeds its claude session id from `resumeSessionId`, so the first message is
+  // sent as `claude --resume <sessionId>` rather than a fresh spawn.
+  if (resumed) {
+    return (
+      <div className="flex-1 min-h-0 h-full p-3">
+        <AgentChat key={`resume-${sessionId}`} agentName="" cwd={cwd} resumeSessionId={sessionId} />
+      </div>
+    );
+  }
+
   if (state === "loading") {
     return <CenteredNote label="Loading conversation…" />;
   }
@@ -65,6 +80,7 @@ export function SessionViewer({ filePath, sessionId, title }: SessionViewerProps
           {title || sessionId.slice(0, 8)}
         </span>
       </div>
+      <ResumeChoice onContinue={() => setResumed(true)} />
       <div
         ref={scrollRef}
         onScroll={handleScroll}
