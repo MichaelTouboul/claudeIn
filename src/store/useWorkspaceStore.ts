@@ -6,10 +6,12 @@ import { useAppStore } from './useAppStore';
 
 export type InternalTab = {
   id: string;
-  kind: 'chat' | 'agent' | 'skill';
+  kind: 'chat' | 'agent' | 'skill' | 'session';
   title: string;
   agentName?: string;
   skillId?: string;
+  sessionFilePath?: string;
+  sessionId?: string;
 };
 
 export type DashboardScope =
@@ -151,8 +153,9 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     const { dashboards, activeDashboardId } = get();
     const active = dashboards.find((d) => d.id === activeDashboardId);
     if (!active) return '';
-    if (tab.kind === 'agent' || tab.kind === 'skill') {
-      const key = tab.kind === 'agent' ? 'agentName' : 'skillId';
+    if (tab.kind === 'agent' || tab.kind === 'skill' || tab.kind === 'session') {
+      const key =
+        tab.kind === 'agent' ? 'agentName' : tab.kind === 'skill' ? 'skillId' : 'sessionFilePath';
       const existing = active.tabs.find((t) => t.kind === tab.kind && t[key] === tab[key]);
       if (existing) {
         set({ dashboards: mapActive(dashboards, activeDashboardId, (d) => ({ ...d, activeTabId: existing.id })) });

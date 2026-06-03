@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import type { SessionSummary } from "@/hooks/useSessions";
 import { useProject } from "@/store/ProjectContext";
 import { useEventsStore } from "@/store/useEventsStore";
+import { useWorkspaceStore } from "@/store/useWorkspaceStore";
 
 import { LiveSessionRow } from "./LiveSessionRow/LiveSessionRow";
 import { LoadMoreModal } from "./LoadMoreModal/LoadMoreModal";
@@ -33,6 +34,7 @@ export function SessionsPanel({ sessions, loading, refresh }: SessionsPanelProps
   const activeAgents = useEventsStore((s) => s.activeAgents);
   const waitingAgents = useEventsStore((s) => s.waitingAgents);
   const agentContexts = useEventsStore((s) => s.agentContexts);
+  const addTab = useWorkspaceStore((s) => s.addTab);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -60,10 +62,18 @@ export function SessionsPanel({ sessions, loading, refresh }: SessionsPanelProps
 
   const { live, recent, older } = partitionSessions(sessions, activeAgents);
 
-  // Selection only — opening a viewer is tranche 2. This is the seam.
+  // Open the conversation in the MAIN dashboard area as a `session` tab
+  // (deduped by filePath in the store), and keep the row highlighted. Title =
+  // the AI title, falling back to the first prompt / short id.
   const handleSelect = (filePath: string) => {
     const match = sessions.find((s) => s.filePath === filePath);
-    setSelectedId(match ? match.sessionId : null);
+    if (!match) {
+      setSelectedId(null);
+      return;
+    }
+    setSelectedId(match.sessionId);
+    const title = match.title || match.firstPrompt || match.sessionId.slice(0, 8);
+    addTab({ kind: "session", title, sessionFilePath: match.filePath, sessionId: match.sessionId });
   };
 
   if (loading) {

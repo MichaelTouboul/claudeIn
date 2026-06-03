@@ -1,0 +1,81 @@
+import { useEffect, useRef } from "react";
+
+import { useConversationTail } from "@/hooks/useConversationTail";
+
+import { SessionMessageRow } from "./SessionMessageRow/SessionMessageRow";
+
+export type SessionViewerProps = {
+  filePath: string;
+  sessionId: string;
+  title: string;
+};
+
+const SCROLL_BOTTOM_SLACK_PX = 64;
+
+function CenteredNote({ label }: { label: string }) {
+  return (
+    <div className="flex-1 flex items-center justify-center h-full">
+      <p className="text-sm" style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-sans)" }}>
+        {label}
+      </p>
+    </div>
+  );
+}
+
+/**
+ * Read-only transcript viewer opened in the main dashboard area as a `session`
+ * tab. Initial render comes from `getSessionConversation`; live appends arrive
+ * via the conversation tail (deduped by uuid in `useConversationTail`). Auto-
+ * scrolls to the newest message unless the user has scrolled up.
+ */
+export function SessionViewer({ filePath, sessionId, title }: SessionViewerProps) {
+  const { messages, state } = useConversationTail(filePath);
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  // Track whether the user is pinned to the bottom; only auto-scroll when so.
+  const pinnedRef = useRef(true);
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    pinnedRef.current = distanceFromBottom <= SCROLL_BOTTOM_SLACK_PX;
+  };
+
+  useEffect(() => {
+    if (!pinnedRef.current) return;
+    const el = scrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [messages.length]);
+
+  if (state === "loading") {
+    return <CenteredNote label="Loading conversation…" />;
+  }
+  if (state === "not-found") {
+    return <CenteredNote label="Conversation not found on disk." />;
+  }
+
+  return (
+    <div className="flex-1 min-h-0 h-full flex flex-col">
+      <div
+        className="px-4 py-2 border-b shrink-0"
+        style={{ borderColor: "var(--color-border-subtle)" }}
+      >
+        <span className="text-sm font-medium" style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-sans)" }}>
+          {title || sessionId.slice(0, 8)}
+        </span>
+      </div>
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="flex-1 min-h-0 overflow-y-auto px-4 py-3 space-y-4"
+      >
+        {messages.length === 0 ? (
+          <CenteredNote label="No messages in this conversation yet." />
+        ) : (
+          messages.map((m) => <SessionMessageRow key={m.uuid} msg={m} />)
+        )}
+      </div>
+    </div>
+  );
+}
