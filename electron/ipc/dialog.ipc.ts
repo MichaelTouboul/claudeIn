@@ -2,6 +2,7 @@ import { exec } from "node:child_process";
 
 import { ipcMain, dialog, BrowserWindow } from "electron";
 import fs from "fs";
+import os from "node:os";
 import path from "path";
 
 function cleanTitle(raw: string): string {
@@ -68,7 +69,9 @@ Assistant: ${assistantMessage.slice(0, 300)}
 
 Title:`;
     return new Promise<string>((resolve) => {
-      const proc = exec("claude --print --max-turns 1", { timeout: 15000, encoding: "utf-8", env: { ...process.env } }, (error, stdout) => {
+      // The title call must not create a session transcript inside a scanned
+      // project, so it runs in a throwaway tmp cwd the app never scans.
+      const proc = exec("claude --print --max-turns 1", { timeout: 15000, encoding: "utf-8", env: { ...process.env }, cwd: os.tmpdir() }, (error, stdout) => {
         if (error || !stdout.trim()) {
           // On failure return an empty string: the renderer applies a title only
           // when it's truthy, so the tab keeps its generic 'Chat' label and we
