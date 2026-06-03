@@ -4,6 +4,26 @@ import { ipcMain, dialog, BrowserWindow } from "electron";
 import fs from "fs";
 import path from "path";
 
+function cleanTitle(raw: string): string {
+  // Take the first non-empty line only.
+  let title = raw
+    .split("\n")
+    .map((line) => line.trim())
+    .find((line) => line.length > 0) ?? "";
+  // Strip an echoed leading "Title:" / "Title -" prefix (case-insensitive).
+  title = title.replace(/^title\s*[:-]\s*/i, "");
+  // Strip wrapping quotes/backticks at start/end.
+  title = title.replace(/^["'`]+/, "").replace(/["'`]+$/, "");
+  // Strip trailing punctuation.
+  title = title.replace(/[.…:-]+$/, "");
+  // If more than 8 words, keep the first 8.
+  const words = title.trim().split(/\s+/).filter(Boolean);
+  if (words.length > 8) {
+    title = words.slice(0, 8).join(" ");
+  }
+  return title.slice(0, 50).trim();
+}
+
 export function registerDialogHandlers(): void {
   ipcMain.handle("dialog:open-file", async () => {
     const win = BrowserWindow.getFocusedWindow();
@@ -39,10 +59,14 @@ export function registerDialogHandlers(): void {
   });
 
   ipcMain.handle("dialog:generate-title", async (_e, userMessage: string, assistantMessage: string) => {
-    const prompt = `Generate a concise title (3-6 words max) for this conversation. Reply ONLY with the title, nothing else — no quotes, no period, no explanation.
+    const prompt = `You are labeling a conversation. Output ONLY a short topic label of 3-6 words. It is a label, not a sentence. No quotes, no trailing punctuation, no "Title:" prefix, no explanation — just the label text.
 
-User: ${userMessage.slice(0, 200)}
-Assistant: ${assistantMessage.slice(0, 200)}`;
+<conversation>
+User: ${userMessage.slice(0, 300)}
+Assistant: ${assistantMessage.slice(0, 300)}
+</conversation>
+
+Title:`;
     return new Promise<string>((resolve) => {
       const proc = exec("claude --print --max-turns 1", { timeout: 15000, encoding: "utf-8", env: { ...process.env } }, (error, stdout) => {
         if (error || !stdout.trim()) {
@@ -51,7 +75,7 @@ Assistant: ${assistantMessage.slice(0, 200)}`;
           // never surface the raw user prompt as the conversation title.
           resolve("");
         } else {
-          resolve(stdout.trim().slice(0, 60));
+          resolve(cleanTitle(stdout));
         }
       });
       proc.stdin?.write(prompt);
