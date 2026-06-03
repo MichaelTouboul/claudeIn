@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import readline from "readline";
 import { extractAssistantUsage, getProjectsBase } from "./session.transcript";
+import { listMeta, type ConversationMeta } from "./conversation.meta";
 import type { SessionStatus, SessionSummary, SessionConversation, SessionMessage } from "../types/session.types";
 
 // Status is derived from how recently the transcript file was touched (mtime,
@@ -69,9 +70,18 @@ export async function listSessions(projectPath: string): Promise<SessionSummary[
   const entries = fs.readdirSync(dir).filter((f) => f.endsWith(".jsonl"));
   const summaries: SessionSummary[] = [];
 
+  // LEFT-JOIN equivalent: app-owned annotations from the DB, keyed by sessionId.
+  // sql.js is synchronous; listMeta() already try/catches a missing/corrupt table.
+  const metaById = new Map<string, ConversationMeta>();
+  for (const m of listMeta()) metaById.set(m.sessionId, m);
+
   for (const entry of entries) {
     const filePath = path.join(dir, entry);
     const sessionId = entry.replace(".jsonl", "");
+
+    // Hide soft-deleted conversations from the normal lists (still on disk).
+    const cmeta = metaById.get(sessionId);
+    if (cmeta?.deletedAt) continue;
 
     let stat: fs.Stats;
     try {
@@ -96,13 +106,19 @@ export async function listSessions(projectPath: string): Promise<SessionSummary[
       model: meta.model || null,
       projectDirName: path.basename(dir),
       status: deriveStatus(lastActiveAt),
+      pinned: Boolean(cmeta?.pinnedAt),
+      archived: Boolean(cmeta?.archivedAt),
+      pinnedAt: cmeta?.pinnedAt ?? null,
     });
   }
 
+  // Pinned first (oldest pin first within the pinned group so order is stable),
+  // then everything else by most-recent activity.
   return summaries.sort((a, b) => {
-    const ta = a.lastActiveAt || "";
-    const tb = b.lastActiveAt || "";
-    return tb.localeCompare(ta);
+    if (a.pinned && b.pinned) return (a.pinnedAt || "").localeCompare(b.pinnedAt || "");
+    if (a.pinned) return -1;
+    if (b.pinned) return 1;
+    return (b.lastActiveAt || "").localeCompare(a.lastActiveAt || "");
   });
 }
 

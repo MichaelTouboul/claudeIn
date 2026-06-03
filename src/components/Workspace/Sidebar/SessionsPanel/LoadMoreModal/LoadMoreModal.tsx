@@ -9,14 +9,27 @@ export type LoadMoreModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   sessions: SessionSummary[];
+  archived?: SessionSummary[];
   selectedId: string | null;
   onSelect: (filePath: string) => void;
 };
+
+function SectionLabel({ children }: { children: string }) {
+  return (
+    <div
+      className="px-2 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-widest"
+      style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-mono)" }}
+    >
+      {children}
+    </div>
+  );
+}
 
 export function LoadMoreModal({
   open,
   onOpenChange,
   sessions,
+  archived = [],
   selectedId,
   onSelect,
 }: LoadMoreModalProps) {
@@ -53,7 +66,7 @@ export function LoadMoreModal({
               fontVariantNumeric: "tabular-nums",
             }}
           >
-            {sessions.length}
+            {sessions.length + archived.length}
           </span>
           <button
             onClick={() => onOpenChange(false)}
@@ -88,6 +101,19 @@ export function LoadMoreModal({
               No older sessions
             </p>
           )}
+          {archived.length > 0 ? (
+            <>
+              <SectionLabel>Archived</SectionLabel>
+              {archived.map((s) => (
+                <RecentSessionRow
+                  key={s.sessionId}
+                  session={s}
+                  selected={selectedId === s.sessionId}
+                  onSelect={onSelect}
+                />
+              ))}
+            </>
+          ) : null}
         </div>
       </div>
     </Dialog>

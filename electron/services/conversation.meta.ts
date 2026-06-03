@@ -20,8 +20,8 @@ function nowIso(): string {
 }
 
 function upsertColumn(sessionId: string, column: "pinned_at" | "archived_at" | "deleted_at", value: string | null): void {
-  const db = getDb();
   try {
+    const db = getDb();
     db.prepare(
       `INSERT INTO conversation_meta (session_id, ${column}) VALUES (?, ?)
        ON CONFLICT(session_id) DO UPDATE SET ${column} = excluded.${column}`
@@ -56,8 +56,8 @@ export function restore(sessionId: string): void {
 }
 
 export function getMeta(sessionId: string): ConversationMeta | null {
-  const db = getDb();
   try {
+    const db = getDb();
     const row = db
       .prepare("SELECT session_id, pinned_at, archived_at, deleted_at, note FROM conversation_meta WHERE session_id = ?")
       .get(sessionId);
@@ -75,8 +75,8 @@ export function getMeta(sessionId: string): ConversationMeta | null {
 }
 
 export function listMeta(): ConversationMeta[] {
-  const db = getDb();
   try {
+    const db = getDb();
     const rows = db
       .prepare("SELECT session_id, pinned_at, archived_at, deleted_at, note FROM conversation_meta")
       .all();

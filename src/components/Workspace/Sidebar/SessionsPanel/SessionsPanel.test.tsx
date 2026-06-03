@@ -37,7 +37,7 @@ function session(id: string, status: SessionStatus, over: Partial<SessionSummary
     sessionId: id, filePath: `/sessions/${id}.jsonl`, agentName: null, title: `Title ${id}`,
     firstPrompt: null, messageCount: 3, branch: null, startedAt: null,
     lastActiveAt: new Date().toISOString(), model: "claude-opus-4", projectDirName: "proj",
-    status, ...over,
+    status, pinned: false, archived: false, pinnedAt: null, ...over,
   };
 }
 
@@ -105,6 +105,32 @@ describe("SessionsPanel", () => {
     fireEvent.click(screen.getByText(/Load more \(1\)/));
     const dialog = await screen.findByRole("dialog");
     expect(within(dialog).getByText("Title idle-a")).toBeInTheDocument();
+  });
+
+  it("keeps archived sessions out of the main tiers and shows them in the modal's Archived section", async () => {
+    renderPanel([
+      session("recent-a", "recent"),
+      session("arch-a", "recent", { archived: true }),
+    ]);
+
+    // Archived is partitioned out of the inline Recent tier.
+    expect(screen.getByText("Title recent-a")).toBeInTheDocument();
+    expect(screen.queryByText("Title arch-a")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByText(/Load more \(1\)/));
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText("Archived")).toBeInTheDocument();
+    expect(within(dialog).getByText("Title arch-a")).toBeInTheDocument();
+  });
+
+  it("places a pinned session at the top of its tier (backend order preserved)", () => {
+    // Backend returns pinned-first; the panel preserves input order per tier.
+    renderPanel([
+      session("pinned-a", "recent", { pinned: true }),
+      session("recent-b", "recent"),
+    ]);
+    const rows = screen.getAllByText(/^Title /).map((el) => el.textContent);
+    expect(rows.indexOf("Title pinned-a")).toBeLessThan(rows.indexOf("Title recent-b"));
   });
 
   it("watches the scope on mount and refetches (debounced) on session_activity", async () => {

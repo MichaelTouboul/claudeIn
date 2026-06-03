@@ -60,7 +60,7 @@ export function SessionsPanel({ sessions, loading, refresh }: SessionsPanelProps
     };
   }, [projectPath, refresh]);
 
-  const { live, recent, older } = partitionSessions(sessions, activeAgents);
+  const { live, recent, older, archived } = partitionSessions(sessions, activeAgents);
 
   // Open the conversation in the MAIN dashboard area as a `session` tab
   // (deduped by filePath in the store), and keep the row highlighted. Title =
@@ -118,7 +118,7 @@ export function SessionsPanel({ sessions, loading, refresh }: SessionsPanelProps
         )}
       </div>
 
-      {older.length > 0 ? (
+      {older.length > 0 || archived.length > 0 ? (
         <button
           onClick={() => setModalOpen(true)}
           className="mx-3 mt-2 mb-1 px-3 py-1.5 text-[11px] font-medium rounded-lg transition-colors"
@@ -134,7 +134,7 @@ export function SessionsPanel({ sessions, loading, refresh }: SessionsPanelProps
             e.currentTarget.style.background = "var(--color-surface-2)";
           }}
         >
-          Load more ({older.length})
+          Load more ({older.length + archived.length})
         </button>
       ) : null}
 
@@ -142,6 +142,7 @@ export function SessionsPanel({ sessions, loading, refresh }: SessionsPanelProps
         open={modalOpen}
         onOpenChange={setModalOpen}
         sessions={older}
+        archived={archived}
         selectedId={selectedId}
         onSelect={handleSelect}
       />

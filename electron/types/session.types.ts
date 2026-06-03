@@ -13,6 +13,9 @@ export type SessionSummary = {
   model: string | null;
   projectDirName: string;
   status: SessionStatus;
+  pinned: boolean;
+  archived: boolean;
+  pinnedAt: string | null;
 };
 
 export type SessionConversation = {
