@@ -8,6 +8,10 @@ Maintenance / cleanup tasks — not features, not bugs. Companion to the feature
 
 ## Open
 
+### Promote a shared `_ui` sidebar-row primitive
+**Effort:** Low–Medium · **Status:** Open (2026-06-03)
+There is **no** `_ui` row/list-item primitive. `AgentRow`, `SkillRow`, `RecentSessionRow`, `LiveSessionRow`, `HookRow` (and the open-tabs `ConversationList` rows) each hand-roll the same pattern: a full-width `<button>` with `px-3 py-2 rounded-lg`, hover-bg via `onMouseEnter/Leave`, a selected/`aria-pressed` state, a leading icon, a truncated label, a trailing `Badge`, and an optional hover-revealed action menu (`absolute` top-right). Promote a `_ui/ListRow` (or `SidebarItem`) primitive that owns this layout (slots: icon / label / trailing badge / hover-action / selected state) so the rows stop duplicating it — and so the "action menu vs trailing badge" overlap is solved once, in one place.
+
 ### `_ui/` Radix follow-ups (deferred from the consolidation)
 **Effort:** Low–Medium · **Status:** Open
 "Watch, not yet" items deferred from the `_ui/` primitive consolidation:
