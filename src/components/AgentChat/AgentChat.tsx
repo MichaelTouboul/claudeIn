@@ -28,9 +28,12 @@ export type AgentChatProps = {
   cwd?: string;
   resumeSessionId?: string;
   initialMessage?: string;
+  // Pre-seed the transcript (e.g. resuming a viewed session: show the prior
+  // history immediately). Seeded once on mount; live appends are not clobbered.
+  initialMessages?: ChatMessage[];
 };
 
-export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessage }: AgentChatProps) {
+export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessage, initialMessages }: AgentChatProps) {
   const selectedProjectPath = useAppStore((s) => s.selectedProject?.path);
   const retitleChatTab = useWorkspaceStore((s) => s.retitleChatTab);
   const setTabClaudeSessionId = useWorkspaceStore((s) => s.setTabClaudeSessionId);
@@ -39,7 +42,7 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
   const projectPath = cwd ?? selectedProjectPath;
   const [session, setSession] = useState<SpawnSession | null>(null);
   const [claudeSessionId, setClaudeSessionId] = useState<string | null>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>(() => initialMessages ?? []);
   const [queue, setQueue] = useState<QueueItem[]>([]);
   const [input, setInput] = useState('');
   const [spawning] = useState(false);
