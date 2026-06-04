@@ -19,7 +19,7 @@ export function ChatTab({ agentName, tabId, cwd }: ChatTabProps) {
 
   return (
     <div className="flex-1 min-h-0 h-full p-3">
-      <AgentChat key={tabId} agentName={agentName} cwd={cwd} />
+      <AgentChat key={tabId} tabId={tabId} agentName={agentName} cwd={cwd} />
     </div>
   );
 }

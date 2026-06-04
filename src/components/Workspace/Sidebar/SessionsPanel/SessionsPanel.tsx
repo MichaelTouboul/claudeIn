@@ -35,6 +35,10 @@ export function SessionsPanel({ sessions, loading, refresh }: SessionsPanelProps
   const activeAgents = useEventsStore((s) => s.activeAgents);
   const agentContexts = useEventsStore((s) => s.agentContexts);
   const addTab = useWorkspaceStore((s) => s.addTab);
+  // Narrow: only the active dashboard's tabs drive the open-conversation dedup.
+  const openTabs = useWorkspaceStore(
+    (s) => s.dashboards.find((d) => d.id === s.activeDashboardId)?.tabs,
+  );
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -60,7 +64,25 @@ export function SessionsPanel({ sessions, loading, refresh }: SessionsPanelProps
     };
   }, [projectPath, refresh]);
 
-  const { live, recent, older, archived } = partitionSessions(sessions, activeAgents);
+  // Hide conversations already open in a tab of the active dashboard so SESSIONS
+  // never duplicates ACTIVITY. A conversation is "open" if a session tab carries
+  // its sessionId/filePath, or a live chat tab has stamped its claudeSessionId.
+  const openConversationIds = new Set<string>();
+  const openFilePaths = new Set<string>();
+  for (const tab of openTabs ?? []) {
+    if (tab.kind === "session") {
+      if (tab.sessionId) openConversationIds.add(tab.sessionId);
+      if (tab.sessionFilePath) openFilePaths.add(tab.sessionFilePath);
+    } else if (tab.claudeSessionId) {
+      openConversationIds.add(tab.claudeSessionId);
+    }
+  }
+  const visibleSessions =
+    openConversationIds.size === 0 && openFilePaths.size === 0
+      ? sessions
+      : sessions.filter((s) => !openConversationIds.has(s.sessionId) && !openFilePaths.has(s.filePath));
+
+  const { live, recent, older, archived } = partitionSessions(visibleSessions, activeAgents);
 
   // Open the conversation in the MAIN dashboard area as a `session` tab
   // (deduped by filePath in the store), and keep the row highlighted. Title =

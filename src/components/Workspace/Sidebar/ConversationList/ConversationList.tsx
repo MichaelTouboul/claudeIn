@@ -1,8 +1,8 @@
-import { MessageSquare } from 'lucide-react';
-
 import { useDashboardStore } from '@/store/useDashboardStore';
 import { useEventsStore } from '@/store/useEventsStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
+
+import { ConversationItem } from './ConversationItem/ConversationItem';
 
 const colorHex: Record<string, string> = {
   cyan: '#06b6d4', blue: '#3b82f6', green: '#22c55e',
@@ -41,28 +41,17 @@ export function ConversationList() {
         const name = tab.kind === 'chat' ? tab.agentName || '_main' : tab.agentName ?? '';
         const agent = agents.find((a) => a.id === name);
         const status = waitingAgents.has(name) ? 'waiting' : activeAgents.has(name) ? 'live' : 'idle';
-        const dotColor = status === 'live' ? '#22c55e' : status === 'waiting' ? '#eab308' : 'var(--color-text-muted)';
         const iconColor = colorHex[agent?.frontmatter?.color || ''] || '#06b6d4';
         const isActive = tab.id === active?.activeTabId;
         return (
-          <button
+          <ConversationItem
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors text-left"
-            style={{ background: isActive ? 'var(--color-surface-2)' : 'transparent' }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-surface-2)')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = isActive ? 'var(--color-surface-2)' : 'transparent')}
-          >
-            <MessageSquare size={12} style={{ color: iconColor }} className="shrink-0" />
-            <span className="text-xs truncate" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>
-              {tab.title}
-            </span>
-            <span
-              className="w-1.5 h-1.5 rounded-full shrink-0 ml-auto"
-              style={{ backgroundColor: dotColor, animation: status === 'live' ? 'pulse 1s ease-in-out infinite' : undefined }}
-              title={status}
-            />
-          </button>
+            tab={tab}
+            isActive={isActive}
+            iconColor={iconColor}
+            status={status}
+            onActivate={() => setActiveTab(tab.id)}
+          />
         );
       })}
     </div>

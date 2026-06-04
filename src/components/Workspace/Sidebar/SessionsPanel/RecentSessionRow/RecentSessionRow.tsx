@@ -1,17 +1,10 @@
 import { GitBranch, MessageSquare, Pin } from "lucide-react";
 
-import { Badge, type BadgeVariant } from "@/components/_ui/Badge";
-import type { SessionStatus, SessionSummary } from "@/hooks/useSessions";
+import type { SessionSummary } from "@/hooks/useSessions";
 import { useConversationTitlesStore } from "@/store/useConversationTitlesStore";
 
 import { SessionRowMenu } from "../SessionRowMenu/SessionRowMenu";
 import { shortModel } from "../utils";
-
-const STATUS_VARIANT: Record<SessionStatus, BadgeVariant> = {
-  live: "green",
-  recent: "cyan",
-  idle: "gray",
-};
 
 export type RecentSessionRowProps = {
   session: SessionSummary;
@@ -56,12 +49,6 @@ export function RecentSessionRow({ session, selected, onSelect, onChanged }: Rec
           >
             {label}
           </span>
-          <Badge
-            variant={STATUS_VARIANT[session.status]}
-            className="ml-auto shrink-0 text-[9px] transition-opacity group-hover:opacity-0"
-          >
-            {session.status}
-          </Badge>
         </div>
         <div
           className="mt-1 flex items-center gap-2.5 text-[10px]"

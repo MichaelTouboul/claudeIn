@@ -221,6 +221,23 @@ describe('useWorkspaceStore', () => {
     expect(tab.title).toBe('Greeting');
   });
 
+  it('setTabClaudeSessionId stamps the conversation id onto the matching tab', () => {
+    useWorkspaceStore.getState().openDashboard(proj('a'));
+    const tabId = useWorkspaceStore.getState().dashboards[0].tabs[0].id;
+    useWorkspaceStore.getState().setTabClaudeSessionId(tabId, 'sess-123');
+    const tab = useWorkspaceStore.getState().dashboards[0].tabs.find((t) => t.id === tabId)!;
+    expect(tab.claudeSessionId).toBe('sess-123');
+  });
+
+  it('setTabClaudeSessionId is a no-op when the id already matches (stable reference)', () => {
+    useWorkspaceStore.getState().openDashboard(proj('a'));
+    const tabId = useWorkspaceStore.getState().dashboards[0].tabs[0].id;
+    useWorkspaceStore.getState().setTabClaudeSessionId(tabId, 'sess-123');
+    const before = useWorkspaceStore.getState().dashboards;
+    useWorkspaceStore.getState().setTabClaudeSessionId(tabId, 'sess-123');
+    expect(useWorkspaceStore.getState().dashboards).toBe(before);
+  });
+
   it('retitleChatTab does not touch non-chat tabs', () => {
     useWorkspaceStore.getState().openDashboard(proj('a'));
     const agentTabId = useWorkspaceStore.getState().addTab({ kind: 'agent', title: 'Chat', agentName: 'tw-dev' });
