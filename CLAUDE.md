@@ -82,6 +82,8 @@ Choosing the right construct:
   export type AgentStatus = (typeof AgentStatus)[keyof typeof AgentStatus];
   ```
 
+**Modeling finite state — enum + behavior-per-value, NOT fallback chains.** When a finite state drives behavior or appearance (a status dot, a mode, a view), give it ONE authoritative source of truth typed as the `as const` enum above, and map each value to its behavior with a `Record<Status, …>` table. Do **not** derive the displayed state with a fallback chain like `isRunning ? 'live' : someOtherSource` — that quietly mixes sources and hides bugs (a real one: a status dot did `running ? 'live' : status` where `status` was agentName-shared, so finished items sharing an agent kept blinking). A `?? <default>` fallback is reserved for the genuine **error/unknown/absent** case (e.g. no store entry → `idle`), never as the primary derivation.
+
 Shared types go in a `types/` folder with a barrel `index.ts`. File naming by kind:
 - `*.interface.ts` — `interface` declarations
 - `*.type.ts` — `type` aliases
