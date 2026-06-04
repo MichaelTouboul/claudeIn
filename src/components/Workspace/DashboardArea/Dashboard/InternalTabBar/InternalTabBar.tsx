@@ -1,6 +1,7 @@
 import { Menu } from 'lucide-react';
 
 import { type TabItem,Tabs } from '@/components/_ui/Tabs';
+import { useConversationTitlesStore } from '@/store/useConversationTitlesStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
 import { AddTabMenu } from './AddTabMenu';
@@ -14,11 +15,20 @@ export function InternalTabBar({ onOpenPanel }: InternalTabBarProps) {
   const activeDashboardId = useWorkspaceStore((s) => s.activeDashboardId);
   const setActiveTab = useWorkspaceStore((s) => s.setActiveTab);
   const closeTab = useWorkspaceStore((s) => s.closeTab);
+  const conversationTitles = useConversationTitlesStore((s) => s.conversationTitles);
 
   const active = dashboards.find((d) => d.id === activeDashboardId);
   if (!active) return null;
 
-  const tabs: TabItem[] = active.tabs.map((t) => ({ key: t.id, label: t.title, onClose: closeTab }));
+  const tabs: TabItem[] = active.tabs.map((t) => {
+    // Mirror ConversationList: overlay the shared titles store so a rename shows
+    // live on the panel tab. session tabs key on sessionId, chat tabs on
+    // claudeSessionId; tabs without one fall back to the tab's own title.
+    const convId = t.kind === 'session' ? t.sessionId : t.claudeSessionId;
+    const entry = convId ? conversationTitles[convId] : undefined;
+    const label = entry?.userTitle ?? entry?.aiTitle ?? t.title;
+    return { key: t.id, label, onClose: closeTab };
+  });
 
   return (
     <div
