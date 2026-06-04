@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { useAgentChatActions } from '@/hooks/useAgentChatActions';
+import { useChatDropzone } from '@/hooks/useChatDropzone';
 import { useCompactOnResume } from '@/hooks/useCompactOnResume';
 import { useAppStore } from '@/store/useAppStore';
 import { ConversationStatus, useConversationStatusStore } from '@/store/useConversationStatusStore';
@@ -12,17 +13,10 @@ import { AgentChatHeader } from './AgentChatHeader/AgentChatHeader';
 import { AgentChatInput } from './AgentChatInput/AgentChatInput';
 import { AgentChatMessages } from './AgentChatMessages/AgentChatMessages';
 import { parseAskPrompt } from './askPrompt';
+import { ChatDropOverlay } from './ChatDropOverlay/ChatDropOverlay';
 import { CompactStatusBanner } from './CompactStatusBanner/CompactStatusBanner';
 import type { RichEditorHandle } from './RichEditor/RichEditor';
-import type { QueueItem } from './types';
-
-type SpawnEvent =
-  // The backend doesn't generate ChatMessage.id — we mint it on receive.
-  | { type: 'spawn_message'; localSessionId: string; message: Omit<ChatMessage, 'id'> }
-  | { type: 'spawn_input_request'; localSessionId: string }
-  | { type: 'spawn_claude_session'; localSessionId: string; claudeSessionId: string }
-  | { type: 'spawn_compacted'; localSessionId: string }
-  | { type: 'spawn_exit'; localSessionId: string; status: SpawnSession['status']; claudeSessionId?: string };
+import type { QueueItem, SpawnEvent } from './types';
 
 export type AgentChatProps = {
   agentName: string;
@@ -100,6 +94,7 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
 
   const isRunning = session?.status === 'running';
 
+  const { isDragging, dragHandlers } = useChatDropzone(setAttachedFiles);
   const { handleSend, handleAttach, onAnswer, handleKill } = useAgentChatActions({
     input, attachedFiles, awaitingResponse, compacting, session, isRunning: isRunning ?? false,
     agentName, projectPath, claudeSessionId, editorRef, pendingUserMsgs,
@@ -276,7 +271,8 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
   }, [isRunning, awaitingResponse, handleKill]);
 
   return (
-    <div className="h-full flex flex-col bg-surface-0 rounded-lg border border-border">
+    <div className="relative h-full flex flex-col bg-surface-0 rounded-lg border border-border" {...dragHandlers}>
+      {isDragging ? <ChatDropOverlay /> : null}
       <AgentChatHeader agentName={agentName} session={session} isRunning={isRunning ?? false} waitingInput={waitingInput} onKill={handleKill} />
       <AgentChatMessages
         agentName={agentName} messages={messages} session={session}
