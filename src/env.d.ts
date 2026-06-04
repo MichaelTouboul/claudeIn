@@ -57,6 +57,7 @@ interface Window {
     unarchiveConversation: (sessionId: string) => Promise<void>;
     softDeleteConversation: (sessionId: string) => Promise<void>;
     restoreConversation: (sessionId: string) => Promise<void>;
+    setConversationTitle: (claudeSessionId: string, title: string) => Promise<void>;
     deleteConversationFromDisk: (filePath: string) => Promise<boolean>;
     onConversationAppended: (
       cb: (data: {
