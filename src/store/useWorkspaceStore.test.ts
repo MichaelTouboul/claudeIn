@@ -189,6 +189,22 @@ describe('useWorkspaceStore', () => {
     expect(tab.title).toBe('My custom name');
   });
 
+  it('retitleChatTab with force overwrites a non-generic (user-renamed/AI) tab title', () => {
+    useWorkspaceStore.getState().openDashboard(proj('a'));
+    const tabId = useWorkspaceStore.getState().addTab({ kind: 'chat', title: 'AI title', agentName: 'tw-dev' });
+    useWorkspaceStore.getState().retitleChatTab('tw-dev', 'User rename', true);
+    const tab = useWorkspaceStore.getState().dashboards[0].tabs.find((t) => t.id === tabId)!;
+    expect(tab.title).toBe('User rename');
+  });
+
+  it('retitleChatTab without force does NOT overwrite a non-generic tab title', () => {
+    useWorkspaceStore.getState().openDashboard(proj('a'));
+    const tabId = useWorkspaceStore.getState().addTab({ kind: 'chat', title: 'AI title', agentName: 'tw-dev' });
+    useWorkspaceStore.getState().retitleChatTab('tw-dev', 'User rename');
+    const tab = useWorkspaceStore.getState().dashboards[0].tabs.find((t) => t.id === tabId)!;
+    expect(tab.title).toBe('AI title');
+  });
+
   it('retitleChatTab leaves a non-matching agent tab untouched', () => {
     useWorkspaceStore.getState().openDashboard(proj('a'));
     const tabId = useWorkspaceStore.getState().addTab({ kind: 'chat', title: 'Chat', agentName: 'other' });
