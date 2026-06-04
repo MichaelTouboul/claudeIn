@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 
 import { useAgentChatActions } from '@/hooks/useAgentChatActions';
 import { useAppStore } from '@/store/useAppStore';
+import { useConversationTitlesStore } from '@/store/useConversationTitlesStore';
+import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 import type { ChatMessage,SpawnSession } from '@/types/spawn.types';
 
 import { AgentChatHeader } from './AgentChatHeader/AgentChatHeader';
@@ -27,6 +29,7 @@ export type AgentChatProps = {
 
 export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: AgentChatProps) {
   const selectedProjectPath = useAppStore((s) => s.selectedProject?.path);
+  const retitleChatTab = useWorkspaceStore((s) => s.retitleChatTab);
   // cwd is the authoritative spawn directory (threaded from dashboard.cwd).
   // Legacy callers without a cwd prop fall back to the selected project path.
   const projectPath = cwd ?? selectedProjectPath;
@@ -52,6 +55,13 @@ export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: A
   queueRef.current = queue;
   const messagesRef = useRef<ChatMessage[]>(messages);
   messagesRef.current = messages;
+
+  // The backend broadcasts the AI title (keyed by claudeSessionId) into the
+  // shared titles store; surface it on this chat's tab via the existing
+  // retitle mechanism so the open tab and the sidebar share one source.
+  const aiTitle = useConversationTitlesStore((s) =>
+    claudeSessionId ? s.conversationTitles[claudeSessionId]?.aiTitle ?? null : null,
+  );
 
   const isRunning = session?.status === 'running';
 
@@ -169,6 +179,10 @@ export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: A
         if (data.claudeSessionId) setClaudeSessionId(data.claudeSessionId);
       }).catch(() => setAwaitingResponse(false));
   }, [initialMessage, resumeSessionId, projectPath, agentName]);
+
+  useEffect(() => {
+    if (aiTitle && agentName) retitleChatTab(agentName, aiTitle);
+  }, [aiTitle, agentName, retitleChatTab]);
 
   const handleInputChange = (val: string) => {
     setInput(val);

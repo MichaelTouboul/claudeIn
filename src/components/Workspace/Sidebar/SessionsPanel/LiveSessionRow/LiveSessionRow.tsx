@@ -2,6 +2,7 @@ import { Pin } from "lucide-react";
 
 import { ContextBar } from "@/components/_ui/ContextBar";
 import type { SessionSummary } from "@/hooks/useSessions";
+import { useConversationTitlesStore } from "@/store/useConversationTitlesStore";
 import type { AgentContext } from "@/types/events.types";
 
 import { SessionRowMenu } from "../SessionRowMenu/SessionRowMenu";
@@ -24,7 +25,9 @@ export function LiveSessionRow({
   piloted = false,
   onChanged,
 }: LiveSessionRowProps) {
-  const label = session.title || session.firstPrompt || session.sessionId.slice(0, 8);
+  const liveTitle = useConversationTitlesStore((s) => s.conversationTitles[session.sessionId]);
+  const label =
+    liveTitle?.userTitle ?? liveTitle?.aiTitle ?? session.title ?? session.firstPrompt ?? session.sessionId.slice(0, 8);
   const showContext = context !== undefined && context.percent > 0;
 
   return (

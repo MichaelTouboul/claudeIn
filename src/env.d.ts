@@ -66,7 +66,6 @@ interface Window {
     ) => () => void;
     openFilePicker: () => Promise<string[]>;
     readImageAsDataUrl: (filePath: string) => Promise<string | null>;
-    generateTitle: (userMessage: string, assistantMessage: string) => Promise<string>;
 
     onEvent: (cb: (data: unknown) => void) => () => void;
 

@@ -86,8 +86,6 @@ contextBridge.exposeInMainWorld("api", {
   },
   openFilePicker: () => ipcRenderer.invoke("dialog:open-file"),
   readImageAsDataUrl: (filePath: string) => ipcRenderer.invoke("dialog:read-image", filePath),
-  generateTitle: (userMessage: string, assistantMessage: string) =>
-    ipcRenderer.invoke("dialog:generate-title", userMessage, assistantMessage),
 
   onEvent: (cb: (data: unknown) => void) => {
     const handler = (_e: unknown, data: unknown) => cb(data);

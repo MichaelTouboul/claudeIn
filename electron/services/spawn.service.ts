@@ -2,34 +2,12 @@ import { spawn, type ChildProcess } from "child_process";
 import { randomUUID } from "crypto";
 import { broadcast } from "./broadcast";
 import { ingestEvent } from "./events.service";
+import { extractText, parseStreamLine } from "./spawn.parse";
 import { NO_FOLLOWUP_SYSTEM_PROMPT } from "./spawn.steering";
+import { generateConversationTitle } from "./title.service";
 import type { SpawnSession, ChatMessage, StreamEvent } from "../types/spawn.types";
 
 const sessions = new Map<string, { session: SpawnSession; process: ChildProcess }>();
-
-function parseStreamLine(line: string): StreamEvent | null {
-  try {
-    return JSON.parse(line);
-  } catch {
-    return null;
-  }
-}
-
-function extractText(event: StreamEvent): string | null {
-  if (event.message?.content) {
-    return event.message.content
-      .filter((c) => c.type === "text" && c.text)
-      .map((c) => c.text!)
-      .join("");
-  }
-  if (event.content) {
-    return event.content
-      .filter((c) => c.type === "text" && c.text)
-      .map((c) => c.text!)
-      .join("");
-  }
-  return null;
-}
 
 export function spawnAgent(agentName: string, mission: string, cwd?: string, resumeSessionId?: string): SpawnSession {
   const localSessionId = randomUUID();
@@ -169,6 +147,22 @@ function handleStreamEvent(localSessionId: string, session: SpawnSession, event:
       const msg: ChatMessage = { role: "assistant", content: text, timestamp: now };
       session.messages.push(msg);
       broadcast({ type: "spawn_message", localSessionId, agentName: session.agentName, message: msg });
+
+      // Best-effort, one-shot per conversation: when the first assistant reply
+      // of a fresh conversation arrives, derive a short title in the backend and
+      // broadcast it keyed by claudeSessionId. Resumed conversations are skipped
+      // (titleGenerated seeded true). Errors are swallowed (no broadcast).
+      if (!session.titleGenerated && session.claudeSessionId) {
+        session.titleGenerated = true;
+        const claudeSessionId = session.claudeSessionId;
+        void generateConversationTitle(session.mission, text)
+          .then((title) => {
+            if (title && session.claudeSessionId) {
+              broadcast({ type: "conversation_titled", localSessionId, claudeSessionId, title });
+            }
+          })
+          .catch(() => {});
+      }
     }
   }
 
