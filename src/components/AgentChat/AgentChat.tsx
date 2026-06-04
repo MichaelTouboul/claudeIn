@@ -95,7 +95,7 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
   const isRunning = session?.status === 'running';
 
   const { isDragging, dragHandlers } = useChatDropzone(setAttachedFiles);
-  const { handleSend, handleAttach, onAnswer, handleKill } = useAgentChatActions({
+  const { handleSend, handleAttach, onAnswer, handleKill, clearConversation } = useAgentChatActions({
     input, attachedFiles, awaitingResponse, compacting, session, isRunning: isRunning ?? false,
     agentName, projectPath, claudeSessionId, editorRef, pendingUserMsgs,
     setInput, setAttachedFiles, setQueue, setMessages,
@@ -254,8 +254,16 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
     setInput(val);
   };
 
-  // Executing a slash command reuses the answer path (sends the command text).
+  // Selecting a slash command from the autocomplete menu. Client-side commands
+  // (`/clear`) run locally and must NOT be sent to the CLI; everything else
+  // reuses the answer path (sends the command text to `claude`). Without this
+  // branch, picking `/clear` from the menu went through `onAnswer` and spawned
+  // it as a message — the bug this fixes.
   const handleSelectSlash = (cmd: string) => {
+    if (cmd === '/clear') {
+      clearConversation();
+      return;
+    }
     onAnswer(cmd);
   };
 

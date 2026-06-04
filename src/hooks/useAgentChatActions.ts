@@ -55,26 +55,32 @@ export function useAgentChatActions({
   setSession,
   setClaudeSessionId,
 }: UseAgentChatActionsParams) {
+  // `/clear` (exact, no args — like the terminal's `/clear`) INSTANTLY clears
+  // the conversation client-side. No `claude` process is spawned, no user
+  // bubble is pushed, nothing is written to the transcript. Resetting
+  // `claudeSessionId` to null means the NEXT message is a fresh spawn (no
+  // `--resume`), exactly like the terminal starting over. Shared by both entry
+  // points: `handleSend` (typed + sent) and the slash-menu selection path
+  // (`AgentChat.handleSelectSlash` → here), so neither ever spawns `/clear`.
+  const clearConversation = useCallback(() => {
+    setMessages([]);
+    setQueue([]);
+    setClaudeSessionId(null);
+    setSession(null);
+    setAwaitingResponse(false);
+    setWaitingInput(false);
+    pendingUserMsgs.current.clear();
+    setAttachedFiles([]);
+    setInput('');
+    editorRef.current?.clear();
+  }, [editorRef, pendingUserMsgs, setInput, setAttachedFiles, setQueue, setMessages, setAwaitingResponse, setWaitingInput, setSession, setClaudeSessionId]);
+
   const handleSend = useCallback(async () => {
     if (!input.trim() && attachedFiles.length === 0) return;
     const text = input.trim();
 
-    // `/clear` (exact, no args — like the terminal's `/clear`) is intercepted
-    // here: it INSTANTLY clears the conversation client-side. No `claude`
-    // process is spawned, no user bubble is pushed, nothing is written to the
-    // transcript. Resetting `claudeSessionId` to null means the NEXT message is
-    // a fresh spawn (no `--resume`), exactly like the terminal starting over.
     if (text === '/clear') {
-      setMessages([]);
-      setQueue([]);
-      setClaudeSessionId(null);
-      setSession(null);
-      setAwaitingResponse(false);
-      setWaitingInput(false);
-      pendingUserMsgs.current.clear();
-      setAttachedFiles([]);
-      setInput('');
-      editorRef.current?.clear();
+      clearConversation();
       return;
     }
 
@@ -112,7 +118,7 @@ export function useAgentChatActions({
         setAwaitingResponse(false);
       }
     }
-  }, [input, attachedFiles, awaitingResponse, compacting, session, isRunning, agentName, projectPath, claudeSessionId, editorRef, pendingUserMsgs, setInput, setAttachedFiles, setQueue, setMessages, setAwaitingResponse, setWaitingInput, setSession, setClaudeSessionId]);
+  }, [input, attachedFiles, awaitingResponse, compacting, session, isRunning, agentName, projectPath, claudeSessionId, editorRef, pendingUserMsgs, clearConversation, setInput, setAttachedFiles, setQueue, setMessages, setAwaitingResponse, setWaitingInput, setSession, setClaudeSessionId]);
 
   const handleAttach = useCallback(async () => {
     const paths = await window.api.openFilePicker();
@@ -167,5 +173,5 @@ export function useAgentChatActions({
     await window.api.killSession(session.localSessionId);
   }, [session]);
 
-  return { handleSend, handleAttach, onAnswer, handleKill };
+  return { handleSend, handleAttach, onAnswer, handleKill, clearConversation };
 }
