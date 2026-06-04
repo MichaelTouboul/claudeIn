@@ -33,6 +33,21 @@ If you add a handler but skip preload or `env.d.ts`, the front cannot reach it. 
 - `services/db.ts` uses **sql.js** (WASM SQLite), persisted at `~/.claude-agent-manager/data.db`. Local file only — no network DB, no Docker.
 - **sql.js is synchronous** — wrap DB calls in `try/catch`, never `.catch()` / `.then()`.
 
+## Session identity — two IDs, never conflate
+
+A live conversation carries **two** ids. The variable name `sessionId` was historically overloaded for both — prefer the explicit names:
+
+- **`localSessionId`** — a `randomUUID()` minted by `spawn.service` at spawn time. The in-memory handle to the live `claude` child process: key of the `sessions` Map, and what `killSession` / `sendInput` / `getSession` + every `spawn_*` broadcast use. It exists at t=0, *before* Claude reports anything — that's why it must be ours.
+- **`claudeSessionId`** — Claude's real session id, learned from the stream's `session_id` (first event). It **is** the `.jsonl` transcript filename, and what the sidebar listing, `--resume`, the DB (`conversation_meta`), and titles key on. It arrives shortly *after* the process starts.
+
+**Rule: live-process control → `localSessionId`; anything persisted (disk, sidebar, resume, titles) → `claudeSessionId`.** They are correlated in exactly one place — `spawn.service` setting `session.claudeSessionId = event.session_id` — and the renderer never converts between them. (`session.service`/`SessionSummary.sessionId` is the claudeId.)
+
+## Conversation titles
+
+- On the **first assistant reply** of a fresh conversation, `spawn.service` fires a one-shot AI title: `title.service.generateConversationTitle()` (a `claude --print` subprocess run in `os.tmpdir()` so it never pollutes a scanned project's SESSIONS), then **persists** it via `conversation.meta.setAiTitle(claudeSessionId, …)` **and** `broadcast`s `conversation_titled` for live UI. Resumed conversations are skipped (`SpawnSession.titleGenerated` seeded `true`).
+- `conversation_meta` stores `ai_title` + `user_title` per `claudeSessionId`. `listSessions` coalesces the title as `user_title ?? ai_title ?? <jsonl ai-title> ?? null` (the renderer then falls back to the first prompt).
+- User rename → `conversation:set-title` IPC → `setUserTitle`; an empty value clears it. `user_title` always wins over `ai_title`.
+
 ## Hard rules
 
 - **No `fetch()` here for app data** — the main process is the data source, not a client of one.

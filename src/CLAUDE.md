@@ -124,6 +124,10 @@ Every new or moved piece of state MUST have a deliberately chosen home. Default 
 
 **When to ASK instead of auto-deciding:** borderline context-vs-zustand (one near-app-wide subtree); local UI state someone wants globalized; or more than one reasonable home exists and the choice touches >3 files.
 
+## Conversation titles (renderer side)
+
+Titles are keyed by **`claudeSessionId`** (the persisted id; see `electron/CLAUDE.md` for the `localSessionId` vs `claudeSessionId` split). `useConversationTitlesStore` (zustand) holds `{ aiTitle, userTitle }` per claudeSessionId, fed by the `conversation_titled` push event (AI title) and by `setUserTitle` (rename, optimistic) + `window.api.setConversationTitle` (persist). Surfaces read it with precedence **`userTitle ?? aiTitle ?? session.title ?? firstPrompt`**: sidebar rows + the ACTIVITY list overlay the store on their label directly; the open chat tab gets its title copied in via `useWorkspaceStore.retitleChatTab` (which only overwrites a *generic* tab title, except a user rename passes `force` to override even the AI title). Chat tabs carry their `claudeSessionId` (threaded `ChatTab → AgentChat tabId prop → setTabClaudeSessionId`) so a live chat can be matched/renamed like a persisted session.
+
 ## React patterns
 
 - **Explicit ternaries** for conditional rendering: `{isReady ? <Panel /> : null}` — not `{isReady && <Panel />}` (renders `0`/`''` on accidental falsy-but-not-boolean left side).
