@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { ContextMenu, type ContextMenuItem } from "@/components/_ui/ContextMenu";
 import type { SessionSummary } from "@/hooks/useSessions";
+import { usePinnedStore } from "@/store/usePinnedStore";
 
 import { DeletePermanentlyDialog } from "./DeletePermanentlyDialog";
 import { RenameDialog } from "./RenameDialog";
@@ -21,6 +22,11 @@ export function SessionRowMenu({ session, piloted = false, onChanged }: SessionR
   const [renameOpen, setRenameOpen] = useState(false);
   const { sessionId } = session;
 
+  // Effective pinned state: optimistic override wins, else the DB-backed flag.
+  // Lets the Pin/Unpin label flip instantly on toggle, before the refetch.
+  const override = usePinnedStore((s) => s.overrides[sessionId]);
+  const isPinned = override ?? session.pinned;
+
   const currentTitle = session.title ?? session.firstPrompt ?? "";
 
   const run = async (op: Promise<unknown>) => {
@@ -28,11 +34,17 @@ export function SessionRowMenu({ session, piloted = false, onChanged }: SessionR
     onChanged();
   };
 
+  // Reflect the toggle in the store immediately, then persist + refetch.
+  const togglePin = (pinned: boolean) => {
+    usePinnedStore.getState().setPinned(sessionId, pinned);
+    void run(pinned ? window.api.pinConversation(sessionId) : window.api.unpinConversation(sessionId));
+  };
+
   const items: ContextMenuItem[] = [
     { label: "Rename…", icon: <Pencil size={13} />, onSelect: () => setRenameOpen(true) },
-    session.pinned
-      ? { label: "Unpin", icon: <PinOff size={13} />, onSelect: () => void run(window.api.unpinConversation(sessionId)) }
-      : { label: "Pin to top", icon: <Pin size={13} />, onSelect: () => void run(window.api.pinConversation(sessionId)) },
+    isPinned
+      ? { label: "Unpin", icon: <PinOff size={13} />, onSelect: () => togglePin(false) }
+      : { label: "Pin to top", icon: <Pin size={13} />, onSelect: () => togglePin(true) },
     session.archived
       ? { label: "Unarchive", icon: <ArchiveRestore size={13} />, onSelect: () => void run(window.api.unarchiveConversation(sessionId)) }
       : { label: "Archive", icon: <Archive size={13} />, onSelect: () => void run(window.api.archiveConversation(sessionId)) },
