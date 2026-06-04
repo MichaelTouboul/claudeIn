@@ -181,7 +181,10 @@ export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: A
   }, [initialMessage, resumeSessionId, projectPath, agentName]);
 
   useEffect(() => {
-    if (aiTitle && agentName) retitleChatTab(agentName, aiTitle);
+    // The main/global chat spawns with an empty agentName; retitleChatTab +
+    // matchesChatTab already handle that case, so do NOT gate on agentName here
+    // (gating on it silently dropped the title for the main chat).
+    if (aiTitle) retitleChatTab(agentName, aiTitle);
   }, [aiTitle, agentName, retitleChatTab]);
 
   const handleInputChange = (val: string) => {
