@@ -7,6 +7,7 @@ import type { ChatMessage } from '@/types/spawn.types';
 import { parseAskPrompt } from '../askPrompt';
 import { AskPrompt } from '../AskPrompt/AskPrompt';
 import { parseSlashCommand } from '../slashCommand';
+import { CopyButton } from './CopyButton';
 import { SlashCommandMessage } from './SlashCommandMessage/SlashCommandMessage';
 
 export type MessageRowProps = {
@@ -19,13 +20,15 @@ export function MessageRow({ msg, isLast, onAnswer }: MessageRowProps) {
   const isUser = msg.role === "user";
   const isTool = msg.role === "tool";
   const time = new Date(msg.timestamp).toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  const hasContent = msg.content.trim().length > 0;
 
   if (isUser) {
     const slash = parseSlashCommand(msg.content);
     // Caveat-only plumbing: the whole row disappears (no empty "you" header).
     if (slash?.kind === 'caveat') return null;
     return (
-      <div className="group">
+      <div className="group relative">
+        {hasContent ? <CopyButton text={msg.content} className="absolute top-0 right-0" /> : null}
         <div className="flex items-center gap-2 mb-0.5">
           <ChevronRight size={12} className="text-accent" />
           <span className="text-xs text-accent font-medium">you</span>
@@ -42,7 +45,8 @@ export function MessageRow({ msg, isLast, onAnswer }: MessageRowProps) {
 
   if (isTool) {
     return (
-      <div className="group ml-5">
+      <div className="group relative ml-5">
+        {hasContent ? <CopyButton text={msg.content} className="absolute top-0 right-0" /> : null}
         <div className="flex items-center gap-2 mb-0.5">
           <Wrench size={10} className="text-yellow-500" />
           <span className="text-xs text-yellow-500 font-mono">{msg.toolName || "tool"}</span>
@@ -59,7 +63,8 @@ export function MessageRow({ msg, isLast, onAnswer }: MessageRowProps) {
     prompt.options.some((o) => o.variant === 'accept' || o.variant === 'deny');
 
   return (
-    <div className="group">
+    <div className="group relative">
+      {hasContent ? <CopyButton text={msg.content} className="absolute top-0 right-0" /> : null}
       <div className="flex items-center gap-2 mb-0.5">
         {isAuthorization ? (
           <Shield size={12} className="text-yellow-400" />

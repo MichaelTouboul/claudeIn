@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import type { ChatMessage } from '@/types/spawn.types';
@@ -58,5 +58,24 @@ describe('MessageRow', () => {
     const content = 'look: <local-command-stdout>Compacted </local-command-stdout> ugh!';
     render(<MessageRow msg={user(content)} isLast={false} onAnswer={vi.fn()} />);
     expect(screen.getByText(content)).toBeInTheDocument();
+  });
+
+  it('copies the message content and shows the copied state on click', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+
+    render(<MessageRow msg={assistant('Hello world')} isLast onAnswer={vi.fn()} />);
+    const button = screen.getByRole('button', { name: 'Copy message' });
+    fireEvent.click(button);
+
+    expect(writeText).toHaveBeenCalledWith('Hello world');
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Copied' })).toBeInTheDocument(),
+    );
+  });
+
+  it('renders no copy button for an empty-content message', () => {
+    render(<MessageRow msg={assistant('   ')} isLast onAnswer={vi.fn()} />);
+    expect(screen.queryByRole('button', { name: 'Copy message' })).not.toBeInTheDocument();
   });
 });
