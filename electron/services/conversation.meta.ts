@@ -1,10 +1,9 @@
-import fs from "fs";
 import { getDb } from "./db";
 
 // App-owned annotations for on-disk conversations. NEVER writes to ~/.claude —
 // only this app's own SQLite DB. All of pin/archive/soft-delete are reversible
-// (set the column back to NULL). The single destructive op is `deleteFromDisk`,
-// which is the ONLY function here that touches the filesystem.
+// (set the column back to NULL). Nothing here touches the filesystem: there is
+// no destructive on-disk delete by design.
 
 export type ConversationMeta = {
   sessionId: string;
@@ -106,19 +105,5 @@ export function listMeta(): ConversationMeta[] {
     }));
   } catch {
     return [];
-  }
-}
-
-// The ONLY destructive path: the real `fs.rm` of the transcript. Guarded — must
-// only ever be reached behind an explicit confirm in the UI. Best-effort clears
-// any app-owned meta row too so a re-created session id starts clean.
-export function deleteFromDisk(filePath: string): boolean {
-  if (!filePath || !filePath.endsWith(".jsonl")) return false;
-  try {
-    if (!fs.existsSync(filePath)) return false;
-    fs.rmSync(filePath);
-    return true;
-  } catch {
-    return false;
   }
 }

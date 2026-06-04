@@ -12,7 +12,6 @@ const ipc = {
   unarchiveConversation: vi.fn().mockResolvedValue(undefined),
   softDeleteConversation: vi.fn().mockResolvedValue(undefined),
   restoreConversation: vi.fn().mockResolvedValue(undefined),
-  deleteConversationFromDisk: vi.fn().mockResolvedValue(true),
 };
 
 function makeSession(over: Partial<SessionSummary> = {}): SessionSummary {
@@ -73,17 +72,13 @@ describe("SessionRowMenu", () => {
     openMenu();
     fireEvent.click(await screen.findByText("Delete"));
     await waitFor(() => expect(ipc.softDeleteConversation).toHaveBeenCalledWith("s1"));
-    expect(ipc.deleteConversationFromDisk).not.toHaveBeenCalled();
   });
 
-  it("only does the disk delete behind the confirm dialog", async () => {
+  it("offers no permanent (disk) delete item", async () => {
     render(<SessionRowMenu session={makeSession()} onChanged={vi.fn()} />);
     openMenu();
-    fireEvent.click(await screen.findByText("Delete permanently…"));
-    // Opening the item does not delete; the dialog confirm does.
-    expect(ipc.deleteConversationFromDisk).not.toHaveBeenCalled();
-    fireEvent.click(await screen.findByRole("button", { name: "Delete permanently" }));
-    expect(ipc.deleteConversationFromDisk).toHaveBeenCalledWith("/sessions/s1.jsonl");
+    await screen.findByText("Delete"); // menu is open
+    expect(screen.queryByText("Delete permanently…")).toBeNull();
   });
 
   it("hides clear/compact for non-piloted sessions", async () => {

@@ -5,7 +5,6 @@ import { ContextMenu, type ContextMenuItem } from "@/components/_ui/ContextMenu"
 import type { SessionSummary } from "@/hooks/useSessions";
 import { usePinnedStore } from "@/store/usePinnedStore";
 
-import { DeletePermanentlyDialog } from "./DeletePermanentlyDialog";
 import { RenameDialog } from "./RenameDialog";
 
 export type SessionRowMenuProps = {
@@ -18,7 +17,6 @@ export type SessionRowMenuProps = {
 };
 
 export function SessionRowMenu({ session, piloted = false, onChanged }: SessionRowMenuProps) {
-  const [confirmOpen, setConfirmOpen] = useState(false);
   const [renameOpen, setRenameOpen] = useState(false);
   const { sessionId } = session;
 
@@ -63,7 +61,6 @@ export function SessionRowMenu({ session, piloted = false, onChanged }: SessionR
 
   items.push(
     { label: "Delete", icon: <Trash2 size={13} />, tone: "danger", onSelect: () => void run(window.api.softDeleteConversation(sessionId)) },
-    { label: "Delete permanently…", icon: <Trash2 size={13} />, tone: "danger", onSelect: () => setConfirmOpen(true) },
   );
 
   return (
@@ -75,12 +72,6 @@ export function SessionRowMenu({ session, piloted = false, onChanged }: SessionR
         claudeSessionId={session.sessionId}
         currentTitle={currentTitle}
         onRenamed={onChanged}
-      />
-      <DeletePermanentlyDialog
-        open={confirmOpen}
-        onOpenChange={setConfirmOpen}
-        session={session}
-        onDeleted={onChanged}
       />
     </>
   );

@@ -179,24 +179,3 @@ describe("pin/archive/softDelete set + clear timestamps", () => {
     expect(ids).toEqual(expect.arrayContaining(["s-multi"]));
   });
 });
-
-describe("deleteFromDisk (the only destructive op)", () => {
-  it("removes an existing .jsonl file and returns true", () => {
-    const file = path.join(tmpHome, "victim.jsonl");
-    fs.writeFileSync(file, "{}\n");
-    expect(fs.existsSync(file)).toBe(true);
-    expect(meta.deleteFromDisk(file)).toBe(true);
-    expect(fs.existsSync(file)).toBe(false);
-  });
-
-  it("refuses a non-.jsonl path (guard) and leaves the file", () => {
-    const file = path.join(tmpHome, "keep.txt");
-    fs.writeFileSync(file, "x");
-    expect(meta.deleteFromDisk(file)).toBe(false);
-    expect(fs.existsSync(file)).toBe(true);
-  });
-
-  it("returns false for a missing file", () => {
-    expect(meta.deleteFromDisk(path.join(tmpHome, "nope.jsonl"))).toBe(false);
-  });
-});
