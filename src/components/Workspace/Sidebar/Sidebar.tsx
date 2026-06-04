@@ -85,7 +85,7 @@ export function Sidebar() {
       }}
     >
       <ZoneHeader label="Activity" />
-      <ConversationList />
+      <ConversationList sessions={sessions} />
 
       <ZoneHeader label="Library" />
       <PanelsArea

@@ -40,8 +40,8 @@ export function SessionsPanel({ sessions, loading, refresh }: SessionsPanelProps
   const openTabs = useWorkspaceStore(
     (s) => s.dashboards.find((d) => d.id === s.activeDashboardId)?.tabs,
   );
-  // Optimistic pin overrides — a pinned session is exempt from the open-tab
-  // hiding below, so it stays in the sidebar even while open in a tab.
+  // Optimistic pin overrides — effectively-pinned conversations are excluded
+  // from SESSIONS entirely; they live in the ACTIVITY list's Pinned group.
   const pinnedOverrides = usePinnedStore((s) => s.overrides);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -81,17 +81,15 @@ export function SessionsPanel({ sessions, loading, refresh }: SessionsPanelProps
       openConversationIds.add(tab.claudeSessionId);
     }
   }
-  // A pinned conversation is kept even when open in a tab — that is the whole
-  // "stays in the sidebar" guarantee. Everything else open is hidden to avoid
-  // duplicating ACTIVITY.
-  const visibleSessions =
-    openConversationIds.size === 0 && openFilePaths.size === 0
-      ? sessions
-      : sessions.filter(
-          (s) =>
-            effectivePinned(pinnedOverrides, s.sessionId, s.pinned) ||
-            (!openConversationIds.has(s.sessionId) && !openFilePaths.has(s.filePath)),
-        );
+  // Effectively-pinned conversations move to ACTIVITY's Pinned group, so they are
+  // dropped from SESSIONS entirely. Everything else open is hidden to avoid
+  // duplicating ACTIVITY; non-pinned, non-open sessions form the history.
+  const visibleSessions = sessions.filter(
+    (s) =>
+      !effectivePinned(pinnedOverrides, s.sessionId, s.pinned) &&
+      !openConversationIds.has(s.sessionId) &&
+      !openFilePaths.has(s.filePath),
+  );
 
   const { live, recent, older, archived } = partitionSessions(visibleSessions, activeAgents);
 

@@ -1,36 +1,52 @@
-import { Pencil } from 'lucide-react';
+import { Pencil, Pin, PinOff } from 'lucide-react';
 import { useState } from 'react';
 
 import { ContextMenu, type ContextMenuItem } from '@/components/_ui/ContextMenu';
 import { RenameDialog } from '@/components/Workspace/Sidebar/SessionsPanel/SessionRowMenu/RenameDialog';
 import { useConversationTitlesStore } from '@/store/useConversationTitlesStore';
-import type { InternalTab } from '@/store/useWorkspaceStore';
+import { usePinnedStore } from '@/store/usePinnedStore';
 
-type ConversationStatus = 'live' | 'waiting' | 'idle';
+export type ConversationStatus = 'live' | 'waiting' | 'idle';
 
+// A normalized view of one ACTIVITY row — produced from either an open tab or a
+// pinned session by ConversationList. The item itself stays presentation-only.
 export type ConversationItemProps = {
-  tab: InternalTab;
+  // The conversation's persisted title key (claudeSessionId). undefined for a
+  // brand-new chat with no session id yet → no Pin/Rename for it.
+  convId: string | undefined;
+  // Base label (already the tab/session title); overlaid with the titles store.
+  title: string;
   isActive: boolean;
   status: ConversationStatus;
+  // Effective pinned state (override-aware), used to flip the menu label.
+  pinned: boolean;
   onActivate: () => void;
 };
 
 const dotColorFor = (status: ConversationStatus): string =>
   status === 'live' ? '#22c55e' : status === 'waiting' ? '#eab308' : 'var(--color-text-muted)';
 
-export function ConversationItem({ tab, isActive, status, onActivate }: ConversationItemProps) {
+export function ConversationItem({ convId, title, isActive, status, pinned, onActivate }: ConversationItemProps) {
   const [renameOpen, setRenameOpen] = useState(false);
 
-  // The conversation's persisted title key: session tabs carry it as sessionId,
-  // live chat tabs as claudeSessionId (once known). A brand-new chat has none.
-  const convId = tab.kind === 'session' ? tab.sessionId : tab.claudeSessionId;
-  // Overlay the shared titles store so a rename shows live regardless of kind,
-  // falling back to the tab's own title.
+  // Overlay the shared titles store so a rename shows live regardless of source,
+  // falling back to the provided title.
   const stored = useConversationTitlesStore((s) => (convId ? s.conversationTitles[convId] : undefined));
-  const label = stored?.userTitle ?? stored?.aiTitle ?? tab.title;
+  const label = stored?.userTitle ?? stored?.aiTitle ?? title;
+
+  // Optimistic pin toggle: reflect in the store immediately, then persist.
+  const togglePin = () => {
+    if (!convId) return;
+    const next = !pinned;
+    usePinnedStore.getState().setPinned(convId, next);
+    void (next ? window.api.pinConversation(convId) : window.api.unpinConversation(convId));
+  };
 
   const items: ContextMenuItem[] = [
     { label: 'Rename…', icon: <Pencil size={13} />, onSelect: () => setRenameOpen(true) },
+    pinned
+      ? { label: 'Unpin', icon: <PinOff size={13} />, onSelect: togglePin }
+      : { label: 'Pin to top', icon: <Pin size={13} />, onSelect: togglePin },
   ];
 
   return (

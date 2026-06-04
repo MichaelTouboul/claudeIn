@@ -123,55 +123,23 @@ describe("SessionsPanel", () => {
     expect(screen.getByText("Title recent-b")).toBeInTheDocument();
   });
 
-  it("keeps a PINNED session listed even when it is open in a tab (non-pinned open one is still hidden)", () => {
-    useWorkspaceStore.setState({
-      dashboards: [
-        {
-          id: "d1",
-          scope: { kind: "project", project },
-          cwd: project.path,
-          activeTabId: "t-pinned",
-          tabs: [
-            { id: "t-pinned", kind: "session", title: "Pinned open", sessionId: "pinned-a", sessionFilePath: "/sessions/pinned-a.jsonl" },
-            { id: "t-open", kind: "session", title: "Open one", sessionId: "recent-a", sessionFilePath: "/sessions/recent-a.jsonl" },
-          ],
-        },
-      ],
-      activeDashboardId: "d1",
-    });
+  it("excludes a DB-pinned session from SESSIONS entirely (it now lives in ACTIVITY)", () => {
     renderPanel([
       session("pinned-a", "recent", { pinned: true }),
-      session("recent-a", "recent"),
       session("recent-b", "recent"),
     ]);
 
-    // Pinned + open → exempt from the open-tab hiding, stays in the sidebar.
-    expect(screen.getByText("Title pinned-a")).toBeInTheDocument();
-    // Non-pinned + open → hidden; not-open → listed.
-    expect(screen.queryByText("Title recent-a")).not.toBeInTheDocument();
+    // Pinned conversations moved to the ACTIVITY Pinned group → gone from SESSIONS.
+    expect(screen.queryByText("Title pinned-a")).not.toBeInTheDocument();
     expect(screen.getByText("Title recent-b")).toBeInTheDocument();
   });
 
-  it("keeps an open session listed when only the optimistic pin override marks it pinned", () => {
+  it("excludes a session marked pinned only by the optimistic override", () => {
     usePinnedStore.setState({ overrides: { "recent-a": true } });
-    useWorkspaceStore.setState({
-      dashboards: [
-        {
-          id: "d1",
-          scope: { kind: "project", project },
-          cwd: project.path,
-          activeTabId: "t-open",
-          tabs: [
-            { id: "t-open", kind: "session", title: "Open one", sessionId: "recent-a", sessionFilePath: "/sessions/recent-a.jsonl" },
-          ],
-        },
-      ],
-      activeDashboardId: "d1",
-    });
-    // DB still says pinned:false, but the override (just-clicked Pin) exempts it.
+    // DB still says pinned:false, but the override (just-clicked Pin) removes it.
     renderPanel([session("recent-a", "recent"), session("recent-b", "recent")]);
 
-    expect(screen.getByText("Title recent-a")).toBeInTheDocument();
+    expect(screen.queryByText("Title recent-a")).not.toBeInTheDocument();
     expect(screen.getByText("Title recent-b")).toBeInTheDocument();
   });
 
@@ -218,14 +186,15 @@ describe("SessionsPanel", () => {
     expect(within(dialog).getByText("Title arch-a")).toBeInTheDocument();
   });
 
-  it("places a pinned session at the top of its tier (backend order preserved)", () => {
-    // Backend returns pinned-first; the panel preserves input order per tier.
+  it("drops pinned sessions but preserves backend order for the rest", () => {
     renderPanel([
       session("pinned-a", "recent", { pinned: true }),
       session("recent-b", "recent"),
+      session("recent-c", "recent"),
     ]);
     const rows = screen.getAllByText(/^Title /).map((el) => el.textContent);
-    expect(rows.indexOf("Title pinned-a")).toBeLessThan(rows.indexOf("Title recent-b"));
+    expect(rows).not.toContain("Title pinned-a");
+    expect(rows.indexOf("Title recent-b")).toBeLessThan(rows.indexOf("Title recent-c"));
   });
 
   it("watches the scope on mount and refetches (debounced) on session_activity", async () => {
