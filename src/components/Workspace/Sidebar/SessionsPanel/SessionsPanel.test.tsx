@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { SessionStatus, SessionSummary } from "@/hooks/useSessions";
 import { ProjectProvider } from "@/store/ProjectContext";
 import { useEventsStore } from "@/store/useEventsStore";
+import { usePinnedStore } from "@/store/usePinnedStore";
 import { useWorkspaceStore } from "@/store/useWorkspaceStore";
 import type { Project } from "@/types/dashboard.types";
 
@@ -54,6 +55,7 @@ beforeEach(() => {
   Object.assign(window, { api: { watchSessions, unwatchSessions, onEvent } });
   useEventsStore.setState({ activeAgents: new Set(), waitingAgents: new Set(), agentContexts: new Map() });
   useWorkspaceStore.setState({ dashboards: [], activeDashboardId: null });
+  usePinnedStore.setState({ overrides: {} });
 });
 
 afterEach(() => {
@@ -118,6 +120,58 @@ describe("SessionsPanel", () => {
 
     // recent-a is open in a session tab → excluded; recent-b still listed.
     expect(screen.queryByText("Title recent-a")).not.toBeInTheDocument();
+    expect(screen.getByText("Title recent-b")).toBeInTheDocument();
+  });
+
+  it("keeps a PINNED session listed even when it is open in a tab (non-pinned open one is still hidden)", () => {
+    useWorkspaceStore.setState({
+      dashboards: [
+        {
+          id: "d1",
+          scope: { kind: "project", project },
+          cwd: project.path,
+          activeTabId: "t-pinned",
+          tabs: [
+            { id: "t-pinned", kind: "session", title: "Pinned open", sessionId: "pinned-a", sessionFilePath: "/sessions/pinned-a.jsonl" },
+            { id: "t-open", kind: "session", title: "Open one", sessionId: "recent-a", sessionFilePath: "/sessions/recent-a.jsonl" },
+          ],
+        },
+      ],
+      activeDashboardId: "d1",
+    });
+    renderPanel([
+      session("pinned-a", "recent", { pinned: true }),
+      session("recent-a", "recent"),
+      session("recent-b", "recent"),
+    ]);
+
+    // Pinned + open → exempt from the open-tab hiding, stays in the sidebar.
+    expect(screen.getByText("Title pinned-a")).toBeInTheDocument();
+    // Non-pinned + open → hidden; not-open → listed.
+    expect(screen.queryByText("Title recent-a")).not.toBeInTheDocument();
+    expect(screen.getByText("Title recent-b")).toBeInTheDocument();
+  });
+
+  it("keeps an open session listed when only the optimistic pin override marks it pinned", () => {
+    usePinnedStore.setState({ overrides: { "recent-a": true } });
+    useWorkspaceStore.setState({
+      dashboards: [
+        {
+          id: "d1",
+          scope: { kind: "project", project },
+          cwd: project.path,
+          activeTabId: "t-open",
+          tabs: [
+            { id: "t-open", kind: "session", title: "Open one", sessionId: "recent-a", sessionFilePath: "/sessions/recent-a.jsonl" },
+          ],
+        },
+      ],
+      activeDashboardId: "d1",
+    });
+    // DB still says pinned:false, but the override (just-clicked Pin) exempts it.
+    renderPanel([session("recent-a", "recent"), session("recent-b", "recent")]);
+
+    expect(screen.getByText("Title recent-a")).toBeInTheDocument();
     expect(screen.getByText("Title recent-b")).toBeInTheDocument();
   });
 

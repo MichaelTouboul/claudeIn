@@ -2,6 +2,7 @@ import { GitBranch, MessageSquare, Pin } from "lucide-react";
 
 import type { SessionSummary } from "@/hooks/useSessions";
 import { useConversationTitlesStore } from "@/store/useConversationTitlesStore";
+import { usePinnedStore } from "@/store/usePinnedStore";
 
 import { SessionRowMenu } from "../SessionRowMenu/SessionRowMenu";
 import { shortModel } from "../utils";
@@ -15,6 +16,8 @@ export type RecentSessionRowProps = {
 
 export function RecentSessionRow({ session, selected, onSelect, onChanged }: RecentSessionRowProps) {
   const liveTitle = useConversationTitlesStore((s) => s.conversationTitles[session.sessionId]);
+  const pinnedOverride = usePinnedStore((s) => s.overrides[session.sessionId]);
+  const isPinned = pinnedOverride ?? session.pinned;
   const label =
     liveTitle?.userTitle ?? liveTitle?.aiTitle ?? session.title ?? session.firstPrompt ?? session.sessionId.slice(0, 8);
   const model = shortModel(session.model);
@@ -42,7 +45,7 @@ export function RecentSessionRow({ session, selected, onSelect, onChanged }: Rec
         }}
       >
         <div className="flex items-center gap-2">
-          {session.pinned ? <Pin size={10} style={{ color: "var(--color-accent)", flexShrink: 0 }} /> : null}
+          {isPinned ? <Pin size={10} style={{ color: "var(--color-accent)", flexShrink: 0 }} /> : null}
           <span
             className="text-xs font-medium truncate"
             style={{ color: "var(--color-text-secondary)" }}
