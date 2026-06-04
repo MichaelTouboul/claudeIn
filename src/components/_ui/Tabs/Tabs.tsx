@@ -44,7 +44,7 @@ export function Tabs({ tabs, active, onChange, className }: TabsProps) {
                 move(-1);
               }
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all duration-200"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all duration-200 min-w-0"
             style={{
               fontFamily: 'var(--font-mono)',
               fontSize: '11px',
@@ -59,8 +59,10 @@ export function Tabs({ tabs, active, onChange, className }: TabsProps) {
                 : { color: 'var(--color-text-muted)' }),
             }}
           >
-            {tab.icon ?? null}
-            {tab.label}
+            {tab.icon ? <span className="shrink-0 inline-flex items-center">{tab.icon}</span> : null}
+            <span className="truncate" style={{ maxWidth: '14rem' }} title={tab.label}>
+              {tab.label}
+            </span>
             {tab.onClose ? (
               <span
                 role="button"
@@ -76,7 +78,7 @@ export function Tabs({ tabs, active, onChange, className }: TabsProps) {
                     tab.onClose?.(tab.key);
                   }
                 }}
-                className="ml-1 inline-flex items-center justify-center w-3.5 h-3.5 rounded opacity-50 hover:opacity-100"
+                className="ml-1 shrink-0 inline-flex items-center justify-center w-3.5 h-3.5 rounded opacity-50 hover:opacity-100"
                 style={{ color: 'var(--color-text-muted)' }}
               >
                 <X size={11} />
