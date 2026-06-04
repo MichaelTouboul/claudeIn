@@ -236,6 +236,18 @@ function handleStreamEvent(localSessionId: string, session: SpawnSession, event:
       agentName: session.agentName,
     });
   }
+
+  // The CLI emits this once a `/compact` turn has rewritten the context window.
+  // Surface it so the renderer's compact-on-resume flow can flip its status from
+  // "Compacting…" to "Context compacted ✓" (the turn usually carries no
+  // assistant text, so this system event is the reliable success signal).
+  if (event.type === "system" && event.subtype === "compact_boundary") {
+    broadcast({
+      type: "spawn_compacted",
+      localSessionId,
+      agentName: session.agentName,
+    });
+  }
 }
 
 export function sendInput(localSessionId: string, text: string): boolean {

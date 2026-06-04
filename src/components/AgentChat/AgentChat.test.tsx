@@ -1,4 +1,4 @@
-import { render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { useImperativeHandle } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -135,5 +135,39 @@ describe('AgentChat prompt-driven focus', () => {
     emitExit();
     await new Promise((r) => setTimeout(r, 10));
     expect(focusSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe('AgentChat compact-on-resume', () => {
+  it('fires one /compact turn with the resume id and shows the compacting status', async () => {
+    render(<AgentChat agentName="tester" cwd="/p" resumeSessionId="claude-1" compactOnResume />);
+
+    await waitFor(() => expect(spawnMock).toHaveBeenCalled());
+    expect(spawnMock).toHaveBeenCalledTimes(1);
+    expect(spawnMock).toHaveBeenCalledWith(
+      expect.objectContaining({ mission: '/compact', resume_session_id: 'claude-1', cwd: '/p' }),
+    );
+    // Status banner appears; the input (rich editor) stays mounted/free.
+    expect(await screen.findByText(/compacting context/i)).toBeInTheDocument();
+    expect(screen.getByTestId('rich-editor')).toBeInTheDocument();
+  });
+
+  it('does NOT render a "/compact" user message for the compact turn', async () => {
+    render(<AgentChat agentName="tester" cwd="/p" resumeSessionId="claude-1" compactOnResume />);
+    await waitFor(() => expect(spawnMock).toHaveBeenCalled());
+    await screen.findByText(/compacting context/i);
+    // The only "/compact" anywhere is the spawn mission arg — never rendered text.
+    expect(screen.queryByText('/compact')).not.toBeInTheDocument();
+  });
+
+  it('flips the status to compacted on a spawn_compacted event', async () => {
+    render(<AgentChat agentName="tester" cwd="/p" resumeSessionId="claude-1" compactOnResume />);
+    await waitFor(() => expect(spawnMock).toHaveBeenCalled());
+    await waitFor(() => expect(eventCb).not.toBeNull());
+    await screen.findByText(/compacting context/i);
+
+    eventCb!({ type: 'spawn_compacted', localSessionId: 'sess-1' });
+
+    expect(await screen.findByText(/context compacted/i)).toBeInTheDocument();
   });
 });

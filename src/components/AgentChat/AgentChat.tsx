@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { useAgentChatActions } from '@/hooks/useAgentChatActions';
+import { useCompactOnResume } from '@/hooks/useCompactOnResume';
 import { useAppStore } from '@/store/useAppStore';
 import { useConversationTitlesStore } from '@/store/useConversationTitlesStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
@@ -10,6 +11,7 @@ import { AgentChatHeader } from './AgentChatHeader/AgentChatHeader';
 import { AgentChatInput } from './AgentChatInput/AgentChatInput';
 import { AgentChatMessages } from './AgentChatMessages/AgentChatMessages';
 import { parseAskPrompt } from './askPrompt';
+import { CompactStatusBanner } from './CompactStatusBanner/CompactStatusBanner';
 import type { RichEditorHandle } from './RichEditor/RichEditor';
 import type { QueueItem } from './types';
 
@@ -18,6 +20,7 @@ type SpawnEvent =
   | { type: 'spawn_message'; localSessionId: string; message: Omit<ChatMessage, 'id'> }
   | { type: 'spawn_input_request'; localSessionId: string }
   | { type: 'spawn_claude_session'; localSessionId: string; claudeSessionId: string }
+  | { type: 'spawn_compacted'; localSessionId: string }
   | { type: 'spawn_exit'; localSessionId: string; status: SpawnSession['status']; claudeSessionId?: string };
 
 export type AgentChatProps = {
@@ -31,9 +34,14 @@ export type AgentChatProps = {
   // Pre-seed the transcript (e.g. resuming a viewed session: show the prior
   // history immediately). Seeded once on mount; live appends are not clobbered.
   initialMessages?: ChatMessage[];
+  // Compact-on-resume: on mount, fire one automatic in-session `/compact` turn
+  // on the resumed session BEFORE the user continues. Surfaced as a status
+  // banner (never as a "/compact" user message); the input stays free
+  // throughout. Mutually exclusive with `initialMessage`.
+  compactOnResume?: boolean;
 };
 
-export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessage, initialMessages }: AgentChatProps) {
+export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessage, initialMessages, compactOnResume }: AgentChatProps) {
   const selectedProjectPath = useAppStore((s) => s.selectedProject?.path);
   const retitleChatTab = useWorkspaceStore((s) => s.retitleChatTab);
   const setTabClaudeSessionId = useWorkspaceStore((s) => s.setTabClaudeSessionId);
@@ -62,6 +70,19 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
   queueRef.current = queue;
   const messagesRef = useRef<ChatMessage[]>(messages);
   messagesRef.current = messages;
+  // Stable indirection to sendNextFromQueue (defined below): lets the compact
+  // hook + the once-mounted onEvent effect call the latest closure.
+  const sendNextFromQueueRef = useRef<() => void>(() => {});
+  const onCompactEventRef = useRef<(data: SpawnEvent) => void>(() => {});
+
+  // Compact-on-resume: fire one automatic `/compact` turn on mount, surface its
+  // status, keep the input free, and flush a message queued during compaction.
+  const { compactStatus, compacting, onCompactEvent } = useCompactOnResume({
+    compactOnResume, resumeSessionId, projectPath, agentName,
+    setSession, setClaudeSessionId,
+    flushQueue: () => sendNextFromQueueRef.current(),
+  });
+  onCompactEventRef.current = onCompactEvent;
 
   // The backend broadcasts the AI title (keyed by claudeSessionId) into the
   // shared titles store; surface it on this chat's tab via the existing
@@ -78,7 +99,7 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
   const isRunning = session?.status === 'running';
 
   const { handleSend, handleAttach, onAnswer, handleKill } = useAgentChatActions({
-    input, attachedFiles, awaitingResponse, session, isRunning: isRunning ?? false,
+    input, attachedFiles, awaitingResponse, compacting, session, isRunning: isRunning ?? false,
     agentName, projectPath, claudeSessionId, editorRef, pendingUserMsgs,
     setInput, setAttachedFiles, setQueue, setMessages,
     setAwaitingResponse, setWaitingInput, setSession, setClaudeSessionId,
@@ -129,6 +150,7 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
       return rest;
     });
   };
+  sendNextFromQueueRef.current = sendNextFromQueue;
 
   useEffect(() => {
     const cleanup = window.api.onEvent((raw) => {
@@ -155,6 +177,11 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
       if (data.type === 'spawn_claude_session' && s && data.localSessionId === s.localSessionId) {
         setClaudeSessionId(data.claudeSessionId);
       }
+      // Route to the compact-on-resume turn handler: it no-ops unless the event
+      // belongs to that turn's process (flips the banner, releases `compacting`,
+      // flushes a message queued during compaction). Kept before `spawn_exit`'s
+      // normal close-out so the compact turn settles its own status first.
+      onCompactEventRef.current(data);
       if (data.type === 'spawn_exit' && s && data.localSessionId === s.localSessionId) {
         setSession((prev) => prev ? { ...prev, status: data.status } : null);
         if (data.claudeSessionId) setClaudeSessionId(data.claudeSessionId);
@@ -235,6 +262,7 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
         isRunning={isRunning ?? false} waitingInput={waitingInput} awaitingResponse={awaitingResponse}
         queue={queue} onAnswer={onAnswer} scrollRef={scrollRef}
       />
+      {compactStatus ? <CompactStatusBanner status={compactStatus} /> : null}
       <AgentChatInput
         input={input} attachedFiles={attachedFiles} waitingInput={waitingInput}
         isRunning={isRunning ?? false} spawning={spawning} session={session}

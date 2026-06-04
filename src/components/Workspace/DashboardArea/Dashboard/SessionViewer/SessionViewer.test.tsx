@@ -111,13 +111,34 @@ describe("SessionViewer", () => {
     expect(unwatchConversation).toHaveBeenCalledWith(FILE);
   });
 
-  it("offers the resume choice with Compact disabled as a follow-up", async () => {
+  it("offers the resume choice with both Compact and Continue enabled", async () => {
     getSessionConversation.mockResolvedValue(conversation([msg("u1", "user", "hello")]));
     renderViewer();
     await screen.findByText("hello");
 
     expect(screen.getByRole("button", { name: /continue as is/i })).toBeEnabled();
-    expect(screen.getByRole("button", { name: /compact/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /compact/i })).toBeEnabled();
+  });
+
+  it('"Compact" resumes the same live chat as Continue, plus compactOnResume', async () => {
+    getSessionConversation.mockResolvedValue(conversation([msg("u1", "user", "hello"), msg("a1", "assistant", "world")]));
+    renderViewer();
+    await screen.findByText("hello");
+
+    fireEvent.click(screen.getByRole("button", { name: /compact/i }));
+
+    expect(await screen.findByTestId("agent-chat")).toBeInTheDocument();
+    const props = agentChatProps.mock.calls[0][0] as {
+      resumeSessionId?: string; cwd?: string; compactOnResume?: boolean; initialMessages?: ChatMessage[];
+    };
+    expect(props).toEqual(
+      expect.objectContaining({ resumeSessionId: "abcdef12", cwd: "/Users/x/proj", compactOnResume: true }),
+    );
+    // Same transcript seeding as Continue-as-is.
+    expect(props.initialMessages).toEqual([
+      expect.objectContaining({ id: "u1", role: "user", content: "hello" }),
+      expect.objectContaining({ id: "a1", role: "assistant", content: "world" }),
+    ]);
   });
 
   it('"Continue as is" resumes into a live chat with the session id', async () => {
