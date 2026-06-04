@@ -13,10 +13,10 @@ import type { QueueItem } from './types';
 
 type SpawnEvent =
   // The backend doesn't generate ChatMessage.id — we mint it on receive.
-  | { type: 'spawn_message'; sessionId: string; message: Omit<ChatMessage, 'id'> }
-  | { type: 'spawn_input_request'; sessionId: string }
-  | { type: 'spawn_claude_session'; sessionId: string; claudeSessionId: string }
-  | { type: 'spawn_exit'; sessionId: string; status: SpawnSession['status']; claudeSessionId?: string };
+  | { type: 'spawn_message'; localSessionId: string; message: Omit<ChatMessage, 'id'> }
+  | { type: 'spawn_input_request'; localSessionId: string }
+  | { type: 'spawn_claude_session'; localSessionId: string; claudeSessionId: string }
+  | { type: 'spawn_exit'; localSessionId: string; status: SpawnSession['status']; claudeSessionId?: string };
 
 export type AgentChatProps = {
   agentName: string;
@@ -112,7 +112,7 @@ export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: A
     const cleanup = window.api.onEvent((raw) => {
       const data = raw as SpawnEvent;
       const s = sessionRef.current;
-      if (data.type === 'spawn_message' && s && data.sessionId === s.id) {
+      if (data.type === 'spawn_message' && s && data.localSessionId === s.localSessionId) {
         const msg: ChatMessage = { ...data.message, id: crypto.randomUUID() };
         if (msg.role === 'user' && pendingUserMsgs.current.has(msg.content)) {
           pendingUserMsgs.current.delete(msg.content);
@@ -125,15 +125,15 @@ export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: A
           setTimeout(() => sendNextFromQueue(), 100);
         }
       }
-      if (data.type === 'spawn_input_request' && s && data.sessionId === s.id) {
+      if (data.type === 'spawn_input_request' && s && data.localSessionId === s.localSessionId) {
         setWaitingInput(true);
         setAwaitingResponse(false);
         setTimeout(() => sendNextFromQueue(), 100);
       }
-      if (data.type === 'spawn_claude_session' && s && data.sessionId === s.id) {
+      if (data.type === 'spawn_claude_session' && s && data.localSessionId === s.localSessionId) {
         setClaudeSessionId(data.claudeSessionId);
       }
-      if (data.type === 'spawn_exit' && s && data.sessionId === s.id) {
+      if (data.type === 'spawn_exit' && s && data.localSessionId === s.localSessionId) {
         setSession((prev) => prev ? { ...prev, status: data.status } : null);
         if (data.claudeSessionId) setClaudeSessionId(data.claudeSessionId);
         setWaitingInput(false);

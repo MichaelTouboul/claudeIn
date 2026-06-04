@@ -19,9 +19,9 @@ interface Window {
     getDashboard: (id: string) => Promise<import("./hooks/useProjects").Dashboard>;
 
     spawn: (opts: { agent_name?: string; mission: string; cwd?: string; resume_session_id?: string }) => Promise<import("./types/spawn.types").SpawnSession>;
-    getSession: (sessionId: string) => Promise<import("./types/spawn.types").SpawnSession | null>;
-    sendInput: (sessionId: string, text: string) => Promise<boolean>;
-    killSession: (sessionId: string) => Promise<boolean>;
+    getSession: (localSessionId: string) => Promise<import("./types/spawn.types").SpawnSession | null>;
+    sendInput: (localSessionId: string, text: string) => Promise<boolean>;
+    killSession: (localSessionId: string) => Promise<boolean>;
     getSessions: () => Promise<import("./types/spawn.types").SpawnSession[]>;
 
     getRecentEvents: (limit?: number) => Promise<import("./types/events.types").LiveEvent[]>;

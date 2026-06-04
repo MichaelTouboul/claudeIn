@@ -32,7 +32,7 @@ function extractText(event: StreamEvent): string | null {
 }
 
 export function spawnAgent(agentName: string, mission: string, cwd?: string, resumeSessionId?: string): SpawnSession {
-  const sessionId = randomUUID();
+  const localSessionId = randomUUID();
 
   // `--append-system-prompt` is added here, ahead of the resume/fresh branch, so
   // the no-follow-up steering is re-passed on EVERY turn — including `--resume`,
@@ -63,7 +63,7 @@ export function spawnAgent(agentName: string, mission: string, cwd?: string, res
   });
 
   const session: SpawnSession = {
-    id: sessionId,
+    localSessionId,
     agentName,
     mission,
     status: "running",
@@ -73,6 +73,7 @@ export function spawnAgent(agentName: string, mission: string, cwd?: string, res
       { role: "user", content: mission, timestamp: new Date().toISOString() },
     ],
     claudeSessionId: resumeSessionId,
+    titleGenerated: Boolean(resumeSessionId),
   };
 
   let buffer = "";
@@ -91,12 +92,12 @@ export function spawnAgent(agentName: string, mission: string, cwd?: string, res
         session.claudeSessionId = event.session_id;
         broadcast({
           type: "spawn_claude_session",
-          sessionId,
+          localSessionId,
           claudeSessionId: event.session_id,
         });
       }
 
-      handleStreamEvent(sessionId, session, event);
+      handleStreamEvent(localSessionId, session, event);
     }
   });
 
@@ -105,7 +106,7 @@ export function spawnAgent(agentName: string, mission: string, cwd?: string, res
     if (text) {
       broadcast({
         type: "spawn_stderr",
-        sessionId,
+        localSessionId,
         agentName,
         text,
       });
@@ -118,7 +119,7 @@ export function spawnAgent(agentName: string, mission: string, cwd?: string, res
 
     broadcast({
       type: "spawn_exit",
-      sessionId,
+      localSessionId,
       agentName,
       code,
       status: session.status,
@@ -127,31 +128,31 @@ export function spawnAgent(agentName: string, mission: string, cwd?: string, res
 
     try { ingestEvent({
       agent_name: agentName,
-      session_id: sessionId,
+      session_id: localSessionId,
       event_type: "Stop",
       payload: { exit_code: code },
     }); } catch {}
   });
 
-  sessions.set(sessionId, { session, process: proc });
+  sessions.set(localSessionId, { session, process: proc });
 
   try { ingestEvent({
     agent_name: agentName,
-    session_id: sessionId,
+    session_id: localSessionId,
     event_type: "SubagentStart",
     payload: { mission },
   }); } catch {}
 
   broadcast({
     type: "spawn_start",
-    sessionId,
+    localSessionId,
     agentName,
     mission,
   });
 
   broadcast({
     type: "spawn_message",
-    sessionId,
+    localSessionId,
     agentName,
     message: { role: "user", content: mission, timestamp: new Date().toISOString() },
   });
@@ -159,7 +160,7 @@ export function spawnAgent(agentName: string, mission: string, cwd?: string, res
   return session;
 }
 
-function handleStreamEvent(sessionId: string, session: SpawnSession, event: StreamEvent) {
+function handleStreamEvent(localSessionId: string, session: SpawnSession, event: StreamEvent) {
   const now = new Date().toISOString();
 
   if (event.type === "assistant") {
@@ -167,7 +168,7 @@ function handleStreamEvent(sessionId: string, session: SpawnSession, event: Stre
     if (text) {
       const msg: ChatMessage = { role: "assistant", content: text, timestamp: now };
       session.messages.push(msg);
-      broadcast({ type: "spawn_message", sessionId, agentName: session.agentName, message: msg });
+      broadcast({ type: "spawn_message", localSessionId, agentName: session.agentName, message: msg });
     }
   }
 
@@ -180,11 +181,11 @@ function handleStreamEvent(sessionId: string, session: SpawnSession, event: Stre
       timestamp: now,
     };
     session.messages.push(msg);
-    broadcast({ type: "spawn_message", sessionId, agentName: session.agentName, message: msg });
+    broadcast({ type: "spawn_message", localSessionId, agentName: session.agentName, message: msg });
 
     try { ingestEvent({
       agent_name: session.agentName,
-      session_id: sessionId,
+      session_id: localSessionId,
       event_type: "PreToolUse",
       tool_name: toolName,
     }); } catch {}
@@ -193,7 +194,7 @@ function handleStreamEvent(sessionId: string, session: SpawnSession, event: Stre
   if (event.type === "tool_result") {
     try { ingestEvent({
       agent_name: session.agentName,
-      session_id: sessionId,
+      session_id: localSessionId,
       event_type: "PostToolUse",
       tool_name: event.name || undefined,
     }); } catch {}
@@ -204,7 +205,7 @@ function handleStreamEvent(sessionId: string, session: SpawnSession, event: Stre
     if (text) {
       const msg: ChatMessage = { role: "assistant", content: text, timestamp: now };
       session.messages.push(msg);
-      broadcast({ type: "spawn_message", sessionId, agentName: session.agentName, message: msg });
+      broadcast({ type: "spawn_message", localSessionId, agentName: session.agentName, message: msg });
     }
   }
 
@@ -215,7 +216,7 @@ function handleStreamEvent(sessionId: string, session: SpawnSession, event: Stre
 
     broadcast({
       type: "spawn_usage",
-      sessionId,
+      localSessionId,
       agentName: session.agentName,
       tokensIn,
       tokensOut,
@@ -224,7 +225,7 @@ function handleStreamEvent(sessionId: string, session: SpawnSession, event: Stre
 
     try { ingestEvent({
       agent_name: session.agentName,
-      session_id: sessionId,
+      session_id: localSessionId,
       event_type: "Usage",
       tokens_in: tokensIn,
       tokens_out: tokensOut,
@@ -235,14 +236,14 @@ function handleStreamEvent(sessionId: string, session: SpawnSession, event: Stre
   if (event.type === "input_request" || event.subtype === "input_request") {
     broadcast({
       type: "spawn_input_request",
-      sessionId,
+      localSessionId,
       agentName: session.agentName,
     });
   }
 }
 
-export function sendInput(sessionId: string, text: string): boolean {
-  const entry = sessions.get(sessionId);
+export function sendInput(localSessionId: string, text: string): boolean {
+  const entry = sessions.get(localSessionId);
   if (!entry || !entry.process.stdin?.writable) return false;
 
   entry.process.stdin.write(text + "\n");
@@ -254,7 +255,7 @@ export function sendInput(sessionId: string, text: string): boolean {
 
   broadcast({
     type: "spawn_message",
-    sessionId,
+    localSessionId,
     agentName: entry.session.agentName,
     message: { role: "user", content: text, timestamp: new Date().toISOString() },
   });
@@ -262,8 +263,8 @@ export function sendInput(sessionId: string, text: string): boolean {
   return true;
 }
 
-export function killSession(sessionId: string): boolean {
-  const entry = sessions.get(sessionId);
+export function killSession(localSessionId: string): boolean {
+  const entry = sessions.get(localSessionId);
   if (!entry) return false;
 
   entry.process.kill("SIGTERM");
@@ -276,8 +277,8 @@ export function killSession(sessionId: string): boolean {
   return true;
 }
 
-export function getSession(sessionId: string): SpawnSession | null {
-  return sessions.get(sessionId)?.session || null;
+export function getSession(localSessionId: string): SpawnSession | null {
+  return sessions.get(localSessionId)?.session || null;
 }
 
 export function getAllSessions(): SpawnSession[] {
