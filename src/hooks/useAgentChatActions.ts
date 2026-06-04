@@ -11,6 +11,12 @@ type UseAgentChatActionsParams = {
   input: string;
   attachedFiles: AttachedFile[];
   awaitingResponse: boolean;
+  // True while the one-shot compact-on-resume `/compact` turn is in flight. The
+  // input stays free (we never set `awaitingResponse` for it), so we route any
+  // message typed during compaction into the queue here — it flushes via
+  // `sendNextFromQueue` once the compact turn exits, never a 2nd concurrent
+  // `--resume` on the same session.
+  compacting: boolean;
   session: SpawnSession | null;
   isRunning: boolean;
   agentName: string;
@@ -32,6 +38,7 @@ export function useAgentChatActions({
   input,
   attachedFiles,
   awaitingResponse,
+  compacting,
   session,
   isRunning,
   agentName,
@@ -59,7 +66,10 @@ export function useAgentChatActions({
     editorRef.current?.clear();
     editorRef.current?.focus();
 
-    if (awaitingResponse) {
+    // While a turn is awaiting a reply OR the compact-on-resume turn is in
+    // flight, queue the message: it fires via `sendNextFromQueue` after the
+    // running turn exits, so we never spawn a 2nd concurrent `--resume`.
+    if (awaitingResponse || compacting) {
       setQueue((prev) => [...prev, { id: crypto.randomUUID(), text: fullText }]);
       return;
     }
@@ -82,7 +92,7 @@ export function useAgentChatActions({
         setAwaitingResponse(false);
       }
     }
-  }, [input, attachedFiles, awaitingResponse, session, isRunning, agentName, projectPath, claudeSessionId, editorRef, pendingUserMsgs, setInput, setAttachedFiles, setQueue, setMessages, setAwaitingResponse, setWaitingInput, setSession, setClaudeSessionId]);
+  }, [input, attachedFiles, awaitingResponse, compacting, session, isRunning, agentName, projectPath, claudeSessionId, editorRef, pendingUserMsgs, setInput, setAttachedFiles, setQueue, setMessages, setAwaitingResponse, setWaitingInput, setSession, setClaudeSessionId]);
 
   const handleAttach = useCallback(async () => {
     const paths = await window.api.openFilePicker();
@@ -106,6 +116,12 @@ export function useAgentChatActions({
   }, [editorRef, setAttachedFiles]);
 
   const onAnswer = useCallback(async (value: string) => {
+    // Don't fire a concurrent turn while the compact-on-resume turn runs; queue
+    // it so it flushes after the compact turn exits (same rule as handleSend).
+    if (compacting) {
+      setQueue((prev) => [...prev, { id: crypto.randomUUID(), text: value }]);
+      return;
+    }
     const msg: ChatMessage = { id: crypto.randomUUID(), role: 'user', content: value, timestamp: new Date().toISOString() };
     setMessages((prev) => [...prev, msg]);
     pendingUserMsgs.current.add(value);
@@ -124,7 +140,7 @@ export function useAgentChatActions({
         setAwaitingResponse(false);
       }
     }
-  }, [session, isRunning, agentName, projectPath, claudeSessionId, pendingUserMsgs, setMessages, setWaitingInput, setAttachedFiles, setAwaitingResponse, setSession, setClaudeSessionId]);
+  }, [compacting, session, isRunning, agentName, projectPath, claudeSessionId, pendingUserMsgs, setQueue, setMessages, setWaitingInput, setAttachedFiles, setAwaitingResponse, setSession, setClaudeSessionId]);
 
   const handleKill = useCallback(async () => {
     if (!session) return;

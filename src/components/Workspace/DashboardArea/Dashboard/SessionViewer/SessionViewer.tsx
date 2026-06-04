@@ -34,7 +34,11 @@ function CenteredNote({ label }: { label: string }) {
  */
 export function SessionViewer({ filePath, sessionId, title, cwd }: SessionViewerProps) {
   const { messages, state } = useConversationTail(filePath);
-  const [resumed, setResumed] = useState(false);
+  // null = read-only viewer; 'continue' = plain resume; 'compact' = resume and
+  // run an automatic /compact turn first (compact-on-resume). Both modes render
+  // the SAME live AgentChat seeded with the prior transcript — 'compact' just
+  // adds the `compactOnResume` flag.
+  const [resumeMode, setResumeMode] = useState<null | "continue" | "compact">(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   // Track whether the user is pinned to the bottom; only auto-scroll when so.
@@ -53,10 +57,11 @@ export function SessionViewer({ filePath, sessionId, title, cwd }: SessionViewer
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages.length]);
 
-  // "Continue as is": resume the on-disk session into a live chat. AgentChat
-  // seeds its claude session id from `resumeSessionId`, so the first message is
-  // sent as `claude --resume <sessionId>` rather than a fresh spawn.
-  if (resumed) {
+  // Resume the on-disk session into a live chat. AgentChat seeds its claude
+  // session id from `resumeSessionId`, so the first message is sent as
+  // `claude --resume <sessionId>` rather than a fresh spawn. In 'compact' mode
+  // AgentChat fires one `/compact` turn on mount before the user continues.
+  if (resumeMode) {
     // Seed the live chat with the transcript the user just saw, so the prior
     // history shows immediately. Drop tool-only rows (empty content) that would
     // render as blank bubbles. The backend later streams only NEW turns on
@@ -77,6 +82,7 @@ export function SessionViewer({ filePath, sessionId, title, cwd }: SessionViewer
           cwd={cwd}
           resumeSessionId={sessionId}
           initialMessages={seedMessages}
+          compactOnResume={resumeMode === "compact"}
         />
       </div>
     );
@@ -99,7 +105,10 @@ export function SessionViewer({ filePath, sessionId, title, cwd }: SessionViewer
           {title || sessionId.slice(0, 8)}
         </span>
       </div>
-      <ResumeChoice onContinue={() => setResumed(true)} />
+      <ResumeChoice
+        onContinue={() => setResumeMode("continue")}
+        onCompact={() => setResumeMode("compact")}
+      />
       <div
         ref={scrollRef}
         onScroll={handleScroll}
