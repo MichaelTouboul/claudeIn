@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { SessionSummary } from "@/hooks/useSessions";
@@ -46,33 +46,33 @@ describe("SessionRowMenu", () => {
     render(<SessionRowMenu session={makeSession()} onChanged={onChanged} />);
     openMenu();
     fireEvent.click(await screen.findByText("Pin to top"));
-    expect(ipc.pinConversation).toHaveBeenCalledWith("s1");
+    await waitFor(() => expect(ipc.pinConversation).toHaveBeenCalledWith("s1"));
   });
 
   it("unpins a pinned session", async () => {
     render(<SessionRowMenu session={makeSession({ pinned: true })} onChanged={vi.fn()} />);
     openMenu();
     fireEvent.click(await screen.findByText("Unpin"));
-    expect(ipc.unpinConversation).toHaveBeenCalledWith("s1");
+    await waitFor(() => expect(ipc.unpinConversation).toHaveBeenCalledWith("s1"));
   });
 
   it("archives, and offers Unarchive when already archived", async () => {
     const { rerender } = render(<SessionRowMenu session={makeSession()} onChanged={vi.fn()} />);
     openMenu();
     fireEvent.click(await screen.findByText("Archive"));
-    expect(ipc.archiveConversation).toHaveBeenCalledWith("s1");
+    await waitFor(() => expect(ipc.archiveConversation).toHaveBeenCalledWith("s1"));
 
     rerender(<SessionRowMenu session={makeSession({ archived: true })} onChanged={vi.fn()} />);
     openMenu();
     fireEvent.click(await screen.findByText("Unarchive"));
-    expect(ipc.unarchiveConversation).toHaveBeenCalledWith("s1");
+    await waitFor(() => expect(ipc.unarchiveConversation).toHaveBeenCalledWith("s1"));
   });
 
   it("soft-deletes via Delete (reversible)", async () => {
     render(<SessionRowMenu session={makeSession()} onChanged={vi.fn()} />);
     openMenu();
     fireEvent.click(await screen.findByText("Delete"));
-    expect(ipc.softDeleteConversation).toHaveBeenCalledWith("s1");
+    await waitFor(() => expect(ipc.softDeleteConversation).toHaveBeenCalledWith("s1"));
     expect(ipc.deleteConversationFromDisk).not.toHaveBeenCalled();
   });
 
