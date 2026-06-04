@@ -1,4 +1,4 @@
-import { MessageSquare, Pencil } from 'lucide-react';
+import { Pencil } from 'lucide-react';
 import { useState } from 'react';
 
 import { ContextMenu, type ContextMenuItem } from '@/components/_ui/ContextMenu';
@@ -11,7 +11,6 @@ type ConversationStatus = 'live' | 'waiting' | 'idle';
 export type ConversationItemProps = {
   tab: InternalTab;
   isActive: boolean;
-  iconColor: string;
   status: ConversationStatus;
   onActivate: () => void;
 };
@@ -19,7 +18,7 @@ export type ConversationItemProps = {
 const dotColorFor = (status: ConversationStatus): string =>
   status === 'live' ? '#22c55e' : status === 'waiting' ? '#eab308' : 'var(--color-text-muted)';
 
-export function ConversationItem({ tab, isActive, iconColor, status, onActivate }: ConversationItemProps) {
+export function ConversationItem({ tab, isActive, status, onActivate }: ConversationItemProps) {
   const [renameOpen, setRenameOpen] = useState(false);
 
   // The conversation's persisted title key: session tabs carry it as sessionId,
@@ -48,15 +47,14 @@ export function ConversationItem({ tab, isActive, iconColor, status, onActivate 
         onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-surface-2)')}
         onMouseLeave={(e) => (e.currentTarget.style.background = isActive ? 'var(--color-surface-2)' : 'transparent')}
       >
-        <MessageSquare size={12} style={{ color: iconColor }} className="shrink-0" />
-        <span className="text-xs truncate" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>
-          {label}
-        </span>
         <span
-          className="w-1.5 h-1.5 rounded-full shrink-0 ml-auto transition-opacity group-hover:opacity-0"
+          className="w-1.5 h-1.5 rounded-full shrink-0"
           style={{ backgroundColor: dotColorFor(status), animation: status === 'live' ? 'pulse 1s ease-in-out infinite' : undefined }}
           title={status}
         />
+        <span className="text-xs truncate" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>
+          {label}
+        </span>
       </button>
       {convId ? (
         <RenameDialog
