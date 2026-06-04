@@ -59,11 +59,14 @@ export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: A
   // The backend broadcasts the AI title (keyed by claudeSessionId) into the
   // shared titles store; surface it on this chat's tab via the existing
   // retitle mechanism so the open tab and the sidebar share one source.
-  const aiTitle = useConversationTitlesStore((s) => {
-    if (!claudeSessionId) return null;
-    const t = s.conversationTitles[claudeSessionId];
-    return t?.userTitle ?? t?.aiTitle ?? null;
-  });
+  // Read userTitle and aiTitle through SEPARATE narrow selectors so the bridge
+  // can tell a user rename (must always win) from an AI title (only-if-generic).
+  const userTitle = useConversationTitlesStore((s) =>
+    claudeSessionId ? s.conversationTitles[claudeSessionId]?.userTitle ?? null : null,
+  );
+  const aiTitle = useConversationTitlesStore((s) =>
+    claudeSessionId ? s.conversationTitles[claudeSessionId]?.aiTitle ?? null : null,
+  );
 
   const isRunning = session?.status === 'running';
 
@@ -186,8 +189,9 @@ export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: A
     // The main/global chat spawns with an empty agentName; retitleChatTab +
     // matchesChatTab already handle that case, so do NOT gate on agentName here
     // (gating on it silently dropped the title for the main chat).
-    if (aiTitle) retitleChatTab(agentName, aiTitle);
-  }, [aiTitle, agentName, retitleChatTab]);
+    if (userTitle) retitleChatTab(agentName, userTitle, true); // user rename always wins
+    else if (aiTitle) retitleChatTab(agentName, aiTitle); // AI title only overwrites generic
+  }, [userTitle, aiTitle, agentName, retitleChatTab]);
 
   const handleInputChange = (val: string) => {
     setInput(val);

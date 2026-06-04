@@ -45,7 +45,7 @@ type WorkspaceState = {
   addTab: (tab: Omit<InternalTab, 'id'>) => string;
   closeTab: (tabId: string) => void;
   setActiveTab: (tabId: string) => void;
-  retitleChatTab: (agentName: string, title: string) => void;
+  retitleChatTab: (agentName: string, title: string, force?: boolean) => void;
 };
 
 // Auto-generated/placeholder labels we're allowed to overwrite with an AI title.
@@ -231,12 +231,14 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     set({ dashboards: mapActive(dashboards, activeDashboardId, (d) => ({ ...d, activeTabId: tabId })) });
   },
 
-  retitleChatTab: (agentName, title) => {
+  retitleChatTab: (agentName, title, force) => {
     set((s) => ({
       dashboards: s.dashboards.map((d) => ({
         ...d,
         tabs: d.tabs.map((t) =>
-          matchesChatTab(t, agentName) && isGenericTitle(t.title) ? { ...t, title } : t,
+          matchesChatTab(t, agentName) && (force === true || isGenericTitle(t.title))
+            ? { ...t, title }
+            : t,
         ),
       })),
     }));
