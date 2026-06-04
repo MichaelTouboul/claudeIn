@@ -137,7 +137,8 @@ export async function initDb(): Promise<void> {
       pinned_at   TEXT,
       archived_at TEXT,
       deleted_at  TEXT,
-      note        TEXT
+      note        TEXT,
+      ai_title    TEXT
     );
   `);
 
@@ -155,5 +156,14 @@ function runMigrations(): void {
 
   if (!eventColumns.includes("model")) {
     wrapper.exec("ALTER TABLE events ADD COLUMN model TEXT");
+  }
+
+  const conversationMetaColumns = wrapper
+    .prepare("PRAGMA table_info(conversation_meta)")
+    .all()
+    .map((row) => row.name);
+
+  if (!conversationMetaColumns.includes("ai_title")) {
+    wrapper.exec("ALTER TABLE conversation_meta ADD COLUMN ai_title TEXT");
   }
 }

@@ -97,7 +97,7 @@ export async function listSessions(projectPath: string): Promise<SessionSummary[
       sessionId,
       filePath,
       agentName: meta.agentName || null,
-      title: meta.title || null,
+      title: cmeta?.aiTitle ?? meta.title ?? null,
       firstPrompt: meta.firstPrompt || null,
       messageCount: Math.max(1, Math.round(stat.size / 500)),
       branch: meta.branch || null,
