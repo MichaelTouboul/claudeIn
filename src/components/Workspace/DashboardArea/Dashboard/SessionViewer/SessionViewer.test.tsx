@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { SessionConversation, SessionMessage } from "@/hooks/useSessions";
+import type { ChatMessage } from "@/types/spawn.types";
 
 import { SessionViewer } from "./SessionViewer";
 
@@ -10,7 +11,7 @@ import { SessionViewer } from "./SessionViewer";
 // behaviour (claudeSessionId -> resume_session_id) is covered in its own test.
 const agentChatProps = vi.fn();
 vi.mock("@/components/AgentChat/AgentChat", () => ({
-  AgentChat: (props: { resumeSessionId?: string; cwd?: string }) => {
+  AgentChat: (props: { resumeSessionId?: string; cwd?: string; initialMessages?: ChatMessage[] }) => {
     agentChatProps(props);
     return <div data-testid="agent-chat" />;
   },
@@ -130,5 +131,27 @@ describe("SessionViewer", () => {
     expect(agentChatProps).toHaveBeenCalledWith(
       expect.objectContaining({ resumeSessionId: "abcdef12", cwd: "/Users/x/proj" }),
     );
+  });
+
+  it('"Continue as is" seeds the live chat with the prior transcript history', async () => {
+    getSessionConversation.mockResolvedValue(
+      // Includes a tool-only row (empty content) that must be filtered out.
+      conversation([
+        msg("u1", "user", "hello"),
+        msg("a1", "assistant", "world"),
+        msg("t1", "assistant", "   "),
+      ]),
+    );
+    renderViewer();
+    await screen.findByText("hello");
+
+    fireEvent.click(screen.getByRole("button", { name: /continue as is/i }));
+    await screen.findByTestId("agent-chat");
+
+    const props = agentChatProps.mock.calls[0][0] as { initialMessages?: ChatMessage[] };
+    expect(props.initialMessages).toEqual([
+      expect.objectContaining({ id: "u1", role: "user", content: "hello" }),
+      expect.objectContaining({ id: "a1", role: "assistant", content: "world" }),
+    ]);
   });
 });

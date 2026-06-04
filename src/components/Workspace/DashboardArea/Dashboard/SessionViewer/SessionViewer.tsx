@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { AgentChat } from "@/components/AgentChat/AgentChat";
 import { useConversationTail } from "@/hooks/useConversationTail";
+import type { ChatMessage } from "@/types/spawn.types";
 
 import { ResumeChoice } from "./ResumeChoice/ResumeChoice";
 import { SessionMessageRow } from "./SessionMessageRow/SessionMessageRow";
@@ -56,9 +57,27 @@ export function SessionViewer({ filePath, sessionId, title, cwd }: SessionViewer
   // seeds its claude session id from `resumeSessionId`, so the first message is
   // sent as `claude --resume <sessionId>` rather than a fresh spawn.
   if (resumed) {
+    // Seed the live chat with the transcript the user just saw, so the prior
+    // history shows immediately. Drop tool-only rows (empty content) that would
+    // render as blank bubbles. The backend later streams only NEW turns on
+    // --resume, so this snapshot is not duplicated.
+    const seedMessages: ChatMessage[] = messages
+      .filter((m) => m.content.trim() !== "")
+      .map((m) => ({
+        id: m.uuid || crypto.randomUUID(),
+        role: m.role,
+        content: m.content,
+        timestamp: m.timestamp,
+      }));
     return (
       <div className="flex-1 min-h-0 h-full p-3">
-        <AgentChat key={`resume-${sessionId}`} agentName="" cwd={cwd} resumeSessionId={sessionId} />
+        <AgentChat
+          key={`resume-${sessionId}`}
+          agentName=""
+          cwd={cwd}
+          resumeSessionId={sessionId}
+          initialMessages={seedMessages}
+        />
       </div>
     );
   }
