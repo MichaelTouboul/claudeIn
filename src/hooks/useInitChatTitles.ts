@@ -1,46 +1,23 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 
-import { useWorkspaceStore } from '@/store/useWorkspaceStore';
+import { useConversationTitlesStore } from '@/store/useConversationTitlesStore';
 
-type SpawnMessageEvent = {
-  type: string;
-  agentName?: string;
-  message?: { role: string; content: string };
+type ConversationTitledEvent = {
+  type?: string;
+  claudeSessionId?: string;
+  title?: string;
 };
 
-// Generates conversation titles from the live spawn stream and propagates the
-// result to the visible InternalTab (and, through it, the sidebar
-// ConversationList). The flow is one-shot per conversation:
-//   • first user message → recorded only (the tab keeps its generic 'Chat'
-//     label so it stays overwritable; the raw prompt is never shown as a title),
-//   • the assistant reply → an AI title via window.api.generateTitle, applied
-//     through retitleChatTab.
-// retitleChatTab only overwrites generic placeholder titles, so a tab the user
-// renamed — or one already given an AI title — is never clobbered. On failure
-// generateTitle resolves to "" and the tab simply stays 'Chat'.
+// Thin listener: the backend generates a conversation's AI title on the first
+// assistant reply and broadcasts `conversation_titled` keyed by claudeSessionId.
+// We mirror that into the titles store; the sidebar rows and the open chat tab
+// read it live, with no refetch.
 export function useInitChatTitles() {
-  const pendingTitles = useRef<Map<string, string>>(new Map());
   useEffect(() => {
-    const retitle = useWorkspaceStore.getState().retitleChatTab;
     const cleanup = window.api.onEvent((raw) => {
-      const data = raw as SpawnMessageEvent;
-      if (data.type !== 'spawn_message' || !data.message?.content) return;
-      const agent = data.agentName || '';
-      const { role, content } = data.message;
-
-      if (role === 'user') {
-        if (pendingTitles.current.has(agent)) return;
-        pendingTitles.current.set(agent, content);
-        return;
-      }
-
-      if (role === 'assistant' && pendingTitles.current.has(agent)) {
-        const userMsg = pendingTitles.current.get(agent)!;
-        pendingTitles.current.delete(agent);
-        void window.api.generateTitle(userMsg, content).then((title) => {
-          if (title) retitle(agent, title);
-        });
-      }
+      const data = raw as ConversationTitledEvent;
+      if (data.type !== 'conversation_titled' || !data.claudeSessionId || !data.title) return;
+      useConversationTitlesStore.getState().setAiTitle(data.claudeSessionId, data.title);
     });
     return cleanup;
   }, []);

@@ -71,7 +71,7 @@ export function useAgentChatActions({
 
     if (session && isRunning) {
       pendingUserMsgs.current.add(fullText);
-      await window.api.sendInput(session.id, fullText);
+      await window.api.sendInput(session.localSessionId, fullText);
     } else {
       pendingUserMsgs.current.add(fullText);
       try {
@@ -114,7 +114,7 @@ export function useAgentChatActions({
     setAwaitingResponse(true);
 
     if (session && isRunning) {
-      await window.api.sendInput(session.id, value);
+      await window.api.sendInput(session.localSessionId, value);
     } else {
       try {
         const data = await window.api.spawn({ agent_name: agentName, mission: value, cwd: projectPath, resume_session_id: claudeSessionId || undefined });
@@ -128,7 +128,7 @@ export function useAgentChatActions({
 
   const handleKill = useCallback(async () => {
     if (!session) return;
-    await window.api.killSession(session.id);
+    await window.api.killSession(session.localSessionId);
   }, [session]);
 
   return { handleSend, handleAttach, onAnswer, handleKill };

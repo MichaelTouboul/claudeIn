@@ -1,5 +1,5 @@
 export type SpawnSession = {
-  id: string;
+  localSessionId: string;
   agentName: string;
   mission: string;
   status: "running" | "done" | "failed";
@@ -7,6 +7,7 @@ export type SpawnSession = {
   startedAt: string;
   messages: ChatMessage[];
   claudeSessionId?: string;
+  titleGenerated?: boolean;
 };
 
 export type ChatMessage = {

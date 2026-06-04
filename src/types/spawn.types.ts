@@ -8,7 +8,7 @@ export type ChatMessage = {
 };
 
 export type SpawnSession = {
-  id: string;
+  localSessionId: string;
   agentName: string;
   mission: string;
   status: "running" | "done" | "failed";

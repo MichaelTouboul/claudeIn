@@ -2,6 +2,7 @@ import { GitBranch, MessageSquare, Pin } from "lucide-react";
 
 import { Badge, type BadgeVariant } from "@/components/_ui/Badge";
 import type { SessionStatus, SessionSummary } from "@/hooks/useSessions";
+import { useConversationTitlesStore } from "@/store/useConversationTitlesStore";
 
 import { SessionRowMenu } from "../SessionRowMenu/SessionRowMenu";
 import { shortModel } from "../utils";
@@ -20,7 +21,9 @@ export type RecentSessionRowProps = {
 };
 
 export function RecentSessionRow({ session, selected, onSelect, onChanged }: RecentSessionRowProps) {
-  const label = session.title || session.firstPrompt || session.sessionId.slice(0, 8);
+  const liveTitle = useConversationTitlesStore((s) => s.conversationTitles[session.sessionId]);
+  const label =
+    liveTitle?.userTitle ?? liveTitle?.aiTitle ?? session.title ?? session.firstPrompt ?? session.sessionId.slice(0, 8);
   const model = shortModel(session.model);
 
   return (

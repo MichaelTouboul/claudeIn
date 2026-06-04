@@ -35,7 +35,7 @@ let eventCb: ((data: unknown) => void) | null = null;
 const spawnMock = vi.fn();
 
 const session: SpawnSession = {
-  id: 'sess-1',
+  localSessionId: 'sess-1',
   agentName: 'tester',
   mission: 'hi',
   status: 'running',
@@ -52,13 +52,13 @@ const textBlock = '```cam-ask\n{"type":"text","question":"What name?"}\n```';
 function emitAssistant(content: string) {
   eventCb!({
     type: 'spawn_message',
-    sessionId: 'sess-1',
+    localSessionId: 'sess-1',
     message: { role: 'assistant', content, timestamp: new Date().toISOString() },
   });
 }
 
 function emitExit() {
-  eventCb!({ type: 'spawn_exit', sessionId: 'sess-1', status: 'done', claudeSessionId: 'claude-1' });
+  eventCb!({ type: 'spawn_exit', localSessionId: 'sess-1', status: 'done', claudeSessionId: 'claude-1' });
 }
 
 async function renderReady() {

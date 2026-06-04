@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 import type { SessionSummary } from "@/hooks/useSessions";
 import { useProject } from "@/store/ProjectContext";
+import { useConversationTitlesStore } from "@/store/useConversationTitlesStore";
 import { useEventsStore } from "@/store/useEventsStore";
 import { useWorkspaceStore } from "@/store/useWorkspaceStore";
 
@@ -71,7 +72,9 @@ export function SessionsPanel({ sessions, loading, refresh }: SessionsPanelProps
       return;
     }
     setSelectedId(match.sessionId);
-    const title = match.title || match.firstPrompt || match.sessionId.slice(0, 8);
+    const liveTitle = useConversationTitlesStore.getState().conversationTitles[match.sessionId];
+    const title =
+      liveTitle?.userTitle ?? liveTitle?.aiTitle ?? match.title ?? match.firstPrompt ?? match.sessionId.slice(0, 8);
     addTab({ kind: "session", title, sessionFilePath: match.filePath, sessionId: match.sessionId });
   };
 

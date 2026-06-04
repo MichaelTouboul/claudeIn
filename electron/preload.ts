@@ -21,9 +21,9 @@ contextBridge.exposeInMainWorld("api", {
 
   spawn: (opts: { agent_name?: string; mission: string; cwd?: string; resume_session_id?: string }) =>
     ipcRenderer.invoke("spawn:start", opts),
-  getSession: (sessionId: string) => ipcRenderer.invoke("spawn:get", sessionId),
-  sendInput: (sessionId: string, text: string) => ipcRenderer.invoke("spawn:input", sessionId, text),
-  killSession: (sessionId: string) => ipcRenderer.invoke("spawn:kill", sessionId),
+  getSession: (localSessionId: string) => ipcRenderer.invoke("spawn:get", localSessionId),
+  sendInput: (localSessionId: string, text: string) => ipcRenderer.invoke("spawn:input", localSessionId, text),
+  killSession: (localSessionId: string) => ipcRenderer.invoke("spawn:kill", localSessionId),
   getSessions: () => ipcRenderer.invoke("spawn:list"),
 
   getRecentEvents: (limit?: number) => ipcRenderer.invoke("events:recent", limit),
@@ -86,8 +86,6 @@ contextBridge.exposeInMainWorld("api", {
   },
   openFilePicker: () => ipcRenderer.invoke("dialog:open-file"),
   readImageAsDataUrl: (filePath: string) => ipcRenderer.invoke("dialog:read-image", filePath),
-  generateTitle: (userMessage: string, assistantMessage: string) =>
-    ipcRenderer.invoke("dialog:generate-title", userMessage, assistantMessage),
 
   onEvent: (cb: (data: unknown) => void) => {
     const handler = (_e: unknown, data: unknown) => cb(data);

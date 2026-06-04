@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 
 import { useAgentChatActions } from '@/hooks/useAgentChatActions';
 import { useAppStore } from '@/store/useAppStore';
+import { useConversationTitlesStore } from '@/store/useConversationTitlesStore';
+import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 import type { ChatMessage,SpawnSession } from '@/types/spawn.types';
 
 import { AgentChatHeader } from './AgentChatHeader/AgentChatHeader';
@@ -13,10 +15,10 @@ import type { QueueItem } from './types';
 
 type SpawnEvent =
   // The backend doesn't generate ChatMessage.id — we mint it on receive.
-  | { type: 'spawn_message'; sessionId: string; message: Omit<ChatMessage, 'id'> }
-  | { type: 'spawn_input_request'; sessionId: string }
-  | { type: 'spawn_claude_session'; sessionId: string; claudeSessionId: string }
-  | { type: 'spawn_exit'; sessionId: string; status: SpawnSession['status']; claudeSessionId?: string };
+  | { type: 'spawn_message'; localSessionId: string; message: Omit<ChatMessage, 'id'> }
+  | { type: 'spawn_input_request'; localSessionId: string }
+  | { type: 'spawn_claude_session'; localSessionId: string; claudeSessionId: string }
+  | { type: 'spawn_exit'; localSessionId: string; status: SpawnSession['status']; claudeSessionId?: string };
 
 export type AgentChatProps = {
   agentName: string;
@@ -27,6 +29,7 @@ export type AgentChatProps = {
 
 export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: AgentChatProps) {
   const selectedProjectPath = useAppStore((s) => s.selectedProject?.path);
+  const retitleChatTab = useWorkspaceStore((s) => s.retitleChatTab);
   // cwd is the authoritative spawn directory (threaded from dashboard.cwd).
   // Legacy callers without a cwd prop fall back to the selected project path.
   const projectPath = cwd ?? selectedProjectPath;
@@ -52,6 +55,13 @@ export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: A
   queueRef.current = queue;
   const messagesRef = useRef<ChatMessage[]>(messages);
   messagesRef.current = messages;
+
+  // The backend broadcasts the AI title (keyed by claudeSessionId) into the
+  // shared titles store; surface it on this chat's tab via the existing
+  // retitle mechanism so the open tab and the sidebar share one source.
+  const aiTitle = useConversationTitlesStore((s) =>
+    claudeSessionId ? s.conversationTitles[claudeSessionId]?.aiTitle ?? null : null,
+  );
 
   const isRunning = session?.status === 'running';
 
@@ -112,7 +122,7 @@ export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: A
     const cleanup = window.api.onEvent((raw) => {
       const data = raw as SpawnEvent;
       const s = sessionRef.current;
-      if (data.type === 'spawn_message' && s && data.sessionId === s.id) {
+      if (data.type === 'spawn_message' && s && data.localSessionId === s.localSessionId) {
         const msg: ChatMessage = { ...data.message, id: crypto.randomUUID() };
         if (msg.role === 'user' && pendingUserMsgs.current.has(msg.content)) {
           pendingUserMsgs.current.delete(msg.content);
@@ -125,15 +135,15 @@ export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: A
           setTimeout(() => sendNextFromQueue(), 100);
         }
       }
-      if (data.type === 'spawn_input_request' && s && data.sessionId === s.id) {
+      if (data.type === 'spawn_input_request' && s && data.localSessionId === s.localSessionId) {
         setWaitingInput(true);
         setAwaitingResponse(false);
         setTimeout(() => sendNextFromQueue(), 100);
       }
-      if (data.type === 'spawn_claude_session' && s && data.sessionId === s.id) {
+      if (data.type === 'spawn_claude_session' && s && data.localSessionId === s.localSessionId) {
         setClaudeSessionId(data.claudeSessionId);
       }
-      if (data.type === 'spawn_exit' && s && data.sessionId === s.id) {
+      if (data.type === 'spawn_exit' && s && data.localSessionId === s.localSessionId) {
         setSession((prev) => prev ? { ...prev, status: data.status } : null);
         if (data.claudeSessionId) setClaudeSessionId(data.claudeSessionId);
         setWaitingInput(false);
@@ -169,6 +179,10 @@ export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: A
         if (data.claudeSessionId) setClaudeSessionId(data.claudeSessionId);
       }).catch(() => setAwaitingResponse(false));
   }, [initialMessage, resumeSessionId, projectPath, agentName]);
+
+  useEffect(() => {
+    if (aiTitle && agentName) retitleChatTab(agentName, aiTitle);
+  }, [aiTitle, agentName, retitleChatTab]);
 
   const handleInputChange = (val: string) => {
     setInput(val);
