@@ -58,6 +58,26 @@ export function useAgentChatActions({
   const handleSend = useCallback(async () => {
     if (!input.trim() && attachedFiles.length === 0) return;
     const text = input.trim();
+
+    // `/clear` (exact, no args — like the terminal's `/clear`) is intercepted
+    // here: it INSTANTLY clears the conversation client-side. No `claude`
+    // process is spawned, no user bubble is pushed, nothing is written to the
+    // transcript. Resetting `claudeSessionId` to null means the NEXT message is
+    // a fresh spawn (no `--resume`), exactly like the terminal starting over.
+    if (text === '/clear') {
+      setMessages([]);
+      setQueue([]);
+      setClaudeSessionId(null);
+      setSession(null);
+      setAwaitingResponse(false);
+      setWaitingInput(false);
+      pendingUserMsgs.current.clear();
+      setAttachedFiles([]);
+      setInput('');
+      editorRef.current?.clear();
+      return;
+    }
+
     const filePaths = attachedFiles.map((f) => f.path).join('\n');
     const fullText = filePaths ? (text ? text + '\n' + filePaths : filePaths) : text;
 
