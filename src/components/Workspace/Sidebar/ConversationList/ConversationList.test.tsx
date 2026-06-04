@@ -2,10 +2,9 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/rea
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { SessionStatus, SessionSummary } from "@/hooks/useSessions";
+import { ConversationStatus, useConversationStatusStore } from "@/store/useConversationStatusStore";
 import { useConversationTitlesStore } from "@/store/useConversationTitlesStore";
-import { useEventsStore } from "@/store/useEventsStore";
 import { usePinnedStore } from "@/store/usePinnedStore";
-import { useRunningStore } from "@/store/useRunningStore";
 import { useWorkspaceStore } from "@/store/useWorkspaceStore";
 import type { Project } from "@/types/dashboard.types";
 
@@ -33,10 +32,9 @@ function session(id: string, over: Partial<SessionSummary> = {}): SessionSummary
 
 beforeEach(() => {
   Object.assign(window, { api: ipc });
-  useEventsStore.setState({ activeAgents: new Set(), waitingAgents: new Set(), agentContexts: new Map() });
   useConversationTitlesStore.setState({ conversationTitles: {} });
   usePinnedStore.setState({ overrides: {} });
-  useRunningStore.setState({ running: {} });
+  useConversationStatusStore.setState({ statuses: {} });
   useWorkspaceStore.setState({ dashboards: [], activeDashboardId: null });
 });
 
@@ -176,30 +174,43 @@ describe("ConversationList", () => {
     expect(usePinnedStore.getState().overrides["pinned-y"]).toBe(false);
   });
 
-  it("drives the dot from useRunningStore per convId (one running, one not)", () => {
-    // Two open chat tabs sharing the same agentName but distinct claudeSessionIds.
+  it("drives the dot from the per-convId status (running pulses, waiting yellow no pulse, absent→idle)", () => {
+    // Three open chat tabs sharing the same agentName but distinct claudeSessionIds.
+    // conv-absent has NO entry in the status store → must resolve to idle.
     useWorkspaceStore.setState({
       dashboards: [
         {
           id: "d1", scope: { kind: "project", project }, cwd: project.path, activeTabId: "t-run",
           tabs: [
             { id: "t-run", kind: "chat", title: "Running chat", agentName: "coder", claudeSessionId: "conv-run" },
-            { id: "t-idle", kind: "chat", title: "Idle chat", agentName: "coder", claudeSessionId: "conv-idle" },
+            { id: "t-wait", kind: "chat", title: "Waiting chat", agentName: "coder", claudeSessionId: "conv-wait" },
+            { id: "t-idle", kind: "chat", title: "Idle chat", agentName: "coder", claudeSessionId: "conv-absent" },
           ],
         },
       ],
       activeDashboardId: "d1",
     });
-    // Only conv-run is running. (The agentName-keyed event sets are empty, proving
-    // the dot no longer derives from them.)
-    useRunningStore.setState({ running: { "conv-run": true, "conv-idle": false } });
+    // Per-id status, independent of any agentName/event-store state.
+    useConversationStatusStore.setState({
+      statuses: { "conv-run": ConversationStatus.Running, "conv-wait": ConversationStatus.Waiting },
+    });
 
     render(<ConversationList sessions={[]} />);
 
     const runRow = screen.getByText("Running chat").closest(".group") as HTMLElement;
+    const waitRow = screen.getByText("Waiting chat").closest(".group") as HTMLElement;
     const idleRow = screen.getByText("Idle chat").closest(".group") as HTMLElement;
+
     // The leading status dot is a span carrying its status as `title`.
-    expect(within(runRow).getByTitle("live")).toBeInTheDocument();
-    expect(within(idleRow).getByTitle("idle")).toBeInTheDocument();
+    const runDot = within(runRow).getByTitle("running");
+    const waitDot = within(waitRow).getByTitle("waiting");
+    const idleDot = within(idleRow).getByTitle("idle");
+
+    // Only running pulses (green); waiting is steady yellow; absent id → muted idle.
+    expect(runDot).toHaveStyle({ backgroundColor: "#22c55e" });
+    expect(runDot.style.animation).toContain("pulse");
+    expect(waitDot).toHaveStyle({ backgroundColor: "#eab308" });
+    expect(waitDot.style.animation).toBe("");
+    expect(idleDot.style.animation).toBe("");
   });
 });

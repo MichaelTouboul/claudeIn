@@ -1,11 +1,10 @@
 import type { SessionSummary } from '@/hooks/useSessions';
+import { ConversationStatus, useConversationStatusStore } from '@/store/useConversationStatusStore';
 import { useConversationTitlesStore } from '@/store/useConversationTitlesStore';
-import { useEventsStore } from '@/store/useEventsStore';
 import { effectivePinned, usePinnedStore } from '@/store/usePinnedStore';
-import { useRunningStore } from '@/store/useRunningStore';
 import { type InternalTab, useWorkspaceStore } from '@/store/useWorkspaceStore';
 
-import { ConversationItem,type ConversationStatus } from './ConversationItem/ConversationItem';
+import { ConversationItem } from './ConversationItem/ConversationItem';
 
 export type ConversationListProps = {
   sessions: SessionSummary[];
@@ -20,17 +19,6 @@ function TierLabel({ label }: { label: string }) {
       {label}
     </div>
   );
-}
-
-// Live-event sets are keyed by the spawn's agentName; for the main chat that is
-// "_main" (the tab carries an empty agentName). Normalize empty→"_main" for chat
-// tabs so the dot can match; other kinds keep their literal agentName.
-function tabAgentKey(tab: InternalTab): string {
-  return tab.kind === 'chat' ? tab.agentName || '_main' : tab.agentName ?? '';
-}
-
-function statusFor(name: string, active: Set<string>, waiting: Set<string>): ConversationStatus {
-  return waiting.has(name) ? 'waiting' : active.has(name) ? 'live' : 'idle';
 }
 
 // A pinned session matches an open tab when the tab is the same conversation:
@@ -48,12 +36,11 @@ export function ConversationList({ sessions }: ConversationListProps) {
   const activeDashboardId = useWorkspaceStore((s) => s.activeDashboardId);
   const setActiveTab = useWorkspaceStore((s) => s.setActiveTab);
   const addTab = useWorkspaceStore((s) => s.addTab);
-  const activeAgents = useEventsStore((s) => s.activeAgents);
-  const waitingAgents = useEventsStore((s) => s.waitingAgents);
   const overrides = usePinnedStore((s) => s.overrides);
-  // Authoritative per-conversation running map (keyed by claudeSessionId). The
-  // dot reads this instead of the agentName-keyed event sets.
-  const running = useRunningStore((s) => s.running);
+  // Explicit per-conversation status map (keyed by claudeSessionId). The dot
+  // reads this per id instead of the agentName-keyed event sets; an absent id
+  // resolves to idle (the single fallback).
+  const statuses = useConversationStatusStore((s) => s.statuses);
 
   const active = dashboards.find((d) => d.id === activeDashboardId);
   const openTabs = active?.tabs ?? [];
@@ -104,7 +91,6 @@ export function ConversationList({ sessions }: ConversationListProps) {
         <>
           <TierLabel label="Pinned" />
           {pinnedSessions.map((s) => {
-            const name = s.agentName ?? '';
             const open = openTabs.find((t) => tabMatchesSession(t, s));
             return (
               <ConversationItem
@@ -112,8 +98,7 @@ export function ConversationList({ sessions }: ConversationListProps) {
                 convId={s.sessionId}
                 title={s.title ?? s.firstPrompt ?? s.sessionId.slice(0, 8)}
                 isActive={open ? open.id === active?.activeTabId : false}
-                running={running[s.sessionId] ?? false}
-                status={statusFor(name, activeAgents, waitingAgents)}
+                status={statuses[s.sessionId] ?? ConversationStatus.Idle}
                 pinned
                 onActivate={() => openPinnedSession(s)}
               />
@@ -133,8 +118,7 @@ export function ConversationList({ sessions }: ConversationListProps) {
                 convId={convId}
                 title={tab.title}
                 isActive={tab.id === active?.activeTabId}
-                running={convId ? running[convId] ?? false : false}
-                status={statusFor(tabAgentKey(tab), activeAgents, waitingAgents)}
+                status={convId ? statuses[convId] ?? ConversationStatus.Idle : ConversationStatus.Idle}
                 pinned={false}
                 onActivate={() => setActiveTab(tab.id)}
               />

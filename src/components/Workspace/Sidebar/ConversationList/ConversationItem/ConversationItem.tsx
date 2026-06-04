@@ -3,10 +3,9 @@ import { useState } from 'react';
 
 import { ContextMenu, type ContextMenuItem } from '@/components/_ui/ContextMenu';
 import { RenameDialog } from '@/components/Workspace/Sidebar/SessionsPanel/SessionRowMenu/RenameDialog';
+import { type ConversationStatus,STATUS_DOT } from '@/store/useConversationStatusStore';
 import { useConversationTitlesStore } from '@/store/useConversationTitlesStore';
 import { usePinnedStore } from '@/store/usePinnedStore';
-
-export type ConversationStatus = 'live' | 'waiting' | 'idle';
 
 // A normalized view of one ACTIVITY row — produced from either an open tab or a
 // pinned session by ConversationList. The item itself stays presentation-only.
@@ -17,22 +16,17 @@ export type ConversationItemProps = {
   // Base label (already the tab/session title); overlaid with the titles store.
   title: string;
   isActive: boolean;
-  // Authoritative per-conversation running flag (useRunningStore, keyed by
-  // claudeSessionId). When true it overrides `status` for the dot → live/pulse.
-  running: boolean;
+  // Explicit per-conversation status (useConversationStatusStore, keyed by
+  // claudeSessionId). The ONLY fallback is `?? 'idle'` for an unknown/absent id;
+  // every known value maps deterministically to its dot via STATUS_DOT.
   status: ConversationStatus;
   // Effective pinned state (override-aware), used to flip the menu label.
   pinned: boolean;
   onActivate: () => void;
 };
 
-const dotColorFor = (status: ConversationStatus): string =>
-  status === 'live' ? '#22c55e' : status === 'waiting' ? '#eab308' : 'var(--color-text-muted)';
-
-export function ConversationItem({ convId, title, isActive, running, status, pinned, onActivate }: ConversationItemProps) {
-  // Running wins over the agentName-derived status: a running turn is always the
-  // live/pulse dot; otherwise fall back to waiting/idle.
-  const dotStatus: ConversationStatus = running ? 'live' : status;
+export function ConversationItem({ convId, title, isActive, status, pinned, onActivate }: ConversationItemProps) {
+  const dot = STATUS_DOT[status];
   const [renameOpen, setRenameOpen] = useState(false);
 
   // Overlay the shared titles store so a rename shows live regardless of source,
@@ -71,8 +65,8 @@ export function ConversationItem({ convId, title, isActive, running, status, pin
       >
         <span
           className="w-1.5 h-1.5 rounded-full shrink-0"
-          style={{ backgroundColor: dotColorFor(dotStatus), animation: dotStatus === 'live' ? 'pulse 1s ease-in-out infinite' : undefined }}
-          title={dotStatus}
+          style={{ backgroundColor: dot.color, animation: dot.pulse ? 'pulse 1s ease-in-out infinite' : undefined }}
+          title={status}
         />
         <span className="text-xs truncate" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>
           {label}

@@ -3,8 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useAgentChatActions } from '@/hooks/useAgentChatActions';
 import { useCompactOnResume } from '@/hooks/useCompactOnResume';
 import { useAppStore } from '@/store/useAppStore';
+import { ConversationStatus, useConversationStatusStore } from '@/store/useConversationStatusStore';
 import { useConversationTitlesStore } from '@/store/useConversationTitlesStore';
-import { useRunningStore } from '@/store/useRunningStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 import type { ChatMessage,SpawnSession } from '@/types/spawn.types';
 
@@ -46,7 +46,7 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
   const selectedProjectPath = useAppStore((s) => s.selectedProject?.path);
   const retitleChatTab = useWorkspaceStore((s) => s.retitleChatTab);
   const setTabClaudeSessionId = useWorkspaceStore((s) => s.setTabClaudeSessionId);
-  const setRunning = useRunningStore((s) => s.setRunning);
+  const setStatus = useConversationStatusStore((s) => s.setStatus);
   // cwd is the authoritative spawn directory (threaded from dashboard.cwd).
   // Legacy callers without a cwd prop fall back to the selected project path.
   const projectPath = cwd ?? selectedProjectPath;
@@ -236,16 +236,24 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
     if (tabId && claudeSessionId) setTabClaudeSessionId(tabId, claudeSessionId);
   }, [tabId, claudeSessionId, setTabClaudeSessionId]);
 
-  // Feed the authoritative per-conversation running flag into useRunningStore so
-  // the sidebar ACTIVITY dot is accurate PER claudeSessionId (not per agentName,
-  // which several conversations share). On unmount or when the id changes, clear
-  // the prior id to false so a closed/navigated-away conversation isn't stuck
-  // "running".
+  // Feed the authoritative per-conversation status into useConversationStatusStore
+  // so the sidebar ACTIVITY dot is accurate PER claudeSessionId (not per agentName,
+  // which several conversations share). Precedence: waiting-for-input wins over
+  // running, otherwise running, otherwise idle. On unmount or when the id changes,
+  // reset the prior id to idle so a closed/navigated-away conversation isn't stuck
+  // pulsing.
   useEffect(() => {
     if (!claudeSessionId) return;
-    setRunning(claudeSessionId, isRunning ?? false);
-    return () => setRunning(claudeSessionId, false);
-  }, [claudeSessionId, isRunning, setRunning]);
+    setStatus(
+      claudeSessionId,
+      waitingInput
+        ? ConversationStatus.Waiting
+        : isRunning
+          ? ConversationStatus.Running
+          : ConversationStatus.Idle,
+    );
+    return () => setStatus(claudeSessionId, ConversationStatus.Idle);
+  }, [claudeSessionId, isRunning, waitingInput, setStatus]);
 
   const handleInputChange = (val: string) => {
     setInput(val);
