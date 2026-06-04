@@ -31,6 +31,16 @@ describe('Tabs', () => {
     expect(onChange).toHaveBeenCalledWith('context');
   });
 
+  it('truncates a long label and carries the full title, keeping the close button visible', () => {
+    const longLabel = 'est-ce que Claude Desktop peut afficher du html?';
+    const onClose = vi.fn();
+    render(<Tabs tabs={[{ key: 'a', label: longLabel, onClose }]} active="a" onChange={() => {}} />);
+    const label = screen.getByText(longLabel);
+    expect(label).toHaveClass('truncate');
+    expect(label).toHaveAttribute('title', longLabel);
+    expect(screen.getByRole('button', { name: `Close ${longLabel}` })).toBeInTheDocument();
+  });
+
   it('renders a close affordance only when onClose is given and fires it', () => {
     const onClose = vi.fn();
     render(<Tabs tabs={[{ key: 'a', label: 'A', onClose }, { key: 'b', label: 'B' }]} active="a" onChange={() => {}} />);
