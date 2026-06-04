@@ -11,6 +11,7 @@ process.env.HOME = tmpHome;
 
 const { initDb, getDb } = await import("./db");
 const meta = await import("./conversation.meta");
+const { listSessions } = await import("./session.service");
 
 beforeAll(async () => {
   await initDb();
@@ -23,7 +24,71 @@ describe("conversation_meta migration", () => {
       .prepare("PRAGMA table_info(conversation_meta)")
       .all()
       .map((r) => r.name);
-    expect(cols).toEqual(expect.arrayContaining(["session_id", "pinned_at", "archived_at", "deleted_at", "note"]));
+    expect(cols).toEqual(
+      expect.arrayContaining(["session_id", "pinned_at", "archived_at", "deleted_at", "note", "ai_title"])
+    );
+  });
+});
+
+describe("setAiTitle persistence", () => {
+  it("round-trips through getMeta", () => {
+    meta.setAiTitle("s-title", "Refactor the parser");
+    expect(meta.getMeta("s-title")?.aiTitle).toBe("Refactor the parser");
+  });
+
+  it("overwrites a prior title and surfaces in listMeta", () => {
+    meta.setAiTitle("s-title", "Updated title");
+    expect(meta.getMeta("s-title")?.aiTitle).toBe("Updated title");
+    const row = meta.listMeta().find((m) => m.sessionId === "s-title");
+    expect(row?.aiTitle).toBe("Updated title");
+  });
+
+  it("aiTitle is null when never set", () => {
+    meta.pin("s-no-title");
+    expect(meta.getMeta("s-no-title")?.aiTitle).toBeNull();
+  });
+});
+
+describe("listSessions coalesces the persisted ai_title", () => {
+  const projectPath = "/tmp/proj-coalesce";
+  const sessionsDir = path.join(tmpHome, ".claude", "projects", projectPath.replace(/\//g, "-"));
+
+  function writeTranscript(sessionId: string, opts: { aiTitle?: string; firstPrompt: string }): void {
+    fs.mkdirSync(sessionsDir, { recursive: true });
+    const lines: string[] = [];
+    if (opts.aiTitle) lines.push(JSON.stringify({ type: "ai-title", aiTitle: opts.aiTitle }));
+    lines.push(
+      JSON.stringify({
+        type: "user",
+        promptId: "p1",
+        message: { content: opts.firstPrompt },
+        timestamp: new Date().toISOString(),
+      })
+    );
+    fs.writeFileSync(path.join(sessionsDir, `${sessionId}.jsonl`), lines.join("\n") + "\n");
+  }
+
+  it("prefers the DB ai_title over the jsonl title", async () => {
+    writeTranscript("sess-db-wins", { aiTitle: "jsonl title", firstPrompt: "do the thing" });
+    meta.setAiTitle("sess-db-wins", "db title");
+    const sessions = await listSessions(projectPath);
+    const s = sessions.find((x) => x.sessionId === "sess-db-wins");
+    expect(s?.title).toBe("db title");
+  });
+
+  it("falls back to the jsonl title when there is no DB title", async () => {
+    writeTranscript("sess-jsonl", { aiTitle: "only jsonl", firstPrompt: "do the thing" });
+    const sessions = await listSessions(projectPath);
+    const s = sessions.find((x) => x.sessionId === "sess-jsonl");
+    expect(s?.title).toBe("only jsonl");
+  });
+
+  it("title is null (falls back to firstPrompt) when neither exists", async () => {
+    writeTranscript("sess-none", { firstPrompt: "just a prompt" });
+    const sessions = await listSessions(projectPath);
+    const s = sessions.find((x) => x.sessionId === "sess-none");
+    expect(s?.title).toBeNull();
+    expect(s?.firstPrompt).toBe("just a prompt");
   });
 });
 

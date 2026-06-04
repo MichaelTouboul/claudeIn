@@ -1,6 +1,7 @@
 import { spawn, type ChildProcess } from "child_process";
 import { randomUUID } from "crypto";
 import { broadcast } from "./broadcast";
+import { setAiTitle } from "./conversation.meta";
 import { ingestEvent } from "./events.service";
 import { extractText, parseStreamLine } from "./spawn.parse";
 import { NO_FOLLOWUP_SYSTEM_PROMPT } from "./spawn.steering";
@@ -158,6 +159,7 @@ function handleStreamEvent(localSessionId: string, session: SpawnSession, event:
         void generateConversationTitle(session.mission, text)
           .then((title) => {
             if (title && session.claudeSessionId) {
+              setAiTitle(claudeSessionId, title);
               broadcast({ type: "conversation_titled", localSessionId, claudeSessionId, title });
             }
           })
