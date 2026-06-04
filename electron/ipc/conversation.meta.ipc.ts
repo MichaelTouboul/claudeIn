@@ -11,5 +11,6 @@ export function registerConversationMetaHandlers(): void {
   ipcMain.handle("conversation:unarchive", (_e, sessionId: string) => meta.unarchive(sessionId));
   ipcMain.handle("conversation:softDelete", (_e, sessionId: string) => meta.softDelete(sessionId));
   ipcMain.handle("conversation:restore", (_e, sessionId: string) => meta.restore(sessionId));
+  ipcMain.handle("conversation:set-title", (_e, sessionId: string, title: string) => meta.setUserTitle(sessionId, title));
   ipcMain.handle("conversation:deleteFromDisk", (_e, filePath: string) => meta.deleteFromDisk(filePath));
 }

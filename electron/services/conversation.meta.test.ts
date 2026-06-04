@@ -25,8 +25,40 @@ describe("conversation_meta migration", () => {
       .all()
       .map((r) => r.name);
     expect(cols).toEqual(
-      expect.arrayContaining(["session_id", "pinned_at", "archived_at", "deleted_at", "note", "ai_title"])
+      expect.arrayContaining(["session_id", "pinned_at", "archived_at", "deleted_at", "note", "ai_title", "user_title"])
     );
+  });
+});
+
+describe("setUserTitle persistence", () => {
+  it("round-trips through getMeta and listMeta", () => {
+    meta.setUserTitle("s-user", "My custom name");
+    expect(meta.getMeta("s-user")?.userTitle).toBe("My custom name");
+    const row = meta.listMeta().find((m) => m.sessionId === "s-user");
+    expect(row?.userTitle).toBe("My custom name");
+  });
+
+  it("trims the stored title", () => {
+    meta.setUserTitle("s-user-trim", "  spaced  ");
+    expect(meta.getMeta("s-user-trim")?.userTitle).toBe("spaced");
+  });
+
+  it("an empty string clears it to null", () => {
+    meta.setUserTitle("s-user-clear", "temporary");
+    expect(meta.getMeta("s-user-clear")?.userTitle).toBe("temporary");
+    meta.setUserTitle("s-user-clear", "");
+    expect(meta.getMeta("s-user-clear")?.userTitle).toBeNull();
+  });
+
+  it("a whitespace-only string clears it to null", () => {
+    meta.setUserTitle("s-user-ws", "keep");
+    meta.setUserTitle("s-user-ws", "   ");
+    expect(meta.getMeta("s-user-ws")?.userTitle).toBeNull();
+  });
+
+  it("userTitle is null when never set", () => {
+    meta.pin("s-user-none");
+    expect(meta.getMeta("s-user-none")?.userTitle).toBeNull();
   });
 });
 
@@ -89,6 +121,25 @@ describe("listSessions coalesces the persisted ai_title", () => {
     const s = sessions.find((x) => x.sessionId === "sess-none");
     expect(s?.title).toBeNull();
     expect(s?.firstPrompt).toBe("just a prompt");
+  });
+
+  it("prefers the user title over both the AI title and the jsonl title", async () => {
+    writeTranscript("sess-user-wins", { aiTitle: "jsonl title", firstPrompt: "do the thing" });
+    meta.setAiTitle("sess-user-wins", "ai title");
+    meta.setUserTitle("sess-user-wins", "user title");
+    const sessions = await listSessions(projectPath);
+    const s = sessions.find((x) => x.sessionId === "sess-user-wins");
+    expect(s?.title).toBe("user title");
+  });
+
+  it("falls back to the AI title once the user title is cleared", async () => {
+    writeTranscript("sess-user-cleared", { aiTitle: "jsonl title", firstPrompt: "do the thing" });
+    meta.setAiTitle("sess-user-cleared", "ai title");
+    meta.setUserTitle("sess-user-cleared", "user title");
+    meta.setUserTitle("sess-user-cleared", "");
+    const sessions = await listSessions(projectPath);
+    const s = sessions.find((x) => x.sessionId === "sess-user-cleared");
+    expect(s?.title).toBe("ai title");
   });
 });
 

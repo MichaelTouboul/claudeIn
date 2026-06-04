@@ -13,6 +13,7 @@ export type ConversationMeta = {
   deletedAt: string | null;
   note: string | null;
   aiTitle: string | null;
+  userTitle: string | null;
 };
 
 // sql.js is synchronous — wrap in try/catch, never .then()/.catch().
@@ -20,7 +21,7 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
-function upsertColumn(sessionId: string, column: "pinned_at" | "archived_at" | "deleted_at" | "ai_title", value: string | null): void {
+function upsertColumn(sessionId: string, column: "pinned_at" | "archived_at" | "deleted_at" | "ai_title" | "user_title", value: string | null): void {
   try {
     const db = getDb();
     db.prepare(
@@ -60,11 +61,18 @@ export function setAiTitle(sessionId: string, title: string): void {
   upsertColumn(sessionId, "ai_title", title);
 }
 
+// A user-set title overrides the AI title in the listing. An empty/whitespace
+// title clears it (stored as NULL) so the row falls back to the AI title.
+export function setUserTitle(sessionId: string, title: string): void {
+  const trimmed = title.trim();
+  upsertColumn(sessionId, "user_title", trimmed === "" ? null : trimmed);
+}
+
 export function getMeta(sessionId: string): ConversationMeta | null {
   try {
     const db = getDb();
     const row = db
-      .prepare("SELECT session_id, pinned_at, archived_at, deleted_at, note, ai_title FROM conversation_meta WHERE session_id = ?")
+      .prepare("SELECT session_id, pinned_at, archived_at, deleted_at, note, ai_title, user_title FROM conversation_meta WHERE session_id = ?")
       .get(sessionId);
     if (!row) return null;
     return {
@@ -74,6 +82,7 @@ export function getMeta(sessionId: string): ConversationMeta | null {
       deletedAt: (row.deleted_at as string | null) ?? null,
       note: (row.note as string | null) ?? null,
       aiTitle: (row.ai_title as string | null) ?? null,
+      userTitle: (row.user_title as string | null) ?? null,
     };
   } catch {
     return null;
@@ -84,7 +93,7 @@ export function listMeta(): ConversationMeta[] {
   try {
     const db = getDb();
     const rows = db
-      .prepare("SELECT session_id, pinned_at, archived_at, deleted_at, note, ai_title FROM conversation_meta")
+      .prepare("SELECT session_id, pinned_at, archived_at, deleted_at, note, ai_title, user_title FROM conversation_meta")
       .all();
     return rows.map((row) => ({
       sessionId: row.session_id as string,
@@ -93,6 +102,7 @@ export function listMeta(): ConversationMeta[] {
       deletedAt: (row.deleted_at as string | null) ?? null,
       note: (row.note as string | null) ?? null,
       aiTitle: (row.ai_title as string | null) ?? null,
+      userTitle: (row.user_title as string | null) ?? null,
     }));
   } catch {
     return [];

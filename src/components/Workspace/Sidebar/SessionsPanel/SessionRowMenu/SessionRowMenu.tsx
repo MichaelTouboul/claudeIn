@@ -1,10 +1,11 @@
-import { Archive, ArchiveRestore, Eraser, Minimize2, Pin, PinOff, Trash2 } from "lucide-react";
+import { Archive, ArchiveRestore, Eraser, Minimize2, Pencil, Pin, PinOff, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 import { ContextMenu, type ContextMenuItem } from "@/components/_ui/ContextMenu";
 import type { SessionSummary } from "@/hooks/useSessions";
 
 import { DeletePermanentlyDialog } from "./DeletePermanentlyDialog";
+import { RenameDialog } from "./RenameDialog";
 
 export type SessionRowMenuProps = {
   session: SessionSummary;
@@ -17,7 +18,10 @@ export type SessionRowMenuProps = {
 
 export function SessionRowMenu({ session, piloted = false, onChanged }: SessionRowMenuProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [renameOpen, setRenameOpen] = useState(false);
   const { sessionId } = session;
+
+  const currentTitle = session.title ?? session.firstPrompt ?? "";
 
   const run = async (op: Promise<unknown>) => {
     await op;
@@ -25,6 +29,7 @@ export function SessionRowMenu({ session, piloted = false, onChanged }: SessionR
   };
 
   const items: ContextMenuItem[] = [
+    { label: "Rename…", icon: <Pencil size={13} />, onSelect: () => setRenameOpen(true) },
     session.pinned
       ? { label: "Unpin", icon: <PinOff size={13} />, onSelect: () => void run(window.api.unpinConversation(sessionId)) }
       : { label: "Pin to top", icon: <Pin size={13} />, onSelect: () => void run(window.api.pinConversation(sessionId)) },
@@ -52,6 +57,13 @@ export function SessionRowMenu({ session, piloted = false, onChanged }: SessionR
   return (
     <>
       <ContextMenu items={items} align="end" />
+      <RenameDialog
+        open={renameOpen}
+        onOpenChange={setRenameOpen}
+        session={session}
+        currentTitle={currentTitle}
+        onRenamed={onChanged}
+      />
       <DeletePermanentlyDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}

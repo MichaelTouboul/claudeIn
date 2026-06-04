@@ -59,9 +59,11 @@ export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: A
   // The backend broadcasts the AI title (keyed by claudeSessionId) into the
   // shared titles store; surface it on this chat's tab via the existing
   // retitle mechanism so the open tab and the sidebar share one source.
-  const aiTitle = useConversationTitlesStore((s) =>
-    claudeSessionId ? s.conversationTitles[claudeSessionId]?.aiTitle ?? null : null,
-  );
+  const aiTitle = useConversationTitlesStore((s) => {
+    if (!claudeSessionId) return null;
+    const t = s.conversationTitles[claudeSessionId];
+    return t?.userTitle ?? t?.aiTitle ?? null;
+  });
 
   const isRunning = session?.status === 'running';
 
