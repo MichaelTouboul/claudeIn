@@ -45,10 +45,16 @@ export function TerminalView({ projectPath }: TerminalViewProps) {
     };
     window.addEventListener('resize', onResize);
 
+    // Refit when the host element itself changes size — e.g. the Console panel
+    // is opened or its height is dragged (no window resize fires for that).
+    const observer = new ResizeObserver(() => onResize());
+    observer.observe(hostRef.current);
+
     return () => {
       offData();
       inputSub.dispose();
       window.removeEventListener('resize', onResize);
+      observer.disconnect();
       term.dispose();
     };
   }, [projectPath]);

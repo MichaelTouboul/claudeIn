@@ -3,17 +3,27 @@ import { type ReactNode, useMemo, useState } from 'react';
 
 import { EventConsole } from '@/components/EventConsole/EventConsole';
 import { useAppStore } from '@/store/useAppStore';
+import { useConsoleStore } from '@/store/useConsoleStore';
 import { useDashboardStore } from '@/store/useDashboardStore';
 import { useEventsStore } from '@/store/useEventsStore';
 
+import { ConsoleResizeHandle } from './ConsoleResizeHandle/ConsoleResizeHandle';
 import { TerminalView } from './TerminalView/TerminalView';
 
 type Tab = 'terminal' | 'events';
+
+const BAR_HEIGHT = 36;
+const HANDLE_HEIGHT = 5;
 
 export function Console() {
   const events = useEventsStore((s) => s.events);
   const agents = useDashboardStore((s) => s.agents);
   const projectPath = useAppStore((s) => s.selectedProject?.path ?? null);
+
+  const open = useConsoleStore((s) => s.open);
+  const height = useConsoleStore((s) => s.height);
+  const setOpen = useConsoleStore((s) => s.setOpen);
+  const toggle = useConsoleStore((s) => s.toggle);
 
   const agentColorMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -24,13 +34,12 @@ export function Console() {
   }, [agents]);
 
   const [tab, setTab] = useState<Tab>('terminal');
-  const [expanded, setExpanded] = useState(true);
 
   const tabBtn = (id: Tab, label: string, icon: ReactNode) => (
     <button
       onClick={() => {
         setTab(id);
-        setExpanded(true);
+        setOpen(true);
       }}
       className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium"
       style={{
@@ -49,23 +58,24 @@ export function Console() {
       style={{
         borderTop: '1px solid var(--color-border)',
         background: 'var(--color-surface-0)',
-        height: expanded ? '15rem' : '2.25rem',
+        height: open ? `${height}px` : `${BAR_HEIGHT}px`,
       }}
     >
+      {open ? <ConsoleResizeHandle /> : null}
       <div className="flex items-center" style={{ background: 'var(--color-surface-1)' }}>
         {tabBtn('terminal', 'Terminal', <TerminalIcon size={12} />)}
         {tabBtn('events', `Events (${events.length})`, <Activity size={12} />)}
         <button
-          onClick={() => setExpanded((v) => !v)}
+          onClick={() => toggle()}
           className="ml-auto px-3 py-2"
           style={{ color: 'var(--color-text-muted)' }}
-          title={expanded ? 'Collapse' : 'Expand'}
+          title={open ? 'Close' : 'Open'}
         >
-          {expanded ? <ChevronDown size={12} /> : <ChevronUp size={12} />}
+          {open ? <ChevronDown size={12} /> : <ChevronUp size={12} />}
         </button>
       </div>
-      {expanded ? (
-        <div style={{ height: 'calc(100% - 36px)' }}>
+      {open ? (
+        <div style={{ height: `calc(100% - ${BAR_HEIGHT + HANDLE_HEIGHT}px)` }}>
           {tab === 'terminal' ? (
             projectPath ? (
               <TerminalView key={projectPath} projectPath={projectPath} />
