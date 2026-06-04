@@ -6,6 +6,8 @@ import type { ChatMessage } from '@/types/spawn.types';
 
 import { parseAskPrompt } from '../askPrompt';
 import { AskPrompt } from '../AskPrompt/AskPrompt';
+import { parseSlashCommand } from '../slashCommand';
+import { SlashCommandMessage } from './SlashCommandMessage/SlashCommandMessage';
 
 export type MessageRowProps = {
   msg: ChatMessage;
@@ -19,6 +21,9 @@ export function MessageRow({ msg, isLast, onAnswer }: MessageRowProps) {
   const time = new Date(msg.timestamp).toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
 
   if (isUser) {
+    const slash = parseSlashCommand(msg.content);
+    // Caveat-only plumbing: the whole row disappears (no empty "you" header).
+    if (slash?.kind === 'caveat') return null;
     return (
       <div className="group">
         <div className="flex items-center gap-2 mb-0.5">
@@ -26,7 +31,11 @@ export function MessageRow({ msg, isLast, onAnswer }: MessageRowProps) {
           <span className="text-xs text-accent font-medium">you</span>
           <span className="text-xs text-fg-subtle opacity-0 group-hover:opacity-100">{time}</span>
         </div>
-        <pre className="text-sm text-accent whitespace-pre-wrap font-mono ml-5 leading-relaxed">{renderContentWithImages(msg.content)}</pre>
+        {slash ? (
+          <SlashCommandMessage parsed={slash} />
+        ) : (
+          <pre className="text-sm text-accent whitespace-pre-wrap font-mono ml-5 leading-relaxed">{renderContentWithImages(msg.content)}</pre>
+        )}
       </div>
     );
   }
