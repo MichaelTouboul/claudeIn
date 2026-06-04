@@ -60,7 +60,7 @@ export function SessionRowMenu({ session, piloted = false, onChanged }: SessionR
       <RenameDialog
         open={renameOpen}
         onOpenChange={setRenameOpen}
-        session={session}
+        claudeSessionId={session.sessionId}
         currentTitle={currentTitle}
         onRenamed={onChanged}
       />

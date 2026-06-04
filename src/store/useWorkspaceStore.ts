@@ -12,6 +12,9 @@ export type InternalTab = {
   skillId?: string;
   sessionFilePath?: string;
   sessionId?: string;
+  // The on-disk claude session id, once a live `chat` tab learns it. Lets the
+  // sidebar dedup an open chat against a persisted session row.
+  claudeSessionId?: string;
 };
 
 export type DashboardScope =
@@ -45,6 +48,7 @@ type WorkspaceState = {
   addTab: (tab: Omit<InternalTab, 'id'>) => string;
   closeTab: (tabId: string) => void;
   setActiveTab: (tabId: string) => void;
+  setTabClaudeSessionId: (tabId: string, claudeSessionId: string) => void;
   retitleChatTab: (agentName: string, title: string, force?: boolean) => void;
 };
 
@@ -229,6 +233,22 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   setActiveTab: (tabId) => {
     const { dashboards, activeDashboardId } = get();
     set({ dashboards: mapActive(dashboards, activeDashboardId, (d) => ({ ...d, activeTabId: tabId })) });
+  },
+
+  // Stamp a live chat tab with the conversation id it discovered. Searches all
+  // dashboards by tab id; no-op if the tab already carries this id (keeps the
+  // effect that calls it idempotent and avoids a needless store churn).
+  setTabClaudeSessionId: (tabId, claudeSessionId) => {
+    const present = get().dashboards.some((d) =>
+      d.tabs.some((t) => t.id === tabId && t.claudeSessionId === claudeSessionId),
+    );
+    if (present) return;
+    set((s) => ({
+      dashboards: s.dashboards.map((d) => ({
+        ...d,
+        tabs: d.tabs.map((t) => (t.id === tabId ? { ...t, claudeSessionId } : t)),
+      })),
+    }));
   },
 
   retitleChatTab: (agentName, title, force) => {

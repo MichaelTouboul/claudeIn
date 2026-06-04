@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 
 import { Dialog } from "@/components/_ui/Dialog";
-import type { SessionSummary } from "@/hooks/useSessions";
 import { useConversationTitlesStore } from "@/store/useConversationTitlesStore";
 
 export type RenameDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  session: SessionSummary;
+  // The conversation's persisted title key (= the `.jsonl` session id).
+  claudeSessionId: string;
   // The title currently shown for the row (userTitle ?? aiTitle ?? jsonl ?? prompt).
   currentTitle: string;
   // Existing refresh hook (same one pin/archive use) so the list re-pulls.
@@ -17,7 +17,7 @@ export type RenameDialogProps = {
 // Manual rename of a conversation. The user title overrides the AI title and is
 // persisted; clearing it (empty input) falls back to the AI title. Optimistically
 // updates the shared titles store, persists via window.api, then refetches.
-export function RenameDialog({ open, onOpenChange, session, currentTitle, onRenamed }: RenameDialogProps) {
+export function RenameDialog({ open, onOpenChange, claudeSessionId, currentTitle, onRenamed }: RenameDialogProps) {
   const [value, setValue] = useState(currentTitle);
 
   // Re-seed the input each time the dialog opens (the displayed title may change).
@@ -26,8 +26,8 @@ export function RenameDialog({ open, onOpenChange, session, currentTitle, onRena
   }, [open, currentTitle]);
 
   const save = async () => {
-    useConversationTitlesStore.getState().setUserTitle(session.sessionId, value);
-    await window.api.setConversationTitle(session.sessionId, value);
+    useConversationTitlesStore.getState().setUserTitle(claudeSessionId, value);
+    await window.api.setConversationTitle(claudeSessionId, value);
     onOpenChange(false);
     onRenamed();
   };

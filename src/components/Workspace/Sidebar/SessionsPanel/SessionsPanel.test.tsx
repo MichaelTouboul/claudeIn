@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { SessionStatus, SessionSummary } from "@/hooks/useSessions";
 import { ProjectProvider } from "@/store/ProjectContext";
 import { useEventsStore } from "@/store/useEventsStore";
+import { useWorkspaceStore } from "@/store/useWorkspaceStore";
 import type { Project } from "@/types/dashboard.types";
 
 import { SessionsPanel } from "./SessionsPanel";
@@ -52,6 +53,7 @@ function renderPanel(sessions: SessionSummary[], refresh = vi.fn()) {
 beforeEach(() => {
   Object.assign(window, { api: { watchSessions, unwatchSessions, onEvent } });
   useEventsStore.setState({ activeAgents: new Set(), waitingAgents: new Set(), agentContexts: new Map() });
+  useWorkspaceStore.setState({ dashboards: [], activeDashboardId: null });
 });
 
 afterEach(() => {
@@ -90,9 +92,52 @@ describe("SessionsPanel", () => {
     expect(screen.queryByLabelText("Waiting for input")).not.toBeInTheDocument();
   });
 
-  it("shows a status badge on recent rows", () => {
+  it("no longer renders the status badge on recent rows", () => {
     renderPanel([session("recent-a", "recent")]);
-    expect(screen.getByText("recent")).toBeInTheDocument();
+    expect(screen.getByText("Title recent-a")).toBeInTheDocument();
+    // The "recent" status badge was removed; only the title text shows it.
+    expect(screen.queryByText("recent")).not.toBeInTheDocument();
+  });
+
+  it("hides a session already open in a tab of the active dashboard", () => {
+    useWorkspaceStore.setState({
+      dashboards: [
+        {
+          id: "d1",
+          scope: { kind: "project", project },
+          cwd: project.path,
+          activeTabId: "t-open",
+          tabs: [
+            { id: "t-open", kind: "session", title: "Open one", sessionId: "recent-a", sessionFilePath: "/sessions/recent-a.jsonl" },
+          ],
+        },
+      ],
+      activeDashboardId: "d1",
+    });
+    renderPanel([session("recent-a", "recent"), session("recent-b", "recent")]);
+
+    // recent-a is open in a session tab → excluded; recent-b still listed.
+    expect(screen.queryByText("Title recent-a")).not.toBeInTheDocument();
+    expect(screen.getByText("Title recent-b")).toBeInTheDocument();
+  });
+
+  it("hides a session whose id matches an open live chat tab's claudeSessionId", () => {
+    useWorkspaceStore.setState({
+      dashboards: [
+        {
+          id: "d1",
+          scope: { kind: "project", project },
+          cwd: project.path,
+          activeTabId: "t-chat",
+          tabs: [{ id: "t-chat", kind: "chat", title: "Chat", claudeSessionId: "recent-a" }],
+        },
+      ],
+      activeDashboardId: "d1",
+    });
+    renderPanel([session("recent-a", "recent"), session("recent-b", "recent")]);
+
+    expect(screen.queryByText("Title recent-a")).not.toBeInTheDocument();
+    expect(screen.getByText("Title recent-b")).toBeInTheDocument();
   });
 
   it("opens the older-sessions modal from Load more", async () => {

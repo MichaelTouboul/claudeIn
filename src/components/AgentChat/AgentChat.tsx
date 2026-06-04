@@ -22,14 +22,18 @@ type SpawnEvent =
 
 export type AgentChatProps = {
   agentName: string;
+  // The owning InternalTab id, when this chat lives in a workspace tab. Lets us
+  // stamp the tab with the conversation id once known (sidebar dedup/rename).
+  tabId?: string;
   cwd?: string;
   resumeSessionId?: string;
   initialMessage?: string;
 };
 
-export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: AgentChatProps) {
+export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessage }: AgentChatProps) {
   const selectedProjectPath = useAppStore((s) => s.selectedProject?.path);
   const retitleChatTab = useWorkspaceStore((s) => s.retitleChatTab);
+  const setTabClaudeSessionId = useWorkspaceStore((s) => s.setTabClaudeSessionId);
   // cwd is the authoritative spawn directory (threaded from dashboard.cwd).
   // Legacy callers without a cwd prop fall back to the selected project path.
   const projectPath = cwd ?? selectedProjectPath;
@@ -192,6 +196,13 @@ export function AgentChat({ agentName, cwd, resumeSessionId, initialMessage }: A
     if (userTitle) retitleChatTab(agentName, userTitle, true); // user rename always wins
     else if (aiTitle) retitleChatTab(agentName, aiTitle); // AI title only overwrites generic
   }, [userTitle, aiTitle, agentName, retitleChatTab]);
+
+  // Once this live chat learns its on-disk conversation id, stamp it onto the
+  // owning tab so the sidebar can dedup the open chat against its session row
+  // and offer rename from ACTIVITY. Keyed precisely by tab id; idempotent.
+  useEffect(() => {
+    if (tabId && claudeSessionId) setTabClaudeSessionId(tabId, claudeSessionId);
+  }, [tabId, claudeSessionId, setTabClaudeSessionId]);
 
   const handleInputChange = (val: string) => {
     setInput(val);
