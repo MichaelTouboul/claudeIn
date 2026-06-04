@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from "electron";
+import { contextBridge, ipcRenderer, webUtils } from "electron";
 
 contextBridge.exposeInMainWorld("api", {
   platform: process.platform,
@@ -86,6 +86,11 @@ contextBridge.exposeInMainWorld("api", {
   },
   openFilePicker: () => ipcRenderer.invoke("dialog:open-file"),
   readImageAsDataUrl: (filePath: string) => ipcRenderer.invoke("dialog:read-image", filePath),
+  // Resolve a dropped File's absolute path. Modern Electron strips `.path` from
+  // renderer File objects, so we use the renderer-safe synchronous `webUtils`
+  // helper (no IPC needed). Drag-and-drop onto the chat reuses this for the same
+  // attach pipeline as the file picker.
+  getPathForFile: (file: File) => webUtils.getPathForFile(file),
 
   onEvent: (cb: (data: unknown) => void) => {
     const handler = (_e: unknown, data: unknown) => cb(data);
