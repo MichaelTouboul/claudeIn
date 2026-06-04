@@ -2,6 +2,7 @@ import type { SessionSummary } from '@/hooks/useSessions';
 import { useConversationTitlesStore } from '@/store/useConversationTitlesStore';
 import { useEventsStore } from '@/store/useEventsStore';
 import { effectivePinned, usePinnedStore } from '@/store/usePinnedStore';
+import { useRunningStore } from '@/store/useRunningStore';
 import { type InternalTab, useWorkspaceStore } from '@/store/useWorkspaceStore';
 
 import { ConversationItem,type ConversationStatus } from './ConversationItem/ConversationItem';
@@ -50,6 +51,9 @@ export function ConversationList({ sessions }: ConversationListProps) {
   const activeAgents = useEventsStore((s) => s.activeAgents);
   const waitingAgents = useEventsStore((s) => s.waitingAgents);
   const overrides = usePinnedStore((s) => s.overrides);
+  // Authoritative per-conversation running map (keyed by claudeSessionId). The
+  // dot reads this instead of the agentName-keyed event sets.
+  const running = useRunningStore((s) => s.running);
 
   const active = dashboards.find((d) => d.id === activeDashboardId);
   const openTabs = active?.tabs ?? [];
@@ -108,6 +112,7 @@ export function ConversationList({ sessions }: ConversationListProps) {
                 convId={s.sessionId}
                 title={s.title ?? s.firstPrompt ?? s.sessionId.slice(0, 8)}
                 isActive={open ? open.id === active?.activeTabId : false}
+                running={running[s.sessionId] ?? false}
                 status={statusFor(name, activeAgents, waitingAgents)}
                 pinned
                 onActivate={() => openPinnedSession(s)}
@@ -128,6 +133,7 @@ export function ConversationList({ sessions }: ConversationListProps) {
                 convId={convId}
                 title={tab.title}
                 isActive={tab.id === active?.activeTabId}
+                running={convId ? running[convId] ?? false : false}
                 status={statusFor(tabAgentKey(tab), activeAgents, waitingAgents)}
                 pinned={false}
                 onActivate={() => setActiveTab(tab.id)}

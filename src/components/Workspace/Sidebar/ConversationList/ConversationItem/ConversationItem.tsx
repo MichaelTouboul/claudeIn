@@ -17,6 +17,9 @@ export type ConversationItemProps = {
   // Base label (already the tab/session title); overlaid with the titles store.
   title: string;
   isActive: boolean;
+  // Authoritative per-conversation running flag (useRunningStore, keyed by
+  // claudeSessionId). When true it overrides `status` for the dot → live/pulse.
+  running: boolean;
   status: ConversationStatus;
   // Effective pinned state (override-aware), used to flip the menu label.
   pinned: boolean;
@@ -26,7 +29,10 @@ export type ConversationItemProps = {
 const dotColorFor = (status: ConversationStatus): string =>
   status === 'live' ? '#22c55e' : status === 'waiting' ? '#eab308' : 'var(--color-text-muted)';
 
-export function ConversationItem({ convId, title, isActive, status, pinned, onActivate }: ConversationItemProps) {
+export function ConversationItem({ convId, title, isActive, running, status, pinned, onActivate }: ConversationItemProps) {
+  // Running wins over the agentName-derived status: a running turn is always the
+  // live/pulse dot; otherwise fall back to waiting/idle.
+  const dotStatus: ConversationStatus = running ? 'live' : status;
   const [renameOpen, setRenameOpen] = useState(false);
 
   // Overlay the shared titles store so a rename shows live regardless of source,
@@ -65,8 +71,8 @@ export function ConversationItem({ convId, title, isActive, status, pinned, onAc
       >
         <span
           className="w-1.5 h-1.5 rounded-full shrink-0"
-          style={{ backgroundColor: dotColorFor(status), animation: status === 'live' ? 'pulse 1s ease-in-out infinite' : undefined }}
-          title={status}
+          style={{ backgroundColor: dotColorFor(dotStatus), animation: dotStatus === 'live' ? 'pulse 1s ease-in-out infinite' : undefined }}
+          title={dotStatus}
         />
         <span className="text-xs truncate" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>
           {label}

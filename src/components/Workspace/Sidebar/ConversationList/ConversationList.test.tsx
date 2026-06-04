@@ -5,6 +5,7 @@ import type { SessionStatus, SessionSummary } from "@/hooks/useSessions";
 import { useConversationTitlesStore } from "@/store/useConversationTitlesStore";
 import { useEventsStore } from "@/store/useEventsStore";
 import { usePinnedStore } from "@/store/usePinnedStore";
+import { useRunningStore } from "@/store/useRunningStore";
 import { useWorkspaceStore } from "@/store/useWorkspaceStore";
 import type { Project } from "@/types/dashboard.types";
 
@@ -35,6 +36,7 @@ beforeEach(() => {
   useEventsStore.setState({ activeAgents: new Set(), waitingAgents: new Set(), agentContexts: new Map() });
   useConversationTitlesStore.setState({ conversationTitles: {} });
   usePinnedStore.setState({ overrides: {} });
+  useRunningStore.setState({ running: {} });
   useWorkspaceStore.setState({ dashboards: [], activeDashboardId: null });
 });
 
@@ -172,5 +174,32 @@ describe("ConversationList", () => {
 
     await waitFor(() => expect(ipc.unpinConversation).toHaveBeenCalledWith("pinned-y"));
     expect(usePinnedStore.getState().overrides["pinned-y"]).toBe(false);
+  });
+
+  it("drives the dot from useRunningStore per convId (one running, one not)", () => {
+    // Two open chat tabs sharing the same agentName but distinct claudeSessionIds.
+    useWorkspaceStore.setState({
+      dashboards: [
+        {
+          id: "d1", scope: { kind: "project", project }, cwd: project.path, activeTabId: "t-run",
+          tabs: [
+            { id: "t-run", kind: "chat", title: "Running chat", agentName: "coder", claudeSessionId: "conv-run" },
+            { id: "t-idle", kind: "chat", title: "Idle chat", agentName: "coder", claudeSessionId: "conv-idle" },
+          ],
+        },
+      ],
+      activeDashboardId: "d1",
+    });
+    // Only conv-run is running. (The agentName-keyed event sets are empty, proving
+    // the dot no longer derives from them.)
+    useRunningStore.setState({ running: { "conv-run": true, "conv-idle": false } });
+
+    render(<ConversationList sessions={[]} />);
+
+    const runRow = screen.getByText("Running chat").closest(".group") as HTMLElement;
+    const idleRow = screen.getByText("Idle chat").closest(".group") as HTMLElement;
+    // The leading status dot is a span carrying its status as `title`.
+    expect(within(runRow).getByTitle("live")).toBeInTheDocument();
+    expect(within(idleRow).getByTitle("idle")).toBeInTheDocument();
   });
 });
