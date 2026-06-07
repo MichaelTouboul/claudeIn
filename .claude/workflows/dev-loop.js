@@ -12,10 +12,17 @@ export const meta = {
 // ---- input -------------------------------------------------------------
 // args: { input?: string (prompt for a simple fix), specPath?: string (a spec doc),
 //         depth?: 'light'|'full', base?: string }
-const specPath = args && args.specPath
-const promptInput = args && args.input
-const base = (args && args.base) || 'main'
-const depth = (args && args.depth) || (specPath ? 'full' : 'light')
+// args may arrive as an object, a JSON string, or a bare prompt string — normalize.
+let opts = args
+if (typeof opts === 'string') {
+  try { opts = JSON.parse(opts) } catch { opts = { input: args } }
+}
+opts = opts || {}
+
+const specPath = opts.specPath
+const promptInput = opts.input
+const base = opts.base || 'main'
+const depth = opts.depth || (specPath ? 'full' : 'light')
 const MAX_RETRIES = 2
 
 if (!specPath && !promptInput) {
