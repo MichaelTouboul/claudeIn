@@ -4,6 +4,8 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 
+import type { SkillAnnexFile } from "../types/project.types";
+
 // project.service captures `process.env.HOME` at module load (for USER_CLAUDE_DIR,
 // which drives getSkill's scope inference). Set HOME to a temp dir and import the
 // module dynamically per test so the user scope resolves under our fixture.
@@ -50,11 +52,11 @@ describe("getSkill", () => {
     expect(skill?.body).toBe("# Heading\n\nbody line two");
     expect(skill?.lineCount).toBe(3);
 
-    const annexNames = (skill?.annexFiles ?? []).map((f) => f.name).sort();
+    const annexNames = (skill?.annexFiles ?? []).map((f: SkillAnnexFile) => f.name).sort();
     expect(annexNames).toEqual(["reference.md", "scripts"]);
-    const scripts = skill?.annexFiles.find((f) => f.name === "scripts");
+    const scripts = skill?.annexFiles.find((f: SkillAnnexFile) => f.name === "scripts");
     expect(scripts?.isDirectory).toBe(true);
-    const ref = skill?.annexFiles.find((f) => f.name === "reference.md");
+    const ref = skill?.annexFiles.find((f: SkillAnnexFile) => f.name === "reference.md");
     expect(ref?.isDirectory).toBe(false);
     expect(ref?.size).toBeGreaterThan(0);
   });

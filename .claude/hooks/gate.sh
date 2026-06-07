@@ -23,6 +23,7 @@ gate() {
 
 gate "lint (0 warnings)" npm run lint -- --max-warnings 0
 gate "typecheck"         npm run typecheck
+gate "typecheck:electron" npm run typecheck:electron
 gate "build"             npx electron-vite build
 gate "tests"             npm test
 

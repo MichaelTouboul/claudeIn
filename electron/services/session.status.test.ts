@@ -4,6 +4,8 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 
+import type { SessionSummary } from "../types/session.types";
+
 // session.service derives the sessions base from HOME via session.transcript's
 // getProjectsBase (~/.claude/projects). Point HOME at a temp dir and import the
 // module dynamically per test so listSessions reads our fixture transcripts.
@@ -75,7 +77,7 @@ describe("listSessions status", () => {
     writeSession("idle-one", RECENT_THRESHOLD_MS + 60_000); // > 6h ago → idle
 
     const sessions = await listSessions(PROJECT_PATH);
-    const byId = Object.fromEntries(sessions.map((s) => [s.sessionId, s.status]));
+    const byId = Object.fromEntries(sessions.map((s: SessionSummary) => [s.sessionId, s.status]));
 
     expect(byId["live-one"]).toBe("live");
     expect(byId["recent-one"]).toBe("recent");
