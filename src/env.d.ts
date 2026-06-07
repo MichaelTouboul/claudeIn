@@ -45,8 +45,8 @@ interface Window {
     addFavorite: (projectId: string, type: string, name: string) => Promise<void>;
     removeFavorite: (projectId: string, type: string, name: string) => Promise<void>;
 
-    getSessionList: (projectPath: string) => Promise<import("./hooks/useSessions").SessionSummary[]>;
-    getSessionConversation: (filePath: string) => Promise<import("./hooks/useSessions").SessionConversation>;
+    getSessionList: (projectPath: string) => Promise<import("./types/session.types").SessionSummary[]>;
+    getSessionConversation: (filePath: string) => Promise<import("./types/session.types").SessionConversation>;
     watchSessions: (projectPath: string) => Promise<void>;
     unwatchSessions: (projectPath: string) => Promise<void>;
     watchConversation: (filePath: string) => Promise<void>;
@@ -62,7 +62,7 @@ interface Window {
     onConversationAppended: (
       cb: (data: {
         filePath: string;
-        messages: import("./hooks/useSessions").SessionMessage[];
+        messages: import("./types/session.types").SessionMessage[];
       }) => void,
     ) => () => void;
     openFilePicker: () => Promise<string[]>;
