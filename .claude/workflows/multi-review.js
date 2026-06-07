@@ -67,7 +67,7 @@ const reviewPrompt = (focus, extra) =>
 
 // blocking lenses gate the merge; advisory lenses are reported only.
 const LENSES = [
-  { key: 'correctness', blocking: true, agentType: 'feature-dev:code-reviewer',
+  { key: 'correctness', blocking: true,
     prompt: reviewPrompt('correctness bugs, logic errors, race conditions, broken contracts') },
   { key: 'security', blocking: true,
     prompt: reviewPrompt('security vulnerabilities (injection, secrets in code, unsafe IPC, path traversal, auth flaws)') },
@@ -86,12 +86,25 @@ const activeLenses = depth === 'full' ? LENSES : LENSES.filter((l) => l.blocking
 
 const results = await pipeline(
   activeLenses,
-  (lens) => agent(lens.prompt, { label: `review:${lens.key}`, phase: 'Review', schema: FINDINGS_SCHEMA, agentType: lens.agentType, model: REVIEW_MODEL }),
-  (review, lens) => {
+  (lens) =>
+    agent(lens.prompt, { label: `review:${lens.key}`, phase: 'Review', schema: FINDINGS_SCHEMA, agentType: lens.agentType, model: REVIEW_MODEL })
+      .then((review) => ({ lens, review }))
+      .catch((err) => ({ lens, review: null, error: String((err && err.message) || err) })),
+  ({ lens, review, error }) => {
+    // Fail-safe: a BLOCKING lens that didn't actually run must block the merge.
+    // Never treat a crashed review as "nothing found" — that once let an
+    // un-reviewed diff merge to main when the correctness lens errored out.
+    if (lens.blocking && (review == null || error)) {
+      return [{
+        lens: lens.key, blocking: true, severity: 'blocker',
+        title: `Blocking review "${lens.key}" did not complete`,
+        file: '(review)', detail: error || 'review agent returned no result',
+        verdict: { isReal: true, reason: 'review incomplete — cannot clear the diff' },
+      }]
+    }
     const findings = review && review.findings ? review.findings : []
-    // Only blocking lenses (correctness + security) pay for adversarial
-    // verification — a false positive in an advisory lens is noise, not a merge
-    // block, so it isn't worth a second agent.
+    // Only blocking lenses pay for adversarial verification — a false positive in
+    // an advisory lens is noise, not a merge block, so it isn't worth a 2nd agent.
     if (!lens.blocking) {
       return findings.map((f) => ({ ...f, lens: lens.key, blocking: false, verdict: null }))
     }
