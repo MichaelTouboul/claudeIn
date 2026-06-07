@@ -68,7 +68,7 @@ contextBridge.exposeInMainWorld("api", {
   onConversationAppended: (
     cb: (data: {
       filePath: string;
-      messages: import("../src/hooks/useSessions").SessionMessage[];
+      messages: import("./types/session.types").SessionMessage[];
     }) => void,
   ) => {
     const handler = (
@@ -78,7 +78,7 @@ contextBridge.exposeInMainWorld("api", {
       if (data?.type === "conversation_appended" && typeof data.filePath === "string") {
         cb({
           filePath: data.filePath,
-          messages: data.messages as import("../src/hooks/useSessions").SessionMessage[],
+          messages: data.messages as import("./types/session.types").SessionMessage[],
         });
       }
     };
