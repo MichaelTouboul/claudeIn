@@ -16,5 +16,17 @@
       "Bash(find *)",
       "Bash(grep *)"
     ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ \"$CLAUDE_GATE\" = \"1\" ]; then bash \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/gate.sh\"; fi"
+          }
+        ]
+      }
+    ]
   }
 }
