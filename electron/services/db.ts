@@ -139,7 +139,8 @@ export async function initDb(): Promise<void> {
       deleted_at  TEXT,
       note        TEXT,
       ai_title    TEXT,
-      user_title  TEXT
+      user_title  TEXT,
+      cleared_at  TEXT
     );
   `);
 
@@ -170,5 +171,12 @@ function runMigrations(): void {
 
   if (!conversationMetaColumns.includes("user_title")) {
     wrapper.exec("ALTER TABLE conversation_meta ADD COLUMN user_title TEXT");
+  }
+
+  // cleared_at — durable `/clear` boundary. `loadConversation` returns only
+  // messages strictly after this timestamp, so a cleared conversation reloads
+  // empty/fresh while the on-disk transcript is left untouched.
+  if (!conversationMetaColumns.includes("cleared_at")) {
+    wrapper.exec("ALTER TABLE conversation_meta ADD COLUMN cleared_at TEXT");
   }
 }

@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import readline from "readline";
 import { extractAssistantUsage, getProjectsBase } from "./session.transcript";
-import { listMeta, type ConversationMeta } from "./conversation.meta";
+import { getMeta, listMeta, type ConversationMeta } from "./conversation.meta";
 import type { SessionStatus, SessionSummary, SessionConversation, SessionMessage } from "../types/session.types";
 
 // Status is derived from how recently the transcript file was touched (mtime,
@@ -124,6 +124,17 @@ export async function listSessions(projectPath: string): Promise<SessionSummary[
 
 // --- Conversation loading (on demand) ---
 
+// Durable `/clear` boundary: a conversation cleared in-app records `cleared_at`
+// (keyed by claudeSessionId = the .jsonl name). We then surface only messages
+// strictly after that timestamp, so a reload shows the cleared conversation
+// empty/fresh — the on-disk transcript is never modified. A message with no
+// timestamp (synthetic tool-only row) is treated as pre-boundary and dropped.
+function applyClearedBoundary(sessionId: string, messages: SessionMessage[]): SessionMessage[] {
+  const clearedAt = getMeta(sessionId)?.clearedAt ?? null;
+  if (!clearedAt) return messages;
+  return messages.filter((m) => m.timestamp !== "" && m.timestamp > clearedAt);
+}
+
 export async function loadConversation(filePath: string): Promise<SessionConversation> {
   const sessionId = path.basename(filePath, ".jsonl");
   const messages: SessionMessage[] = [];
@@ -208,10 +219,10 @@ export async function loadConversation(filePath: string): Promise<SessionConvers
           toolNames: pendingToolNames,
         });
       }
-      resolve({ sessionId, messages, totalTokensIn, totalTokensOut, model });
+      resolve({ sessionId, messages: applyClearedBoundary(sessionId, messages), totalTokensIn, totalTokensOut, model });
     });
     rl.on("error", (_err) => {
-      resolve({ sessionId, messages, totalTokensIn, totalTokensOut, model });
+      resolve({ sessionId, messages: applyClearedBoundary(sessionId, messages), totalTokensIn, totalTokensOut, model });
     });
   });
 }

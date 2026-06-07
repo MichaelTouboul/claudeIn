@@ -1,6 +1,7 @@
 import { type RefObject, useCallback } from 'react';
 
 import type { RichEditorHandle } from '@/components/AgentChat/RichEditor/RichEditor';
+import { dispatchSlashCommand, type LocalSlashHandlers } from '@/components/AgentChat/slashRegistry';
 import type { QueueItem } from '@/components/AgentChat/types';
 import type { ChatMessage, SpawnSession } from '@/types/spawn.types';
 
@@ -55,14 +56,18 @@ export function useAgentChatActions({
   setSession,
   setClaudeSessionId,
 }: UseAgentChatActionsParams) {
-  // `/clear` (exact, no args — like the terminal's `/clear`) INSTANTLY clears
-  // the conversation client-side. No `claude` process is spawned, no user
-  // bubble is pushed, nothing is written to the transcript. Resetting
+  // `/clear` (a `kind:'local'` registry command — like the terminal's `/clear`)
+  // INSTANTLY clears the conversation client-side AND persists a durable cleared
+  // boundary so the conversation reloads empty (the on-disk transcript is kept).
+  // No `claude` process is spawned, no user bubble is pushed. Resetting
   // `claudeSessionId` to null means the NEXT message is a fresh spawn (no
-  // `--resume`), exactly like the terminal starting over. Shared by both entry
-  // points: `handleSend` (typed + sent) and the slash-menu selection path
-  // (`AgentChat.handleSelectSlash` → here), so neither ever spawns `/clear`.
+  // `--resume`), exactly like the terminal starting over. Reached only through
+  // the single slash dispatcher (`dispatchSlash`), from both entry points:
+  // `handleSend` (typed + sent) and the slash-menu selection path.
   const clearConversation = useCallback(() => {
+    // Persist BEFORE the local reset so we capture the id still in state. Without
+    // a claudeSessionId there is no on-disk transcript yet → nothing to persist.
+    if (claudeSessionId) void window.api.clearConversation(claudeSessionId);
     setMessages([]);
     setQueue([]);
     setClaudeSessionId(null);
@@ -73,25 +78,14 @@ export function useAgentChatActions({
     setAttachedFiles([]);
     setInput('');
     editorRef.current?.clear();
-  }, [editorRef, pendingUserMsgs, setInput, setAttachedFiles, setQueue, setMessages, setAwaitingResponse, setWaitingInput, setSession, setClaudeSessionId]);
+  }, [claudeSessionId, editorRef, pendingUserMsgs, setInput, setAttachedFiles, setQueue, setMessages, setAwaitingResponse, setWaitingInput, setSession, setClaudeSessionId]);
 
-  const handleSend = useCallback(async () => {
-    if (!input.trim() && attachedFiles.length === 0) return;
-    const text = input.trim();
+  // The in-app handlers a `kind:'local'` command can bind to (registry → here).
+  const slashHandlers: LocalSlashHandlers = { clear: clearConversation };
 
-    if (text === '/clear') {
-      clearConversation();
-      return;
-    }
-
-    const filePaths = attachedFiles.map((f) => f.path).join('\n');
-    const fullText = filePaths ? (text ? text + '\n' + filePaths : filePaths) : text;
-
-    setInput('');
-    setAttachedFiles([]);
-    editorRef.current?.clear();
-    editorRef.current?.focus();
-
+  // Send arbitrary text to claude as a message (the normal turn path). Also the
+  // `sendToCli` route for `kind:'cli'` slash commands (e.g. `/help`).
+  const sendMessage = useCallback(async (fullText: string) => {
     // While a turn is awaiting a reply OR the compact-on-resume turn is in
     // flight, queue the message: it fires via `sendNextFromQueue` after the
     // running turn exits, so we never spawn a 2nd concurrent `--resume`.
@@ -118,7 +112,40 @@ export function useAgentChatActions({
         setAwaitingResponse(false);
       }
     }
-  }, [input, attachedFiles, awaitingResponse, compacting, session, isRunning, agentName, projectPath, claudeSessionId, editorRef, pendingUserMsgs, clearConversation, setInput, setAttachedFiles, setQueue, setMessages, setAwaitingResponse, setWaitingInput, setSession, setClaudeSessionId]);
+  }, [awaitingResponse, compacting, session, isRunning, agentName, projectPath, claudeSessionId, pendingUserMsgs, setQueue, setMessages, setAwaitingResponse, setWaitingInput, setSession, setClaudeSessionId]);
+
+  // The ONE slash dispatcher. Both entry points (typed send + slash menu) route
+  // through it: registry-driven, `local` → its handler, `cli` → `sendMessage`.
+  // Returns true when a registered command owned the input.
+  const dispatchSlash = useCallback((command: string): boolean =>
+    dispatchSlashCommand(command, { handlers: slashHandlers, sendToCli: (t) => void sendMessage(t) }),
+    // slashHandlers is rebuilt each render but only wraps the stable clearConversation.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [clearConversation, sendMessage]);
+
+  const handleSend = useCallback(async () => {
+    if (!input.trim() && attachedFiles.length === 0) return;
+    const text = input.trim();
+
+    // A bare registered slash command (no attachments) goes through the single
+    // dispatcher: `local` runs in-app (e.g. /clear), `cli` forwards to claude.
+    if (attachedFiles.length === 0 && dispatchSlash(text)) {
+      setInput('');
+      editorRef.current?.clear();
+      editorRef.current?.focus();
+      return;
+    }
+
+    const filePaths = attachedFiles.map((f) => f.path).join('\n');
+    const fullText = filePaths ? (text ? text + '\n' + filePaths : filePaths) : text;
+
+    setInput('');
+    setAttachedFiles([]);
+    editorRef.current?.clear();
+    editorRef.current?.focus();
+
+    await sendMessage(fullText);
+  }, [input, attachedFiles, dispatchSlash, sendMessage, editorRef, setInput, setAttachedFiles]);
 
   const handleAttach = useCallback(async () => {
     const paths = await window.api.openFilePicker();
@@ -173,5 +200,5 @@ export function useAgentChatActions({
     await window.api.killSession(session.localSessionId);
   }, [session]);
 
-  return { handleSend, handleAttach, onAnswer, handleKill, clearConversation };
+  return { handleSend, handleAttach, onAnswer, handleKill, clearConversation, dispatchSlash };
 }
