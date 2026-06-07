@@ -13,6 +13,7 @@ export type ConversationMeta = {
   note: string | null;
   aiTitle: string | null;
   userTitle: string | null;
+  clearedAt: string | null;
 };
 
 // sql.js is synchronous — wrap in try/catch, never .then()/.catch().
@@ -20,7 +21,7 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
-function upsertColumn(sessionId: string, column: "pinned_at" | "archived_at" | "deleted_at" | "ai_title" | "user_title", value: string | null): void {
+function upsertColumn(sessionId: string, column: "pinned_at" | "archived_at" | "deleted_at" | "ai_title" | "user_title" | "cleared_at", value: string | null): void {
   try {
     const db = getDb();
     db.prepare(
@@ -67,11 +68,28 @@ export function setUserTitle(sessionId: string, title: string): void {
   upsertColumn(sessionId, "user_title", trimmed === "" ? null : trimmed);
 }
 
+// Durable `/clear`: records a "cleared boundary" timestamp keyed by the
+// claudeSessionId (= the .jsonl transcript name). `loadConversation` then
+// returns only messages strictly after this timestamp, so the conversation
+// reloads empty/fresh. The transcript file is never deleted. Reversible (NULL).
+export function clearConversation(sessionId: string): void {
+  upsertColumn(sessionId, "cleared_at", nowIso());
+}
+
+export function unclearConversation(sessionId: string): void {
+  upsertColumn(sessionId, "cleared_at", null);
+}
+
+// Explicit boundary setter (used in tests / future programmatic boundaries).
+export function setClearedAt(sessionId: string, clearedAt: string | null): void {
+  upsertColumn(sessionId, "cleared_at", clearedAt);
+}
+
 export function getMeta(sessionId: string): ConversationMeta | null {
   try {
     const db = getDb();
     const row = db
-      .prepare("SELECT session_id, pinned_at, archived_at, deleted_at, note, ai_title, user_title FROM conversation_meta WHERE session_id = ?")
+      .prepare("SELECT session_id, pinned_at, archived_at, deleted_at, note, ai_title, user_title, cleared_at FROM conversation_meta WHERE session_id = ?")
       .get(sessionId);
     if (!row) return null;
     return {
@@ -82,6 +100,7 @@ export function getMeta(sessionId: string): ConversationMeta | null {
       note: (row.note as string | null) ?? null,
       aiTitle: (row.ai_title as string | null) ?? null,
       userTitle: (row.user_title as string | null) ?? null,
+      clearedAt: (row.cleared_at as string | null) ?? null,
     };
   } catch {
     return null;
@@ -92,7 +111,7 @@ export function listMeta(): ConversationMeta[] {
   try {
     const db = getDb();
     const rows = db
-      .prepare("SELECT session_id, pinned_at, archived_at, deleted_at, note, ai_title, user_title FROM conversation_meta")
+      .prepare("SELECT session_id, pinned_at, archived_at, deleted_at, note, ai_title, user_title, cleared_at FROM conversation_meta")
       .all();
     return rows.map((row) => ({
       sessionId: row.session_id as string,
@@ -102,6 +121,7 @@ export function listMeta(): ConversationMeta[] {
       note: (row.note as string | null) ?? null,
       aiTitle: (row.ai_title as string | null) ?? null,
       userTitle: (row.user_title as string | null) ?? null,
+      clearedAt: (row.cleared_at as string | null) ?? null,
     }));
   } catch {
     return [];

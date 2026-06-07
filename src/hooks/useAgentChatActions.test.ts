@@ -8,6 +8,7 @@ import { useAgentChatActions } from './useAgentChatActions';
 
 const spawnMock = vi.fn();
 const sendInputMock = vi.fn();
+const clearConversationApiMock = vi.fn();
 
 const editorClear = vi.fn();
 const editorFocus = vi.fn();
@@ -42,9 +43,10 @@ function makeParams(overrides: Partial<Parameters<typeof useAgentChatActions>[0]
 beforeEach(() => {
   spawnMock.mockReset().mockResolvedValue({ claudeSessionId: 'claude-2' });
   sendInputMock.mockReset().mockResolvedValue(undefined);
+  clearConversationApiMock.mockReset().mockResolvedValue(undefined);
   editorClear.mockClear();
   editorFocus.mockClear();
-  window.api = { spawn: spawnMock, sendInput: sendInputMock } as unknown as typeof window.api;
+  window.api = { spawn: spawnMock, sendInput: sendInputMock, clearConversation: clearConversationApiMock } as unknown as typeof window.api;
 });
 
 describe('useAgentChatActions handleSend — /clear', () => {
@@ -69,6 +71,19 @@ describe('useAgentChatActions handleSend — /clear', () => {
     // (c) no process spawned, no input sent — instant client-side clear
     expect(spawnMock).not.toHaveBeenCalled();
     expect(sendInputMock).not.toHaveBeenCalled();
+    // (d) the clear is PERSISTED for the current conversation so a reload stays empty
+    expect(clearConversationApiMock).toHaveBeenCalledWith('claude-1');
+  });
+
+  it('does not call the persist API when there is no claude session yet', async () => {
+    const params = makeParams({ input: '/clear', claudeSessionId: null });
+    const { result } = renderHook(() => useAgentChatActions(params));
+
+    await result.current.handleSend();
+
+    expect(params.setMessages).toHaveBeenCalledWith([]);
+    // Nothing persisted on disk exists to clear, so the API is not called.
+    expect(clearConversationApiMock).not.toHaveBeenCalled();
   });
 });
 

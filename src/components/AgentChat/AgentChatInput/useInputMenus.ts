@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useDashboardStore } from '@/store/useDashboardStore';
 
 import { matchMentionQuery, matchSlashQuery } from '../RichEditor/serialize';
-import { SLASH_COMMANDS } from '../slashCommands';
+import { SLASH_COMMANDS } from '../slashRegistry';
 import type { InputMenuGroup } from './InputMenu';
 
 export type InputMenuKind = 'slash' | 'mention' | null;

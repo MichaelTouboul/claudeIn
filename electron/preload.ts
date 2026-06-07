@@ -64,6 +64,7 @@ contextBridge.exposeInMainWorld("api", {
   softDeleteConversation: (sessionId: string) => ipcRenderer.invoke("conversation:softDelete", sessionId),
   restoreConversation: (sessionId: string) => ipcRenderer.invoke("conversation:restore", sessionId),
   setConversationTitle: (claudeSessionId: string, title: string) => ipcRenderer.invoke("conversation:set-title", claudeSessionId, title),
+  clearConversation: (claudeSessionId: string) => ipcRenderer.invoke("conversation:clear", claudeSessionId),
   onConversationAppended: (
     cb: (data: {
       filePath: string;
