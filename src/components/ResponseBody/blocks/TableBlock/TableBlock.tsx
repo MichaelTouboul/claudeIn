@@ -1,6 +1,8 @@
 import { ThemeProvider } from '@mui/material/styles';
 import { DataGrid, type GridColDef } from '@mui/x-data-grid';
 
+import { PanelTabKind, tableTabId, usePanelStore } from '@/store/usePanelStore';
+
 import { BlockShell } from '../../BlockShell/BlockShell';
 import type { BlockAction } from '../../responseBody.types';
 import { muiTheme } from './muiTheme';
@@ -22,6 +24,21 @@ export function TableBlock({ node, raw }: TableBlockProps) {
     minWidth: 120,
   }));
 
+  const openTab = usePanelStore((s) => s.openTab);
+
+  const open: BlockAction = {
+    id: 'open',
+    label: 'Open',
+    kind: 'local',
+    run: () =>
+      openTab({
+        id: tableTabId({ columns, rows }),
+        kind: PanelTabKind.Table,
+        title: 'Table',
+        payload: { columns, rows },
+      }),
+  };
+
   const copy: BlockAction = {
     id: 'copy',
     label: 'Copy',
@@ -32,7 +49,7 @@ export function TableBlock({ node, raw }: TableBlockProps) {
   return (
     <BlockShell>
       {(register) => {
-        register([copy]);
+        register([open, copy]);
         return (
           <ThemeProvider theme={muiTheme}>
             <div className="p-2" style={{ maxHeight: MAX_GRID_HEIGHT, overflow: 'auto' }}>
