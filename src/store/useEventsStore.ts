@@ -38,7 +38,7 @@ type IPCEvent =
   | { type: "spawn_usage"; agentName: string; tokensIn?: number; tokensOut?: number }
   | { type: "session_activity"; agentName?: string; tokensIn?: number; tokensOut?: number }
   | { type: "spawn_input_request"; agentName?: string }
-  | { type: "spawn_exit"; agentName?: string };
+  | { type: "spawn_exit"; agentName?: string; claudeSessionId?: string };
 
 type EventsState = {
   events: LiveEvent[];
@@ -259,14 +259,19 @@ export const useEventsStore = create<EventsState>((set, get) => ({
     }
     if (data.type === "spawn_exit" && data.agentName) {
       const name = data.agentName;
+      const exitedSession = data.claudeSessionId;
       clearWaitingWatchdog(name);
       set((s) => {
         const next = new Set(s.waitingAgents);
         next.delete(name);
-        return {
-          waitingAgents: next,
-          presence: setPresenceByName(s.presence, name, AgentPresenceStatus.Idle),
-        };
+        // Scope Idle to the session that actually exited (the exit payload carries
+        // claudeSessionId). Only fall back to the name-only sweep when it is
+        // absent — otherwise a same-named sub-agent still running in another
+        // conversation would wrongly flip to Idle here.
+        const presence = exitedSession
+          ? setPresence(s.presence, exitedSession, name, AgentPresenceStatus.Idle)
+          : setPresenceByName(s.presence, name, AgentPresenceStatus.Idle);
+        return { waitingAgents: next, presence };
       });
     }
   },

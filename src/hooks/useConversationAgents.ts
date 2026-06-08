@@ -103,7 +103,7 @@ export function useConversationAgents(
 
   const result: ConversationAgent[] = [];
   for (const [name, status] of sessionPresence) {
-    if (!name || name === orchestratorName) continue;
+    if (!name || normalizeAgentKey(name) === normalizeAgentKey(orchestratorName)) continue;
     result.push({
       name,
       color: colorByName.get(normalizeAgentKey(name)) ?? paletteColor(name),
