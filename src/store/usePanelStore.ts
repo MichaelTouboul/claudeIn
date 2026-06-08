@@ -1,22 +1,23 @@
 import { create } from 'zustand';
 
 import type { TableColumn, TableRow } from '@/components/ResponseBody/blocks/TableBlock/parseTable';
+import { contentHash } from '@/lib/contentHash';
 
 export type { TableColumn, TableRow };
 
-/** Finite set of panel tab kinds. Widened in later phases (code, text, …). */
-export const PanelTabKind = { Table: 'table' } as const;
+/** Finite set of panel tab kinds. Add a value here + an entry in TAB_BODY to extend the panel. */
+export const PanelTabKind = { Table: 'table', Code: 'code', Text: 'text' } as const;
 export type PanelTabKind = (typeof PanelTabKind)[keyof typeof PanelTabKind];
 
 export type TablePayload = { columns: TableColumn[]; rows: TableRow[] };
+export type CodePayload = { lang: string | null; src: string };
+export type TextPayload = { text: string };
 
-export type PanelTab = {
-  /** Stable id used for dedup (see tableTabId). */
-  id: string;
-  kind: PanelTabKind;
-  title: string;
-  payload: TablePayload;
-};
+/** A panel tab — discriminated by `kind`, so `payload` is narrowed per kind. */
+export type PanelTab =
+  | { id: string; kind: typeof PanelTabKind.Table; title: string; payload: TablePayload }
+  | { id: string; kind: typeof PanelTabKind.Code; title: string; payload: CodePayload }
+  | { id: string; kind: typeof PanelTabKind.Text; title: string; payload: TextPayload };
 
 type PanelState = {
   isOpen: boolean;
@@ -26,11 +27,11 @@ type PanelState = {
   openTab: (tab: PanelTab) => void;
   closeTab: (id: string) => void;
   /** Patch an existing tab in place (e.g. ephemeral table edits). No-op if absent. */
-  updateTab: (id: string, patch: Partial<Omit<PanelTab, 'id'>>) => void;
+  updateTab: (id: string, patch: Partial<Omit<PanelTab, 'id' | 'kind'>>) => void;
   /**
    * Replace a single row (matched by `id`) in a table tab's payload, reading the
    * LIVE tab state inside the set updater so back-to-back edits never lose data
-   * (no stale render-time closure). No-op if the tab is absent.
+   * (no stale render-time closure). No-op if the tab is absent or not a table.
    */
   commitRow: (id: string, row: TableRow) => void;
   setActive: (id: string) => void;
@@ -47,11 +48,11 @@ export const usePanelStore = create<PanelState>((set) => ({
       const existing = s.tabs.find((t) => t.id === tab.id);
       if (existing) {
         // Same id AND same content → refocus the existing tab (true dedup).
-        if (samePayload(existing.payload, tab.payload)) {
+        if (samePayload(existing, tab)) {
           return { isOpen: true, activeTabId: existing.id, tabs: s.tabs };
         }
         // Same id but DIFFERENT content (hash collision). Aliasing here would
-        // show the wrong table, so mint a fresh, guaranteed-unique id instead.
+        // show the wrong content, so mint a fresh, guaranteed-unique id instead.
         const uniqueTab = { ...tab, id: uniqueId(tab.id, s.tabs) };
         return { isOpen: true, activeTabId: uniqueTab.id, tabs: [...s.tabs, uniqueTab] };
       }
@@ -66,12 +67,12 @@ export const usePanelStore = create<PanelState>((set) => ({
     }),
   updateTab: (id, patch) =>
     set((s) => ({
-      tabs: s.tabs.map((t) => (t.id === id ? { ...t, ...patch } : t)),
+      tabs: s.tabs.map((t) => (t.id === id ? ({ ...t, ...patch } as PanelTab) : t)),
     })),
   commitRow: (id, row) =>
     set((s) => ({
       tabs: s.tabs.map((t) => {
-        if (t.id !== id) return t;
+        if (t.id !== id || t.kind !== PanelTabKind.Table) return t;
         const rows = t.payload.rows.map((r) => (r.id === row.id ? row : r));
         return { ...t, payload: { ...t.payload, rows } };
       }),
@@ -81,28 +82,33 @@ export const usePanelStore = create<PanelState>((set) => ({
   togglePanel: () => set((s) => ({ isOpen: !s.isOpen })),
 }));
 
-/** Canonical string form of a payload — the single source for hashing & equality. */
-function serializePayload(payload: TablePayload): string {
-  return JSON.stringify({ c: payload.columns, r: payload.rows });
+/** Canonical string form of a tab's payload — the single source for hashing & equality. */
+function serializePayload(tab: PanelTab): string {
+  return JSON.stringify(tab.payload);
 }
 
 /**
- * Content-derived tab id (djb2 hash) so re-opening the *same* table refocuses
+ * Content-derived tab ids (djb2 hash) so re-opening the *same* content refocuses
  * its tab. The hash is only a fast dedup hint — it is NOT collision-proof, so
  * `openTab` verifies payload equality before treating two ids as the same tab
  * and mints a fresh id on a genuine collision. Distinct content is therefore
  * never silently aliased to the wrong tab.
  */
 export function tableTabId(payload: TablePayload): string {
-  const str = serializePayload(payload);
-  let h = 5381;
-  for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0;
-  return `table:${h >>> 0}`;
+  return `table:${contentHash(JSON.stringify({ c: payload.columns, r: payload.rows }))}`;
 }
 
-/** True when two payloads carry identical content (for collision disambiguation). */
-function samePayload(a: TablePayload, b: TablePayload): boolean {
-  return serializePayload(a) === serializePayload(b);
+export function codeTabId(payload: CodePayload): string {
+  return `code:${contentHash(JSON.stringify(payload))}`;
+}
+
+export function textTabId(payload: TextPayload): string {
+  return `text:${contentHash(payload.text)}`;
+}
+
+/** True when two tabs carry identical payload content (for collision disambiguation). */
+function samePayload(a: PanelTab, b: PanelTab): boolean {
+  return a.kind === b.kind && serializePayload(a) === serializePayload(b);
 }
 
 /** Derive an id that is guaranteed not to clash with any existing tab id. */

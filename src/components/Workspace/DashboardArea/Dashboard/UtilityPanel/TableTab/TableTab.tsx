@@ -3,15 +3,29 @@ import { DataGrid, type GridColDef, type GridRowModel } from '@mui/x-data-grid';
 import { useCallback } from 'react';
 
 import { muiTheme } from '@/components/ResponseBody/blocks/TableBlock/muiTheme';
-import { type PanelTab, type TableRow, usePanelStore } from '@/store/usePanelStore';
+import {
+  type PanelTab,
+  PanelTabKind,
+  type TablePayload,
+  type TableRow,
+  usePanelStore,
+} from '@/store/usePanelStore';
 
 import { TableToolbar } from './TableToolbar/TableToolbar';
+
+const EMPTY_TABLE: TablePayload = { columns: [], rows: [] };
 
 export function TableTab({ tab }: { tab: PanelTab }) {
   const commitRow = usePanelStore((s) => s.commitRow);
   // Read the LIVE payload from the store (not the render-time prop) so the grid,
   // the export toolbar, and processRowUpdate always see the latest edits.
-  const payload = usePanelStore((s) => s.tabs.find((t) => t.id === tab.id)?.payload) ?? tab.payload;
+  const livePayload = usePanelStore((s) => {
+    const found = s.tabs.find((t) => t.id === tab.id);
+    return found?.kind === PanelTabKind.Table ? found.payload : null;
+  });
+  // TAB_BODY only routes table tabs here; the prop fallback keeps narrowing sound.
+  const fallback = tab.kind === PanelTabKind.Table ? tab.payload : EMPTY_TABLE;
+  const payload = livePayload ?? fallback;
   const { columns, rows } = payload;
 
   const gridColumns: GridColDef[] = columns.map((c) => ({
