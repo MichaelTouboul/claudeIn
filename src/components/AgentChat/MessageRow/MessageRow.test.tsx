@@ -1,9 +1,14 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { PanelTabKind, textTabId, usePanelStore } from '@/store/usePanelStore';
 import type { ChatMessage } from '@/types/spawn.types';
 
 import { MessageRow } from './MessageRow';
+
+beforeEach(() => {
+  usePanelStore.setState({ isOpen: false, tabs: [], activeTabId: null });
+});
 
 function assistant(content: string): ChatMessage {
   return { id: 'm1', role: 'assistant', content, timestamp: new Date().toISOString() };
@@ -77,5 +82,25 @@ describe('MessageRow', () => {
   it('renders no copy button for an empty-content message', () => {
     render(<MessageRow msg={assistant('   ')} isLast onAnswer={vi.fn()} />);
     expect(screen.queryByRole('button', { name: 'Copy message' })).not.toBeInTheDocument();
+  });
+
+  it('opens the message prose as a Text panel tab from the footer button', () => {
+    const content = 'Here is a summary of the work.';
+    render(<MessageRow msg={assistant(content)} isLast onAnswer={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Open in panel' }));
+    const s = usePanelStore.getState();
+    expect(s.isOpen).toBe(true);
+    expect(s.tabs).toHaveLength(1);
+    const tab = s.tabs[0];
+    expect(tab.id).toBe(textTabId({ text: content }));
+    expect(tab.kind).toBe(PanelTabKind.Text);
+    expect(tab.payload).toEqual({ text: content });
+  });
+
+  it('shows no panel footer button for an authorization prompt or empty prose', () => {
+    const { rerender } = render(<MessageRow msg={assistant(authBlock)} isLast onAnswer={vi.fn()} />);
+    expect(screen.queryByRole('button', { name: 'Open in panel' })).not.toBeInTheDocument();
+    rerender(<MessageRow msg={assistant('   ')} isLast onAnswer={vi.fn()} />);
+    expect(screen.queryByRole('button', { name: 'Open in panel' })).not.toBeInTheDocument();
   });
 });
