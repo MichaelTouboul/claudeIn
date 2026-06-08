@@ -175,6 +175,24 @@ describe("useConversationAgents", () => {
     expect(result.current[0].color).toBe("purple");
   });
 
+  it("matches the defined agent's color despite case/whitespace differences in the runtime name", () => {
+    act(() => {
+      // Defined agent name is "Researcher"; the backend reports "researcher "
+      // (different casing + trailing space). The configured color must still win
+      // rather than silently falling back to the palette hash.
+      useDashboardStore.setState({
+        agents: [agentSummary("Researcher", "purple")],
+      });
+      ingestEvent({ id: 1, agent_name: "researcher ", session_id: "sess-1" });
+    });
+
+    const { result } = renderHook(() =>
+      useConversationAgents("sess-1", "orchestrator"),
+    );
+
+    expect(result.current[0].color).toBe("purple");
+  });
+
   it("falls back to a deterministic palette color for an unknown name", () => {
     act(() => {
       ingestEvent({ id: 1, agent_name: "mystery", session_id: "sess-1" });

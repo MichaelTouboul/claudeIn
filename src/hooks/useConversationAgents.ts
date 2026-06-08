@@ -39,6 +39,15 @@ const PALETTE = [
   "pink",
 ] as const;
 
+// Canonical key for matching a runtime `agent_name` to a defined agent's
+// `frontmatter.name` (AgentSummary.id). The backend's reported `agent_name` is
+// not guaranteed to be byte-identical to the frontmatter name — casing or stray
+// whitespace can differ — so we compare on a trimmed, lower-cased key rather than
+// requiring an exact match (which would silently lose the configured color).
+export function normalizeAgentKey(name: string): string {
+  return name.trim().toLowerCase();
+}
+
 /** Stable name → palette color. Same name always yields the same color. */
 export function paletteColor(name: string): string {
   let hash = 0;
@@ -68,7 +77,9 @@ export function paletteColor(name: string): string {
  * single place to revisit.
  *
  * Color is the defined project agent's frontmatter color when the runtime name
- * matches, else a deterministic palette hash.
+ * matches (compared via `normalizeAgentKey` — trimmed + lower-cased — so casing
+ * or whitespace drift in the backend's `agent_name` doesn't lose the configured
+ * color), else a deterministic palette hash.
  */
 export function useConversationAgents(
   claudeSessionId: string | null,
@@ -81,9 +92,13 @@ export function useConversationAgents(
 
   if (!sessionPresence) return [];
 
+  // Keyed by the NORMALIZED frontmatter name (AgentSummary.id) so a runtime
+  // agent_name that differs only by casing/whitespace still resolves the color.
   const colorByName = new Map<string, string>();
   for (const agent of definedAgents) {
-    if (agent.frontmatter.color) colorByName.set(agent.id, agent.frontmatter.color);
+    if (agent.frontmatter.color) {
+      colorByName.set(normalizeAgentKey(agent.id), agent.frontmatter.color);
+    }
   }
 
   const result: ConversationAgent[] = [];
@@ -91,7 +106,7 @@ export function useConversationAgents(
     if (!name || name === orchestratorName) continue;
     result.push({
       name,
-      color: colorByName.get(name) ?? paletteColor(name),
+      color: colorByName.get(normalizeAgentKey(name)) ?? paletteColor(name),
       status,
     });
   }

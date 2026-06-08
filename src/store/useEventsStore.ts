@@ -5,6 +5,13 @@ import type { AgentContext, LiveEvent } from "@/types/events.types";
 
 const DEFAULT_LIMIT = 200_000;
 const ACTIVE_TIMEOUT_MS = 5000;
+// A sub-agent that asked for input but never resolved (no `spawn_usage`,
+// `session_activity`, or `spawn_exit`) — e.g. its process was killed — would
+// otherwise stay `Waiting` forever, since no other code path can clear it. After
+// this idle window with no further signal, the watchdog demotes it to Idle so a
+// dead agent's dot can't blink "waiting" indefinitely. Generous vs the 5s active
+// window because a genuine input prompt may legitimately wait on the user.
+const WAITING_TIMEOUT_MS = 45_000;
 
 // Per-conversation presence status for one agent. Authoritative, finite state
 // (CLAUDE.md: enum + behavior map, not a fallback chain). `idle` doubles as the
@@ -46,6 +53,8 @@ type EventsState = {
   setConnected: (connected: boolean) => void;
   ingest: (raw: unknown) => void;
   expireActive: (agentName: string) => void;
+  // Watchdog: demote a still-`Waiting` agent to Idle (see WAITING_TIMEOUT_MS).
+  expireWaiting: (agentName: string) => void;
 };
 
 // Set an agent's status for ONE session, cloning the touched maps so zustand
@@ -116,6 +125,30 @@ export const useEventsStore = create<EventsState>((set, get) => ({
       return { activeAgents: nextActive, currentTools: nextTools, presence: nextPresence };
     }),
 
+  expireWaiting: (agentName) =>
+    set((s) => {
+      // Only act if the agent is still Waiting — a `spawn_usage`/`session_activity`
+      // (→ Active) or `spawn_exit` (→ Idle) may have already resolved it and reset
+      // its presence; in that case the watchdog is a no-op.
+      const nextWaiting = new Set(s.waitingAgents);
+      nextWaiting.delete(agentName);
+      let nextPresence = s.presence;
+      for (const [sessionId, inner] of s.presence) {
+        if (inner.get(agentName) === AgentPresenceStatus.Waiting) {
+          nextPresence = setPresence(
+            nextPresence,
+            sessionId,
+            agentName,
+            AgentPresenceStatus.Idle,
+          );
+        }
+      }
+      if (nextPresence === s.presence && nextWaiting.size === s.waitingAgents.size) {
+        return {};
+      }
+      return { waitingAgents: nextWaiting, presence: nextPresence };
+    }),
+
   ingest: (raw) => {
     const data = raw as IPCEvent;
     const markActive = (
@@ -126,6 +159,8 @@ export const useEventsStore = create<EventsState>((set, get) => ({
       toolName?: string
     ) => {
       const s = get();
+      // Any real activity supersedes a pending "waiting" — cancel its watchdog.
+      clearWaitingWatchdog(agentName);
       const nextActive = new Set(s.activeAgents).add(agentName);
 
       let nextContexts = s.agentContexts;
@@ -215,6 +250,7 @@ export const useEventsStore = create<EventsState>((set, get) => ({
     }
     if (data.type === "spawn_input_request" && data.agentName) {
       const name = data.agentName;
+      armWaitingWatchdog(name);
       set((s) => ({
         waitingAgents: new Set(s.waitingAgents).add(name),
         presence: setPresenceByName(s.presence, name, AgentPresenceStatus.Waiting),
@@ -223,6 +259,7 @@ export const useEventsStore = create<EventsState>((set, get) => ({
     }
     if (data.type === "spawn_exit" && data.agentName) {
       const name = data.agentName;
+      clearWaitingWatchdog(name);
       set((s) => {
         const next = new Set(s.waitingAgents);
         next.delete(name);
@@ -236,6 +273,30 @@ export const useEventsStore = create<EventsState>((set, get) => ({
 }));
 
 const activeTimers = new Map<string, ReturnType<typeof setTimeout>>();
+const waitingTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
+// Arm the waiting watchdog for an agent, replacing any pending one (so a repeated
+// input request resets the window rather than firing on the first request's clock).
+function armWaitingWatchdog(agentName: string) {
+  const existing = waitingTimers.get(agentName);
+  if (existing) clearTimeout(existing);
+  waitingTimers.set(
+    agentName,
+    setTimeout(() => {
+      waitingTimers.delete(agentName);
+      useEventsStore.getState().expireWaiting(agentName);
+    }, WAITING_TIMEOUT_MS),
+  );
+}
+
+// Cancel a pending waiting watchdog (the agent left `Waiting` by another signal).
+function clearWaitingWatchdog(agentName: string) {
+  const existing = waitingTimers.get(agentName);
+  if (existing) {
+    clearTimeout(existing);
+    waitingTimers.delete(agentName);
+  }
+}
 
 export function useInitEvents() {
   useEffect(() => {
@@ -247,6 +308,8 @@ export function useInitEvents() {
       cleanup();
       for (const timer of activeTimers.values()) clearTimeout(timer);
       activeTimers.clear();
+      for (const timer of waitingTimers.values()) clearTimeout(timer);
+      waitingTimers.clear();
       useEventsStore.getState().setConnected(false);
     };
   }, []);
