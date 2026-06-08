@@ -1,5 +1,5 @@
 import { X } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import { Dialog } from '@/components/_ui/Dialog';
 import { type TabItem, Tabs } from '@/components/_ui/Tabs';
@@ -22,23 +22,35 @@ export function UtilityPanel() {
   // is the distance from the cursor to the right viewport edge. Mirrors
   // useResizableSidebar (the store action clamps the value).
   const isDragging = useRef(false);
+  // End any in-flight drag and restore the body styles. Used by mouseup, by the
+  // unmount cleanup, and whenever the panel closes — so closing mid-drag never
+  // leaves the app stuck with a col-resize cursor and text selection disabled.
+  const endDrag = useCallback(() => {
+    isDragging.current = false;
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  }, []);
+
   useEffect(() => {
     const onMouseMove = (e: MouseEvent) => {
       if (!isDragging.current) return;
       setWidth(window.innerWidth - e.clientX);
     };
-    const onMouseUp = () => {
-      isDragging.current = false;
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-    };
     document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
+    document.addEventListener('mouseup', endDrag);
     return () => {
       document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
+      document.removeEventListener('mouseup', endDrag);
+      endDrag();
     };
-  }, [setWidth]);
+  }, [setWidth, endDrag]);
+
+  // The panel content unmounts on close, but THIS component stays mounted, so
+  // the listener cleanup above doesn't run on close. Reset the drag state here
+  // when the panel is no longer open.
+  useEffect(() => {
+    if (!isOpen) endDrag();
+  }, [isOpen, endDrag]);
 
   const startDrag = () => {
     isDragging.current = true;
