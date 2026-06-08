@@ -13,14 +13,32 @@ type TableToolbarProps = {
   title: string;
 };
 
+/** Outcome of the last copy attempt — drives the Copy button label. */
+const CopyState = { Idle: 'idle', Copied: 'copied', Failed: 'failed' } as const;
+type CopyState = (typeof CopyState)[keyof typeof CopyState];
+
+const COPY_LABEL: Record<CopyState, string> = {
+  [CopyState.Idle]: 'Copy',
+  [CopyState.Copied]: 'Copied',
+  [CopyState.Failed]: 'Failed',
+};
+
 /** Deterministic actions over the current grid: export Excel / PDF, copy markdown. */
 export function TableToolbar({ payload, title }: TableToolbarProps) {
-  const [copied, setCopied] = useState(false);
+  const [copyState, setCopyState] = useState<CopyState>(CopyState.Idle);
 
+  // `navigator.clipboard.writeText` can reject (permission denied, non-secure
+  // context, Electron restrictions). React does not catch rejections from async
+  // event handlers, so we must catch here — otherwise the failure becomes an
+  // unhandled rejection and the user gets no feedback at all.
   const onCopy = async () => {
-    await copyMarkdown(payload);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1500);
+    try {
+      await copyMarkdown(payload);
+      setCopyState(CopyState.Copied);
+    } catch {
+      setCopyState(CopyState.Failed);
+    }
+    window.setTimeout(() => setCopyState(CopyState.Idle), 1500);
   };
 
   return (
@@ -35,7 +53,7 @@ export function TableToolbar({ payload, title }: TableToolbarProps) {
       </Button>
       <Button intent="outline" size="sm" onClick={onCopy}>
         <Clipboard size={13} />
-        {copied ? 'Copied' : 'Copy'}
+        {COPY_LABEL[copyState]}
       </Button>
     </div>
   );
