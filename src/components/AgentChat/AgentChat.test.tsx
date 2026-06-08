@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { useImperativeHandle } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { useModelStore } from '@/store/useModelStore';
 import type { SpawnSession } from '@/types/spawn.types';
 
 import { AgentChat } from './AgentChat';
@@ -14,15 +15,30 @@ import type { RichEditorHandle } from './RichEditor/RichEditor';
 
 const focusSpy = vi.fn();
 
+// Captured RichEditor callbacks so a test can simulate typing + submitting a
+// message (the only way to populate the send queue through the real flow).
+let editorOnChange: ((markdown: string, plain: string) => void) | null = null;
+let editorOnSubmit: (() => void) | null = null;
+
 // Mock RichEditor: forward the focus() spy through the imperative handle so a
 // real editorRef.current.focus() call is observable, without pulling in Lexical.
 vi.mock('./RichEditor/RichEditor', () => ({
-  RichEditor: ({ handleRef }: { handleRef: React.Ref<RichEditorHandle> }) => {
+  RichEditor: ({
+    handleRef,
+    onChange,
+    onSubmit,
+  }: {
+    handleRef: React.Ref<RichEditorHandle>;
+    onChange: (markdown: string, plain: string) => void;
+    onSubmit: () => void;
+  }) => {
     useImperativeHandle(handleRef, () => ({
       focus: focusSpy,
       clear: vi.fn(),
       insertMention: vi.fn(),
     }));
+    editorOnChange = onChange;
+    editorOnSubmit = onSubmit;
     return <div data-testid="rich-editor" />;
   },
 }));
@@ -71,6 +87,9 @@ async function renderReady() {
 beforeEach(() => {
   focusSpy.mockClear();
   eventCb = null;
+  editorOnChange = null;
+  editorOnSubmit = null;
+  useModelStore.setState({ models: {} });
   spawnMock.mockReset().mockResolvedValue(session);
   Object.defineProperty(document, 'hidden', { configurable: true, value: false });
   vi.stubGlobal('window', window);
@@ -169,5 +188,59 @@ describe('AgentChat compact-on-resume', () => {
     eventCb!({ type: 'spawn_compacted', localSessionId: 'sess-1' });
 
     expect(await screen.findByText(/context compacted/i)).toBeInTheDocument();
+  });
+});
+
+describe('AgentChat model threading', () => {
+  const act = async (fn: () => void) => {
+    fn();
+    await new Promise((r) => setTimeout(r, 0));
+  };
+
+  it('threads a model picked under the stable tab key into the first (resume) spawn', async () => {
+    // The key is the owning tab id (STABLE) — NOT session.localSessionId — so a
+    // model chosen before the first spawn is honored, not orphaned when the
+    // session arrives. (regression: conversationKey shift on first setSession)
+    useModelStore.getState().setModel('tab-1', 'claude-opus-4-8');
+    render(
+      <AgentChat agentName="tester" tabId="tab-1" cwd="/p" resumeSessionId="claude-1" initialMessage="hi" />,
+    );
+    await waitFor(() => expect(spawnMock).toHaveBeenCalled());
+    expect(spawnMock).toHaveBeenCalledWith(expect.objectContaining({ model: 'claude-opus-4-8' }));
+  });
+
+  it('keeps honoring the tab-keyed model across a queue-flushed turn after the session id is known', async () => {
+    // Reproduces BOTH prior blockers: (1) the key must not shift to localSessionId
+    // once the session exists; (2) the queue flush must use the LATEST closure
+    // (via sendNextFromQueueRef), reflecting a model changed mid-conversation.
+    render(
+      <AgentChat agentName="tester" tabId="tab-1" cwd="/p" resumeSessionId="claude-1" initialMessage="hi" />,
+    );
+    await waitFor(() => expect(spawnMock).toHaveBeenCalled());
+    await waitFor(() => expect(eventCb).not.toBeNull());
+    await waitFor(() => expect(editorOnSubmit).not.toBeNull());
+
+    // First turn is in flight (awaitingResponse). User picks a model now, then
+    // queues a second message while still awaiting — it must flush with that model.
+    await act(() => useModelStore.getState().setModel('tab-1', 'claude-sonnet-4-6'));
+    await act(() => editorOnChange!('next turn', 'next turn'));
+    await act(() => editorOnSubmit!());
+
+    spawnMock.mockClear();
+    // Assistant reply for the first turn drives the queue flush.
+    await act(() => emitAssistant('done with first'));
+    await new Promise((r) => setTimeout(r, 150));
+
+    expect(spawnMock).toHaveBeenCalledWith(
+      expect.objectContaining({ mission: 'next turn', model: 'claude-sonnet-4-6' }),
+    );
+  });
+
+  it('omits model when none is selected for the conversation (claude default)', async () => {
+    render(
+      <AgentChat agentName="tester" tabId="tab-1" cwd="/p" resumeSessionId="claude-1" initialMessage="hi" />,
+    );
+    await waitFor(() => expect(spawnMock).toHaveBeenCalled());
+    expect(spawnMock).toHaveBeenCalledWith(expect.objectContaining({ model: undefined }));
   });
 });

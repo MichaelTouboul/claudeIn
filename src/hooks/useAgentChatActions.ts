@@ -23,6 +23,11 @@ type UseAgentChatActionsParams = {
   agentName: string;
   projectPath: string | undefined;
   claudeSessionId: string | null;
+  // The model id selected for THIS conversation (from useModelStore), or
+  // undefined for claude's default. Passed on every spawn/resume turn.
+  model: string | undefined;
+  // Open the in-app model picker submenu (the `/model` slash command).
+  openModelPicker: () => void;
   editorRef: RefObject<RichEditorHandle | null>;
   pendingUserMsgs: RefObject<Set<string>>;
   setInput: SetState<string>;
@@ -45,6 +50,8 @@ export function useAgentChatActions({
   agentName,
   projectPath,
   claudeSessionId,
+  model,
+  openModelPicker,
   editorRef,
   pendingUserMsgs,
   setInput,
@@ -105,23 +112,23 @@ export function useAgentChatActions({
     } else {
       pendingUserMsgs.current.add(fullText);
       try {
-        const data = await window.api.spawn({ agent_name: agentName, mission: fullText, cwd: projectPath, resume_session_id: claudeSessionId || undefined });
+        const data = await window.api.spawn({ agent_name: agentName, mission: fullText, cwd: projectPath, resume_session_id: claudeSessionId || undefined, model });
         setSession(data);
         if (data.claudeSessionId) setClaudeSessionId(data.claudeSessionId);
       } catch {
         setAwaitingResponse(false);
       }
     }
-  }, [awaitingResponse, compacting, session, isRunning, agentName, projectPath, claudeSessionId, pendingUserMsgs, setQueue, setMessages, setAwaitingResponse, setWaitingInput, setSession, setClaudeSessionId]);
+  }, [awaitingResponse, compacting, session, isRunning, agentName, projectPath, claudeSessionId, model, pendingUserMsgs, setQueue, setMessages, setAwaitingResponse, setWaitingInput, setSession, setClaudeSessionId]);
 
   // The ONE slash dispatcher. Both entry points (typed send + slash menu) route
   // through it: registry-driven, `local` → its handler, `cli` → `sendMessage`.
   // Returns true when a registered command owned the input.
   const dispatchSlash = useCallback((command: string): boolean =>
-    dispatchSlashCommand(command, { handlers: slashHandlers, sendToCli: (t) => void sendMessage(t) }),
+    dispatchSlashCommand(command, { handlers: slashHandlers, sendToCli: (t) => void sendMessage(t), openModelPicker }),
     // slashHandlers is rebuilt each render but only wraps the stable clearConversation.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [clearConversation, sendMessage]);
+    [clearConversation, sendMessage, openModelPicker]);
 
   const handleSend = useCallback(async () => {
     if (!input.trim() && attachedFiles.length === 0) return;
@@ -186,14 +193,14 @@ export function useAgentChatActions({
       await window.api.sendInput(session.localSessionId, value);
     } else {
       try {
-        const data = await window.api.spawn({ agent_name: agentName, mission: value, cwd: projectPath, resume_session_id: claudeSessionId || undefined });
+        const data = await window.api.spawn({ agent_name: agentName, mission: value, cwd: projectPath, resume_session_id: claudeSessionId || undefined, model });
         setSession(data);
         if (data.claudeSessionId) setClaudeSessionId(data.claudeSessionId);
       } catch {
         setAwaitingResponse(false);
       }
     }
-  }, [compacting, session, isRunning, agentName, projectPath, claudeSessionId, pendingUserMsgs, setQueue, setMessages, setWaitingInput, setAttachedFiles, setAwaitingResponse, setSession, setClaudeSessionId]);
+  }, [compacting, session, isRunning, agentName, projectPath, claudeSessionId, model, pendingUserMsgs, setQueue, setMessages, setWaitingInput, setAttachedFiles, setAwaitingResponse, setSession, setClaudeSessionId]);
 
   const handleKill = useCallback(async () => {
     if (!session) return;

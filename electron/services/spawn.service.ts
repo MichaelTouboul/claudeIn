@@ -3,37 +3,19 @@ import { randomUUID } from "crypto";
 import { broadcast } from "./broadcast";
 import { setAiTitle } from "./conversation.meta";
 import { ingestEvent } from "./events.service";
+import { buildSpawnArgs } from "./spawn.args";
 import { extractText, parseStreamLine } from "./spawn.parse";
-import { NO_FOLLOWUP_SYSTEM_PROMPT } from "./spawn.steering";
 import { generateConversationTitle } from "./title.service";
 import type { SpawnSession, ChatMessage, StreamEvent } from "../types/spawn.types";
 
 const sessions = new Map<string, { session: SpawnSession; process: ChildProcess }>();
 
-export function spawnAgent(agentName: string, mission: string, cwd?: string, resumeSessionId?: string): SpawnSession {
+export function spawnAgent(agentName: string, mission: string, cwd?: string, resumeSessionId?: string, model?: string): SpawnSession {
   const localSessionId = randomUUID();
 
-  // `--append-system-prompt` is added here, ahead of the resume/fresh branch, so
-  // the no-follow-up steering is re-passed on EVERY turn — including `--resume`,
-  // where the CLI does not carry a prior turn's appended prompt forward.
-  const args = [
-    "--print",
-    "--output-format", "stream-json",
-    "--verbose",
-    "--max-turns", "50",
-    "--append-system-prompt", NO_FOLLOWUP_SYSTEM_PROMPT,
-  ];
-
-  if (resumeSessionId) {
-    args.push("--resume", resumeSessionId);
-  } else {
-    const agentFlag = agentName && agentName !== "_main";
-    if (agentFlag) {
-      args.push("--agent", agentName);
-    }
-  }
-
-  args.push(mission);
+  // Flag assembly (including the optional `--model`) lives in the pure
+  // `buildSpawnArgs` helper so it stays unit-testable.
+  const args = buildSpawnArgs({ agentName, mission, resumeSessionId, model });
 
   const proc = spawn("claude", args, {
     stdio: ["pipe", "pipe", "pipe"],

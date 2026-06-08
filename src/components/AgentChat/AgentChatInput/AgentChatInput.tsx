@@ -21,6 +21,14 @@ export type AgentChatInputProps = {
   onInputChange: (val: string) => void;
   /** Execute a chosen slash command (e.g. `/compact`). */
   onSelectSlash: (cmd: string) => void;
+  /** The `/model` picker submenu open state (driven by AgentChat). */
+  modelPickerOpen: boolean;
+  /** The label of the model selected for this conversation, if any. */
+  selectedModelLabel?: string;
+  /** Commit a chosen model id for this conversation (closes the picker). */
+  onSelectModel: (modelId: string) => void;
+  /** Dismiss the model picker without choosing. */
+  onCloseModelPicker: () => void;
   onRemoveAttachment: (index: number) => void;
   onAttach: () => void;
   onSend: () => void;
@@ -36,12 +44,16 @@ export function AgentChatInput({
   editorRef,
   onInputChange,
   onSelectSlash,
+  modelPickerOpen,
+  selectedModelLabel,
+  onSelectModel,
+  onCloseModelPicker,
   onRemoveAttachment,
   onAttach,
   onSend,
 }: AgentChatInputProps) {
   const [plainText, setPlainText] = useState('');
-  const menus = useInputMenus(plainText);
+  const menus = useInputMenus(plainText, modelPickerOpen);
 
   // Auto-focus when a turn finishes lives in AgentChat (on `spawn_exit`), since
   // the old `waitingInput`-based effect here never fired: `claude --print` is
@@ -49,7 +61,10 @@ export function AgentChatInput({
   // is still consumed below for styling and the placeholder.
 
   const handleSelect = (id: string) => {
-    if (menus.kind === 'slash') {
+    if (menus.kind === 'model') {
+      // The model picker's item id IS the model id; committing closes the picker.
+      onSelectModel(id);
+    } else if (menus.kind === 'slash') {
       onSelectSlash(id);
       editorRef.current?.clear();
     } else if (menus.kind === 'mention') {
@@ -79,6 +94,8 @@ export function AgentChatInput({
       return true;
     }
     if (key === 'Escape') {
+      // The model picker is opened explicitly, so it must be closed explicitly.
+      if (menus.kind === 'model') onCloseModelPicker();
       // Dismiss by clearing the open token: clearing the editor is too aggressive,
       // so we simply blur the menu via a focus bounce (re-render hides it on next type).
       editorRef.current?.focus();
@@ -148,7 +165,15 @@ export function AgentChatInput({
         </div>
         <RichEditor
           handleRef={editorRef}
-          placeholder={waitingInput ? "Type your response (yes / no / ...)..." : session && isRunning ? "Send a message..." : "Type a prompt, / for commands or @ to mention..."}
+          placeholder={
+            waitingInput
+              ? "Type your response (yes / no / ...)..."
+              : session && isRunning
+                ? "Send a message..."
+                : selectedModelLabel
+                  ? `${selectedModelLabel} · type, / for commands or @ to mention...`
+                  : "Type a prompt, / for commands or @ to mention..."
+          }
           onChange={(markdown, plain) => {
             onInputChange(markdown);
             setPlainText(plain);

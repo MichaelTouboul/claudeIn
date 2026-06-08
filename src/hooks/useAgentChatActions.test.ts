@@ -26,6 +26,8 @@ function makeParams(overrides: Partial<Parameters<typeof useAgentChatActions>[0]
     agentName: 'tester',
     projectPath: '/p',
     claudeSessionId: 'claude-1',
+    model: undefined as string | undefined,
+    openModelPicker: vi.fn(),
     editorRef,
     pendingUserMsgs,
     setInput: vi.fn(),
@@ -100,5 +102,26 @@ describe('useAgentChatActions handleSend — normal message (regression guard)',
     // a user bubble is pushed for a real message (not for /clear)
     expect(params.setMessages).toHaveBeenCalled();
     expect(params.setClaudeSessionId).toHaveBeenCalledWith('claude-2');
+  });
+
+  it('passes the selected model on spawn when one is set', async () => {
+    const params = makeParams({ input: 'do the thing', model: 'claude-opus-4-8' });
+    const { result } = renderHook(() => useAgentChatActions(params));
+
+    await result.current.handleSend();
+
+    expect(spawnMock).toHaveBeenCalledWith(
+      expect.objectContaining({ mission: 'do the thing', model: 'claude-opus-4-8' }),
+    );
+  });
+
+  it('opens the model picker for /model instead of spawning', async () => {
+    const params = makeParams({ input: '/model' });
+    const { result } = renderHook(() => useAgentChatActions(params));
+
+    await result.current.handleSend();
+
+    expect(params.openModelPicker).toHaveBeenCalledTimes(1);
+    expect(spawnMock).not.toHaveBeenCalled();
   });
 });

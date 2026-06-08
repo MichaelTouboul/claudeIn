@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { useDashboardStore } from '@/store/useDashboardStore';
+import { MODELS } from '@/store/useModelStore';
 
 import { matchMentionQuery, matchSlashQuery } from '../RichEditor/serialize';
 import { SLASH_COMMANDS } from '../slashRegistry';
 import type { InputMenuGroup } from './InputMenu';
 
-export type InputMenuKind = 'slash' | 'mention' | null;
+export type InputMenuKind = 'slash' | 'mention' | 'model' | null;
 
 export type UseInputMenusResult = {
   /** Which menu is open (mutually exclusive), or null. */
@@ -20,6 +21,18 @@ export type UseInputMenusResult = {
   /** The currently highlighted item id, or null when no items. */
   activeId: string | null;
 };
+
+/** The model picker submenu: one group of the central MODELS list. The item id is
+ *  the model id (so selecting returns the id straight to `setModel`). */
+function buildModelGroups(): InputMenuGroup[] {
+  return [
+    {
+      key: 'models',
+      title: 'Model',
+      items: MODELS.map((m, i) => ({ id: m.id, label: m.label, flatIndex: i })),
+    },
+  ];
+}
 
 function buildSlashGroups(query: string): InputMenuGroup[] {
   const items = SLASH_COMMANDS.filter((c) => c.cmd.slice(1).startsWith(query)).map((c, i) => ({
@@ -58,35 +71,45 @@ function buildMentionGroups(query: string, agentNames: string[], skillNames: str
   return groups;
 }
 
-/** Owns the slash/mention menu state for the chat input. Derives the open menu and its
- *  filtered, grouped items from the editor's plain text, and tracks keyboard highlight. */
-export function useInputMenus(plainText: string): UseInputMenusResult {
+/** Owns the slash/mention/model menu state for the chat input. Derives the open menu
+ *  and its filtered, grouped items from the editor's plain text (and the explicit
+ *  `modelPickerOpen` flag for the `/model` submenu), and tracks keyboard highlight. */
+export function useInputMenus(plainText: string, modelPickerOpen = false): UseInputMenusResult {
   const agents = useDashboardStore((s) => s.agents);
   const skills = useDashboardStore((s) => s.skills);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const slashQuery = matchSlashQuery(plainText);
+  // The model picker is opened explicitly (by `/model`), not by a typed token, so
+  // it takes precedence over any slash/mention query still in the editor.
+  const slashQuery = modelPickerOpen ? null : matchSlashQuery(plainText);
   // Mention only when slash isn't claiming the token — they are mutually exclusive.
-  const mentionQuery = slashQuery === null ? matchMentionQuery(plainText) : null;
+  const mentionQuery = !modelPickerOpen && slashQuery === null ? matchMentionQuery(plainText) : null;
 
   const agentNames = useMemo(() => agents.map((a) => a.frontmatter.name).filter(Boolean), [agents]);
   const skillNames = useMemo(() => skills.map((s) => s.name).filter(Boolean), [skills]);
 
   const groups = useMemo<InputMenuGroup[]>(() => {
+    if (modelPickerOpen) return buildModelGroups();
     if (slashQuery !== null) return buildSlashGroups(slashQuery);
     if (mentionQuery !== null) return buildMentionGroups(mentionQuery, agentNames, skillNames);
     return [];
-  }, [slashQuery, mentionQuery, agentNames, skillNames]);
+  }, [modelPickerOpen, slashQuery, mentionQuery, agentNames, skillNames]);
 
   const flatIds = useMemo(() => groups.flatMap((g) => g.items.map((it) => it.id)), [groups]);
 
-  // Reset highlight whenever the query token changes.
+  // Reset highlight whenever the query token (or the picker open state) changes.
   useEffect(() => {
     setActiveIndex(0);
-  }, [slashQuery, mentionQuery]);
+  }, [slashQuery, mentionQuery, modelPickerOpen]);
 
   const kind: InputMenuKind =
-    groups.length === 0 ? null : slashQuery !== null ? 'slash' : 'mention';
+    groups.length === 0
+      ? null
+      : modelPickerOpen
+        ? 'model'
+        : slashQuery !== null
+          ? 'slash'
+          : 'mention';
 
   const move = (delta: number) => {
     if (flatIds.length === 0) return;
