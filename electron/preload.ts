@@ -36,13 +36,6 @@ contextBridge.exposeInMainWorld("api", {
   deleteProjectMemoryFile: (projectId: string, fileName: string) =>
     ipcRenderer.invoke("memory:delete", projectId, fileName),
 
-  getCostsSummary: () => ipcRenderer.invoke("costs:summary"),
-  getCostsByDay: (days?: number) => ipcRenderer.invoke("costs:by-day", days),
-  getCostsByAgent: (days?: number) => ipcRenderer.invoke("costs:by-agent", days),
-  getCostsByAgentPerDay: (days?: number) => ipcRenderer.invoke("costs:by-agent-day", days),
-  getCostsByTool: (days?: number) => ipcRenderer.invoke("costs:by-tool", days),
-  getCostsByModel: (days?: number) => ipcRenderer.invoke("costs:by-model", days),
-
   getActivity: (days?: number) => ipcRenderer.invoke("activity:get", days),
 
   getFavorites: (projectId: string) => ipcRenderer.invoke("favorites:list", projectId),
