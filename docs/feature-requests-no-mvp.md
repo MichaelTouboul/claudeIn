@@ -22,6 +22,12 @@ Effort: **Low** (~half day) · **Medium** (~1 day) · **High** (multi-day).
 - **Upload button → dropdown** of upload types (image/file/folder/paste…) — ⬜ Low–Medium.
 - **Audio prompt input** (speech-to-text) — ⬜ Medium–High.
 - **Stop Thinking button** (prominent "Stop generating" in the chat area, wired to `handleKill`) — ⬜ Low.
+- **Native slash commands — deferred from v1** (v1 ships only `/model` + a registry honesty pass; see `docs/superpowers/specs/2026-06-08-native-slash-commands-v1-design.md`) — ⬜:
+  - `/cost` (Low, local — show this conversation's tokens/%/cost from data already tracked) and `/help` (Low, local — list working commands). Easy follow-ups.
+  - `/init` (Medium — app-crafted prompt to generate/update `CLAUDE.md` via `--print`) and `/review` (Medium — PR/diff review prompt).
+  - `/mcp` `/memory` `/config` `/permissions` (Medium each) — need a dedicated app view first; then a `kind:'view'` registry entry.
+  - **Custom user/project commands** (`.claude/commands/*.md`) + **skills runner** surfaced in the slash menu (High, Pillar 2) — a separate larger feature.
+  - Removed as N/A under the GUI/`--print`: `/vim` `/doctor` `/terminal-setup` `/login` `/logout` `/status`.
 
 ## ResponseBody block actions
 - **Table export → PDF** (Low) / **Excel** (Medium, TBD) — ⬜. On the `TableBlock`/`BlockShell` toolbar.
