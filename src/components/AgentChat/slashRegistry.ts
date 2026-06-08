@@ -11,6 +11,9 @@ export const SlashCommandKind = {
   Local: 'local',
   // Forwarded to `claude` as a message — the default for native CLI commands.
   Cli: 'cli',
+  // Opens an in-app picker submenu (e.g. `/model`) instead of running anything;
+  // the choice writes per-conversation state consumed by the next spawn.
+  Model: 'model',
 } as const;
 export type SlashCommandKind = (typeof SlashCommandKind)[keyof typeof SlashCommandKind];
 
@@ -23,7 +26,8 @@ export type LocalSlashHandlers = Record<LocalSlashHandlerId, () => void>;
 
 type LocalSlashCommand = { cmd: string; desc: string; kind: typeof SlashCommandKind.Local; handler: LocalSlashHandlerId };
 type CliSlashCommand = { cmd: string; desc: string; kind: typeof SlashCommandKind.Cli };
-export type SlashCommand = LocalSlashCommand | CliSlashCommand;
+type ModelSlashCommand = { cmd: string; desc: string; kind: typeof SlashCommandKind.Model };
+export type SlashCommand = LocalSlashCommand | CliSlashCommand | ModelSlashCommand;
 
 export const SLASH_COMMANDS: SlashCommand[] = [
   { cmd: '/help', desc: 'Get help with Claude Code', kind: SlashCommandKind.Cli },
@@ -37,7 +41,7 @@ export const SLASH_COMMANDS: SlashCommand[] = [
   { cmd: '/login', desc: 'Switch account', kind: SlashCommandKind.Cli },
   { cmd: '/logout', desc: 'Sign out', kind: SlashCommandKind.Cli },
   { cmd: '/memory', desc: 'Edit CLAUDE.md', kind: SlashCommandKind.Cli },
-  { cmd: '/model', desc: 'Switch model', kind: SlashCommandKind.Cli },
+  { cmd: '/model', desc: 'Switch model', kind: SlashCommandKind.Model },
   { cmd: '/permissions', desc: 'View allowed tools', kind: SlashCommandKind.Cli },
   { cmd: '/status', desc: 'Show session status', kind: SlashCommandKind.Cli },
   { cmd: '/terminal-setup', desc: 'Install shell integration', kind: SlashCommandKind.Cli },
@@ -57,6 +61,9 @@ export type DispatchDeps = {
   handlers: LocalSlashHandlers;
   // Forward a `cli` command (or unknown text the caller chose to send) to claude.
   sendToCli: (text: string) => void;
+  // Open the in-app model picker submenu (the `model` kind). The caller owns the
+  // menu mechanism (same pattern as `handlers` for local commands).
+  openModelPicker: () => void;
 };
 
 // Per-kind behavior, keyed by the finite `kind` — no `if (cmd === …)` chains.
@@ -67,6 +74,9 @@ const KIND_BEHAVIOR: Record<SlashCommandKind, (cmd: SlashCommand, deps: Dispatch
   },
   [SlashCommandKind.Cli]: (cmd, deps) => {
     deps.sendToCli(cmd.cmd);
+  },
+  [SlashCommandKind.Model]: (_cmd, deps) => {
+    deps.openModelPicker();
   },
 };
 
