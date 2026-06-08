@@ -7,6 +7,11 @@ import { buildTransformPrompt, type TransformInput } from "./transform.prompt";
 // but bounded so a hung `claude` never leaves the renderer spinning forever.
 const TRANSFORM_TIMEOUT_MS = 120_000;
 
+// Upper bound on the prompt (content + instruction) written to the child stdin.
+// Without it a very large tab — or a malicious renderer — could make the main
+// process allocate and write an unbounded buffer. `maxBuffer` only caps stdout.
+const MAX_PROMPT_BYTES = 2 * 1024 * 1024;
+
 /**
  * Run a single, fully ISOLATED `claude --print` to transform one panel tab's
  * content per the user's instruction.
@@ -25,6 +30,7 @@ const TRANSFORM_TIMEOUT_MS = 120_000;
  */
 export function transform(input: TransformInput): Promise<string> {
   const prompt = buildTransformPrompt(input);
+  if (prompt.length > MAX_PROMPT_BYTES) return Promise.resolve("");
   return new Promise<string>((resolve) => {
     const proc = exec(
       "claude --print --max-turns 1",
@@ -43,7 +49,14 @@ export function transform(input: TransformInput): Promise<string> {
         }
       },
     );
-    proc.stdin?.write(prompt);
-    proc.stdin?.end();
+    if (!proc.stdin) {
+      // No stdin → the prompt would be silently dropped and claude would return
+      // empty. Resolve explicitly so the empty result is intentional, not a
+      // dropped write masquerading as a successful no-op.
+      resolve("");
+      return;
+    }
+    proc.stdin.write(prompt);
+    proc.stdin.end();
   });
 }

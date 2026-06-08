@@ -1,5 +1,5 @@
 import { Loader2, Sparkles } from 'lucide-react';
-import { type FormEvent, type KeyboardEvent,useEffect,useState } from 'react';
+import { type FormEvent, type KeyboardEvent, useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/_ui/Button';
 import type { PanelTabKind } from '@/store/usePanelStore';
@@ -33,6 +33,11 @@ type PromptBarProps = {
 export function PromptBar({ kind, content, apply, onRunningChange }: PromptBarProps) {
   const [instruction, setInstruction] = useState('');
   const [isRunning, setIsRunning] = useState(false);
+  // Read `content` lazily at submit time (not when `submit` was created), so an
+  // edit committed to the store moments before Run is included rather than the
+  // stale render-time value.
+  const contentRef = useRef(content);
+  contentRef.current = content;
 
   // Surface the in-flight state to the parent so it can lock interactive content.
   useEffect(() => {
@@ -50,7 +55,7 @@ export function PromptBar({ kind, content, apply, onRunningChange }: PromptBarPr
       // main-process handler, …) collapses to '' — same silent-failure contract
       // as transform.service, so it never escapes as an unhandled rejection.
       const result = await window.api
-        .transform({ kind, instruction: trimmed, content })
+        .transform({ kind, instruction: trimmed, content: contentRef.current })
         .catch(() => '');
       if (result) {
         apply(result);
