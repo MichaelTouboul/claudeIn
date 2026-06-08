@@ -68,7 +68,10 @@ describe('TableTab', () => {
     act(() => {
       usePanelStore
         .getState()
-        .updateTab(tab.id, { payload: { columns: tab.payload.columns, rows: [{ id: 0, name: 'Renamed' }] } });
+        .updateTab(tab.id, {
+          kind: PanelTabKind.Table,
+          payload: { columns: tab.payload.columns, rows: [{ id: 0, name: 'Renamed' }] },
+        });
     });
     fireEvent.click(screen.getByRole('button', { name: /copy/i }));
     await waitFor(() =>

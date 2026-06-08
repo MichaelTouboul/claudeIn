@@ -112,7 +112,7 @@ describe('usePanelStore', () => {
       columns: [{ field: 'name', headerName: 'Name' }],
       rows: [{ id: 0, name: 'Edited' }],
     };
-    updateTab('a', { payload: patched });
+    updateTab('a', { kind: PanelTabKind.Table, payload: patched });
     const s = usePanelStore.getState();
     const a = s.tabs.find((t) => t.id === 'a');
     const b = s.tabs.find((t) => t.id === 'b');
@@ -129,6 +129,18 @@ describe('usePanelStore', () => {
     updateTab('a', { title: 'Renamed' });
     const a = usePanelStore.getState().tabs.find((t) => t.id === 'a');
     expect(a?.title).toBe('Renamed');
+    expect(a?.payload).toEqual({ columns: [], rows: [] });
+  });
+
+  it('updateTab rejects a payload whose kind differs from the target tab', () => {
+    const { openTab, updateTab } = usePanelStore.getState();
+    openTab(tableTab('a'));
+    // A rogue/unsafe caller (e.g. via a stale cast) tries to slot a TextPayload
+    // into a Table tab. The runtime guard must drop the payload, leaving the tab
+    // structurally intact: kind 'table' keeps its TablePayload.
+    updateTab('a', { kind: PanelTabKind.Text, payload: { text: 'rogue' } });
+    const a = usePanelStore.getState().tabs.find((t) => t.id === 'a');
+    expect(a?.kind).toBe(PanelTabKind.Table);
     expect(a?.payload).toEqual({ columns: [], rows: [] });
   });
 

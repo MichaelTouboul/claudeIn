@@ -19,6 +19,26 @@ export type PanelTab =
   | { id: string; kind: typeof PanelTabKind.Code; title: string; payload: CodePayload }
   | { id: string; kind: typeof PanelTabKind.Text; title: string; payload: TextPayload };
 
+/** Payload type for a given tab kind — single source for kind→payload mapping. */
+export type PayloadByKind = {
+  [PanelTabKind.Table]: TablePayload;
+  [PanelTabKind.Code]: CodePayload;
+  [PanelTabKind.Text]: TextPayload;
+};
+
+/**
+ * A patch for `updateTab`. `title` is always allowed; a `payload` patch is
+ * tagged with its `kind` so the type cannot supply, say, a TextPayload — the
+ * payload must declare which kind it belongs to. `updateTab` then refuses to
+ * apply a payload whose kind differs from the target tab (runtime guard), so
+ * a tab can never become structurally corrupt (e.g. table kind + text payload).
+ */
+export type TabPatch =
+  | { title?: string; kind?: undefined; payload?: undefined }
+  | { title?: string; kind: typeof PanelTabKind.Table; payload: TablePayload }
+  | { title?: string; kind: typeof PanelTabKind.Code; payload: CodePayload }
+  | { title?: string; kind: typeof PanelTabKind.Text; payload: TextPayload };
+
 type PanelState = {
   isOpen: boolean;
   tabs: PanelTab[];
@@ -26,8 +46,13 @@ type PanelState = {
   /** Push a tab (or refocus if its id already exists) and open the panel. */
   openTab: (tab: PanelTab) => void;
   closeTab: (id: string) => void;
-  /** Patch an existing tab in place (e.g. ephemeral table edits). No-op if absent. */
-  updateTab: (id: string, patch: Partial<Omit<PanelTab, 'id' | 'kind'>>) => void;
+  /**
+   * Patch an existing tab in place (e.g. ephemeral table edits). No-op if the
+   * tab is absent. A `payload` patch must carry the matching `kind`; a payload
+   * tagged for a different kind than the target tab is rejected (the tab is
+   * left untouched) so cross-kind payload substitution is impossible.
+   */
+  updateTab: (id: string, patch: TabPatch) => void;
   /**
    * Replace a single row (matched by `id`) in a table tab's payload, reading the
    * LIVE tab state inside the set updater so back-to-back edits never lose data
@@ -67,7 +92,7 @@ export const usePanelStore = create<PanelState>((set) => ({
     }),
   updateTab: (id, patch) =>
     set((s) => ({
-      tabs: s.tabs.map((t) => (t.id === id ? ({ ...t, ...patch } as PanelTab) : t)),
+      tabs: s.tabs.map((t) => (t.id === id ? applyPatch(t, patch) : t)),
     })),
   commitRow: (id, row) =>
     set((s) => ({
@@ -81,6 +106,31 @@ export const usePanelStore = create<PanelState>((set) => ({
   setOpen: (open) => set({ isOpen: open }),
   togglePanel: () => set((s) => ({ isOpen: !s.isOpen })),
 }));
+
+/**
+ * Merge a {@link TabPatch} into a tab, preserving the kind invariant. `title` is
+ * applied unconditionally; a `payload` is applied ONLY when the patch's `kind`
+ * matches the tab's `kind`, so the two narrow together and TypeScript proves the
+ * payload type is correct without a cast. A payload tagged for another kind is
+ * silently dropped (the rest of the patch still applies) — a tab can never end up
+ * with `kind: 'table'` carrying a `TextPayload`.
+ */
+function applyPatch(tab: PanelTab, patch: TabPatch): PanelTab {
+  const title = patch.title ?? tab.title;
+  if (patch.kind !== undefined && patch.kind === tab.kind) {
+    // patch.kind === tab.kind narrows both discriminants: payload matches tab.
+    if (tab.kind === PanelTabKind.Table && patch.kind === PanelTabKind.Table) {
+      return { ...tab, title, payload: patch.payload };
+    }
+    if (tab.kind === PanelTabKind.Code && patch.kind === PanelTabKind.Code) {
+      return { ...tab, title, payload: patch.payload };
+    }
+    if (tab.kind === PanelTabKind.Text && patch.kind === PanelTabKind.Text) {
+      return { ...tab, title, payload: patch.payload };
+    }
+  }
+  return { ...tab, title };
+}
 
 /** Canonical string form of a tab's payload — the single source for hashing & equality. */
 function serializePayload(tab: PanelTab): string {
