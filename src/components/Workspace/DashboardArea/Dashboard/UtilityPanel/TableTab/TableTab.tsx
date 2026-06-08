@@ -44,6 +44,12 @@ export function TableTab({ tab }: { tab: PanelTab }) {
             density="compact"
             disableRowSelectionOnClick
             processRowUpdate={processRowUpdate}
+            onProcessRowUpdateError={(error: unknown) => {
+              // MUI requires this alongside processRowUpdate: without it a failed
+              // commit is swallowed by warnOnce and the cell silently snaps back.
+              // processRowUpdate can't throw today, but surface it if it ever does.
+              console.error('TableTab: row update failed', error);
+            }}
             sx={{ border: 0, height: '100%', fontFamily: "'JetBrains Mono', monospace" }}
           />
         </div>

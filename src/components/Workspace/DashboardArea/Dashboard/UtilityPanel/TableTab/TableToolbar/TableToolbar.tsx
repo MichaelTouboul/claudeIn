@@ -1,5 +1,5 @@
 import { Clipboard, FileSpreadsheet, FileText } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/_ui/Button';
 import type { TablePayload } from '@/store/usePanelStore';
@@ -26,6 +26,16 @@ const COPY_LABEL: Record<CopyState, string> = {
 /** Deterministic actions over the current grid: export Excel / PDF, copy markdown. */
 export function TableToolbar({ payload, title }: TableToolbarProps) {
   const [copyState, setCopyState] = useState<CopyState>(CopyState.Idle);
+  // One pending reset timer at a time: a second click must cancel the first,
+  // else the earlier timer fires and tears away the later click's feedback.
+  const resetTimer = useRef<number | null>(null);
+
+  useEffect(
+    () => () => {
+      if (resetTimer.current !== null) window.clearTimeout(resetTimer.current);
+    },
+    [],
+  );
 
   // `navigator.clipboard.writeText` can reject (permission denied, non-secure
   // context, Electron restrictions). React does not catch rejections from async
@@ -38,7 +48,8 @@ export function TableToolbar({ payload, title }: TableToolbarProps) {
     } catch {
       setCopyState(CopyState.Failed);
     }
-    window.setTimeout(() => setCopyState(CopyState.Idle), 1500);
+    if (resetTimer.current !== null) window.clearTimeout(resetTimer.current);
+    resetTimer.current = window.setTimeout(() => setCopyState(CopyState.Idle), 1500);
   };
 
   return (
