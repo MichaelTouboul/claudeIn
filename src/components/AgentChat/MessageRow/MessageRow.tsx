@@ -8,6 +8,7 @@ import { parseAskPrompt } from '../askPrompt';
 import { AskPrompt } from '../AskPrompt/AskPrompt';
 import { parseSlashCommand } from '../slashCommand';
 import { CopyButton } from './CopyButton';
+import { OpenInPanelButton } from './OpenInPanelButton';
 import { SlashCommandMessage } from './SlashCommandMessage/SlashCommandMessage';
 
 export type MessageRowProps = {
@@ -79,6 +80,7 @@ export function MessageRow({ msg, isLast, onAnswer }: MessageRowProps) {
       <div className="ml-5">
         <ResponseBody content={msg.content} />
       </div>
+      {hasContent && !isAuthorization ? <OpenInPanelButton text={msg.content} /> : null}
       {prompt ? <AskPrompt prompt={prompt} isActive={isLast} onAnswer={onAnswer} /> : null}
     </div>
   );
