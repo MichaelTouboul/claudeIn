@@ -286,6 +286,7 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
       <AgentChatInput
         input={input} attachedFiles={attachedFiles} waitingInput={waitingInput}
         isRunning={isRunning ?? false} spawning={spawning} session={session}
+        claudeSessionId={claudeSessionId} agentName={agentName}
         editorRef={editorRef} onInputChange={handleInputChange}
         onSelectSlash={handleSelectSlash}
         onRemoveAttachment={(i) => setAttachedFiles((prev) => prev.filter((_, j) => j !== i))}
