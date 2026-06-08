@@ -7,7 +7,7 @@ import { LauncherView } from './LauncherView/LauncherView';
 import { UtilityPanel } from './UtilityPanel/UtilityPanel';
 
 export function Dashboard() {
-  const togglePanel = usePanelStore((s) => s.togglePanel);
+  const setPanelOpen = usePanelStore((s) => s.setOpen);
   const dashboards = useWorkspaceStore((s) => s.dashboards);
   const activeDashboardId = useWorkspaceStore((s) => s.activeDashboardId);
 
@@ -16,7 +16,7 @@ export function Dashboard() {
 
   return (
     <div className="flex-1 flex flex-col h-full relative">
-      {isLauncher ? null : <InternalTabBar onOpenPanel={togglePanel} />}
+      {isLauncher ? null : <InternalTabBar onOpenPanel={() => setPanelOpen(true)} />}
 
       <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
         {isLauncher && active ? <LauncherView dashboardId={active.id} /> : null}
