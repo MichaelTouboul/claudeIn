@@ -19,7 +19,7 @@ contextBridge.exposeInMainWorld("api", {
   getProject: (id: string) => ipcRenderer.invoke("projects:get", id),
   getDashboard: (id: string) => ipcRenderer.invoke("projects:dashboard", id),
 
-  spawn: (opts: { agent_name?: string; mission: string; cwd?: string; resume_session_id?: string }) =>
+  spawn: (opts: { agent_name?: string; mission: string; cwd?: string; resume_session_id?: string; model?: string }) =>
     ipcRenderer.invoke("spawn:start", opts),
   getSession: (localSessionId: string) => ipcRenderer.invoke("spawn:get", localSessionId),
   sendInput: (localSessionId: string, text: string) => ipcRenderer.invoke("spawn:input", localSessionId, text),

@@ -18,7 +18,7 @@ interface Window {
     getProject: (id: string) => Promise<import("./hooks/useProjects").Project | null>;
     getDashboard: (id: string) => Promise<import("./hooks/useProjects").Dashboard>;
 
-    spawn: (opts: { agent_name?: string; mission: string; cwd?: string; resume_session_id?: string }) => Promise<import("./types/spawn.types").SpawnSession>;
+    spawn: (opts: { agent_name?: string; mission: string; cwd?: string; resume_session_id?: string; model?: string }) => Promise<import("./types/spawn.types").SpawnSession>;
     getSession: (localSessionId: string) => Promise<import("./types/spawn.types").SpawnSession | null>;
     sendInput: (localSessionId: string, text: string) => Promise<boolean>;
     killSession: (localSessionId: string) => Promise<boolean>;
