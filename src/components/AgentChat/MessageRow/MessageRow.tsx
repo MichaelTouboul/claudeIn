@@ -1,6 +1,8 @@
 import { Bot, ChevronRight, Shield, Wrench } from 'lucide-react';
 
 import { renderContentWithImages } from '@/components/_ui/InlineImage';
+import { DiffBlock } from '@/components/ResponseBody/blocks/DiffBlock/DiffBlock';
+import { parseEditTool } from '@/components/ResponseBody/blocks/DiffBlock/parseEditTool';
 import { ResponseBody } from '@/components/ResponseBody/ResponseBody';
 import type { ChatMessage } from '@/types/spawn.types';
 
@@ -45,6 +47,10 @@ export function MessageRow({ msg, isLast, onAnswer }: MessageRowProps) {
   }
 
   if (isTool) {
+    const fileDiff = msg.toolName ? parseEditTool(msg.toolName, msg.content) : null;
+    // When a diff renders, DiffBlock's own Copy action (copies the diff text)
+    // supersedes the outer raw-JSON copy button — suppress the latter.
+    const showCopy = hasContent && fileDiff === null;
     return (
       <div className="group relative ml-5">
         <div className="flex items-center gap-2 mb-0.5">
@@ -52,8 +58,12 @@ export function MessageRow({ msg, isLast, onAnswer }: MessageRowProps) {
           <span className="text-xs text-yellow-500 font-mono">{msg.toolName || "tool"}</span>
           <span className="text-xs text-fg-subtle opacity-0 group-hover:opacity-100">{time}</span>
         </div>
-        <pre className="text-xs text-fg-muted whitespace-pre-wrap font-mono leading-relaxed max-h-32 overflow-y-auto">{renderContentWithImages(msg.content)}</pre>
-        {hasContent ? <CopyButton text={msg.content} className="mt-1" /> : null}
+        {fileDiff && msg.toolName ? (
+          <DiffBlock diff={fileDiff} toolName={msg.toolName} />
+        ) : (
+          <pre className="text-xs text-fg-muted whitespace-pre-wrap font-mono leading-relaxed max-h-32 overflow-y-auto">{renderContentWithImages(msg.content)}</pre>
+        )}
+        {showCopy ? <CopyButton text={msg.content} className="mt-1" /> : null}
       </div>
     );
   }

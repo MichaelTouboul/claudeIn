@@ -10,11 +10,16 @@ export type BlockShellProps = {
 export function BlockShell({ children }: BlockShellProps) {
   const [actions, setActions] = useState<BlockAction[]>([]);
   const pending = useRef<BlockAction[]>([]);
+  // Always the CURRENT render's actions. The `actions` state only re-syncs when
+  // the id set changes, so its closures can go stale if an action's captured
+  // data changes without its id — dispatch through this ref to avoid that.
+  const latest = useRef<BlockAction[]>([]);
 
   // The block calls `register` during render; capture into a ref (no state churn).
   pending.current = [];
   const register = (next: BlockAction[]) => {
     pending.current = next;
+    latest.current = next;
   };
 
   const body = children(register);
@@ -26,6 +31,13 @@ export function BlockShell({ children }: BlockShellProps) {
     setActions(pending.current);
   }, [actionKey]);
 
+  // Run an action by id through the LATEST registered set (never the snapshot in
+  // `actions` state), so a click always invokes the current closure.
+  const runById = (id: string) => {
+    const action = latest.current.find((a) => a.id === id);
+    if (action && action.kind === 'local') action.run();
+  };
+
   return (
     <div className="group relative my-2 rounded-lg" style={{ background: 'var(--color-surface-2)' }}>
       {actions.length > 0 ? (
@@ -34,7 +46,7 @@ export function BlockShell({ children }: BlockShellProps) {
             <button
               key={a.id}
               disabled={a.kind === 'claude'}
-              onClick={a.kind === 'local' ? a.run : undefined}
+              onClick={a.kind === 'local' ? () => runById(a.id) : undefined}
               title={a.kind === 'claude' ? 'Coming soon' : a.label}
               className="rounded px-2 py-1 text-xs font-medium disabled:opacity-40"
               style={{ background: 'var(--color-surface-3)', color: 'var(--color-text-secondary)' }}
