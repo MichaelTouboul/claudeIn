@@ -1,21 +1,15 @@
 import { useDashboardStore } from "@/store/useDashboardStore";
-import { useEventsStore } from "@/store/useEventsStore";
-import type { LiveEvent } from "@/types/events.types";
+import { AgentPresenceStatus, useEventsStore } from "@/store/useEventsStore";
 
-// Finite presence state for a sub-agent in a conversation. Authoritative source
-// of truth (CLAUDE.md: enum + behavior map, not a fallback chain). `idle` also
-// stands in for the unknown/absent case (an agent seen in the conversation's
-// events but in neither the active nor waiting set).
-export const ConversationAgentStatus = {
-  Active: "active",
-  Waiting: "waiting",
-  Idle: "idle",
-} as const;
-export type ConversationAgentStatus =
-  (typeof ConversationAgentStatus)[keyof typeof ConversationAgentStatus];
+// Re-export the store's presence enum under the hook's public name so callers
+// (AgentTabs) keep a single import surface. There is ONE authoritative status
+// type; this is an alias, not a parallel definition.
+export const ConversationAgentStatus = AgentPresenceStatus;
+export type ConversationAgentStatus = AgentPresenceStatus;
 
-// Value → dot behavior, defined ONCE. Only `active` pulses — a blinking dot must
-// mean the agent is actually running (event within the 5s active window).
+// Value → dot behavior, defined ONCE (CLAUDE.md: enum + behavior map, not a
+// fallback chain). Only `active` pulses — a blinking dot must mean the agent is
+// actually running (an event arrived within the 5s active window).
 export const CONVERSATION_AGENT_DOT: Record<
   ConversationAgentStatus,
   { pulse: boolean }
@@ -54,61 +48,51 @@ export function paletteColor(name: string): string {
   return PALETTE[Math.abs(hash) % PALETTE.length];
 }
 
-function statusFor(
-  name: string,
-  active: Set<string>,
-  waiting: Set<string>,
-): ConversationAgentStatus {
-  if (active.has(name)) return ConversationAgentStatus.Active;
-  if (waiting.has(name)) return ConversationAgentStatus.Waiting;
-  return ConversationAgentStatus.Idle;
-}
-
 /**
- * Sub-agents seen in THIS conversation, derived from existing events.
+ * Sub-agents seen in THIS conversation, derived from the events store's DURABLE
+ * session-scoped presence record (`useEventsStore.presence`).
  *
  * CORNERSTONE (session_id ↔ sub-agent linkage): `LiveEvent` carries the
  * `session_id` the hook reported. Claude Code runs Task-tool sub-agents inside
  * the parent conversation's session, so their hook events carry the PARENT
- * `session_id` — i.e. the conversation's `claudeSessionId`. We therefore scope
- * by filtering the retained `events[]` (each keeps its per-event `session_id`)
- * rather than the by-name aggregate sets, which drop it. The orchestrator/main
- * agent IS the conversation (its activity is the chat), so it gets no tab and is
- * excluded by name. If a future backend change tags sub-agent events with their
- * OWN session id instead, this selector is the single place to revisit.
+ * `session_id` — i.e. the conversation's `claudeSessionId`. The store records
+ * presence keyed by that `session_id` on every `event` ingest, so this selector
+ * just reads `presence.get(claudeSessionId)`. Two correctness properties follow:
+ *   • Discovery survives the 200-event rolling buffer — presence is a separate
+ *     durable Map, so a tab never silently vanishes when old events evict.
+ *   • Status is per (session, agent) — an agent active in another conversation
+ *     never makes this conversation's same-named agent pulse.
+ * The orchestrator/main agent IS the conversation (its activity is the chat), so
+ * it gets no tab and is excluded by name. If a future backend change tags
+ * sub-agent events with their OWN session id instead, the store ingest is the
+ * single place to revisit.
  *
- * Status comes from the by-name `activeAgents`/`waitingAgents` sets; color is
- * the defined project agent's frontmatter color when the runtime name matches,
- * else a deterministic palette hash.
+ * Color is the defined project agent's frontmatter color when the runtime name
+ * matches, else a deterministic palette hash.
  */
 export function useConversationAgents(
   claudeSessionId: string | null,
   orchestratorName: string,
 ): ConversationAgent[] {
-  const events = useEventsStore((s) => s.events);
-  const active = useEventsStore((s) => s.activeAgents);
-  const waiting = useEventsStore((s) => s.waitingAgents);
+  const sessionPresence = useEventsStore((s) =>
+    claudeSessionId ? s.presence.get(claudeSessionId) : undefined,
+  );
   const definedAgents = useDashboardStore((s) => s.agents);
 
-  if (!claudeSessionId) return [];
+  if (!sessionPresence) return [];
 
   const colorByName = new Map<string, string>();
   for (const agent of definedAgents) {
     if (agent.frontmatter.color) colorByName.set(agent.id, agent.frontmatter.color);
   }
 
-  const seen = new Set<string>();
   const result: ConversationAgent[] = [];
-  for (const event of events as LiveEvent[]) {
-    if (event.session_id !== claudeSessionId) continue;
-    const name = event.agent_name;
+  for (const [name, status] of sessionPresence) {
     if (!name || name === orchestratorName) continue;
-    if (seen.has(name)) continue;
-    seen.add(name);
     result.push({
       name,
       color: colorByName.get(name) ?? paletteColor(name),
-      status: statusFor(name, active, waiting),
+      status,
     });
   }
   return result;

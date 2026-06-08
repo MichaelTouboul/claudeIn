@@ -2,7 +2,7 @@ import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { useDashboardStore } from "@/store/useDashboardStore";
-import { useEventsStore } from "@/store/useEventsStore";
+import { AgentPresenceStatus, useEventsStore } from "@/store/useEventsStore";
 import type { AgentSummary } from "@/types/agents-mirror.types";
 import type { LiveEvent } from "@/types/events.types";
 
@@ -28,6 +28,11 @@ function liveEvent(over: Partial<LiveEvent>): LiveEvent {
   };
 }
 
+/** Push a sub-agent `event` through the real ingest path (records presence). */
+function ingestEvent(over: Partial<LiveEvent>) {
+  useEventsStore.getState().ingest({ type: "event", ...liveEvent(over) });
+}
+
 function agentSummary(id: string, color: string): AgentSummary {
   return {
     id,
@@ -48,6 +53,7 @@ function resetStores() {
     waitingAgents: new Set(),
     agentContexts: new Map(),
     currentTools: new Map(),
+    presence: new Map(),
   });
   useDashboardStore.setState({ agents: [] });
 }
@@ -57,13 +63,9 @@ describe("useConversationAgents", () => {
 
   it("returns only sub-agents whose events carry this conversation's session_id", () => {
     act(() => {
-      useEventsStore.setState({
-        events: [
-          liveEvent({ id: 3, agent_name: "researcher", session_id: "sess-1" }),
-          liveEvent({ id: 2, agent_name: "writer", session_id: "sess-1" }),
-          liveEvent({ id: 1, agent_name: "other", session_id: "sess-2" }),
-        ],
-      });
+      ingestEvent({ id: 3, agent_name: "researcher", session_id: "sess-1" });
+      ingestEvent({ id: 2, agent_name: "writer", session_id: "sess-1" });
+      ingestEvent({ id: 1, agent_name: "other", session_id: "sess-2" });
     });
 
     const { result } = renderHook(() =>
@@ -78,12 +80,8 @@ describe("useConversationAgents", () => {
 
   it("excludes the orchestrator/main agent (the conversation itself)", () => {
     act(() => {
-      useEventsStore.setState({
-        events: [
-          liveEvent({ id: 2, agent_name: "orchestrator", session_id: "sess-1" }),
-          liveEvent({ id: 1, agent_name: "researcher", session_id: "sess-1" }),
-        ],
-      });
+      ingestEvent({ id: 2, agent_name: "orchestrator", session_id: "sess-1" });
+      ingestEvent({ id: 1, agent_name: "researcher", session_id: "sess-1" });
     });
 
     const { result } = renderHook(() =>
@@ -93,17 +91,18 @@ describe("useConversationAgents", () => {
     expect(result.current.map((a) => a.name)).toEqual(["researcher"]);
   });
 
-  it("derives status from the by-name active/waiting sets", () => {
+  it("derives status from session-scoped presence (active / waiting / idle)", () => {
     act(() => {
-      useEventsStore.setState({
-        events: [
-          liveEvent({ id: 3, agent_name: "active-one", session_id: "sess-1" }),
-          liveEvent({ id: 2, agent_name: "waiting-one", session_id: "sess-1" }),
-          liveEvent({ id: 1, agent_name: "idle-one", session_id: "sess-1" }),
-        ],
-        activeAgents: new Set(["active-one"]),
-        waitingAgents: new Set(["waiting-one"]),
-      });
+      // active-one: a fresh event keeps it Active.
+      ingestEvent({ id: 3, agent_name: "active-one", session_id: "sess-1" });
+      // waiting-one: an event then a waiting request scoped to its name.
+      ingestEvent({ id: 2, agent_name: "waiting-one", session_id: "sess-1" });
+      useEventsStore
+        .getState()
+        .ingest({ type: "spawn_input_request", agentName: "waiting-one" });
+      // idle-one: seen, then its active window expires.
+      ingestEvent({ id: 1, agent_name: "idle-one", session_id: "sess-1" });
+      useEventsStore.getState().expireActive("idle-one");
     });
 
     const { result } = renderHook(() =>
@@ -118,16 +117,55 @@ describe("useConversationAgents", () => {
     expect(byName["idle-one"]).toBe(ConversationAgentStatus.Idle);
   });
 
+  it("does NOT leak status across sessions sharing an agent name", () => {
+    act(() => {
+      // Same agent name in two conversations.
+      ingestEvent({ id: 2, agent_name: "researcher", session_id: "sess-A" });
+      ingestEvent({ id: 1, agent_name: "researcher", session_id: "sess-B" });
+      // Only conversation A's researcher goes idle; B stays active.
+      // (expireActive is name-keyed, so simulate B being re-activated after.)
+      useEventsStore.getState().expireActive("researcher");
+      ingestEvent({ id: 3, agent_name: "researcher", session_id: "sess-B" });
+    });
+
+    const { result: a } = renderHook(() =>
+      useConversationAgents("sess-A", "orch"),
+    );
+    const { result: b } = renderHook(() =>
+      useConversationAgents("sess-B", "orch"),
+    );
+
+    expect(a.current[0].status).toBe(ConversationAgentStatus.Idle);
+    expect(b.current[0].status).toBe(ConversationAgentStatus.Active);
+  });
+
+  it("keeps a sub-agent's tab after its events evict from the 200-buffer", () => {
+    act(() => {
+      ingestEvent({ id: 0, agent_name: "early", session_id: "sess-1" });
+      // Flood with 250 unrelated events to push `early`'s event off the buffer.
+      for (let i = 1; i <= 250; i += 1) {
+        ingestEvent({ id: i, agent_name: "noise", session_id: "sess-2" });
+      }
+    });
+
+    // The rolling buffer no longer holds `early`'s event...
+    expect(
+      useEventsStore.getState().events.some((e) => e.agent_name === "early"),
+    ).toBe(false);
+
+    // ...but its presence tab survives.
+    const { result } = renderHook(() =>
+      useConversationAgents("sess-1", "orch"),
+    );
+    expect(result.current.map((a) => a.name)).toContain("early");
+  });
+
   it("uses the defined project agent's frontmatter color when the name matches", () => {
     act(() => {
       useDashboardStore.setState({
         agents: [agentSummary("researcher", "purple")],
       });
-      useEventsStore.setState({
-        events: [
-          liveEvent({ id: 1, agent_name: "researcher", session_id: "sess-1" }),
-        ],
-      });
+      ingestEvent({ id: 1, agent_name: "researcher", session_id: "sess-1" });
     });
 
     const { result } = renderHook(() =>
@@ -139,11 +177,7 @@ describe("useConversationAgents", () => {
 
   it("falls back to a deterministic palette color for an unknown name", () => {
     act(() => {
-      useEventsStore.setState({
-        events: [
-          liveEvent({ id: 1, agent_name: "mystery", session_id: "sess-1" }),
-        ],
-      });
+      ingestEvent({ id: 1, agent_name: "mystery", session_id: "sess-1" });
     });
 
     const { result } = renderHook(() =>
@@ -157,9 +191,7 @@ describe("useConversationAgents", () => {
 
   it("returns an empty list when no events carry this session_id", () => {
     act(() => {
-      useEventsStore.setState({
-        events: [liveEvent({ id: 1, agent_name: "x", session_id: "sess-2" })],
-      });
+      ingestEvent({ id: 1, agent_name: "x", session_id: "sess-2" });
     });
 
     const { result } = renderHook(() =>
@@ -171,9 +203,7 @@ describe("useConversationAgents", () => {
 
   it("returns an empty list when claudeSessionId is null", () => {
     act(() => {
-      useEventsStore.setState({
-        events: [liveEvent({ id: 1, agent_name: "x", session_id: "sess-1" })],
-      });
+      ingestEvent({ id: 1, agent_name: "x", session_id: "sess-1" });
     });
 
     const { result } = renderHook(() =>
@@ -184,14 +214,8 @@ describe("useConversationAgents", () => {
   });
 
   it("maps each status to a dot behavior — only active pulses", () => {
-    expect(CONVERSATION_AGENT_DOT[ConversationAgentStatus.Active].pulse).toBe(
-      true,
-    );
-    expect(CONVERSATION_AGENT_DOT[ConversationAgentStatus.Waiting].pulse).toBe(
-      false,
-    );
-    expect(CONVERSATION_AGENT_DOT[ConversationAgentStatus.Idle].pulse).toBe(
-      false,
-    );
+    expect(CONVERSATION_AGENT_DOT[AgentPresenceStatus.Active].pulse).toBe(true);
+    expect(CONVERSATION_AGENT_DOT[AgentPresenceStatus.Waiting].pulse).toBe(false);
+    expect(CONVERSATION_AGENT_DOT[AgentPresenceStatus.Idle].pulse).toBe(false);
   });
 });

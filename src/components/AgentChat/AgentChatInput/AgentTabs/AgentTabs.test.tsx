@@ -22,6 +22,11 @@ function liveEvent(over: Partial<LiveEvent>): LiveEvent {
   };
 }
 
+/** Push a sub-agent `event` through the real ingest path (records presence). */
+function ingestEvent(over: Partial<LiveEvent>) {
+  useEventsStore.getState().ingest({ type: "event", ...liveEvent(over) });
+}
+
 beforeEach(() => {
   useEventsStore.setState({
     events: [],
@@ -29,6 +34,7 @@ beforeEach(() => {
     waitingAgents: new Set(),
     agentContexts: new Map(),
     currentTools: new Map(),
+    presence: new Map(),
   });
   useDashboardStore.setState({ agents: [] });
 });
@@ -42,12 +48,8 @@ describe("AgentTabs", () => {
   });
 
   it("renders a tab per sub-agent in the conversation", () => {
-    useEventsStore.setState({
-      events: [
-        liveEvent({ id: 2, agent_name: "researcher", session_id: "sess-1" }),
-        liveEvent({ id: 1, agent_name: "writer", session_id: "sess-1" }),
-      ],
-    });
+    ingestEvent({ id: 2, agent_name: "researcher", session_id: "sess-1" });
+    ingestEvent({ id: 1, agent_name: "writer", session_id: "sess-1" });
 
     render(<AgentTabs claudeSessionId="sess-1" orchestratorName="orch" />);
 
@@ -56,13 +58,10 @@ describe("AgentTabs", () => {
   });
 
   it("pulses the dot only for an active agent", () => {
-    useEventsStore.setState({
-      events: [
-        liveEvent({ id: 2, agent_name: "live", session_id: "sess-1" }),
-        liveEvent({ id: 1, agent_name: "resting", session_id: "sess-1" }),
-      ],
-      activeAgents: new Set(["live"]),
-    });
+    ingestEvent({ id: 2, agent_name: "live", session_id: "sess-1" });
+    ingestEvent({ id: 1, agent_name: "resting", session_id: "sess-1" });
+    // `resting`'s active window expires; `live` stays active.
+    useEventsStore.getState().expireActive("resting");
 
     render(<AgentTabs claudeSessionId="sess-1" orchestratorName="orch" />);
 
@@ -73,9 +72,7 @@ describe("AgentTabs", () => {
   });
 
   it("does not render the orchestrator as a tab", () => {
-    useEventsStore.setState({
-      events: [liveEvent({ id: 1, agent_name: "orch", session_id: "sess-1" })],
-    });
+    ingestEvent({ id: 1, agent_name: "orch", session_id: "sess-1" });
 
     const { container } = render(
       <AgentTabs claudeSessionId="sess-1" orchestratorName="orch" />,
