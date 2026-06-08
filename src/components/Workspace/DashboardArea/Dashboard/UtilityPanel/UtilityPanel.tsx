@@ -1,9 +1,11 @@
 import { X } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 
 import { Dialog } from '@/components/_ui/Dialog';
 import { type TabItem, Tabs } from '@/components/_ui/Tabs';
 import { usePanelStore } from '@/store/usePanelStore';
 
+import { PanelResizeHandle } from './PanelResizeHandle';
 import { TAB_BODY } from './panelTabBody';
 
 export function UtilityPanel() {
@@ -13,6 +15,36 @@ export function UtilityPanel() {
   const setActive = usePanelStore((s) => s.setActive);
   const closeTab = usePanelStore((s) => s.closeTab);
   const setOpen = usePanelStore((s) => s.setOpen);
+  const width = usePanelStore((s) => s.width);
+  const setWidth = usePanelStore((s) => s.setWidth);
+
+  // Drag-to-resize from the LEFT edge: the panel is docked right, so its width
+  // is the distance from the cursor to the right viewport edge. Mirrors
+  // useResizableSidebar (the store action clamps the value).
+  const isDragging = useRef(false);
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      if (!isDragging.current) return;
+      setWidth(window.innerWidth - e.clientX);
+    };
+    const onMouseUp = () => {
+      isDragging.current = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+    return () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+  }, [setWidth]);
+
+  const startDrag = () => {
+    isDragging.current = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  };
 
   const active = tabs.find((t) => t.id === activeTabId) ?? null;
   const Body = active ? TAB_BODY[active.kind] : null;
@@ -32,13 +64,15 @@ export function UtilityPanel() {
       title="Panel"
     >
       <div
-        className="relative h-full flex flex-col w-[480px] max-w-[90%]"
+        className="relative h-full flex flex-col max-w-[90%]"
         style={{
+          width,
           background: 'var(--color-surface-1)',
           borderLeft: '1px solid var(--color-border)',
           boxShadow: '-12px 0 48px rgba(0,0,0,0.4)',
         }}
       >
+        <PanelResizeHandle onMouseDown={startDrag} />
         <div
           className="flex items-center justify-between pr-2"
           style={{ borderBottom: '1px solid var(--color-border)' }}

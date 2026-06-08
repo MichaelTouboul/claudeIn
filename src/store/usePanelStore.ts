@@ -18,10 +18,18 @@ export type PanelTab = {
   payload: TablePayload;
 };
 
+/** Panel width clamp bounds (px floor; ceiling is 90% of the viewport). */
+const MIN_PANEL_WIDTH = 320;
+const DEFAULT_PANEL_WIDTH = 480;
+
 type PanelState = {
   isOpen: boolean;
   tabs: PanelTab[];
   activeTabId: string | null;
+  /** Persisted panel width in px; survives close/reopen via the store. */
+  width: number;
+  /** Set the panel width, clamped to [320, 0.9 * window.innerWidth]. */
+  setWidth: (px: number) => void;
   /** Push a tab (or refocus if its id already exists) and open the panel. */
   openTab: (tab: PanelTab) => void;
   closeTab: (id: string) => void;
@@ -42,6 +50,8 @@ export const usePanelStore = create<PanelState>((set) => ({
   isOpen: false,
   tabs: [],
   activeTabId: null,
+  width: DEFAULT_PANEL_WIDTH,
+  setWidth: (px) => set({ width: clampWidth(px) }),
   openTab: (tab) =>
     set((s) => {
       const existing = s.tabs.find((t) => t.id === tab.id);
@@ -80,6 +90,12 @@ export const usePanelStore = create<PanelState>((set) => ({
   setOpen: (open) => set({ isOpen: open }),
   togglePanel: () => set((s) => ({ isOpen: !s.isOpen })),
 }));
+
+/** Clamp a requested panel width to the [320, 90% viewport] range. */
+function clampWidth(px: number): number {
+  const max = Math.round(window.innerWidth * 0.9);
+  return Math.min(Math.max(px, MIN_PANEL_WIDTH), max);
+}
 
 /** Canonical string form of a payload — the single source for hashing & equality. */
 function serializePayload(payload: TablePayload): string {
