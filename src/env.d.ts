@@ -14,6 +14,8 @@ interface Window {
 
     getHomeDir: () => Promise<string>;
 
+    transform: (input: { kind: import("./store/usePanelStore").PanelTabKind; instruction: string; content: string }) => Promise<string>;
+
     getProjects: (forceRefresh?: boolean) => Promise<import("./hooks/useProjects").Project[]>;
     getProject: (id: string) => Promise<import("./hooks/useProjects").Project | null>;
     getDashboard: (id: string) => Promise<import("./hooks/useProjects").Dashboard>;

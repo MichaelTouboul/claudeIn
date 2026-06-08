@@ -1,6 +1,6 @@
 import { ThemeProvider } from '@mui/material/styles';
 import { DataGrid, type GridColDef, type GridRowModel } from '@mui/x-data-grid';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 import { muiTheme } from '@/components/ResponseBody/blocks/TableBlock/muiTheme';
 import {
@@ -11,12 +11,16 @@ import {
   usePanelStore,
 } from '@/store/usePanelStore';
 
+import { PromptBar } from '../PromptBar/PromptBar';
+import { buildMarkdown } from './exporters';
+import { parseMarkdownTable } from './parseMarkdownTable';
 import { TableToolbar } from './TableToolbar/TableToolbar';
 
 const EMPTY_TABLE: TablePayload = { columns: [], rows: [] };
 
 export function TableTab({ tab }: { tab: PanelTab }) {
   const commitRow = usePanelStore((s) => s.commitRow);
+  const updateTab = usePanelStore((s) => s.updateTab);
   // Read the LIVE payload from the store (not the render-time prop) so the grid,
   // the export toolbar, and processRowUpdate always see the latest edits.
   const livePayload = usePanelStore((s) => {
@@ -28,12 +32,17 @@ export function TableTab({ tab }: { tab: PanelTab }) {
   const payload = livePayload ?? fallback;
   const { columns, rows } = payload;
 
+  // While a transform is in flight the result (parsed from a markdown string
+  // captured at submit time) will REPLACE the whole payload on arrival. Locking the
+  // grid for that window prevents a committed cell edit from being silently dropped.
+  const [isTransforming, setIsTransforming] = useState(false);
+
   const gridColumns: GridColDef[] = columns.map((c) => ({
     field: c.field,
     headerName: c.headerName,
     flex: 1,
     minWidth: 120,
-    editable: true,
+    editable: !isTransforming,
   }));
 
   // Edits are ephemeral in-tab: commit the single edited row to the panel tab so
@@ -45,6 +54,17 @@ export function TableTab({ tab }: { tab: PanelTab }) {
       return newRow;
     },
     [commitRow, tab.id],
+  );
+
+  // Apply a one-shot transform result: the model returns a markdown table, which
+  // we re-parse into rows/cols and replace the tab payload with. A malformed
+  // result (no parseable table) is ignored so the current grid is never blanked.
+  const applyTransform = useCallback(
+    (markdown: string) => {
+      const next = parseMarkdownTable(markdown);
+      if (next) updateTab(tab.id, { kind: PanelTabKind.Table, payload: next });
+    },
+    [updateTab, tab.id],
   );
 
   return (
@@ -68,6 +88,12 @@ export function TableTab({ tab }: { tab: PanelTab }) {
           />
         </div>
       </ThemeProvider>
+      <PromptBar
+        kind={PanelTabKind.Table}
+        content={buildMarkdown(payload)}
+        apply={applyTransform}
+        onRunningChange={setIsTransforming}
+      />
     </div>
   );
 }
