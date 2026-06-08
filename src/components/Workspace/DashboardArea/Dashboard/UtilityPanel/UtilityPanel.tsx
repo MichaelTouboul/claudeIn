@@ -1,5 +1,5 @@
 import { X } from 'lucide-react';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useReducer, useRef } from 'react';
 
 import { Dialog } from '@/components/_ui/Dialog';
 import { type TabItem, Tabs } from '@/components/_ui/Tabs';
@@ -22,41 +22,53 @@ export function UtilityPanel() {
   // is the distance from the cursor to the right viewport edge. Mirrors
   // useResizableSidebar (the store action clamps the value).
   const isDragging = useRef(false);
-  // End any in-flight drag and restore the body styles. Used by mouseup, by the
-  // unmount cleanup, and whenever the panel closes — so closing mid-drag never
-  // leaves the app stuck with a col-resize cursor and text selection disabled.
-  const endDrag = useCallback(() => {
-    isDragging.current = false;
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
-  }, []);
 
+  // Re-clamp the stored width and refresh the rendered ceiling when the viewport
+  // changes, so the separator never advertises a stale aria-valuemax and the
+  // width never exceeds the new viewport bound.
+  const [, refreshMax] = useReducer((n: number) => n + 1, 0);
   useEffect(() => {
-    const onMouseMove = (e: MouseEvent) => {
+    const onResize = () => {
+      setWidth(usePanelStore.getState().width);
+      refreshMax();
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [setWidth]);
+
+  // Drag-to-resize from the LEFT edge (panel is docked right, so width is the
+  // distance from the cursor to the right viewport edge). Listeners live ONLY
+  // while a drag is in progress — attached in startDrag, removed in endDrag —
+  // mirroring useResizableSidebar and avoiding zombie document listeners (this
+  // component is always mounted, so an always-on listener would never be torn
+  // down). The store action clamps the value.
+  const onMouseMove = useCallback(
+    (e: MouseEvent) => {
       if (!isDragging.current) return;
       setWidth(window.innerWidth - e.clientX);
-    };
+    },
+    [setWidth],
+  );
+  const endDrag = useCallback(() => {
+    isDragging.current = false;
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', endDrag);
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  }, [onMouseMove]);
+  const startDrag = useCallback(() => {
+    isDragging.current = true;
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', endDrag);
-    return () => {
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', endDrag);
-      endDrag();
-    };
-  }, [setWidth, endDrag]);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  }, [onMouseMove, endDrag]);
 
-  // The panel content unmounts on close, but THIS component stays mounted, so
-  // the listener cleanup above doesn't run on close. Reset the drag state here
-  // when the panel is no longer open.
+  // Reset drag state if the panel closes mid-drag; tear down on unmount.
   useEffect(() => {
     if (!isOpen) endDrag();
   }, [isOpen, endDrag]);
-
-  const startDrag = () => {
-    isDragging.current = true;
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
-  };
+  useEffect(() => endDrag, [endDrag]);
 
   const active = tabs.find((t) => t.id === activeTabId) ?? null;
   const Body = active ? TAB_BODY[active.kind] : null;
