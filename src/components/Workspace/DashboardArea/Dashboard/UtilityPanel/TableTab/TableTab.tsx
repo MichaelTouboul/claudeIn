@@ -8,8 +8,11 @@ import { type PanelTab, type TableRow, usePanelStore } from '@/store/usePanelSto
 import { TableToolbar } from './TableToolbar/TableToolbar';
 
 export function TableTab({ tab }: { tab: PanelTab }) {
-  const updateTab = usePanelStore((s) => s.updateTab);
-  const { columns, rows } = tab.payload;
+  const commitRow = usePanelStore((s) => s.commitRow);
+  // Read the LIVE payload from the store (not the render-time prop) so the grid,
+  // the export toolbar, and processRowUpdate always see the latest edits.
+  const payload = usePanelStore((s) => s.tabs.find((t) => t.id === tab.id)?.payload) ?? tab.payload;
+  const { columns, rows } = payload;
 
   const gridColumns: GridColDef[] = columns.map((c) => ({
     field: c.field,
@@ -19,21 +22,20 @@ export function TableTab({ tab }: { tab: PanelTab }) {
     editable: true,
   }));
 
-  // Edits are ephemeral in-tab: persist the new row set on the panel tab so the
-  // grid stays consistent and exports reflect it. The source response is untouched.
+  // Edits are ephemeral in-tab: commit the single edited row to the panel tab so
+  // exports reflect it. commitRow reads live store state, so back-to-back edits
+  // never clobber each other. The source chat response stays immutable.
   const processRowUpdate = useCallback(
     (newRow: GridRowModel): GridRowModel => {
-      const updated = newRow as TableRow;
-      const nextRows = rows.map((r) => (r.id === updated.id ? updated : r));
-      updateTab(tab.id, { payload: { columns, rows: nextRows } });
+      commitRow(tab.id, newRow as TableRow);
       return newRow;
     },
-    [columns, rows, tab.id, updateTab],
+    [commitRow, tab.id],
   );
 
   return (
     <div className="flex h-full flex-col">
-      <TableToolbar payload={tab.payload} title={tab.title} />
+      <TableToolbar payload={payload} title={tab.title} />
       <ThemeProvider theme={muiTheme}>
         <div className="min-h-0 flex-1 p-2">
           <DataGrid

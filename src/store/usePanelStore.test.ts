@@ -126,6 +126,37 @@ describe('usePanelStore', () => {
     expect(s.tabs[0].title).toBe('Table');
   });
 
+  it('commitRow replaces a single row by id, reading live state each call', () => {
+    const { openTab, commitRow } = usePanelStore.getState();
+    openTab({
+      id: 'a',
+      kind: PanelTabKind.Table,
+      title: 'Table',
+      payload: {
+        columns: [{ field: 'name', headerName: 'Name' }],
+        rows: [
+          { id: 0, name: 'Alice' },
+          { id: 1, name: 'Bob' },
+        ],
+      },
+    });
+    // Sequential commits without a re-render in between must both stick.
+    commitRow('a', { id: 0, name: 'Alice2' });
+    commitRow('a', { id: 1, name: 'Bob2' });
+    const a = usePanelStore.getState().tabs.find((t) => t.id === 'a');
+    expect(a?.payload.rows).toEqual([
+      { id: 0, name: 'Alice2' },
+      { id: 1, name: 'Bob2' },
+    ]);
+  });
+
+  it('commitRow is a no-op when the tab id is absent', () => {
+    const { openTab, commitRow } = usePanelStore.getState();
+    openTab(tableTab('a'));
+    commitRow('missing', { id: 0, name: 'X' });
+    expect(usePanelStore.getState().tabs[0].payload).toEqual({ columns: [], rows: [] });
+  });
+
   it('openTab never aliases distinct content to the same tab on an id collision', () => {
     const { openTab } = usePanelStore.getState();
     const payloadA = { columns: [{ field: 'x', headerName: 'X' }], rows: [{ id: 0, x: 'A' }] };

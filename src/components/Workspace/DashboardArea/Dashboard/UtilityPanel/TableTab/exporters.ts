@@ -70,7 +70,11 @@ function downloadBytes(bytes: Uint8Array, filename: string, mime: string): void 
   link.href = url;
   link.download = filename;
   link.click();
-  URL.revokeObjectURL(url);
+  // `click()` only QUEUES the download; the browser fetches the blob URL on a
+  // later tick. Revoking synchronously races that fetch (the resource vanishes
+  // before the download starts — notably on Firefox). Defer the revoke so the
+  // download has been initiated first.
+  window.setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
 /** Download the current grid as an .xlsx file. */

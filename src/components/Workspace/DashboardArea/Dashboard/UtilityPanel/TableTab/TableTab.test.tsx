@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { type PanelTab, PanelTabKind, usePanelStore } from '@/store/usePanelStore';
@@ -12,6 +12,19 @@ const tab: PanelTab = {
   payload: {
     columns: [{ field: 'name', headerName: 'Name' }],
     rows: [{ id: 0, name: 'Alice' }],
+  },
+};
+
+const multiRowTab: PanelTab = {
+  id: 'table:2',
+  kind: PanelTabKind.Table,
+  title: 'People',
+  payload: {
+    columns: [{ field: 'name', headerName: 'Name' }],
+    rows: [
+      { id: 0, name: 'Alice' },
+      { id: 1, name: 'Bob' },
+    ],
   },
 };
 
@@ -45,5 +58,35 @@ describe('TableTab', () => {
     await waitFor(() =>
       expect(writeText).toHaveBeenCalledWith('| Name |\n| --- |\n| Alice |'),
     );
+  });
+
+  it('reflects live store edits when exporting (reads payload from the store, not the prop)', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+    render(<TableTab tab={tab} />);
+    // Edit the row in the store after mount; Copy must reflect the NEW value.
+    act(() => {
+      usePanelStore
+        .getState()
+        .updateTab(tab.id, { payload: { columns: tab.payload.columns, rows: [{ id: 0, name: 'Renamed' }] } });
+    });
+    fireEvent.click(screen.getByRole('button', { name: /copy/i }));
+    await waitFor(() =>
+      expect(writeText).toHaveBeenCalledWith('| Name |\n| --- |\n| Renamed |'),
+    );
+  });
+
+  it('persists two back-to-back row edits without dropping the first (no stale closure)', () => {
+    usePanelStore.setState({ isOpen: true, tabs: [multiRowTab], activeTabId: multiRowTab.id });
+    render(<TableTab tab={multiRowTab} />);
+    const { commitRow } = usePanelStore.getState();
+    // Two sequential cell commits before any re-render flushes — each must read live state.
+    commitRow(multiRowTab.id, { id: 0, name: 'Alice2' });
+    commitRow(multiRowTab.id, { id: 1, name: 'Bob2' });
+    const rows = usePanelStore.getState().tabs[0].payload.rows;
+    expect(rows).toEqual([
+      { id: 0, name: 'Alice2' },
+      { id: 1, name: 'Bob2' },
+    ]);
   });
 });

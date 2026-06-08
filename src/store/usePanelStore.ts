@@ -27,6 +27,12 @@ type PanelState = {
   closeTab: (id: string) => void;
   /** Patch an existing tab in place (e.g. ephemeral table edits). No-op if absent. */
   updateTab: (id: string, patch: Partial<Omit<PanelTab, 'id'>>) => void;
+  /**
+   * Replace a single row (matched by `id`) in a table tab's payload, reading the
+   * LIVE tab state inside the set updater so back-to-back edits never lose data
+   * (no stale render-time closure). No-op if the tab is absent.
+   */
+  commitRow: (id: string, row: TableRow) => void;
   setActive: (id: string) => void;
   setOpen: (open: boolean) => void;
   togglePanel: () => void;
@@ -61,6 +67,14 @@ export const usePanelStore = create<PanelState>((set) => ({
   updateTab: (id, patch) =>
     set((s) => ({
       tabs: s.tabs.map((t) => (t.id === id ? { ...t, ...patch } : t)),
+    })),
+  commitRow: (id, row) =>
+    set((s) => ({
+      tabs: s.tabs.map((t) => {
+        if (t.id !== id) return t;
+        const rows = t.payload.rows.map((r) => (r.id === row.id ? row : r));
+        return { ...t, payload: { ...t.payload, rows } };
+      }),
     })),
   setActive: (id) => set({ activeTabId: id }),
   setOpen: (open) => set({ isOpen: open }),

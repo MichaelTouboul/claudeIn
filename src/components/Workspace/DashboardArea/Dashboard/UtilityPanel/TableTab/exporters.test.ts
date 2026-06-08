@@ -1,9 +1,16 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { read, utils } from 'xlsx';
 
 import type { TablePayload } from '@/store/usePanelStore';
 
-import { buildAoa, buildMarkdown, buildPdf, buildTsv, buildXlsxBytes } from './exporters';
+import {
+  buildAoa,
+  buildMarkdown,
+  buildPdf,
+  buildTsv,
+  buildXlsxBytes,
+  triggerXlsx,
+} from './exporters';
 
 const payload: TablePayload = {
   columns: [
@@ -75,5 +82,37 @@ describe('buildMarkdown', () => {
     expect(buildMarkdown(payload)).toBe(
       ['| Name | Age |', '| --- | --- |', '| Alice | 30 |', '| Bob | 25 |'].join('\n'),
     );
+  });
+});
+
+describe('triggerXlsx download lifecycle', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+  });
+
+  it('defers revokeObjectURL until after the click is queued (no sync race)', () => {
+    vi.useFakeTimers();
+    const createObjectURL = vi.fn(() => 'blob:fake');
+    const revokeObjectURL = vi.fn();
+    vi.stubGlobal('URL', { createObjectURL, revokeObjectURL });
+    const click = vi.fn();
+    vi.spyOn(document, 'createElement').mockReturnValue({
+      href: '',
+      download: '',
+      click,
+    } as unknown as HTMLAnchorElement);
+
+    triggerXlsx(payload, 'My Table');
+
+    // The download has been queued, but the URL must still be alive at this point.
+    expect(click).toHaveBeenCalledTimes(1);
+    expect(revokeObjectURL).not.toHaveBeenCalled();
+
+    // It is revoked only on a later tick, after the browser can fetch the blob.
+    vi.runAllTimers();
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:fake');
+
+    vi.unstubAllGlobals();
   });
 });
