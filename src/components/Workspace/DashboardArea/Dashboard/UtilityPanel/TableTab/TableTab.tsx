@@ -11,12 +11,16 @@ import {
   usePanelStore,
 } from '@/store/usePanelStore';
 
+import { PromptBar } from '../PromptBar/PromptBar';
+import { buildMarkdown } from './exporters';
+import { parseMarkdownTable } from './parseMarkdownTable';
 import { TableToolbar } from './TableToolbar/TableToolbar';
 
 const EMPTY_TABLE: TablePayload = { columns: [], rows: [] };
 
 export function TableTab({ tab }: { tab: PanelTab }) {
   const commitRow = usePanelStore((s) => s.commitRow);
+  const updateTab = usePanelStore((s) => s.updateTab);
   // Read the LIVE payload from the store (not the render-time prop) so the grid,
   // the export toolbar, and processRowUpdate always see the latest edits.
   const livePayload = usePanelStore((s) => {
@@ -47,6 +51,17 @@ export function TableTab({ tab }: { tab: PanelTab }) {
     [commitRow, tab.id],
   );
 
+  // Apply a one-shot transform result: the model returns a markdown table, which
+  // we re-parse into rows/cols and replace the tab payload with. A malformed
+  // result (no parseable table) is ignored so the current grid is never blanked.
+  const applyTransform = useCallback(
+    (markdown: string) => {
+      const next = parseMarkdownTable(markdown);
+      if (next) updateTab(tab.id, { kind: PanelTabKind.Table, payload: next });
+    },
+    [updateTab, tab.id],
+  );
+
   return (
     <div className="flex h-full flex-col">
       <TableToolbar payload={payload} title={tab.title} />
@@ -68,6 +83,7 @@ export function TableTab({ tab }: { tab: PanelTab }) {
           />
         </div>
       </ThemeProvider>
+      <PromptBar kind={PanelTabKind.Table} content={buildMarkdown(payload)} apply={applyTransform} />
     </div>
   );
 }

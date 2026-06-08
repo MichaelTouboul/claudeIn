@@ -1,13 +1,34 @@
-import { ResponseBody } from '@/components/ResponseBody/ResponseBody';
-import { type PanelTab, PanelTabKind } from '@/store/usePanelStore';
+import { useCallback } from 'react';
 
-/** Rendered-markdown view, reusing the chat ResponseBody markdown path. */
+import { ResponseBody } from '@/components/ResponseBody/ResponseBody';
+import { type PanelTab, PanelTabKind, usePanelStore } from '@/store/usePanelStore';
+
+import { PromptBar } from '../PromptBar/PromptBar';
+
+/**
+ * Rendered-markdown view, reusing the chat ResponseBody markdown path. A shared
+ * PromptBar is pinned at the bottom for one-shot LLM transforms.
+ */
 export function TextTab({ tab }: { tab: PanelTab }) {
+  const updateTab = usePanelStore((s) => s.updateTab);
+  const text = tab.kind === PanelTabKind.Text ? tab.payload.text : '';
+
+  // Replace the prose in place with the transform result (transformed markdown).
+  const applyTransform = useCallback(
+    (result: string) => {
+      updateTab(tab.id, { kind: PanelTabKind.Text, payload: { text: result } });
+    },
+    [updateTab, tab.id],
+  );
+
   if (tab.kind !== PanelTabKind.Text) return null;
 
   return (
-    <div className="min-h-0 flex-1 overflow-auto p-3">
-      <ResponseBody content={tab.payload.text} />
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="min-h-0 flex-1 overflow-auto p-3">
+        <ResponseBody content={text} />
+      </div>
+      <PromptBar kind={PanelTabKind.Text} content={text} apply={applyTransform} />
     </div>
   );
 }
