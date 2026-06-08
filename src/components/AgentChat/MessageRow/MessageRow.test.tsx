@@ -13,6 +13,10 @@ function user(content: string): ChatMessage {
   return { id: 'u1', role: 'user', content, timestamp: new Date().toISOString() };
 }
 
+function tool(toolName: string, content: string): ChatMessage {
+  return { id: 't1', role: 'tool', toolName, content, timestamp: new Date().toISOString() };
+}
+
 const authBlock =
   '```cam-ask\n' +
   '{"type":"choice","question":"Proceed?","options":[' +
@@ -77,5 +81,24 @@ describe('MessageRow', () => {
   it('renders no copy button for an empty-content message', () => {
     render(<MessageRow msg={assistant('   ')} isLast onAnswer={vi.fn()} />);
     expect(screen.queryByRole('button', { name: 'Copy message' })).not.toBeInTheDocument();
+  });
+
+  it('renders an Edit tool message as a diff with added and removed lines', () => {
+    const content = JSON.stringify({
+      file_path: '/repo/a.ts',
+      old_string: 'keep\nold\ntail',
+      new_string: 'keep\nnew\ntail',
+    });
+    render(<MessageRow msg={tool('Edit', content)} isLast={false} onAnswer={vi.fn()} />);
+    expect(screen.getByText('old')).toBeInTheDocument();
+    expect(screen.getByText('new')).toBeInTheDocument();
+    expect(screen.getByText('/repo/a.ts')).toBeInTheDocument();
+    // No raw JSON fallback.
+    expect(screen.queryByText(/"file_path"/)).not.toBeInTheDocument();
+  });
+
+  it('keeps the raw JSON fallback for a non-edit tool message', () => {
+    render(<MessageRow msg={tool('Bash', '{"command":"ls"}')} isLast={false} onAnswer={vi.fn()} />);
+    expect(screen.getByText(/"command"/)).toBeInTheDocument();
   });
 });

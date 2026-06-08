@@ -58,7 +58,8 @@ describe('parseEditTool', () => {
       const result = parseEditTool('Edit', json);
       // No change -> all context, identical numbering.
       expect(result?.lines.every((l) => l.kind === LineKind.Context)).toBe(true);
-      const last = result?.lines.at(-1);
+      const all = result?.lines ?? [];
+      const last = all[all.length - 1];
       expect(last?.oldNo).toBe(3);
       expect(last?.newNo).toBe(3);
     });
