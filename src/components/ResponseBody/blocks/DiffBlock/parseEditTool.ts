@@ -32,22 +32,24 @@ function chunkToLines(value: string): string[] {
   return trimmed.split('\n');
 }
 
-/** A line cursor carried across MultiEdit hunks. */
-type Cursor = { oldNo: number; newNo: number };
+/** A line cursor carried across MultiEdit hunks. `seq` makes line ids unique. */
+type Cursor = { oldNo: number; newNo: number; seq: number };
 
 /** Diff two strings, appending lines to `acc` and advancing the cursor. */
 function diffInto(oldStr: string, newStr: string, acc: DiffLine[], cursor: Cursor): void {
   for (const part of diffLines(oldStr, newStr)) {
     const lines = chunkToLines(part.value);
     for (const text of lines) {
+      const id = `l${cursor.seq}`;
+      cursor.seq += 1;
       if (part.added) {
-        acc.push({ kind: LineKind.Add, oldNo: null, newNo: cursor.newNo, text });
+        acc.push({ id, kind: LineKind.Add, oldNo: null, newNo: cursor.newNo, text });
         cursor.newNo += 1;
       } else if (part.removed) {
-        acc.push({ kind: LineKind.Del, oldNo: cursor.oldNo, newNo: null, text });
+        acc.push({ id, kind: LineKind.Del, oldNo: cursor.oldNo, newNo: null, text });
         cursor.oldNo += 1;
       } else {
-        acc.push({ kind: LineKind.Context, oldNo: cursor.oldNo, newNo: cursor.newNo, text });
+        acc.push({ id, kind: LineKind.Context, oldNo: cursor.oldNo, newNo: cursor.newNo, text });
         cursor.oldNo += 1;
         cursor.newNo += 1;
       }
@@ -64,7 +66,7 @@ function parseEdit(payload: EditPayload): FileDiff | null {
     return null;
   }
   const lines: DiffLine[] = [];
-  diffInto(payload.old_string, payload.new_string, lines, { oldNo: 1, newNo: 1 });
+  diffInto(payload.old_string, payload.new_string, lines, { oldNo: 1, newNo: 1, seq: 0 });
   return { filePath: payload.file_path, lines };
 }
 
@@ -73,6 +75,7 @@ function parseWrite(payload: WritePayload): FileDiff | null {
     return null;
   }
   const lines: DiffLine[] = chunkToLines(payload.content).map((text, i) => ({
+    id: `l${i}`,
     kind: LineKind.Add,
     oldNo: null,
     newNo: i + 1,
@@ -86,7 +89,7 @@ function parseMultiEdit(payload: MultiEditPayload): FileDiff | null {
     return null;
   }
   const lines: DiffLine[] = [];
-  const cursor: Cursor = { oldNo: 1, newNo: 1 };
+  const cursor: Cursor = { oldNo: 1, newNo: 1, seq: 0 };
   for (const edit of payload.edits) {
     if (!isRecord(edit) || typeof edit.old_string !== 'string' || typeof edit.new_string !== 'string') {
       return null;

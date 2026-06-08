@@ -4,6 +4,8 @@ export type LineKind = (typeof LineKind)[keyof typeof LineKind];
 
 /** One rendered line of a unified diff. */
 export type DiffLine = {
+  /** Stable identity for React keys (sequential within a FileDiff). */
+  id: string;
   kind: LineKind;
   /** Line number in the old file, or null for added lines. */
   oldNo: number | null;
