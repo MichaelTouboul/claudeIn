@@ -57,10 +57,13 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
   // The `/model` picker submenu open state (reuses the InputMenu mechanism).
   const [modelPickerOpen, setModelPickerOpen] = useState(false);
 
-  // Per-conversation model key: the live localSessionId once spawned, else the
-  // owning tab id, else a stable fallback so a model can be picked pre-spawn.
+  // Per-conversation model key — STABLE for this chat instance's whole lifetime
+  // so a model picked before the first spawn isn't orphaned when the session
+  // arrives. We deliberately do NOT key on `session.localSessionId` (which is
+  // undefined pre-spawn and would shift the key mid-conversation); the owning tab
+  // id, or a stable per-instance fallback for the tab-less main chat, never change.
   const fallbackKeyRef = useRef<string>(crypto.randomUUID());
-  const conversationKey = session?.localSessionId ?? tabId ?? fallbackKeyRef.current;
+  const conversationKey = tabId ?? fallbackKeyRef.current;
   const selectedModel = useModelStore((s) => s.models[conversationKey]);
   const setModel = useModelStore((s) => s.setModel);
   const selectedModelLabel = MODELS.find((m) => m.id === selectedModel)?.label;
@@ -176,13 +179,15 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
         setWaitingInput(false);
         if (msg.role === 'assistant') {
           setAwaitingResponse(false);
-          setTimeout(() => sendNextFromQueue(), 100);
+          // Forward through the ref so we run the LATEST sendNextFromQueue closure
+          // (capturing the current selectedModel), not this mount-once effect's.
+          setTimeout(() => sendNextFromQueueRef.current(), 100);
         }
       }
       if (data.type === 'spawn_input_request' && s && data.localSessionId === s.localSessionId) {
         setWaitingInput(true);
         setAwaitingResponse(false);
-        setTimeout(() => sendNextFromQueue(), 100);
+        setTimeout(() => sendNextFromQueueRef.current(), 100);
       }
       if (data.type === 'spawn_claude_session' && s && data.localSessionId === s.localSessionId) {
         setClaudeSessionId(data.claudeSessionId);
@@ -201,7 +206,9 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
       }
     });
     return cleanup;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Mount-once: the handler only touches stable refs + state setters (and forwards
+    // to the latest sendNextFromQueue via sendNextFromQueueRef), so it has no
+    // reactive deps — exhaustive-deps agrees, no disable needed.
   }, []);
 
   // "Continue as is" resume entry: when a session is resumed WITHOUT an initial

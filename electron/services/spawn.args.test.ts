@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 
-import { buildSpawnArgs } from "./spawn.args";
+import { ALLOWED_MODELS, buildSpawnArgs } from "./spawn.args";
 
 describe("buildSpawnArgs", () => {
   it("always emits the base --print stream flags and ends with the mission", () => {
@@ -57,5 +57,24 @@ describe("buildSpawnArgs", () => {
     expect(args).toContain("--resume");
     const i = args.indexOf("--model");
     expect(args[i + 1]).toBe("claude-sonnet-4-6");
+  });
+
+  it("accepts every allowlisted model id", () => {
+    for (const id of ALLOWED_MODELS) {
+      const args = buildSpawnArgs({ agentName: "_main", mission: "go", model: id });
+      const i = args.indexOf("--model");
+      expect(args[i + 1]).toBe(id);
+    }
+  });
+
+  it("drops a model id that is NOT on the allowlist (no --model forwarded)", () => {
+    const args = buildSpawnArgs({ agentName: "_main", mission: "go", model: "evil; rm -rf /" });
+    expect(args).not.toContain("--model");
+    expect(args[args.length - 1]).toBe("go");
+  });
+
+  it("drops an empty model string", () => {
+    const args = buildSpawnArgs({ agentName: "_main", mission: "go", model: "" });
+    expect(args).not.toContain("--model");
   });
 });

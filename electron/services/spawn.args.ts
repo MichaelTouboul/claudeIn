@@ -1,5 +1,18 @@
 import { NO_FOLLOWUP_SYSTEM_PROMPT } from "./spawn.steering";
 
+// Server-side allowlist of model ids that may be forwarded to `claude --model`.
+// This is the authoritative guard: the renderer's `MODELS` list is convenience
+// only and is bypassable from a compromised/XSS'd renderer, so any `model` that
+// is not exactly one of these is dropped here before it can reach the subprocess.
+// Keep in sync with `src/store/useModelStore.ts` MODELS.
+export const ALLOWED_MODELS = [
+  "claude-opus-4-8",
+  "claude-sonnet-4-6",
+  "claude-haiku-4-5-20251001",
+] as const;
+
+const ALLOWED_MODEL_SET: ReadonlySet<string> = new Set(ALLOWED_MODELS);
+
 export type SpawnArgsInput = {
   agentName: string;
   mission: string;
@@ -37,7 +50,10 @@ export function buildSpawnArgs({ agentName, mission, resumeSessionId, model }: S
     }
   }
 
-  if (model) {
+  // Only forward `--model` for an allowlisted id; anything else (empty, unknown,
+  // or a malicious string from a compromised renderer) is silently dropped so
+  // `claude` falls back to its default model.
+  if (model && ALLOWED_MODEL_SET.has(model)) {
     args.push("--model", model);
   }
 

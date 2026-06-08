@@ -3,6 +3,9 @@ import { create } from 'zustand';
 // The models selectable per conversation (label for the picker + the `--model`
 // id passed to `claude`). Central list so the picker and any indicator share one
 // source. No selection for a conversation => omit `--model` (claude's default).
+// SECURITY: this renderer list is convenience only — the authoritative allowlist
+// that actually guards the `--model` flag lives in electron/services/spawn.args.ts
+// (ALLOWED_MODELS). Keep the ids here in sync with that set.
 export type ModelOption = { label: string; id: string };
 
 export const MODELS: ModelOption[] = [
