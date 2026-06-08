@@ -26,8 +26,11 @@ export function parseMarkdownTable(markdown: string): TablePayload | null {
   const headerCells = splitRow(lines[sepIndex - 1]);
   if (headerCells.length === 0) return null;
 
+  // Slugs must be unique: DataGrid forbids duplicate `field`s, and the row-builder
+  // keys by `field`, so a collision would silently overwrite a column's cells.
+  const usedFields = new Set<string>();
   const columns: TableColumn[] = headerCells.map((headerName, i) => ({
-    field: slug(headerName, i),
+    field: dedupeField(slug(headerName, i), usedFields),
     headerName,
   }));
 
@@ -66,4 +69,24 @@ function slug(text: string, index: number): string {
     .replace(/[^a-z0-9]+/g, '_')
     .replace(/^_+|_+$/g, '');
   return base.length > 0 ? base : `col_${index}`;
+}
+
+/**
+ * Make `field` unique within `used`, appending `_2`, `_3`, … on collision. The
+ * suffix is skipped if it would itself collide, so duplicates never alias. Mutates
+ * `used` to record the returned field.
+ */
+function dedupeField(field: string, used: Set<string>): string {
+  if (!used.has(field)) {
+    used.add(field);
+    return field;
+  }
+  let suffix = 2;
+  let candidate = `${field}_${suffix}`;
+  while (used.has(candidate)) {
+    suffix += 1;
+    candidate = `${field}_${suffix}`;
+  }
+  used.add(candidate);
+  return candidate;
 }

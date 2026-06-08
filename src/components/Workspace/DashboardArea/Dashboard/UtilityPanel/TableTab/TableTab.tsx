@@ -1,6 +1,6 @@
 import { ThemeProvider } from '@mui/material/styles';
 import { DataGrid, type GridColDef, type GridRowModel } from '@mui/x-data-grid';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 import { muiTheme } from '@/components/ResponseBody/blocks/TableBlock/muiTheme';
 import {
@@ -32,12 +32,17 @@ export function TableTab({ tab }: { tab: PanelTab }) {
   const payload = livePayload ?? fallback;
   const { columns, rows } = payload;
 
+  // While a transform is in flight the result (parsed from a markdown string
+  // captured at submit time) will REPLACE the whole payload on arrival. Locking the
+  // grid for that window prevents a committed cell edit from being silently dropped.
+  const [isTransforming, setIsTransforming] = useState(false);
+
   const gridColumns: GridColDef[] = columns.map((c) => ({
     field: c.field,
     headerName: c.headerName,
     flex: 1,
     minWidth: 120,
-    editable: true,
+    editable: !isTransforming,
   }));
 
   // Edits are ephemeral in-tab: commit the single edited row to the panel tab so
@@ -83,7 +88,12 @@ export function TableTab({ tab }: { tab: PanelTab }) {
           />
         </div>
       </ThemeProvider>
-      <PromptBar kind={PanelTabKind.Table} content={buildMarkdown(payload)} apply={applyTransform} />
+      <PromptBar
+        kind={PanelTabKind.Table}
+        content={buildMarkdown(payload)}
+        apply={applyTransform}
+        onRunningChange={setIsTransforming}
+      />
     </div>
   );
 }

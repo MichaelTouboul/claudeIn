@@ -1,5 +1,5 @@
 import { Loader2, Sparkles } from 'lucide-react';
-import { type FormEvent, type KeyboardEvent,useState } from 'react';
+import { type FormEvent, type KeyboardEvent,useEffect,useState } from 'react';
 
 import { Button } from '@/components/_ui/Button';
 import type { PanelTabKind } from '@/store/usePanelStore';
@@ -15,6 +15,13 @@ type PromptBarProps = {
    * with a non-empty result, so a failed transform leaves the tab untouched.
    */
   apply: (result: string) => void;
+  /**
+   * Notified whenever the in-flight state flips. The table tab uses it to lock its
+   * editable grid while a transform runs, so a mid-flight cell edit can't be
+   * silently overwritten when the (stale) result lands. Optional: code/text tabs
+   * are read-only and don't need it.
+   */
+  onRunningChange?: (isRunning: boolean) => void;
 };
 
 /**
@@ -23,9 +30,14 @@ type PromptBarProps = {
  * fresh headless `claude --print`, isolated from the chat) and hands the result
  * to `apply`. Esc or an empty field cancels.
  */
-export function PromptBar({ kind, content, apply }: PromptBarProps) {
+export function PromptBar({ kind, content, apply, onRunningChange }: PromptBarProps) {
   const [instruction, setInstruction] = useState('');
   const [isRunning, setIsRunning] = useState(false);
+
+  // Surface the in-flight state to the parent so it can lock interactive content.
+  useEffect(() => {
+    onRunningChange?.(isRunning);
+  }, [isRunning, onRunningChange]);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();

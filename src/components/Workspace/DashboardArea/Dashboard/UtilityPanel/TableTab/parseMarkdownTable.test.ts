@@ -51,4 +51,37 @@ describe('parseMarkdownTable', () => {
   it('returns null when a separator row is present but no header precedes it', () => {
     expect(parseMarkdownTable('| --- | --- |\n| 1 | 2 |')).toBeNull();
   });
+
+  it('deduplicates slug-colliding headers so no cell value is lost', () => {
+    // 'Score'/'Score' (exact dup) and 'First Name'/'First-Name' (slug-equivalent)
+    // both collapse to one slug; without a collision guard the second column would
+    // overwrite the first for every row.
+    const md = [
+      '| Score | Score | First Name | First-Name |',
+      '| - | - | - | - |',
+      '| 10 | 20 | Ada | Lovelace |',
+    ].join('\n');
+    const result = parseMarkdownTable(md);
+    expect(result?.columns.map((c) => c.field)).toEqual([
+      'score',
+      'score_2',
+      'first_name',
+      'first_name_2',
+    ]);
+    // Headers are preserved verbatim even when slugs collide.
+    expect(result?.columns.map((c) => c.headerName)).toEqual([
+      'Score',
+      'Score',
+      'First Name',
+      'First-Name',
+    ]);
+    // Every cell survives — no silent overwrite.
+    expect(result?.rows[0]).toEqual({
+      id: 0,
+      score: '10',
+      score_2: '20',
+      first_name: 'Ada',
+      first_name_2: 'Lovelace',
+    });
+  });
 });
