@@ -155,9 +155,17 @@ export default tseslint.config(
       // Default handlers list flags onMouseDown/onMouseOut/etc — those are
       // legitimate on drag handles, hover effects, resize splitters. Narrow to
       // the handlers that signal a real "should be a button" mistake.
+      // Keep onClick as the "should be a button" signal, but DON'T flag keyboard
+      // handlers: the ARIA window-splitter pattern (role="separator" + tabIndex +
+      // aria-valuenow) is a focusable resize handle that must respond to Arrow
+      // keys via onKeyDown — that's correct markup, not a non-interactive mistake.
+      // (jsx-a11y's aria-query data treats every separator as non-interactive, so
+      // there's no role-scoped allowlist available for this rule.) The inverse —
+      // a click handler with no keyboard support — is still caught by
+      // click-events-have-key-events / no-static-element-interactions above.
       'jsx-a11y/no-noninteractive-element-interactions': [
         'warn',
-        { handlers: ['onClick', 'onKeyDown', 'onKeyPress', 'onKeyUp'] },
+        { handlers: ['onClick'] },
       ],
       // Whitelist `separator` (window splitter pattern from ARIA APG) — these
       // legitimately carry tabIndex so the user can focus them for keyboard resize.

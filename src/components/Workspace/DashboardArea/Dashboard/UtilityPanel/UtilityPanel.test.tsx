@@ -6,7 +6,8 @@ import { PanelTabKind, usePanelStore } from '@/store/usePanelStore';
 import { UtilityPanel } from './UtilityPanel';
 
 beforeEach(() => {
-  usePanelStore.setState({ isOpen: false, tabs: [], activeTabId: null });
+  usePanelStore.setState({ isOpen: false, tabs: [], activeTabId: null, width: 480 });
+  Object.defineProperty(window, 'innerWidth', { value: 1600, configurable: true });
 });
 
 afterEach(() => {
@@ -54,5 +55,38 @@ describe('UtilityPanel', () => {
     act(() => usePanelStore.setState({ isOpen: false }));
     expect(document.body.style.cursor).toBe('');
     expect(document.body.style.userSelect).toBe('');
+  });
+
+  it('exposes the resize separator with ARIA value bounds', () => {
+    usePanelStore.setState({
+      isOpen: true,
+      activeTabId: 't1',
+      width: 480,
+      tabs: [{ id: 't1', kind: PanelTabKind.Table, title: 'Table', payload: { columns: [], rows: [] } }],
+    });
+    render(<UtilityPanel />);
+    const handle = screen.getByRole('separator', { name: 'Resize panel' });
+    expect(handle.getAttribute('aria-valuenow')).toBe('480');
+    expect(handle.getAttribute('aria-valuemin')).toBe('320');
+    expect(handle.getAttribute('aria-valuemax')).toBe('1440');
+  });
+
+  it('keyboard ArrowLeft widens and ArrowRight narrows the panel', () => {
+    usePanelStore.setState({
+      isOpen: true,
+      activeTabId: 't1',
+      width: 480,
+      tabs: [{ id: 't1', kind: PanelTabKind.Table, title: 'Table', payload: { columns: [], rows: [] } }],
+    });
+    render(<UtilityPanel />);
+    const handle = screen.getByRole('separator', { name: 'Resize panel' });
+
+    // Panel is docked right and grows leftward: ArrowLeft widens it.
+    fireEvent.keyDown(handle, { key: 'ArrowLeft' });
+    expect(usePanelStore.getState().width).toBe(504);
+
+    // ArrowRight narrows it back.
+    fireEvent.keyDown(handle, { key: 'ArrowRight' });
+    expect(usePanelStore.getState().width).toBe(480);
   });
 });

@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef } from 'react';
 
 import { Dialog } from '@/components/_ui/Dialog';
 import { type TabItem, Tabs } from '@/components/_ui/Tabs';
-import { usePanelStore } from '@/store/usePanelStore';
+import { maxPanelWidth, MIN_PANEL_WIDTH, usePanelStore } from '@/store/usePanelStore';
 
 import { PanelResizeHandle } from './PanelResizeHandle';
 import { TAB_BODY } from './panelTabBody';
@@ -84,7 +84,13 @@ export function UtilityPanel() {
           boxShadow: '-12px 0 48px rgba(0,0,0,0.4)',
         }}
       >
-        <PanelResizeHandle onMouseDown={startDrag} />
+        <PanelResizeHandle
+          onMouseDown={startDrag}
+          width={width}
+          min={MIN_PANEL_WIDTH}
+          max={maxPanelWidth()}
+          onResize={setWidth}
+        />
         <div
           className="flex items-center justify-between pr-2"
           style={{ borderBottom: '1px solid var(--color-border)' }}

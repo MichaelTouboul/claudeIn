@@ -19,8 +19,13 @@ export type PanelTab = {
 };
 
 /** Panel width clamp bounds (px floor; ceiling is 90% of the viewport). */
-const MIN_PANEL_WIDTH = 320;
+export const MIN_PANEL_WIDTH = 320;
 const DEFAULT_PANEL_WIDTH = 480;
+
+/** Live ceiling for the panel width: 90% of the current viewport. */
+export function maxPanelWidth(): number {
+  return Math.round(window.innerWidth * 0.9);
+}
 
 type PanelState = {
   isOpen: boolean;
@@ -93,8 +98,7 @@ export const usePanelStore = create<PanelState>((set) => ({
 
 /** Clamp a requested panel width to the [320, 90% viewport] range. */
 function clampWidth(px: number): number {
-  const max = Math.round(window.innerWidth * 0.9);
-  return Math.min(Math.max(px, MIN_PANEL_WIDTH), max);
+  return Math.min(Math.max(px, MIN_PANEL_WIDTH), maxPanelWidth());
 }
 
 /** Canonical string form of a payload — the single source for hashing & equality. */
