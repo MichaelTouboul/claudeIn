@@ -101,6 +101,9 @@ function parseMultiEdit(payload: MultiEditPayload): FileDiff | null {
   if (typeof payload.file_path !== 'string' || !Array.isArray(payload.edits)) {
     return null;
   }
+  // No edits at all isn't a real diff — fall back to the raw <pre> rather than
+  // render a blank header (a real MultiEdit always has ≥1 edit).
+  if (payload.edits.length === 0) return null;
   const lines: DiffLine[] = [];
   let seq = 0;
   for (const edit of payload.edits) {
