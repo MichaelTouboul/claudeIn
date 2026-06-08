@@ -33,11 +33,20 @@ export const usePanelStore = create<PanelState>((set) => ({
   tabs: [],
   activeTabId: null,
   openTab: (tab) =>
-    set((s) => ({
-      isOpen: true,
-      activeTabId: tab.id,
-      tabs: s.tabs.some((t) => t.id === tab.id) ? s.tabs : [...s.tabs, tab],
-    })),
+    set((s) => {
+      const existing = s.tabs.find((t) => t.id === tab.id);
+      if (existing) {
+        // Same id AND same content → refocus the existing tab (true dedup).
+        if (samePayload(existing.payload, tab.payload)) {
+          return { isOpen: true, activeTabId: existing.id, tabs: s.tabs };
+        }
+        // Same id but DIFFERENT content (hash collision). Aliasing here would
+        // show the wrong table, so mint a fresh, guaranteed-unique id instead.
+        const uniqueTab = { ...tab, id: uniqueId(tab.id, s.tabs) };
+        return { isOpen: true, activeTabId: uniqueTab.id, tabs: [...s.tabs, uniqueTab] };
+      }
+      return { isOpen: true, activeTabId: tab.id, tabs: [...s.tabs, tab] };
+    }),
   closeTab: (id) =>
     set((s) => {
       const tabs = s.tabs.filter((t) => t.id !== id);
@@ -50,10 +59,34 @@ export const usePanelStore = create<PanelState>((set) => ({
   togglePanel: () => set((s) => ({ isOpen: !s.isOpen })),
 }));
 
-/** Stable content hash (djb2) so re-opening the same table refocuses its tab. */
+/** Canonical string form of a payload — the single source for hashing & equality. */
+function serializePayload(payload: TablePayload): string {
+  return JSON.stringify({ c: payload.columns, r: payload.rows });
+}
+
+/**
+ * Content-derived tab id (djb2 hash) so re-opening the *same* table refocuses
+ * its tab. The hash is only a fast dedup hint — it is NOT collision-proof, so
+ * `openTab` verifies payload equality before treating two ids as the same tab
+ * and mints a fresh id on a genuine collision. Distinct content is therefore
+ * never silently aliased to the wrong tab.
+ */
 export function tableTabId(payload: TablePayload): string {
-  const str = JSON.stringify({ c: payload.columns, r: payload.rows });
+  const str = serializePayload(payload);
   let h = 5381;
   for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0;
   return `table:${h >>> 0}`;
+}
+
+/** True when two payloads carry identical content (for collision disambiguation). */
+function samePayload(a: TablePayload, b: TablePayload): boolean {
+  return serializePayload(a) === serializePayload(b);
+}
+
+/** Derive an id that is guaranteed not to clash with any existing tab id. */
+function uniqueId(base: string, tabs: PanelTab[]): string {
+  const taken = new Set(tabs.map((t) => t.id));
+  let candidate = base;
+  for (let n = 2; taken.has(candidate); n++) candidate = `${base}#${n}`;
+  return candidate;
 }
