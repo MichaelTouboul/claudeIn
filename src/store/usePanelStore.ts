@@ -2,6 +2,8 @@ import { create } from 'zustand';
 
 import type { TableColumn, TableRow } from '@/components/ResponseBody/blocks/TableBlock/parseTable';
 
+export type { TableColumn, TableRow };
+
 /** Finite set of panel tab kinds. Widened in later phases (code, text, …). */
 export const PanelTabKind = { Table: 'table' } as const;
 export type PanelTabKind = (typeof PanelTabKind)[keyof typeof PanelTabKind];
