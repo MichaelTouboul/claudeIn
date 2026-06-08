@@ -97,8 +97,25 @@ describe('MessageRow', () => {
     expect(screen.queryByText(/"file_path"/)).not.toBeInTheDocument();
   });
 
+  it('suppresses the outer raw-JSON copy button when a diff is shown', () => {
+    const content = JSON.stringify({
+      file_path: '/repo/a.ts',
+      old_string: 'keep\nold\ntail',
+      new_string: 'keep\nnew\ntail',
+    });
+    render(<MessageRow msg={tool('Edit', content)} isLast={false} onAnswer={vi.fn()} />);
+    // The raw-JSON CopyButton (aria-label "Copy message") must NOT be mounted;
+    // the DiffBlock provides its own "Copy" action that copies the diff text.
+    expect(screen.queryByRole('button', { name: 'Copy message' })).not.toBeInTheDocument();
+  });
+
   it('keeps the raw JSON fallback for a non-edit tool message', () => {
     render(<MessageRow msg={tool('Bash', '{"command":"ls"}')} isLast={false} onAnswer={vi.fn()} />);
     expect(screen.getByText(/"command"/)).toBeInTheDocument();
+  });
+
+  it('keeps the copy button for a non-edit tool message', () => {
+    render(<MessageRow msg={tool('Bash', '{"command":"ls"}')} isLast={false} onAnswer={vi.fn()} />);
+    expect(screen.getByRole('button', { name: 'Copy message' })).toBeInTheDocument();
   });
 });

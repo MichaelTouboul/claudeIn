@@ -47,9 +47,12 @@ export function MessageRow({ msg, isLast, onAnswer }: MessageRowProps) {
 
   if (isTool) {
     const fileDiff = msg.toolName ? parseEditTool(msg.toolName, msg.content) : null;
+    // When a diff renders, DiffBlock's own Copy action (copies the diff text)
+    // supersedes the outer raw-JSON copy button — suppress the latter.
+    const showCopy = hasContent && fileDiff === null;
     return (
       <div className="group relative ml-5">
-        {hasContent ? <CopyButton text={msg.content} className="absolute top-0 right-0" /> : null}
+        {showCopy ? <CopyButton text={msg.content} className="absolute top-0 right-0" /> : null}
         <div className="flex items-center gap-2 mb-0.5">
           <Wrench size={10} className="text-yellow-500" />
           <span className="text-xs text-yellow-500 font-mono">{msg.toolName || "tool"}</span>

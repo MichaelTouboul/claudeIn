@@ -76,6 +76,12 @@ describe('parseEditTool', () => {
       expect(result?.lines.every((l) => l.oldNo === null)).toBe(true);
       expect(result?.lines.map((l) => l.text)).toEqual(['a', 'b', 'c']);
     });
+
+    it('emits no phantom blank line for empty content', () => {
+      const json = JSON.stringify({ file_path: 'empty.ts', content: '' });
+      const result = parseEditTool('Write', json);
+      expect(result?.lines).toHaveLength(0);
+    });
   });
 
   describe('MultiEdit', () => {
@@ -97,6 +103,19 @@ describe('parseEditTool', () => {
 
     it('returns null when edits is missing', () => {
       expect(parseEditTool('MultiEdit', '{"file_path":"a.ts"}')).toBeNull();
+    });
+  });
+
+  describe('trailing-newline handling', () => {
+    it('does not emit a phantom line when only a trailing newline is removed', () => {
+      const json = JSON.stringify({
+        file_path: 'a.ts',
+        old_string: 'a\nb\n',
+        new_string: 'a\nb',
+      });
+      const result = parseEditTool('Edit', json);
+      // No line whose text is the empty string should appear.
+      expect(result?.lines.some((l) => l.text === '')).toBe(false);
     });
   });
 });

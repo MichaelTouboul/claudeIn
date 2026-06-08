@@ -29,7 +29,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 /** diffLines keeps a trailing newline on each chunk; split into bare lines. */
 function chunkToLines(value: string): string[] {
   const trimmed = value.endsWith('\n') ? value.slice(0, -1) : value;
-  return trimmed.split('\n');
+  return trimmed === '' ? [] : trimmed.split('\n');
 }
 
 /** A line cursor carried across MultiEdit hunks. `seq` makes line ids unique. */
