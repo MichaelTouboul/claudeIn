@@ -13,6 +13,7 @@ import { registerPtyHandlers } from "./pty.ipc";
 import { registerSystemHandlers } from "./system.ipc";
 import { registerSettingsHandlers } from "./settings.ipc";
 import { registerActivityHandlers } from "./activity.ipc";
+import { registerTransformHandlers } from "./transform.ipc";
 
 export function registerAllHandlers(): void {
   registerAgentHandlers();
@@ -30,4 +31,5 @@ export function registerAllHandlers(): void {
   registerSystemHandlers();
   registerSettingsHandlers();
   registerActivityHandlers();
+  registerTransformHandlers();
 }

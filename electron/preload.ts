@@ -15,6 +15,9 @@ contextBridge.exposeInMainWorld("api", {
 
   getHomeDir: () => ipcRenderer.invoke("system:home-dir"),
 
+  transform: (input: { kind: "table" | "code" | "text"; instruction: string; content: string }) =>
+    ipcRenderer.invoke("panel:transform", input),
+
   getProjects: (forceRefresh?: boolean) => ipcRenderer.invoke("projects:list", forceRefresh),
   getProject: (id: string) => ipcRenderer.invoke("projects:get", id),
   getDashboard: (id: string) => ipcRenderer.invoke("projects:dashboard", id),
