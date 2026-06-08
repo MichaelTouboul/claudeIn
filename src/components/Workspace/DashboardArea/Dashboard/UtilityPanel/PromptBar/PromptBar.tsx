@@ -46,7 +46,12 @@ export function PromptBar({ kind, content, apply, onRunningChange }: PromptBarPr
 
     setIsRunning(true);
     try {
-      const result = await window.api.transform({ kind, instruction: trimmed, content });
+      // A rejected IPC call (serialisation error, an unexpected throw in the
+      // main-process handler, …) collapses to '' — same silent-failure contract
+      // as transform.service, so it never escapes as an unhandled rejection.
+      const result = await window.api
+        .transform({ kind, instruction: trimmed, content })
+        .catch(() => '');
       if (result) {
         apply(result);
         setInstruction('');

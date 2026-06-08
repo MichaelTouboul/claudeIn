@@ -34,7 +34,11 @@ export function parseMarkdownTable(markdown: string): TablePayload | null {
     headerName,
   }));
 
-  const bodyLines = lines.slice(sepIndex + 1).filter((l) => !isSeparatorRow(l));
+  // Everything after the header's separator is a data row. We deliberately do NOT
+  // re-filter the body for separator-looking lines: a legitimate data row can
+  // consist of only dashes (e.g. a placeholder `| -- | -- |`), which is
+  // indistinguishable from a GFM separator and would be silently dropped.
+  const bodyLines = lines.slice(sepIndex + 1);
   const rows: TableRow[] = bodyLines.map((line, rowIndex) => {
     const cells = splitRow(line);
     const values: Record<string, string> = {};
@@ -47,10 +51,16 @@ export function parseMarkdownTable(markdown: string): TablePayload | null {
   return { columns, rows };
 }
 
-/** A GFM separator row is all dashes/colons/pipes/spaces (`|---|:--:|`). */
+/**
+ * A GFM separator row is one where EVERY pipe-delimited cell is a dash run with
+ * optional leading/trailing colons (`---`, `:--`, `:-:`). Requiring each cell to
+ * match `^:?-+:?$` — rather than the whole row matching a loose char-class —
+ * means a non-separator cell (a word, a number) disqualifies the line, so we
+ * never mistake a header or data row for the separator.
+ */
 function isSeparatorRow(line: string): boolean {
-  const inner = line.replace(/^\||\|$/g, '');
-  return /^[\s:|-]+$/.test(inner) && inner.includes('-');
+  const cells = splitRow(line);
+  return cells.length > 0 && cells.every((cell) => /^:?-+:?$/.test(cell));
 }
 
 /** Split a `| a | b |` row into trimmed cell strings (drops the outer pipes). */

@@ -52,6 +52,18 @@ describe('parseMarkdownTable', () => {
     expect(parseMarkdownTable('| --- | --- |\n| 1 | 2 |')).toBeNull();
   });
 
+  it('keeps a data row whose cells contain only dashes (not a separator)', () => {
+    // An LLM emitting a placeholder/diff-style table can produce a body row like
+    // `| -- | -- |`. The separator detector must NOT treat it as a separator and
+    // drop it — only the single GFM separator directly under the header counts.
+    const md = ['| A | B |', '| --- | --- |', '| -- | -- |', '| 1 | 2 |'].join('\n');
+    const result = parseMarkdownTable(md);
+    expect(result?.rows).toEqual([
+      { id: 0, a: '--', b: '--' },
+      { id: 1, a: '1', b: '2' },
+    ]);
+  });
+
   it('deduplicates slug-colliding headers so no cell value is lost', () => {
     // 'Score'/'Score' (exact dup) and 'First Name'/'First-Name' (slug-equivalent)
     // both collapse to one slug; without a collision guard the second column would

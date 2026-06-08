@@ -84,4 +84,22 @@ describe('PromptBar', () => {
     await waitFor(() => expect(transformMock).toHaveBeenCalled());
     expect(apply).not.toHaveBeenCalled();
   });
+
+  it('swallows an IPC rejection without applying and re-enables the input', async () => {
+    // A rejecting transform (Electron serialisation error, sync throw in the
+    // handler, …) must NOT become an unhandled rejection: the bar treats it as a
+    // silent no-op (apply untouched) and the input becomes usable again.
+    transformMock.mockRejectedValue(new Error('ipc blew up'));
+    const apply = vi.fn();
+    render(<PromptBar kind={PanelTabKind.Text} content="c" apply={apply} />);
+
+    const input = screen.getByRole('textbox') as HTMLInputElement;
+    fireEvent.change(input, { target: { value: 'go' } });
+    fireEvent.submit(input.closest('form')!);
+
+    await waitFor(() => expect(transformMock).toHaveBeenCalled());
+    expect(apply).not.toHaveBeenCalled();
+    // finally re-enabled the field so the user can retry.
+    await waitFor(() => expect(input.disabled).toBe(false));
+  });
 });
