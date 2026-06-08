@@ -5,6 +5,7 @@ import { Button } from '@/components/_ui/Button';
 import type { SpawnSession } from '@/types/spawn.types';
 
 import { RichEditor, type RichEditorHandle } from '../RichEditor/RichEditor';
+import { AgentTabs } from './AgentTabs/AgentTabs';
 import { InputMenu } from './InputMenu';
 import { useInputMenus } from './useInputMenus';
 
@@ -17,6 +18,10 @@ export type AgentChatInputProps = {
   isRunning: boolean;
   spawning: boolean;
   session: SpawnSession | null;
+  // The conversation's claude session id + its own (orchestrator) agent name —
+  // used to scope the sub-agent presence tabs to this conversation.
+  claudeSessionId: string | null;
+  agentName: string;
   editorRef: RefObject<RichEditorHandle | null>;
   onInputChange: (val: string) => void;
   /** Execute a chosen slash command (e.g. `/compact`). */
@@ -41,6 +46,8 @@ export function AgentChatInput({
   isRunning,
   spawning,
   session,
+  claudeSessionId,
+  agentName,
   editorRef,
   onInputChange,
   onSelectSlash,
@@ -158,6 +165,9 @@ export function AgentChatInput({
           onSelect={handleSelect}
         />
       ) : null}
+
+      {/* Sub-agent presence for THIS conversation, above the editor. */}
+      <AgentTabs claudeSessionId={claudeSessionId} orchestratorName={agentName} />
 
       <div className="flex gap-2 items-end">
         <div className={`flex items-center text-sm shrink-0 pt-1.5 ${waitingInput ? "text-yellow-400" : "text-accent"}`}>

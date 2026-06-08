@@ -68,7 +68,10 @@ describe('TableTab', () => {
     act(() => {
       usePanelStore
         .getState()
-        .updateTab(tab.id, { payload: { columns: tab.payload.columns, rows: [{ id: 0, name: 'Renamed' }] } });
+        .updateTab(tab.id, {
+          kind: PanelTabKind.Table,
+          payload: { columns: tab.payload.columns, rows: [{ id: 0, name: 'Renamed' }] },
+        });
     });
     fireEvent.click(screen.getByRole('button', { name: /copy/i }));
     await waitFor(() =>
@@ -83,8 +86,9 @@ describe('TableTab', () => {
     // Two sequential cell commits before any re-render flushes — each must read live state.
     commitRow(multiRowTab.id, { id: 0, name: 'Alice2' });
     commitRow(multiRowTab.id, { id: 1, name: 'Bob2' });
-    const rows = usePanelStore.getState().tabs[0].payload.rows;
-    expect(rows).toEqual([
+    const stored = usePanelStore.getState().tabs[0];
+    if (stored.kind !== PanelTabKind.Table) throw new Error('expected a table tab');
+    expect(stored.payload.rows).toEqual([
       { id: 0, name: 'Alice2' },
       { id: 1, name: 'Bob2' },
     ]);
