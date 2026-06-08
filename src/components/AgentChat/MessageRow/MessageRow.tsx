@@ -29,7 +29,6 @@ export function MessageRow({ msg, isLast, onAnswer }: MessageRowProps) {
     if (slash?.kind === 'caveat') return null;
     return (
       <div className="group relative">
-        {hasContent ? <CopyButton text={msg.content} className="absolute top-0 right-0" /> : null}
         <div className="flex items-center gap-2 mb-0.5">
           <ChevronRight size={12} className="text-accent" />
           <span className="text-xs text-accent font-medium">you</span>
@@ -40,6 +39,7 @@ export function MessageRow({ msg, isLast, onAnswer }: MessageRowProps) {
         ) : (
           <pre className="text-sm text-accent whitespace-pre-wrap font-mono ml-5 leading-relaxed">{renderContentWithImages(msg.content)}</pre>
         )}
+        {hasContent ? <CopyButton text={msg.content} className="ml-5 mt-1" /> : null}
       </div>
     );
   }
@@ -47,13 +47,13 @@ export function MessageRow({ msg, isLast, onAnswer }: MessageRowProps) {
   if (isTool) {
     return (
       <div className="group relative ml-5">
-        {hasContent ? <CopyButton text={msg.content} className="absolute top-0 right-0" /> : null}
         <div className="flex items-center gap-2 mb-0.5">
           <Wrench size={10} className="text-yellow-500" />
           <span className="text-xs text-yellow-500 font-mono">{msg.toolName || "tool"}</span>
           <span className="text-xs text-fg-subtle opacity-0 group-hover:opacity-100">{time}</span>
         </div>
         <pre className="text-xs text-fg-muted whitespace-pre-wrap font-mono leading-relaxed max-h-32 overflow-y-auto">{renderContentWithImages(msg.content)}</pre>
+        {hasContent ? <CopyButton text={msg.content} className="mt-1" /> : null}
       </div>
     );
   }
@@ -65,7 +65,6 @@ export function MessageRow({ msg, isLast, onAnswer }: MessageRowProps) {
 
   return (
     <div className="group relative">
-      {hasContent ? <CopyButton text={msg.content} className="absolute top-0 right-0" /> : null}
       <div className="flex items-center gap-2 mb-0.5">
         {isAuthorization ? (
           <Shield size={12} className="text-yellow-400" />
@@ -80,6 +79,7 @@ export function MessageRow({ msg, isLast, onAnswer }: MessageRowProps) {
       <div className="ml-5">
         <ResponseBody content={msg.content} />
       </div>
+      {hasContent ? <CopyButton text={msg.content} className="ml-5 mt-1" /> : null}
       {hasContent && !isAuthorization ? <OpenInPanelButton text={msg.content} /> : null}
       {prompt ? <AskPrompt prompt={prompt} isActive={isLast} onAnswer={onAnswer} /> : null}
     </div>

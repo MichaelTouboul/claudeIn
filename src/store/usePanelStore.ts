@@ -39,10 +39,23 @@ export type TabPatch =
   | { title?: string; kind: typeof PanelTabKind.Code; payload: CodePayload }
   | { title?: string; kind: typeof PanelTabKind.Text; payload: TextPayload };
 
+/** Panel width clamp bounds (px floor; ceiling is 90% of the viewport). */
+export const MIN_PANEL_WIDTH = 320;
+const DEFAULT_PANEL_WIDTH = 480;
+
+/** Live ceiling for the panel width: 90% of the current viewport. */
+export function maxPanelWidth(): number {
+  return Math.round(window.innerWidth * 0.9);
+}
+
 type PanelState = {
   isOpen: boolean;
   tabs: PanelTab[];
   activeTabId: string | null;
+  /** Persisted panel width in px; survives close/reopen via the store. */
+  width: number;
+  /** Set the panel width, clamped to [320, 0.9 * window.innerWidth]. */
+  setWidth: (px: number) => void;
   /** Push a tab (or refocus if its id already exists) and open the panel. */
   openTab: (tab: PanelTab) => void;
   closeTab: (id: string) => void;
@@ -68,6 +81,8 @@ export const usePanelStore = create<PanelState>((set) => ({
   isOpen: false,
   tabs: [],
   activeTabId: null,
+  width: DEFAULT_PANEL_WIDTH,
+  setWidth: (px) => set({ width: clampWidth(px) }),
   openTab: (tab) =>
     set((s) => {
       const existing = s.tabs.find((t) => t.id === tab.id);
@@ -130,6 +145,11 @@ function applyPatch(tab: PanelTab, patch: TabPatch): PanelTab {
     }
   }
   return { ...tab, title };
+}
+
+/** Clamp a requested panel width to the [320, 90% viewport] range. */
+function clampWidth(px: number): number {
+  return Math.min(Math.max(px, MIN_PANEL_WIDTH), maxPanelWidth());
 }
 
 /** Canonical string form of a tab's payload — the single source for hashing & equality. */

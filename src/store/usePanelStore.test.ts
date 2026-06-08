@@ -22,7 +22,7 @@ function tablePayloadOf(id: string): TablePayload {
 }
 
 beforeEach(() => {
-  usePanelStore.setState({ isOpen: false, tabs: [], activeTabId: null });
+  usePanelStore.setState({ isOpen: false, tabs: [], activeTabId: null, width: 480 });
 });
 
 describe('usePanelStore', () => {
@@ -231,6 +231,28 @@ describe('usePanelStore', () => {
     expect(s.tabs).toHaveLength(2);
     const active = s.tabs.find((t) => t.id === s.activeTabId);
     expect(active?.payload).toEqual({ lang: 'ts', src: 'B' });
+  });
+
+  it('width defaults to 480', () => {
+    expect(usePanelStore.getState().width).toBe(480);
+  });
+
+  it('setWidth applies a value within the allowed range as-is', () => {
+    Object.defineProperty(window, 'innerWidth', { value: 1600, configurable: true });
+    usePanelStore.getState().setWidth(600);
+    expect(usePanelStore.getState().width).toBe(600);
+  });
+
+  it('setWidth clamps below 320 up to the 320 floor', () => {
+    Object.defineProperty(window, 'innerWidth', { value: 1600, configurable: true });
+    usePanelStore.getState().setWidth(100);
+    expect(usePanelStore.getState().width).toBe(320);
+  });
+
+  it('setWidth clamps to 90% of window.innerWidth as the ceiling', () => {
+    Object.defineProperty(window, 'innerWidth', { value: 1000, configurable: true });
+    usePanelStore.getState().setWidth(5000);
+    expect(usePanelStore.getState().width).toBe(900);
   });
 
   it('openTab never aliases distinct content to the same tab on an id collision', () => {

@@ -1,12 +1,18 @@
-import { render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { PanelTabKind, usePanelStore } from '@/store/usePanelStore';
 
 import { UtilityPanel } from './UtilityPanel';
 
 beforeEach(() => {
-  usePanelStore.setState({ isOpen: false, tabs: [], activeTabId: null });
+  usePanelStore.setState({ isOpen: false, tabs: [], activeTabId: null, width: 480 });
+  Object.defineProperty(window, 'innerWidth', { value: 1600, configurable: true });
+});
+
+afterEach(() => {
+  document.body.style.cursor = '';
+  document.body.style.userSelect = '';
 });
 
 describe('UtilityPanel', () => {
@@ -30,5 +36,57 @@ describe('UtilityPanel', () => {
     });
     render(<UtilityPanel />);
     expect(screen.getByText('Alice')).not.toBeNull();
+  });
+
+  it('clears the drag body styles when the panel closes mid-drag', () => {
+    usePanelStore.setState({
+      isOpen: true,
+      activeTabId: 't1',
+      tabs: [{ id: 't1', kind: PanelTabKind.Table, title: 'Table', payload: { columns: [], rows: [] } }],
+    });
+    render(<UtilityPanel />);
+
+    // Begin a drag: the body picks up the resize cursor + text-select lock.
+    fireEvent.mouseDown(screen.getByRole('separator', { name: 'Resize panel' }));
+    expect(document.body.style.cursor).toBe('col-resize');
+    expect(document.body.style.userSelect).toBe('none');
+
+    // Close the panel mid-drag (e.g. the X button) — the content unmounts.
+    act(() => usePanelStore.setState({ isOpen: false }));
+    expect(document.body.style.cursor).toBe('');
+    expect(document.body.style.userSelect).toBe('');
+  });
+
+  it('exposes the resize separator with ARIA value bounds', () => {
+    usePanelStore.setState({
+      isOpen: true,
+      activeTabId: 't1',
+      width: 480,
+      tabs: [{ id: 't1', kind: PanelTabKind.Table, title: 'Table', payload: { columns: [], rows: [] } }],
+    });
+    render(<UtilityPanel />);
+    const handle = screen.getByRole('separator', { name: 'Resize panel' });
+    expect(handle.getAttribute('aria-valuenow')).toBe('480');
+    expect(handle.getAttribute('aria-valuemin')).toBe('320');
+    expect(handle.getAttribute('aria-valuemax')).toBe('1440');
+  });
+
+  it('keyboard ArrowLeft widens and ArrowRight narrows the panel', () => {
+    usePanelStore.setState({
+      isOpen: true,
+      activeTabId: 't1',
+      width: 480,
+      tabs: [{ id: 't1', kind: PanelTabKind.Table, title: 'Table', payload: { columns: [], rows: [] } }],
+    });
+    render(<UtilityPanel />);
+    const handle = screen.getByRole('separator', { name: 'Resize panel' });
+
+    // Panel is docked right and grows leftward: ArrowLeft widens it.
+    fireEvent.keyDown(handle, { key: 'ArrowLeft' });
+    expect(usePanelStore.getState().width).toBe(504);
+
+    // ArrowRight narrows it back.
+    fireEvent.keyDown(handle, { key: 'ArrowRight' });
+    expect(usePanelStore.getState().width).toBe(480);
   });
 });
