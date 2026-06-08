@@ -14,9 +14,12 @@ export const MODELS: ModelOption[] = [
   { label: 'Haiku 4.5', id: 'claude-haiku-4-5-20251001' },
 ];
 
-// Per-conversation selected model, keyed by a conversation key (the chat's
-// localSessionId, falling back to the owning tab id). Selector-based, like the
-// other stores. An absent key reads as `undefined` => claude default.
+// Per-conversation selected model, keyed by a stable conversation key. The
+// caller (AgentChat) derives that key as the owning tab id, falling back to a
+// per-mount generated id for tab-less chats — deliberately NOT localSessionId,
+// which is undefined before the first spawn and shifts mid-conversation, so it
+// would scatter a single chat's selection across multiple keys. Selector-based,
+// like the other stores. An absent key reads as `undefined` => claude default.
 type ModelState = {
   models: Record<string, string>;
   getModel: (conversationKey: string) => string | undefined;
