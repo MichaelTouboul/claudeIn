@@ -1,17 +1,33 @@
 import { X } from 'lucide-react';
 
 import { Dialog } from '@/components/_ui/Dialog';
+import { type TabItem, Tabs } from '@/components/_ui/Tabs';
+import { usePanelStore } from '@/store/usePanelStore';
 
-export type UtilityPanelProps = {
-  open: boolean;
-  onClose: () => void;
-};
+import { TAB_BODY } from './panelTabBody';
 
-export function UtilityPanel({ open, onClose }: UtilityPanelProps) {
+export function UtilityPanel() {
+  const isOpen = usePanelStore((s) => s.isOpen);
+  const tabs = usePanelStore((s) => s.tabs);
+  const activeTabId = usePanelStore((s) => s.activeTabId);
+  const setActive = usePanelStore((s) => s.setActive);
+  const closeTab = usePanelStore((s) => s.closeTab);
+  const setOpen = usePanelStore((s) => s.setOpen);
+
+  const active = tabs.find((t) => t.id === activeTabId) ?? null;
+  const Body = active ? TAB_BODY[active.kind] : null;
+  const tabItems: TabItem[] = tabs.map((t) => ({
+    key: t.id,
+    label: t.title,
+    onClose: () => closeTab(t.id),
+  }));
+
   return (
     <Dialog
-      open={open}
-      onOpenChange={(o) => { if (!o) onClose(); }}
+      open={isOpen}
+      onOpenChange={(o) => {
+        if (!o) setOpen(false);
+      }}
       variant="drawer-right"
       title="Panel"
     >
@@ -27,10 +43,9 @@ export function UtilityPanel({ open, onClose }: UtilityPanelProps) {
           className="flex items-center justify-between pr-2"
           style={{ borderBottom: '1px solid var(--color-border)' }}
         >
-          {/* Left slot reserved for a future tabs row. */}
-          <div className="flex-1" />
+          <Tabs tabs={tabItems} active={activeTabId ?? ''} onChange={setActive} className="flex-1" />
           <button
-            onClick={onClose}
+            onClick={() => setOpen(false)}
             title="Close"
             aria-label="Close panel"
             className="flex items-center justify-center w-7 h-7 rounded-md shrink-0"
@@ -41,7 +56,20 @@ export function UtilityPanel({ open, onClose }: UtilityPanelProps) {
             <X size={15} />
           </button>
         </div>
-        <div className="flex-1 min-h-0 overflow-hidden flex flex-col" />
+        <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+          {active && Body ? (
+            <Body tab={active} />
+          ) : (
+            <div className="flex-1 flex items-center justify-center">
+              <p
+                className="text-xs"
+                style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}
+              >
+                Open a table from a response to start.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </Dialog>
   );

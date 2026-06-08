@@ -1,5 +1,4 @@
-import { useState } from 'react';
-
+import { usePanelStore } from '@/store/usePanelStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
 import { DashboardSurface } from './DashboardSurface/DashboardSurface';
@@ -8,7 +7,7 @@ import { LauncherView } from './LauncherView/LauncherView';
 import { UtilityPanel } from './UtilityPanel/UtilityPanel';
 
 export function Dashboard() {
-  const [panelOpen, setPanelOpen] = useState(false);
+  const togglePanel = usePanelStore((s) => s.togglePanel);
   const dashboards = useWorkspaceStore((s) => s.dashboards);
   const activeDashboardId = useWorkspaceStore((s) => s.activeDashboardId);
 
@@ -17,14 +16,14 @@ export function Dashboard() {
 
   return (
     <div className="flex-1 flex flex-col h-full relative">
-      {isLauncher ? null : <InternalTabBar onOpenPanel={() => setPanelOpen(true)} />}
+      {isLauncher ? null : <InternalTabBar onOpenPanel={togglePanel} />}
 
       <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
         {isLauncher && active ? <LauncherView dashboardId={active.id} /> : null}
         <DashboardSurface />
       </div>
 
-      <UtilityPanel open={panelOpen} onClose={() => setPanelOpen(false)} />
+      <UtilityPanel />
     </div>
   );
 }
