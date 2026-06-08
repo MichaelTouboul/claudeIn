@@ -40,6 +40,24 @@ describe('usePanelStore', () => {
     expect(usePanelStore.getState().activeTabId).toBeNull();
   });
 
+  it('closeTab closes the panel when the last tab is removed', () => {
+    const { openTab, closeTab } = usePanelStore.getState();
+    openTab(tableTab('a'));
+    expect(usePanelStore.getState().isOpen).toBe(true);
+    closeTab('a');
+    const s = usePanelStore.getState();
+    expect(s.tabs).toEqual([]);
+    expect(s.isOpen).toBe(false);
+  });
+
+  it('closeTab keeps the panel open while tabs remain', () => {
+    const { openTab, closeTab } = usePanelStore.getState();
+    openTab(tableTab('a'));
+    openTab(tableTab('b'));
+    closeTab('b');
+    expect(usePanelStore.getState().isOpen).toBe(true);
+  });
+
   it('setActive / setOpen / togglePanel mutate flags', () => {
     const { openTab, setActive, setOpen, togglePanel } = usePanelStore.getState();
     openTab(tableTab('a'));

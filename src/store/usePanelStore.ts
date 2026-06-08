@@ -43,7 +43,7 @@ export const usePanelStore = create<PanelState>((set) => ({
       const tabs = s.tabs.filter((t) => t.id !== id);
       const activeTabId =
         s.activeTabId === id ? (tabs.length > 0 ? tabs[tabs.length - 1].id : null) : s.activeTabId;
-      return { tabs, activeTabId };
+      return { tabs, activeTabId, isOpen: tabs.length > 0 ? s.isOpen : false };
     }),
   setActive: (id) => set({ activeTabId: id }),
   setOpen: (open) => set({ isOpen: open }),
