@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 export type CopyButtonProps = {
   // The raw text to place on the clipboard (the message content).
   text: string;
-  // Extra positioning classes (e.g. absolute top-right of a bubble).
+  // Extra positioning classes (e.g. left-aligned below the message content).
   className?: string;
 };
 
