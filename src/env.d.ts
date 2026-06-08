@@ -32,13 +32,6 @@ interface Window {
     updateProjectMemoryFile: (projectId: string, fileName: string, content: string) => Promise<import("./types/agent.types").MemoryFile>;
     deleteProjectMemoryFile: (projectId: string, fileName: string) => Promise<void>;
 
-    getCostsSummary: () => Promise<import("./types/costs.types").CostsSummary>;
-    getCostsByDay: (days?: number) => Promise<import("./types/costs.types").CostsByDay[]>;
-    getCostsByAgent: (days?: number) => Promise<import("./types/costs.types").CostsByAgent[]>;
-    getCostsByAgentPerDay: (days?: number) => Promise<import("./types/costs.types").CostsByAgent[]>;
-    getCostsByTool: (days?: number) => Promise<import("./types/costs.types").CostsByTool[]>;
-    getCostsByModel: (days?: number) => Promise<import("./types/costs.types").CostsByModel[]>;
-
     getActivity: (days?: number) => Promise<import("./types/activity.types").ActivitySnapshot>;
 
     getFavorites: (projectId: string) => Promise<import("./store/useFavoritesStore").FavoriteItem[]>;

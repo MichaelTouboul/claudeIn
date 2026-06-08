@@ -5,7 +5,6 @@ import { registerProjectHandlers } from "./projects.ipc";
 import { registerSpawnHandlers } from "./spawn.ipc";
 import { registerEventHandlers } from "./events.ipc";
 import { registerMemoryHandlers } from "./memory.ipc";
-import { registerCostHandlers } from "./costs.ipc";
 import { registerFavoriteHandlers } from "./favorites.ipc";
 import { registerSessionHandlers } from "./sessions.ipc";
 import { registerConversationMetaHandlers } from "./conversation.meta.ipc";
@@ -23,7 +22,6 @@ export function registerAllHandlers(): void {
   registerSpawnHandlers();
   registerEventHandlers();
   registerMemoryHandlers();
-  registerCostHandlers();
   registerFavoriteHandlers();
   registerSessionHandlers();
   registerConversationMetaHandlers();
