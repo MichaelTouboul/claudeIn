@@ -14,7 +14,26 @@
       "Bash(ls *)",
       "Bash(cat *)",
       "Bash(find *)",
-      "Bash(grep *)"
+      "Bash(grep *)",
+      "Bash(bash *)",
+      "Bash(cd *)",
+      "Bash(echo *)",
+      "Bash(printf *)",
+      "Bash(osascript *)",
+      "Bash(wc *)",
+      "Bash(sed *)",
+      "Bash(awk *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(tr *)",
+      "Bash(sort *)",
+      "Bash(uniq *)",
+      "Bash(mkdir *)",
+      "Bash(mv *)",
+      "Bash(cp *)",
+      "Bash(test *)",
+      "Bash(xargs *)",
+      "Bash(true)"
     ]
   },
   "hooks": {

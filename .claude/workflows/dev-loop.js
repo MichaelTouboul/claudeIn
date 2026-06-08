@@ -1,6 +1,6 @@
 export const meta = {
   name: 'dev-loop',
-  description: 'Autonomous dev loop for one feature: setup worktree → feature-dev (TDD) → multi-review → deterministic integrate (merge + re-gate, or bounded retry, or desktop-notify). Never pushes.',
+  description: 'Autonomous dev loop for one feature: setup worktree → feature-dev (TDD) → multi-review → deterministic integrate (merge + re-gate + push, or bounded retry, or desktop-notify).',
   phases: [
     { title: 'Setup' },
     { title: 'Develop' },
@@ -125,7 +125,12 @@ if (passed) {
     `fi\n` +
     `if bash .claude/hooks/gate.sh; then\n` +
     `  git worktree remove --force "${setup.worktree}"; git branch -d "${setup.branch}"\n` +
-    `  echo RESULT=merged-clean\n` +
+    `  if git push origin ${base}; then\n` +
+    `    echo RESULT=merged-clean\n` +
+    `  else\n` +
+    `    osascript -e 'display notification "merged + gate green but PUSH FAILED — push ${base} manually" with title "ClaudeIn dev-loop: ${setup.branch}"'\n` +
+    `    echo RESULT=merged-clean\n` +
+    `  fi\n` +
     `else\n` +
     `  git reset --hard "$before"\n` +
     `  osascript -e 'display notification "main gate red after merge — reverted" with title "ClaudeIn dev-loop: ${setup.branch}"'\n` +
