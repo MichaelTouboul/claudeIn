@@ -23,6 +23,8 @@ type PanelState = {
   /** Push a tab (or refocus if its id already exists) and open the panel. */
   openTab: (tab: PanelTab) => void;
   closeTab: (id: string) => void;
+  /** Patch an existing tab in place (e.g. ephemeral table edits). No-op if absent. */
+  updateTab: (id: string, patch: Partial<Omit<PanelTab, 'id'>>) => void;
   setActive: (id: string) => void;
   setOpen: (open: boolean) => void;
   togglePanel: () => void;
@@ -54,6 +56,10 @@ export const usePanelStore = create<PanelState>((set) => ({
         s.activeTabId === id ? (tabs.length > 0 ? tabs[tabs.length - 1].id : null) : s.activeTabId;
       return { tabs, activeTabId, isOpen: tabs.length > 0 ? s.isOpen : false };
     }),
+  updateTab: (id, patch) =>
+    set((s) => ({
+      tabs: s.tabs.map((t) => (t.id === id ? { ...t, ...patch } : t)),
+    })),
   setActive: (id) => set({ activeTabId: id }),
   setOpen: (open) => set({ isOpen: open }),
   togglePanel: () => set((s) => ({ isOpen: !s.isOpen })),
