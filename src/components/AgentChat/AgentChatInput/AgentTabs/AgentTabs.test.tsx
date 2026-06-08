@@ -1,8 +1,9 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { useDashboardStore } from "@/store/useDashboardStore";
 import { useEventsStore } from "@/store/useEventsStore";
+import { agentTabId, PanelTabKind, usePanelStore } from "@/store/usePanelStore";
 import type { LiveEvent } from "@/types/events.types";
 
 import { AgentTabs } from "./AgentTabs";
@@ -37,6 +38,7 @@ beforeEach(() => {
     presence: new Map(),
   });
   useDashboardStore.setState({ agents: [] });
+  usePanelStore.setState({ isOpen: false, tabs: [], activeTabId: null, width: 480 });
 });
 
 describe("AgentTabs", () => {
@@ -69,6 +71,35 @@ describe("AgentTabs", () => {
     const restingDot = screen.getByTestId("agent-tab-dot-resting");
     expect(liveDot.className).toContain("animate-pulse");
     expect(restingDot.className).not.toContain("animate-pulse");
+  });
+
+  it("opens an agent tab in the right panel when a presence tab is clicked", () => {
+    ingestEvent({ id: 1, agent_name: "researcher", session_id: "sess-1" });
+
+    render(<AgentTabs claudeSessionId="sess-1" orchestratorName="orch" />);
+    fireEvent.click(screen.getByText("researcher"));
+
+    const s = usePanelStore.getState();
+    const expectedId = agentTabId("researcher", "sess-1");
+    expect(s.isOpen).toBe(true);
+    expect(s.activeTabId).toBe(expectedId);
+    const tab = s.tabs.find((t) => t.id === expectedId);
+    expect(tab?.kind).toBe(PanelTabKind.Agent);
+    expect(tab?.title).toBe("researcher");
+    if (tab?.kind !== PanelTabKind.Agent) throw new Error("not an agent tab");
+    expect(tab.payload).toEqual({ agentName: "researcher", claudeSessionId: "sess-1" });
+  });
+
+  it("refocuses the existing agent tab on a second click (no duplicate)", () => {
+    ingestEvent({ id: 1, agent_name: "researcher", session_id: "sess-1" });
+
+    render(<AgentTabs claudeSessionId="sess-1" orchestratorName="orch" />);
+    fireEvent.click(screen.getByText("researcher"));
+    fireEvent.click(screen.getByText("researcher"));
+
+    const s = usePanelStore.getState();
+    expect(s.tabs).toHaveLength(1);
+    expect(s.activeTabId).toBe(agentTabId("researcher", "sess-1"));
   });
 
   it("does not render the orchestrator as a tab", () => {
