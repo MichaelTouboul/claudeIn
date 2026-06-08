@@ -6,6 +6,7 @@ import { useCompactOnResume } from '@/hooks/useCompactOnResume';
 import { useAppStore } from '@/store/useAppStore';
 import { ConversationStatus, useConversationStatusStore } from '@/store/useConversationStatusStore';
 import { useConversationTitlesStore } from '@/store/useConversationTitlesStore';
+import { useDashboardUIStore } from '@/store/useDashboardUIStore';
 import { MODELS, useModelStore } from '@/store/useModelStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 import type { ChatMessage,SpawnSession } from '@/types/spawn.types';
@@ -17,7 +18,15 @@ import { parseAskPrompt } from './askPrompt';
 import { ChatDropOverlay } from './ChatDropOverlay/ChatDropOverlay';
 import { CompactStatusBanner } from './CompactStatusBanner/CompactStatusBanner';
 import type { RichEditorHandle } from './RichEditor/RichEditor';
+import type { SlashViewTarget } from './slashRegistry';
 import type { QueueItem, SpawnEvent } from './types';
+
+// A `/view` slash target → the sidebar panel key it reveals. Explicit map (no
+// fallback chain) so adding a future view target is a one-line, total change.
+const VIEW_PANEL_KEY: Record<SlashViewTarget, string> = {
+  agents: 'agents',
+  skills: 'skills',
+};
 
 export type AgentChatProps = {
   agentName: string;
@@ -113,6 +122,7 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
     input, attachedFiles, awaitingResponse, compacting, session, isRunning: isRunning ?? false,
     agentName, projectPath, claudeSessionId, model: selectedModel,
     openModelPicker: () => setModelPickerOpen(true),
+    openView: (view) => useDashboardUIStore.getState().openPanel(VIEW_PANEL_KEY[view]),
     editorRef, pendingUserMsgs,
     setInput, setAttachedFiles, setQueue, setMessages,
     setAwaitingResponse, setWaitingInput, setSession, setClaudeSessionId,

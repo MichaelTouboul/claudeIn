@@ -1,7 +1,7 @@
 import { type RefObject, useCallback } from 'react';
 
 import type { RichEditorHandle } from '@/components/AgentChat/RichEditor/RichEditor';
-import { dispatchSlashCommand, type LocalSlashHandlers } from '@/components/AgentChat/slashRegistry';
+import { dispatchSlashCommand, type LocalSlashHandlers, type SlashViewTarget } from '@/components/AgentChat/slashRegistry';
 import type { QueueItem } from '@/components/AgentChat/types';
 import type { ChatMessage, SpawnSession } from '@/types/spawn.types';
 
@@ -28,6 +28,8 @@ type UseAgentChatActionsParams = {
   model: string | undefined;
   // Open the in-app model picker submenu (the `/model` slash command).
   openModelPicker: () => void;
+  // Open the in-app screen a `view` slash command targets (`/agents`, `/skills`).
+  openView: (view: SlashViewTarget) => void;
   editorRef: RefObject<RichEditorHandle | null>;
   pendingUserMsgs: RefObject<Set<string>>;
   setInput: SetState<string>;
@@ -52,6 +54,7 @@ export function useAgentChatActions({
   claudeSessionId,
   model,
   openModelPicker,
+  openView,
   editorRef,
   pendingUserMsgs,
   setInput,
@@ -125,10 +128,10 @@ export function useAgentChatActions({
   // through it: registry-driven, `local` → its handler, `cli` → `sendMessage`.
   // Returns true when a registered command owned the input.
   const dispatchSlash = useCallback((command: string): boolean =>
-    dispatchSlashCommand(command, { handlers: slashHandlers, sendToCli: (t) => void sendMessage(t), openModelPicker }),
+    dispatchSlashCommand(command, { handlers: slashHandlers, sendToCli: (t) => void sendMessage(t), openModelPicker, openView }),
     // slashHandlers is rebuilt each render but only wraps the stable clearConversation.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [clearConversation, sendMessage, openModelPicker]);
+    [clearConversation, sendMessage, openModelPicker, openView]);
 
   const handleSend = useCallback(async () => {
     if (!input.trim() && attachedFiles.length === 0) return;

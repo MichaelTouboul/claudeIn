@@ -91,7 +91,9 @@ describe('useInputMenus — slash menu keyboard nav', () => {
   it('opens for / and moves the active highlight on ArrowDown', () => {
     const onSelect = vi.fn();
     render(<Harness onSelect={onSelect} />);
-    fireEvent.change(screen.getByLabelText('probe'), { target: { value: '/co' } });
+    // `/c` matches at least two commands (/clear, /compact) in the honest v1 menu,
+    // so ArrowDown moves the highlight to a distinct second option.
+    fireEvent.change(screen.getByLabelText('probe'), { target: { value: '/c' } });
 
     const first = screen.getAllByRole('option')[0];
     expect(first).toHaveAttribute('aria-selected', 'true');

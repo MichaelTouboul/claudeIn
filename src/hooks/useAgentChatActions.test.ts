@@ -28,6 +28,7 @@ function makeParams(overrides: Partial<Parameters<typeof useAgentChatActions>[0]
     claudeSessionId: 'claude-1',
     model: undefined as string | undefined,
     openModelPicker: vi.fn(),
+    openView: vi.fn(),
     editorRef,
     pendingUserMsgs,
     setInput: vi.fn(),
@@ -122,6 +123,26 @@ describe('useAgentChatActions handleSend — normal message (regression guard)',
     await result.current.handleSend();
 
     expect(params.openModelPicker).toHaveBeenCalledTimes(1);
+    expect(spawnMock).not.toHaveBeenCalled();
+  });
+
+  it('opens the agents view for /agents instead of spawning', async () => {
+    const params = makeParams({ input: '/agents' });
+    const { result } = renderHook(() => useAgentChatActions(params));
+
+    await result.current.handleSend();
+
+    expect(params.openView).toHaveBeenCalledWith('agents');
+    expect(spawnMock).not.toHaveBeenCalled();
+  });
+
+  it('opens the skills view for /skills instead of spawning', async () => {
+    const params = makeParams({ input: '/skills' });
+    const { result } = renderHook(() => useAgentChatActions(params));
+
+    await result.current.handleSend();
+
+    expect(params.openView).toHaveBeenCalledWith('skills');
     expect(spawnMock).not.toHaveBeenCalled();
   });
 });
