@@ -89,6 +89,74 @@ describe('usePanelStore', () => {
     expect(s.activeTabId).toBe(id);
   });
 
+  it('updateTab patches the targeted tab payload in place, leaving others untouched', () => {
+    const { openTab, updateTab } = usePanelStore.getState();
+    openTab(tableTab('a'));
+    openTab(tableTab('b'));
+    const patched = {
+      columns: [{ field: 'name', headerName: 'Name' }],
+      rows: [{ id: 0, name: 'Edited' }],
+    };
+    updateTab('a', { payload: patched });
+    const s = usePanelStore.getState();
+    const a = s.tabs.find((t) => t.id === 'a');
+    const b = s.tabs.find((t) => t.id === 'b');
+    expect(a?.payload).toEqual(patched);
+    expect(b?.payload).toEqual({ columns: [], rows: [] });
+    // identity / other fields preserved
+    expect(a?.title).toBe('Table');
+    expect(a?.kind).toBe(PanelTabKind.Table);
+  });
+
+  it('updateTab can patch the title without touching the payload', () => {
+    const { openTab, updateTab } = usePanelStore.getState();
+    openTab(tableTab('a'));
+    updateTab('a', { title: 'Renamed' });
+    const a = usePanelStore.getState().tabs.find((t) => t.id === 'a');
+    expect(a?.title).toBe('Renamed');
+    expect(a?.payload).toEqual({ columns: [], rows: [] });
+  });
+
+  it('updateTab is a no-op when the id does not exist', () => {
+    const { openTab, updateTab } = usePanelStore.getState();
+    openTab(tableTab('a'));
+    updateTab('missing', { title: 'X' });
+    const s = usePanelStore.getState();
+    expect(s.tabs).toHaveLength(1);
+    expect(s.tabs[0].title).toBe('Table');
+  });
+
+  it('commitRow replaces a single row by id, reading live state each call', () => {
+    const { openTab, commitRow } = usePanelStore.getState();
+    openTab({
+      id: 'a',
+      kind: PanelTabKind.Table,
+      title: 'Table',
+      payload: {
+        columns: [{ field: 'name', headerName: 'Name' }],
+        rows: [
+          { id: 0, name: 'Alice' },
+          { id: 1, name: 'Bob' },
+        ],
+      },
+    });
+    // Sequential commits without a re-render in between must both stick.
+    commitRow('a', { id: 0, name: 'Alice2' });
+    commitRow('a', { id: 1, name: 'Bob2' });
+    const a = usePanelStore.getState().tabs.find((t) => t.id === 'a');
+    expect(a?.payload.rows).toEqual([
+      { id: 0, name: 'Alice2' },
+      { id: 1, name: 'Bob2' },
+    ]);
+  });
+
+  it('commitRow is a no-op when the tab id is absent', () => {
+    const { openTab, commitRow } = usePanelStore.getState();
+    openTab(tableTab('a'));
+    commitRow('missing', { id: 0, name: 'X' });
+    expect(usePanelStore.getState().tabs[0].payload).toEqual({ columns: [], rows: [] });
+  });
+
   it('openTab never aliases distinct content to the same tab on an id collision', () => {
     const { openTab } = usePanelStore.getState();
     const payloadA = { columns: [{ field: 'x', headerName: 'X' }], rows: [{ id: 0, x: 'A' }] };
