@@ -12,6 +12,10 @@ type DashboardUIState = {
 
   selectAgent: (a: AgentSummary) => void;
   togglePanel: (panel: string) => void;
+  // Idempotently reveal a sidebar panel (vs `togglePanel`). Used by the
+  // `/agents` and `/skills` view slash commands to open the screen without
+  // accidentally closing an already-open panel.
+  openPanel: (panel: string) => void;
   setScopeTab: (tab: "project" | "user") => void;
   setSelectedAgent: (a: AgentSummary | null) => void;
   backToProject: () => void;
@@ -30,6 +34,13 @@ export const useDashboardUIStore = create<DashboardUIState>((set) => ({
       const next = new Set(s.openPanels);
       if (next.has(panel)) next.delete(panel);
       else next.add(panel);
+      return { openPanels: next };
+    }),
+  openPanel: (panel) =>
+    set((s) => {
+      if (s.openPanels.has(panel)) return s;
+      const next = new Set(s.openPanels);
+      next.add(panel);
       return { openPanels: next };
     }),
   setScopeTab: (tab) => set({ scopeTab: tab }),

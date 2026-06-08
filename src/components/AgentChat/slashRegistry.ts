@@ -14,8 +14,16 @@ export const SlashCommandKind = {
   // Opens an in-app picker submenu (e.g. `/model`) instead of running anything;
   // the choice writes per-conversation state consumed by the next spawn.
   Model: 'model',
+  // Opens an in-app screen (e.g. `/agents`, `/skills`) — the command carries a
+  // `view` target; the caller supplies the open function (the `openView` dep),
+  // same injected-handler pattern as `local` commands. Never forwarded to claude.
+  View: 'view',
 } as const;
 export type SlashCommandKind = (typeof SlashCommandKind)[keyof typeof SlashCommandKind];
+
+// Which app screen a `view` command opens. The caller's `openView` maps each
+// target to its real open mechanism (sidebar agents/skills panel today).
+export type SlashViewTarget = 'agents' | 'skills';
 
 // The id of an in-app handler a local command binds to. The registry stays pure
 // data (no React closures); the caller supplies the actual functions at dispatch
@@ -27,25 +35,23 @@ export type LocalSlashHandlers = Record<LocalSlashHandlerId, () => void>;
 type LocalSlashCommand = { cmd: string; desc: string; kind: typeof SlashCommandKind.Local; handler: LocalSlashHandlerId };
 type CliSlashCommand = { cmd: string; desc: string; kind: typeof SlashCommandKind.Cli };
 type ModelSlashCommand = { cmd: string; desc: string; kind: typeof SlashCommandKind.Model };
-export type SlashCommand = LocalSlashCommand | CliSlashCommand | ModelSlashCommand;
+type ViewSlashCommand = { cmd: string; desc: string; kind: typeof SlashCommandKind.View; view: SlashViewTarget };
+export type SlashCommand = LocalSlashCommand | CliSlashCommand | ModelSlashCommand | ViewSlashCommand;
 
+// v1 HONESTY PASS: every entry here works through `claude --print` or opens a
+// real app view. Dead interactive-TUI placeholders (`/vim`, `/config`, `/login`,
+// …) and not-yet-viewable commands (`/mcp`, `/memory`, `/cost`, `/help`, …) were
+// REMOVED — they are tracked in `docs/feature-requests-no-mvp.md` for future
+// versions. See `docs/superpowers/specs/2026-06-08-native-slash-commands-v1-design.md`.
+// `/compact` is genuinely effective under `--print`: the CLI emits a
+// `compact_boundary` system event (handled in `electron/services/spawn.service.ts`)
+// that rewrites the context window — so it stays a real `cli` command.
 export const SLASH_COMMANDS: SlashCommand[] = [
-  { cmd: '/help', desc: 'Get help with Claude Code', kind: SlashCommandKind.Cli },
-  { cmd: '/init', desc: 'Initialize CLAUDE.md', kind: SlashCommandKind.Cli },
-  { cmd: '/review', desc: 'Review a pull request', kind: SlashCommandKind.Cli },
-  { cmd: '/compact', desc: 'Compact conversation context', kind: SlashCommandKind.Cli },
   { cmd: '/clear', desc: 'Clear conversation history', kind: SlashCommandKind.Local, handler: 'clear' },
-  { cmd: '/config', desc: 'Open settings', kind: SlashCommandKind.Cli },
-  { cmd: '/cost', desc: 'Show token/cost usage', kind: SlashCommandKind.Cli },
-  { cmd: '/doctor', desc: 'Check Claude Code health', kind: SlashCommandKind.Cli },
-  { cmd: '/login', desc: 'Switch account', kind: SlashCommandKind.Cli },
-  { cmd: '/logout', desc: 'Sign out', kind: SlashCommandKind.Cli },
-  { cmd: '/memory', desc: 'Edit CLAUDE.md', kind: SlashCommandKind.Cli },
+  { cmd: '/compact', desc: 'Compact conversation context', kind: SlashCommandKind.Cli },
   { cmd: '/model', desc: 'Switch model', kind: SlashCommandKind.Model },
-  { cmd: '/permissions', desc: 'View allowed tools', kind: SlashCommandKind.Cli },
-  { cmd: '/status', desc: 'Show session status', kind: SlashCommandKind.Cli },
-  { cmd: '/terminal-setup', desc: 'Install shell integration', kind: SlashCommandKind.Cli },
-  { cmd: '/vim', desc: 'Toggle vim mode', kind: SlashCommandKind.Cli },
+  { cmd: '/agents', desc: 'Browse sub-agents', kind: SlashCommandKind.View, view: 'agents' },
+  { cmd: '/skills', desc: 'Browse skills', kind: SlashCommandKind.View, view: 'skills' },
 ];
 
 const BY_CMD: Record<string, SlashCommand> = Object.fromEntries(
@@ -64,6 +70,9 @@ export type DispatchDeps = {
   // Open the in-app model picker submenu (the `model` kind). The caller owns the
   // menu mechanism (same pattern as `handlers` for local commands).
   openModelPicker: () => void;
+  // Open the in-app screen a `view` command targets (e.g. agents/skills panel).
+  // The caller owns the open mechanism (same injected-handler pattern).
+  openView: (view: SlashViewTarget) => void;
 };
 
 // Per-kind behavior, keyed by the finite `kind` — no `if (cmd === …)` chains.
@@ -77,6 +86,10 @@ const KIND_BEHAVIOR: Record<SlashCommandKind, (cmd: SlashCommand, deps: Dispatch
   },
   [SlashCommandKind.Model]: (_cmd, deps) => {
     deps.openModelPicker();
+  },
+  [SlashCommandKind.View]: (cmd, deps) => {
+    // Only a ViewSlashCommand reaches here (its kind is View), so `view` exists.
+    deps.openView((cmd as ViewSlashCommand).view);
   },
 };
 

@@ -28,4 +28,13 @@ describe('useDashboardUIStore dashboard navigation', () => {
     useDashboardUIStore.getState().backToProject();
     expect(useDashboardUIStore.getState().selectedAgent).toBeNull();
   });
+
+  it('openPanel reveals a panel (idempotently, never closing an open one)', () => {
+    const { openPanel } = useDashboardUIStore.getState();
+    openPanel('agents');
+    expect(useDashboardUIStore.getState().openPanels.has('agents')).toBe(true);
+    // Calling again keeps it open (vs togglePanel, which would close it).
+    openPanel('agents');
+    expect(useDashboardUIStore.getState().openPanels.has('agents')).toBe(true);
+  });
 });
