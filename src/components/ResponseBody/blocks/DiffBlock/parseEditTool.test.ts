@@ -101,6 +101,45 @@ describe('parseEditTool', () => {
       expect(adds).toEqual(['bar', 'qux']);
     });
 
+    it('restarts line numbers per edit (each edit is an independent hunk)', () => {
+      // Two 3-line edits. If a single shared cursor leaked across them, the
+      // second edit's numbers would start where the first left off (~4+).
+      // Independent hunks => both edits' del/add line 2 is numbered 2.
+      const json = JSON.stringify({
+        file_path: 'multi.ts',
+        edits: [
+          { old_string: 'a\nold1\nc', new_string: 'a\nnew1\nc' },
+          { old_string: 'x\nold2\nz', new_string: 'x\nnew2\nz' },
+        ],
+      });
+      const result = parseEditTool('MultiEdit', json);
+      const dels = result?.lines.filter((l) => l.kind === LineKind.Del) ?? [];
+      const adds = result?.lines.filter((l) => l.kind === LineKind.Add) ?? [];
+      expect(dels.map((l) => l.text)).toEqual(['old1', 'old2']);
+      expect(adds.map((l) => l.text)).toEqual(['new1', 'new2']);
+      // Both hunks place their change on line 2 of their own region.
+      expect(dels.map((l) => l.oldNo)).toEqual([2, 2]);
+      expect(adds.map((l) => l.newNo)).toEqual([2, 2]);
+      // Context after each change is line 3 in each hunk, not a running total.
+      const contextNos = (result?.lines ?? [])
+        .filter((l) => l.kind === LineKind.Context && l.text === 'c')
+        .concat((result?.lines ?? []).filter((l) => l.kind === LineKind.Context && l.text === 'z'));
+      expect(contextNos.map((l) => l.oldNo)).toEqual([3, 3]);
+    });
+
+    it('keeps line ids unique across edits despite per-hunk number resets', () => {
+      const json = JSON.stringify({
+        file_path: 'multi.ts',
+        edits: [
+          { old_string: 'foo', new_string: 'bar' },
+          { old_string: 'baz', new_string: 'qux' },
+        ],
+      });
+      const result = parseEditTool('MultiEdit', json);
+      const ids = result?.lines.map((l) => l.id) ?? [];
+      expect(new Set(ids).size).toBe(ids.length);
+    });
+
     it('returns null when edits is missing', () => {
       expect(parseEditTool('MultiEdit', '{"file_path":"a.ts"}')).toBeNull();
     });

@@ -32,16 +32,28 @@ function chunkToLines(value: string): string[] {
   return trimmed === '' ? [] : trimmed.split('\n');
 }
 
-/** A line cursor carried across MultiEdit hunks. `seq` makes line ids unique. */
-type Cursor = { oldNo: number; newNo: number; seq: number };
+/**
+ * A line cursor for ONE hunk. `oldNo`/`newNo` are 1-based positions *within the
+ * replaced region* of a single edit — a MultiEdit's edits are independent
+ * replacements at unknowable file offsets, so each hunk restarts at 1 rather
+ * than carrying a shared file-wide counter (which would mis-number every edit
+ * after the first). `seq` is threaded separately to keep React keys unique.
+ */
+type Cursor = { oldNo: number; newNo: number };
 
-/** Diff two strings, appending lines to `acc` and advancing the cursor. */
-function diffInto(oldStr: string, newStr: string, acc: DiffLine[], cursor: Cursor): void {
+/**
+ * Diff two strings into a fresh hunk, appending lines to `acc`.
+ * Returns the next free `seq` so callers can keep ids unique across hunks while
+ * each hunk's line numbers start at 1.
+ */
+function diffInto(oldStr: string, newStr: string, acc: DiffLine[], seq: number): number {
+  const cursor: Cursor = { oldNo: 1, newNo: 1 };
+  let nextSeq = seq;
   for (const part of diffLines(oldStr, newStr)) {
     const lines = chunkToLines(part.value);
     for (const text of lines) {
-      const id = `l${cursor.seq}`;
-      cursor.seq += 1;
+      const id = `l${nextSeq}`;
+      nextSeq += 1;
       if (part.added) {
         acc.push({ id, kind: LineKind.Add, oldNo: null, newNo: cursor.newNo, text });
         cursor.newNo += 1;
@@ -55,6 +67,7 @@ function diffInto(oldStr: string, newStr: string, acc: DiffLine[], cursor: Curso
       }
     }
   }
+  return nextSeq;
 }
 
 function parseEdit(payload: EditPayload): FileDiff | null {
@@ -66,7 +79,7 @@ function parseEdit(payload: EditPayload): FileDiff | null {
     return null;
   }
   const lines: DiffLine[] = [];
-  diffInto(payload.old_string, payload.new_string, lines, { oldNo: 1, newNo: 1, seq: 0 });
+  diffInto(payload.old_string, payload.new_string, lines, 0);
   return { filePath: payload.file_path, lines };
 }
 
@@ -89,12 +102,13 @@ function parseMultiEdit(payload: MultiEditPayload): FileDiff | null {
     return null;
   }
   const lines: DiffLine[] = [];
-  const cursor: Cursor = { oldNo: 1, newNo: 1, seq: 0 };
+  let seq = 0;
   for (const edit of payload.edits) {
     if (!isRecord(edit) || typeof edit.old_string !== 'string' || typeof edit.new_string !== 'string') {
       return null;
     }
-    diffInto(edit.old_string, edit.new_string, lines, cursor);
+    // Each edit is an independent replacement: its own hunk, line numbers from 1.
+    seq = diffInto(edit.old_string, edit.new_string, lines, seq);
   }
   return { filePath: payload.file_path, lines };
 }
