@@ -3,6 +3,7 @@ import { useDashboardStore } from '@/store/useDashboardStore';
 import type { InternalTab } from '@/store/useWorkspaceStore';
 
 import { ChatTab } from '../ChatTab/ChatTab';
+import { McpView } from '../McpView/McpView';
 import { SessionViewer } from '../SessionViewer/SessionViewer';
 import { SkillDetail } from '../SkillDetail/SkillDetail';
 
@@ -24,6 +25,7 @@ function NotFound({ label }: { label: string }) {
 export function TabBody({ tab, cwd }: TabBodyProps) {
   const agents = useDashboardStore((s) => s.agents);
   const skills = useDashboardStore((s) => s.skills);
+  const mcp = useDashboardStore((s) => s.mcp);
   const deleteAgent = useDashboardStore((s) => s.deleteAgent);
 
   if (tab.kind === 'chat') {
@@ -42,6 +44,9 @@ export function TabBody({ tab, cwd }: TabBodyProps) {
     return summary
       ? <AgentDetail agentId={summary.id} onDelete={(name) => void deleteAgent(name)} />
       : <NotFound label="Agent not found in this project." />;
+  }
+  if (tab.kind === 'mcp') {
+    return <McpView servers={mcp} />;
   }
   const skill = skills.find((s) => s.filePath === tab.skillId);
   return skill ? <SkillDetail filePath={skill.filePath} /> : <NotFound label="Skill not found in this project." />;
