@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { Network, X } from "lucide-react";
 
 import { colorMap } from "@/components/Workspace/utils";
 import {
@@ -6,7 +6,12 @@ import {
   useConversationAgents,
 } from "@/hooks/useConversationAgents";
 import { useAgentDismissStore } from "@/store/useAgentDismissStore";
-import { agentTabId, PanelTabKind, usePanelStore } from "@/store/usePanelStore";
+import {
+  agentTabId,
+  PanelTabKind,
+  usePanelStore,
+  workflowTabId,
+} from "@/store/usePanelStore";
 
 export type AgentTabsProps = {
   // The conversation this input belongs to. Sub-agent presence is scoped to it.
@@ -29,6 +34,27 @@ export function AgentTabs({ claudeSessionId, orchestratorName }: AgentTabsProps)
 
   return (
     <div className="flex flex-wrap items-center gap-1.5 px-3 pb-2">
+      <button
+        type="button"
+        aria-label="Open session overview"
+        data-testid="session-overview-open"
+        onClick={() =>
+          openTab({
+            id: workflowTabId(claudeSessionId),
+            kind: PanelTabKind.Workflow,
+            title: "Session overview",
+            payload: { claudeSessionId },
+          })
+        }
+        className="flex items-center justify-center w-6 h-6 rounded-md cursor-pointer transition-colors hover:bg-surface-3"
+        style={{
+          background: "var(--color-surface-2)",
+          color: "var(--color-text-secondary)",
+          border: "1px solid var(--color-border)",
+        }}
+      >
+        <Network size={12} />
+      </button>
       {agents.map((agent) => {
         const pulse = CONVERSATION_AGENT_DOT[agent.status].pulse;
         const dotClass = pulse
