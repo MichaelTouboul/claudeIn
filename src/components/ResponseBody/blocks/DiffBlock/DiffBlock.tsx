@@ -3,6 +3,7 @@ import type { BlockAction } from '../../responseBody.types';
 import type { FileDiff } from './diff.types';
 import { DiffLineRow } from './DiffLineRow/DiffLineRow';
 import { linesToText } from './lineStyle';
+import { AskPhase, useDiffAsk } from './useDiffAsk';
 
 export type DiffBlockProps = {
   diff: FileDiff;
@@ -11,6 +12,8 @@ export type DiffBlockProps = {
 };
 
 export function DiffBlock({ diff, toolName }: DiffBlockProps) {
+  const ask = useDiffAsk(diff.filePath, diff.lines);
+
   const copy: BlockAction = {
     id: 'copy',
     label: 'Copy',
@@ -43,9 +46,20 @@ export function DiffBlock({ diff, toolName }: DiffBlockProps) {
               </span>
             </div>
             <div className="py-1">
-              {diff.lines.map((line) => (
-                <DiffLineRow key={line.id} line={line} />
-              ))}
+              {diff.lines.map((line) => {
+                const active = ask.state.lineId === line.id;
+                return (
+                  <DiffLineRow
+                    key={line.id}
+                    line={line}
+                    askPhase={active ? ask.state.phase : AskPhase.Idle}
+                    answer={active ? ask.state.answer : ''}
+                    onAsk={ask.open}
+                    onSubmit={ask.submit}
+                    onClose={ask.close}
+                  />
+                );
+              })}
             </div>
           </div>
         );
