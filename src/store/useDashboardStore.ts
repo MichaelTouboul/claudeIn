@@ -2,12 +2,14 @@ import { create } from "zustand";
 
 import type { AgentSummary } from "@/types/agents-mirror.types";
 import type { HookConfig, Project } from "@/types/dashboard.types";
+import type { McpServerEntry } from "@/types/mcp-mirror.types";
 import type { SkillSummary } from "@/types/skills-mirror.types";
 
 type DashboardState = {
   project: Project | null;
   agents: AgentSummary[];
   skills: SkillSummary[];
+  mcp: McpServerEntry[];
   hooks: HookConfig[];
   loading: boolean;
   load: (projectId: string) => Promise<void>;
@@ -26,6 +28,7 @@ let currentLoadId = 0;
 // project switch / before re-subscribing.
 let unsubscribeAgents: (() => void) | null = null;
 let unsubscribeSkills: (() => void) | null = null;
+let unsubscribeMcp: (() => void) | null = null;
 // The snapshot.projectPath value that identifies the active scope. For the user
 // project it is null (user-only mirror); for a project it is the project path.
 let activeScopePath: string | null = null;
@@ -34,16 +37,20 @@ let activeScopePath: string | null = null;
 function teardownLiveWiring(): void {
   unsubscribeAgents?.();
   unsubscribeSkills?.();
+  unsubscribeMcp?.();
   unsubscribeAgents = null;
   unsubscribeSkills = null;
+  unsubscribeMcp = null;
   void window.api.unwatchAgents();
   void window.api.unwatchSkills();
+  void window.api.unwatchMcp();
 }
 
 export const useDashboardStore = create<DashboardState>((set, get) => ({
   project: null,
   agents: [],
   skills: [],
+  mcp: [],
   hooks: [],
   loading: false,
 
@@ -61,9 +68,10 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
     const watchPath = data.project.id === "user" ? undefined : data.project.path;
     const scopePath = watchPath ?? null;
 
-    const [agentsSnap, skillsSnap] = await Promise.all([
+    const [agentsSnap, skillsSnap, mcpSnap] = await Promise.all([
       window.api.getAgentsMirror(watchPath),
       window.api.getSkillsMirror(watchPath),
+      window.api.getMcp(watchPath),
     ]);
     if (id !== currentLoadId) return; // superseded
 
@@ -78,13 +86,18 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
     unsubscribeSkills = window.api.onSkillsChanged((snapshot) => {
       if (snapshot.projectPath === activeScopePath) set({ skills: snapshot.skills });
     });
+    unsubscribeMcp = window.api.onMcpChanged((snapshot) => {
+      if (snapshot.projectPath === activeScopePath) set({ mcp: snapshot.servers });
+    });
     void window.api.watchAgents(watchPath);
     void window.api.watchSkills(watchPath);
+    void window.api.watchMcp(watchPath);
 
     set({
       project: data.project,
       agents: agentsSnap.agents,
       skills: skillsSnap.skills,
+      mcp: mcpSnap.servers,
       hooks: data.hooks,
       loading: false,
     });
