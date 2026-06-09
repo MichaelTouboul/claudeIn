@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
+import { useAgentDismissStore } from "@/store/useAgentDismissStore";
 import { useDashboardStore } from "@/store/useDashboardStore";
 import { useEventsStore } from "@/store/useEventsStore";
 import { agentTabId, PanelTabKind, usePanelStore } from "@/store/usePanelStore";
@@ -36,8 +37,10 @@ beforeEach(() => {
     agentContexts: new Map(),
     currentTools: new Map(),
     presence: new Map(),
+    presenceSeq: new Map(),
   });
   useDashboardStore.setState({ agents: [] });
+  useAgentDismissStore.setState({ dismissed: new Map() });
   usePanelStore.setState({ isOpen: false, tabs: [], activeTabId: null, width: 480 });
 });
 
@@ -100,6 +103,36 @@ describe("AgentTabs", () => {
     const s = usePanelStore.getState();
     expect(s.tabs).toHaveLength(1);
     expect(s.activeTabId).toBe(agentTabId("researcher", "sess-1"));
+  });
+
+  it("hides a tab after its × is clicked, without opening the panel", () => {
+    ingestEvent({ id: 5, agent_name: "researcher", session_id: "sess-1" });
+
+    const { rerender } = render(
+      <AgentTabs claudeSessionId="sess-1" orchestratorName="orch" />,
+    );
+    fireEvent.click(screen.getByTestId("agent-tab-dismiss-researcher"));
+
+    // Dismiss must not open the right panel (it is not a tab click).
+    expect(usePanelStore.getState().isOpen).toBe(false);
+    rerender(<AgentTabs claudeSessionId="sess-1" orchestratorName="orch" />);
+    expect(screen.queryByText("researcher")).not.toBeInTheDocument();
+  });
+
+  it("reappears after dismissal once a newer event arrives", () => {
+    ingestEvent({ id: 5, agent_name: "researcher", session_id: "sess-1" });
+
+    const { rerender } = render(
+      <AgentTabs claudeSessionId="sess-1" orchestratorName="orch" />,
+    );
+    fireEvent.click(screen.getByTestId("agent-tab-dismiss-researcher"));
+    rerender(<AgentTabs claudeSessionId="sess-1" orchestratorName="orch" />);
+    expect(screen.queryByText("researcher")).not.toBeInTheDocument();
+
+    // A strictly-newer event re-shows the tab.
+    ingestEvent({ id: 6, agent_name: "researcher", session_id: "sess-1" });
+    rerender(<AgentTabs claudeSessionId="sess-1" orchestratorName="orch" />);
+    expect(screen.getByText("researcher")).toBeInTheDocument();
   });
 
   it("does not render the orchestrator as a tab", () => {

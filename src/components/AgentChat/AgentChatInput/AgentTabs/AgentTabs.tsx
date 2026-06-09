@@ -1,8 +1,11 @@
+import { X } from "lucide-react";
+
 import { colorMap } from "@/components/Workspace/utils";
 import {
   CONVERSATION_AGENT_DOT,
   useConversationAgents,
 } from "@/hooks/useConversationAgents";
+import { useAgentDismissStore } from "@/store/useAgentDismissStore";
 import { agentTabId, PanelTabKind, usePanelStore } from "@/store/usePanelStore";
 
 export type AgentTabsProps = {
@@ -21,6 +24,7 @@ export type AgentTabsProps = {
 export function AgentTabs({ claudeSessionId, orchestratorName }: AgentTabsProps) {
   const agents = useConversationAgents(claudeSessionId, orchestratorName);
   const openTab = usePanelStore((s) => s.openTab);
+  const dismiss = useAgentDismissStore((s) => s.dismiss);
   if (agents.length === 0) return null;
 
   return (
@@ -31,30 +35,44 @@ export function AgentTabs({ claudeSessionId, orchestratorName }: AgentTabsProps)
           ? "bg-active animate-pulse"
           : colorMap[agent.color] || "bg-surface-3";
         return (
-          <button
+          <div
             key={agent.name}
-            type="button"
-            onClick={() =>
-              openTab({
-                id: agentTabId(agent.name, claudeSessionId),
-                kind: PanelTabKind.Agent,
-                title: agent.name,
-                payload: { agentName: agent.name, claudeSessionId },
-              })
-            }
-            className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs cursor-pointer transition-colors hover:bg-surface-3"
+            className="group flex items-center gap-1.5 pl-2 pr-1 py-1 rounded-md text-xs transition-colors"
             style={{
               background: "var(--color-surface-2)",
               color: "var(--color-text-secondary)",
               border: "1px solid var(--color-border)",
             }}
           >
-            <span
-              data-testid={`agent-tab-dot-${agent.name}`}
-              className={`w-2 h-2 rounded-full shrink-0 ${dotClass}`}
-            />
-            <span className="truncate max-w-[140px] font-medium">{agent.name}</span>
-          </button>
+            <button
+              type="button"
+              onClick={() =>
+                openTab({
+                  id: agentTabId(agent.name, claudeSessionId),
+                  kind: PanelTabKind.Agent,
+                  title: agent.name,
+                  payload: { agentName: agent.name, claudeSessionId },
+                })
+              }
+              className="flex items-center gap-1.5 cursor-pointer hover:text-fg transition-colors"
+            >
+              <span
+                data-testid={`agent-tab-dot-${agent.name}`}
+                className={`w-2 h-2 rounded-full shrink-0 ${dotClass}`}
+              />
+              <span className="truncate max-w-[140px] font-medium">{agent.name}</span>
+            </button>
+            <button
+              type="button"
+              aria-label={`Dismiss ${agent.name}`}
+              data-testid={`agent-tab-dismiss-${agent.name}`}
+              onClick={() => dismiss(claudeSessionId, agent.name, agent.latestSeq)}
+              className="flex items-center justify-center w-4 h-4 rounded cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity hover:bg-surface-3"
+              style={{ color: "var(--color-text-muted)" }}
+            >
+              <X size={11} />
+            </button>
+          </div>
         );
       })}
     </div>

@@ -1,3 +1,4 @@
+import { dismissKey, useAgentDismissStore } from "@/store/useAgentDismissStore";
 import { useDashboardStore } from "@/store/useDashboardStore";
 import { AgentPresenceStatus, useEventsStore } from "@/store/useEventsStore";
 
@@ -23,6 +24,9 @@ export type ConversationAgent = {
   name: string;
   color: string;
   status: ConversationAgentStatus;
+  // Latest event seq seen for this (session, agent). Passed to the dismiss store
+  // on `×` so a later, strictly-newer event re-shows the tab.
+  latestSeq: number;
 };
 
 // Deterministic palette for runtime agents that don't match a defined project
@@ -80,6 +84,11 @@ export function paletteColor(name: string): string {
  * matches (compared via `normalizeAgentKey` — trimmed + lower-cased — so casing
  * or whitespace drift in the backend's `agent_name` doesn't lose the configured
  * color), else a deterministic palette hash.
+ *
+ * Dismiss (cosmetic, non-destructive): an agent dismissed via `×` is filtered out
+ * while its latest event seq is `<=` the seq recorded at dismissal. It reappears
+ * automatically once a strictly-newer event arrives (latest seq exceeds it) —
+ * never stopping the agent, only hiding a stale tab until it's active again.
  */
 export function useConversationAgents(
   claudeSessionId: string | null,
@@ -88,6 +97,10 @@ export function useConversationAgents(
   const sessionPresence = useEventsStore((s) =>
     claudeSessionId ? s.presence.get(claudeSessionId) : undefined,
   );
+  const sessionSeq = useEventsStore((s) =>
+    claudeSessionId ? s.presenceSeq.get(claudeSessionId) : undefined,
+  );
+  const dismissed = useAgentDismissStore((s) => s.dismissed);
   const definedAgents = useDashboardStore((s) => s.agents);
 
   if (!sessionPresence) return [];
@@ -104,10 +117,17 @@ export function useConversationAgents(
   const result: ConversationAgent[] = [];
   for (const [name, status] of sessionPresence) {
     if (!name || normalizeAgentKey(name) === normalizeAgentKey(orchestratorName)) continue;
+    const latestSeq = sessionSeq?.get(name) ?? -Infinity;
+    // Cosmetic dismiss: hide the tab while NO strictly-newer event has arrived.
+    // A `×` records the seq that was latest at dismissal; the tab reappears once
+    // `latestSeq` exceeds it (the agent emitted again). Absent dismissal → show.
+    const dismissedSeq = dismissed.get(dismissKey(claudeSessionId, name));
+    if (dismissedSeq !== undefined && latestSeq <= dismissedSeq) continue;
     result.push({
       name,
       color: colorByName.get(normalizeAgentKey(name)) ?? paletteColor(name),
       status,
+      latestSeq,
     });
   }
   return result;
