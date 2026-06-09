@@ -6,7 +6,13 @@ import { contentHash } from '@/lib/contentHash';
 export type { TableColumn, TableRow };
 
 /** Finite set of panel tab kinds. Add a value here + an entry in TAB_BODY to extend the panel. */
-export const PanelTabKind = { Table: 'table', Code: 'code', Text: 'text', Agent: 'agent' } as const;
+export const PanelTabKind = {
+  Table: 'table',
+  Code: 'code',
+  Text: 'text',
+  Agent: 'agent',
+  Workflow: 'workflow',
+} as const;
 export type PanelTabKind = (typeof PanelTabKind)[keyof typeof PanelTabKind];
 
 export type TablePayload = { columns: TableColumn[]; rows: TableRow[] };
@@ -18,13 +24,20 @@ export type TextPayload = { text: string };
  * `useEventsStore` keyed by `agentName` (+ `claudeSessionId` to scope the stream).
  */
 export type AgentPayload = { agentName: string; claudeSessionId: string | null };
+/**
+ * A live session-overview view. Like {@link AgentPayload} it carries no snapshot —
+ * the body reads live status/tool/events from `useEventsStore`, scoped by
+ * `claudeSessionId` (the same key the Agent tab uses).
+ */
+export type WorkflowPayload = { claudeSessionId: string | null };
 
 /** A panel tab — discriminated by `kind`, so `payload` is narrowed per kind. */
 export type PanelTab =
   | { id: string; kind: typeof PanelTabKind.Table; title: string; payload: TablePayload }
   | { id: string; kind: typeof PanelTabKind.Code; title: string; payload: CodePayload }
   | { id: string; kind: typeof PanelTabKind.Text; title: string; payload: TextPayload }
-  | { id: string; kind: typeof PanelTabKind.Agent; title: string; payload: AgentPayload };
+  | { id: string; kind: typeof PanelTabKind.Agent; title: string; payload: AgentPayload }
+  | { id: string; kind: typeof PanelTabKind.Workflow; title: string; payload: WorkflowPayload };
 
 /** Payload type for a given tab kind — single source for kind→payload mapping. */
 export type PayloadByKind = {
@@ -32,6 +45,7 @@ export type PayloadByKind = {
   [PanelTabKind.Code]: CodePayload;
   [PanelTabKind.Text]: TextPayload;
   [PanelTabKind.Agent]: AgentPayload;
+  [PanelTabKind.Workflow]: WorkflowPayload;
 };
 
 /**
