@@ -238,6 +238,16 @@ describe('useWorkspaceStore', () => {
     expect(useWorkspaceStore.getState().dashboards).toBe(before);
   });
 
+  it('addTab dedupes an mcp tab by kind (one MCP tab per project, re-activates)', () => {
+    useWorkspaceStore.getState().openDashboard(proj('a'));
+    const id1 = useWorkspaceStore.getState().addTab({ kind: 'mcp', title: 'MCP Servers' });
+    useWorkspaceStore.getState().addTab({ kind: 'chat', title: 'Chat' });
+    const id2 = useWorkspaceStore.getState().addTab({ kind: 'mcp', title: 'MCP Servers' });
+    expect(id2).toBe(id1);
+    expect(useWorkspaceStore.getState().dashboards[0].tabs.filter((t) => t.kind === 'mcp')).toHaveLength(1);
+    expect(useWorkspaceStore.getState().dashboards[0].activeTabId).toBe(id1);
+  });
+
   it('retitleChatTab does not touch non-chat tabs', () => {
     useWorkspaceStore.getState().openDashboard(proj('a'));
     const agentTabId = useWorkspaceStore.getState().addTab({ kind: 'agent', title: 'Chat', agentName: 'tw-dev' });
