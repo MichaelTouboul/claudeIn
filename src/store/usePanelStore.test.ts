@@ -274,6 +274,24 @@ describe('usePanelStore', () => {
     expect(agentTabId('research', null)).toBe(agentTabId('research', null));
   });
 
+  it('opens a Workflow tab carrying the session id and narrows by kind', () => {
+    const { openTab } = usePanelStore.getState();
+    openTab({
+      id: 'workflow:sess-1',
+      kind: PanelTabKind.Workflow,
+      title: 'Session overview',
+      payload: { claudeSessionId: 'sess-1' },
+    });
+    const s = usePanelStore.getState();
+    expect(s.tabs).toHaveLength(1);
+    const tab = s.tabs[s.tabs.length - 1];
+    expect(tab.kind).toBe(PanelTabKind.Workflow);
+    if (tab.kind !== PanelTabKind.Workflow) throw new Error('not a workflow tab');
+    expect(tab.payload.claudeSessionId).toBe('sess-1');
+    expect(s.activeTabId).toBe('workflow:sess-1');
+    expect(s.isOpen).toBe(true);
+  });
+
   it('width defaults to 480', () => {
     expect(usePanelStore.getState().width).toBe(480);
   });
