@@ -12,7 +12,7 @@ function TreeAgentNode({
 }) {
   const presentation = AGENT_PRESENTATION[agent.status];
   return (
-    <li role="treeitem" aria-label={agent.agentName} className="relative pl-5">
+    <li role="treeitem" aria-selected={false} aria-label={agent.agentName} className="relative pl-5">
       {/* CSS connector from the root spine to this node. */}
       <span
         aria-hidden
@@ -49,7 +49,7 @@ export function WorkflowTree({ agents, onSelectAgent }: WorkflowViewProps) {
   return (
     <div role="tabpanel" aria-label="Tree" className="min-h-0 flex-1 overflow-auto p-3">
       <ul role="tree" className="flex flex-col gap-1">
-        <li role="treeitem" aria-label="Session">
+        <li role="treeitem" aria-selected={false} aria-label="Session">
           <div
             className="flex items-center gap-2 rounded-md px-2 py-1.5 text-xs font-semibold"
             style={{ background: 'var(--color-surface-2)', color: 'var(--color-text-primary)' }}

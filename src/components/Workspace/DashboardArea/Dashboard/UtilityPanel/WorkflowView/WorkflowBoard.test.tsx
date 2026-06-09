@@ -1,8 +1,8 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { AgentPresenceStatus } from '@/store/useEventsStore';
 import type { WorkflowAgent } from '@/hooks/useSessionWorkflow';
+import { AgentPresenceStatus } from '@/store/useEventsStore';
 
 import { WorkflowBoard } from './WorkflowBoard';
 
