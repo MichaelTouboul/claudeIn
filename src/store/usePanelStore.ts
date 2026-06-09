@@ -208,6 +208,16 @@ export function agentTabId(agentName: string, claudeSessionId: string | null): s
   return `agent:${contentHash(`${agentName}::${claudeSessionId ?? ''}`)}`;
 }
 
+/**
+ * Stable id for a session's overview (Workflow) tab. Identity is the conversation
+ * itself, not content — re-clicking the overview control must refocus the SAME
+ * panel tab while its live data keeps updating. Distinct conversations get
+ * distinct tabs; a null session shares one "unscoped" overview tab.
+ */
+export function workflowTabId(claudeSessionId: string | null): string {
+  return `workflow:${contentHash(claudeSessionId ?? '')}`;
+}
+
 /** True when two tabs carry identical payload content (for collision disambiguation). */
 function samePayload(a: PanelTab, b: PanelTab): boolean {
   return a.kind === b.kind && serializePayload(a) === serializePayload(b);

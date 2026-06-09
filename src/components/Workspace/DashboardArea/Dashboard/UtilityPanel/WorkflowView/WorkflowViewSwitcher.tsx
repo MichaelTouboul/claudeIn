@@ -1,4 +1,4 @@
-import { Tabs, type TabItem } from '@/components/_ui/Tabs';
+import { type TabItem,Tabs } from '@/components/_ui/Tabs';
 import { useWorkflowViewStore, WorkflowViewKind } from '@/store/useWorkflowViewStore';
 
 // Value → switcher label, defined ONCE (CLAUDE.md: enum + behavior map). The

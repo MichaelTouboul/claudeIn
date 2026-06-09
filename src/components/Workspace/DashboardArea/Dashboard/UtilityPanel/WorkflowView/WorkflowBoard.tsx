@@ -1,5 +1,5 @@
-import { WorkflowAgentList } from './WorkflowAgentList';
 import type { WorkflowViewProps } from './types';
+import { WorkflowAgentList } from './WorkflowAgentList';
 
 /**
  * Board view — Phase-3 stub. Lists the session's agents; Phase 4 groups them
