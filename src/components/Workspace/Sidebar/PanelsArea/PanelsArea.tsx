@@ -97,7 +97,7 @@ export function PanelsArea({
           <>
             {favAgents.length > 0 ? <>
                 <SectionLabel icon={<Bot size={10} className="text-accent" />} label="Agents" />
-                <AgentList agents={favAgents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} />
+                <AgentList agents={favAgents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} />
               </> : null}
             {favSkills.length > 0 ? <>
                 <SectionLabel icon={<Wrench size={10} className="text-active" />} label="Skills" />
@@ -120,7 +120,7 @@ export function PanelsArea({
         icon: <Bot size={11} className="text-accent" />,
         count: agents.length,
         content: isUserProject ? (
-          <AgentList agents={agents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} />
+          <AgentList agents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} />
         ) : (
           <div>
             <div
@@ -160,7 +160,7 @@ export function PanelsArea({
             </div>
             {scopeTab === "project" ? (
               projectAgents.length > 0 ? (
-                <AgentList agents={projectAgents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} />
+                <AgentList agents={projectAgents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} />
               ) : (
                 <div className="px-3 py-6 text-center">
                   <p className="text-xs text-fg-muted mb-1.5">No project agents</p>
@@ -169,7 +169,7 @@ export function PanelsArea({
               )
             ) : (
               userAgents.length > 0 ? (
-                <AgentList agents={userAgents} allAgents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} />
+                <AgentList agents={userAgents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} />
               ) : (
                 <p className="px-3 py-6 text-xs text-fg-muted text-center">No user agents</p>
               )
