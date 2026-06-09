@@ -1,17 +1,15 @@
 export const meta = {
   name: 'dev-loop',
-  description: 'Autonomous dev loop for one feature: setup worktree → feature-dev (TDD) → multi-review → deterministic integrate (merge + re-gate + push, or bounded retry, or desktop-notify).',
+  description: 'Lean autonomous dev loop for one feature: setup worktree → feature-dev (strict TDD, gate-verified) → deterministic integrate (merge + re-gate + push, or bounded retry, or desktop-notify). The gate (lint/typecheck/build/tests) is the quality bar — no separate multi-review pass (kept lean to save tokens).',
   phases: [
     { title: 'Setup' },
     { title: 'Develop' },
-    { title: 'Review' },
     { title: 'Integrate' },
   ],
 }
 
 // ---- input -------------------------------------------------------------
-// args: { input?: string (prompt for a simple fix), specPath?: string (a spec doc),
-//         depth?: 'light'|'full', base?: string }
+// args: { input?: string (prompt for a fix), specPath?: string (a spec/plan doc), base?: string }
 // args may arrive as an object, a JSON string, or a bare prompt string — normalize.
 let opts = args
 if (typeof opts === 'string') {
@@ -22,7 +20,6 @@ opts = opts || {}
 const specPath = opts.specPath
 const promptInput = opts.input
 const base = opts.base || 'main'
-const depth = opts.depth || (specPath ? 'full' : 'light')
 const MAX_RETRIES = 2
 
 if (!specPath && !promptInput) {
@@ -63,56 +60,37 @@ const setup = await agent(
   { label: 'setup-worktree', phase: 'Setup', schema: SETUP },
 )
 if (!setup || !setup.worktree) throw new Error('worktree setup failed')
-const reportFile = `docs/reviews/${setup.branch.split('/').join('-')}.md`
-log(`worktree ${setup.worktree} on ${setup.branch} (depth=${depth})`)
+log(`worktree ${setup.worktree} on ${setup.branch}`)
 
-// ---- steps 1+2: develop → review, bounded retries ----------------------
-let review = null
-let blockers = []
+// ---- step 1: develop until the gate is green (bounded retries) ----------
+// The gate is the ONLY quality bar — feature-dev's strict TDD plus
+// lint/typecheck/build/tests. No multi-review pass.
+let gatePassed = false
 let attempt = 0
+let lastSummary = ''
 while (attempt <= MAX_RETRIES) {
   phase('Develop')
-  const fixNote = blockers.length
-    ? `\n\nThis is retry ${attempt}/${MAX_RETRIES}. A prior review found these BLOCKING issues — fix them and keep the gate green:\n` +
-      blockers.map((b, i) => `${i + 1}. [${b.lens}] ${b.title} — ${b.file}${b.line ? ':' + b.line : ''}\n   ${b.detail}`).join('\n')
+  const fixNote = attempt
+    ? `\n\nThis is retry ${attempt}/${MAX_RETRIES}. The previous attempt left the gate RED (${lastSummary}). Fix it and get \`bash .claude/hooks/gate.sh\` FULLY green.`
     : ''
   const dev = await agent(
     `Work in the worktree \`${setup.worktree}\` (cd there; use absolute paths under it).\n` +
     `Implement ${featureDesc} per your feature-dev rules (strict TDD, CLAUDE.md conventions). ` +
-    `Self-verify with \`bash .claude/hooks/gate.sh\` until green, then commit on this branch — no push, no merge.${fixNote}`,
+    `Write real tests — they are the safety net for this lean loop. Self-verify with \`bash .claude/hooks/gate.sh\` until it is FULLY green ` +
+    `(lint 0 errors/0 warnings, typecheck renderer + electron, build, all tests), then commit on this branch — no push, no merge.${fixNote}`,
     { label: `develop:attempt-${attempt}`, phase: 'Develop', schema: DEV, agentType: 'feature-dev' },
   )
-  if (!dev || !dev.gatePassed) {
-    log(`attempt ${attempt}: gate not green — ${dev ? dev.summary : 'agent failed'}`)
-    attempt++
-    continue
-  }
-
-  phase('Review')
-  review = await workflow('multi-review', { base, worktree: setup.worktree, depth })
-  if (review && review.gate === 'pass') break
-  blockers = review && review.blockers ? review.blockers : []
-  log(`attempt ${attempt}: review found ${blockers.length} blocker(s)`)
+  lastSummary = dev ? dev.summary : 'agent failed'
+  if (dev && dev.gatePassed) { gatePassed = true; break }
+  log(`attempt ${attempt}: gate not green — ${lastSummary}`)
   attempt++
 }
 
-// ---- step 3: deterministic decision ------------------------------------
+// ---- step 2: deterministic integrate -----------------------------------
 phase('Integrate')
-const passed = !!(review && review.gate === 'pass')
-
-if (passed) {
-  const advisory = review.advisory || []
-  const advisoryMd = advisory.length
-    ? advisory.map((a) => `- **[${a.lens}]** ${a.title} — \`${a.file}${a.line ? ':' + a.line : ''}\`\n  ${a.detail}`).join('\n')
-    : 'No advisory findings.'
-
+if (gatePassed) {
   const integrate = await agent(
-    `You are the integrator. The feature on branch \`${setup.branch}\` passed review. Do EXACTLY this, no improvisation:\n\n` +
-    `STEP 1 — write the advisory report INTO the worktree and commit it there so it travels with the merge:\n` +
-    `  - Write this markdown to \`${setup.worktree}/${reportFile}\`:\n` +
-    `    ----\n    # Advisory review — ${setup.branch}\n\n    Gate: pass (depth=${depth}). Blocking findings: none.\n\n    ## Advisory (non-blocking)\n${advisoryMd}\n    ----\n` +
-    `  - Then: \`git -C "${setup.worktree}" add ${reportFile} && git -C "${setup.worktree}" commit -m "docs: advisory review for ${setup.branch}"\`\n\n` +
-    `STEP 2 — run this as a SINGLE bash script from the main checkout (env vars don't persist across separate calls, so keep it one block):\n` +
+    `You are the integrator. The feature on branch \`${setup.branch}\` is committed and gate-green in its worktree. Do EXACTLY this, no improvisation — run it as a SINGLE bash script from the main checkout (env vars don't persist across separate calls, so keep it one block):\n` +
     '```bash\n' +
     `set -uo pipefail\n` +
     `cd "$(git rev-parse --show-toplevel)"\n` +
@@ -123,6 +101,7 @@ if (passed) {
     `  osascript -e 'display notification "merge conflict" with title "ClaudeIn dev-loop: ${setup.branch}"'\n` +
     `  echo RESULT=conflict; exit 0\n` +
     `fi\n` +
+    `npm install --no-audit --no-fund >/dev/null 2>&1 || true\n` +
     `if bash .claude/hooks/gate.sh; then\n` +
     `  git worktree remove --force "${setup.worktree}"; git branch -d "${setup.branch}"\n` +
     `  if git push origin ${base}; then\n` +
@@ -146,13 +125,11 @@ if (passed) {
     branch: setup.branch,
     worktree: setup.worktree,
     attempts: attempt + 1,
-    reportFile,
-    advisory,
   }
 }
 
-// failed after retries: leave worktree intact, desktop-notify
-const why = review ? `${blockers.length} blocker(s) after ${attempt} attempts` : `gate never green after ${attempt} attempts`
+// gate never green after retries: leave worktree intact, desktop-notify
+const why = `gate never green after ${attempt} attempts`
 await agent(
   `Run this and nothing else:\n` +
   `osascript -e 'display notification "${why} — worktree left intact" with title "ClaudeIn dev-loop: ${setup.branch}"'`,
@@ -164,5 +141,5 @@ return {
   branch: setup.branch,
   worktree: setup.worktree,
   attempts: attempt,
-  blockers,
+  summary: lastSummary,
 }
