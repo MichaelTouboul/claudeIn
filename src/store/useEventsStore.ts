@@ -33,6 +33,13 @@ export type AgentPresenceStatus =
 // conversation B never makes conversation A's "researcher" pulse.
 export type SessionPresence = Map<string, Map<string, AgentPresenceStatus>>;
 
+// Latest event `seq` (monotonic `LiveEvent.id`) seen per (session, agent). Fed
+// ONLY by the `event` channel — the one signal that carries both `session_id`
+// and `id` — so it is a faithful, durable high-water mark. Consumers compare it
+// against a dismissed seq to decide whether a dismissed tab should REAPPEAR
+// (latest seq strictly greater than dismissed → a newer event arrived).
+export type SessionPresenceSeq = Map<string, Map<string, number>>;
+
 type IPCEvent =
   | ({ type: "event" } & LiveEvent)
   | { type: "spawn_usage"; agentName: string; tokensIn?: number; tokensOut?: number }
@@ -50,6 +57,8 @@ type EventsState = {
   // Durable, session-scoped sub-agent presence (see SessionPresence). Survives
   // 200-event buffer eviction and keeps status from leaking across sessions.
   presence: SessionPresence;
+  // Latest event seq per (session, agent) — drives dismiss reappear-on-newer.
+  presenceSeq: SessionPresenceSeq;
   setConnected: (connected: boolean) => void;
   ingest: (raw: unknown) => void;
   expireActive: (agentName: string) => void;
@@ -92,6 +101,24 @@ function setPresenceByName(
   return next;
 }
 
+// Record the latest seq for one (session, agent), keeping the MAX so an
+// out-of-order event can never lower the high-water mark. Clones the touched
+// maps so zustand subscribers re-render. Returns the next top-level seq map.
+function setPresenceSeq(
+  presenceSeq: SessionPresenceSeq,
+  sessionId: string,
+  agentName: string,
+  seq: number,
+): SessionPresenceSeq {
+  const inner = presenceSeq.get(sessionId);
+  if (inner && (inner.get(agentName) ?? -Infinity) >= seq) return presenceSeq;
+  const next: SessionPresenceSeq = new Map(presenceSeq);
+  const nextInner = new Map(inner ?? new Map<string, number>());
+  nextInner.set(agentName, seq);
+  next.set(sessionId, nextInner);
+  return next;
+}
+
 export const useEventsStore = create<EventsState>((set, get) => ({
   events: [],
   connected: false,
@@ -100,6 +127,7 @@ export const useEventsStore = create<EventsState>((set, get) => ({
   currentTools: new Map(),
   waitingAgents: new Set(),
   presence: new Map(),
+  presenceSeq: new Map(),
 
   setConnected: (connected) => set({ connected }),
 
@@ -208,6 +236,11 @@ export const useEventsStore = create<EventsState>((set, get) => ({
         presence: sessionId
           ? setPresence(s.presence, sessionId, data.agent_name, AgentPresenceStatus.Active)
           : s.presence,
+        // Track the latest seq for this (session, agent) so a dismissed tab can
+        // reappear once a strictly-newer event arrives.
+        presenceSeq: sessionId
+          ? setPresenceSeq(s.presenceSeq, sessionId, data.agent_name, data.id)
+          : s.presenceSeq,
       }));
       markActive(
         data.agent_name,
