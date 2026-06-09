@@ -38,6 +38,6 @@ describe('TabBody mcp routing', () => {
   it('renders the McpView empty state when no servers are configured', () => {
     useDashboardStore.setState({ mcp: [] });
     render(<TabBody tab={mcpTab} cwd="/p/a" />);
-    expect(screen.getByTestId('mcp-view')).toHaveTextContent('No MCP servers configured.');
+    expect(screen.getByTestId('mcp-view')).toHaveTextContent('No MCP servers configured');
   });
 });
