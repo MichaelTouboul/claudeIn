@@ -3,6 +3,7 @@ import {
   CONVERSATION_AGENT_DOT,
   useConversationAgents,
 } from "@/hooks/useConversationAgents";
+import { agentTabId, PanelTabKind, usePanelStore } from "@/store/usePanelStore";
 
 export type AgentTabsProps = {
   // The conversation this input belongs to. Sub-agent presence is scoped to it.
@@ -14,10 +15,12 @@ export type AgentTabsProps = {
 
 // Presence row above the editor: one tab per sub-agent seen in this
 // conversation. Dot reuses the AgentRow pattern (pulsing colored dot when
-// active, static otherwise). No click / no × yet (Phase 2/3). Renders nothing
-// when the conversation has no sub-agents.
+// active, static otherwise). Clicking a tab opens/focuses that agent's live
+// activity view in the right panel (UtilityPanel). Renders nothing when the
+// conversation has no sub-agents.
 export function AgentTabs({ claudeSessionId, orchestratorName }: AgentTabsProps) {
   const agents = useConversationAgents(claudeSessionId, orchestratorName);
+  const openTab = usePanelStore((s) => s.openTab);
   if (agents.length === 0) return null;
 
   return (
@@ -28,9 +31,18 @@ export function AgentTabs({ claudeSessionId, orchestratorName }: AgentTabsProps)
           ? "bg-active animate-pulse"
           : colorMap[agent.color] || "bg-surface-3";
         return (
-          <div
+          <button
             key={agent.name}
-            className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs"
+            type="button"
+            onClick={() =>
+              openTab({
+                id: agentTabId(agent.name, claudeSessionId),
+                kind: PanelTabKind.Agent,
+                title: agent.name,
+                payload: { agentName: agent.name, claudeSessionId },
+              })
+            }
+            className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs cursor-pointer transition-colors hover:bg-surface-3"
             style={{
               background: "var(--color-surface-2)",
               color: "var(--color-text-secondary)",
@@ -42,7 +54,7 @@ export function AgentTabs({ claudeSessionId, orchestratorName }: AgentTabsProps)
               className={`w-2 h-2 rounded-full shrink-0 ${dotClass}`}
             />
             <span className="truncate max-w-[140px] font-medium">{agent.name}</span>
-          </div>
+          </button>
         );
       })}
     </div>

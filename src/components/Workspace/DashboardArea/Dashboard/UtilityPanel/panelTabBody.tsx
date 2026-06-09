@@ -2,6 +2,7 @@ import { type ComponentType } from 'react';
 
 import { type PanelTab, PanelTabKind } from '@/store/usePanelStore';
 
+import { AgentTab } from './AgentTab/AgentTab';
 import { CodeTab } from './CodeTab/CodeTab';
 import { TableTab } from './TableTab/TableTab';
 import { TextTab } from './TextTab/TextTab';
@@ -11,4 +12,5 @@ export const TAB_BODY: Record<PanelTabKind, ComponentType<{ tab: PanelTab }>> = 
   [PanelTabKind.Table]: TableTab,
   [PanelTabKind.Code]: CodeTab,
   [PanelTabKind.Text]: TextTab,
+  [PanelTabKind.Agent]: AgentTab,
 };

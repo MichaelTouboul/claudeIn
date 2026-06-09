@@ -6,24 +6,32 @@ import { contentHash } from '@/lib/contentHash';
 export type { TableColumn, TableRow };
 
 /** Finite set of panel tab kinds. Add a value here + an entry in TAB_BODY to extend the panel. */
-export const PanelTabKind = { Table: 'table', Code: 'code', Text: 'text' } as const;
+export const PanelTabKind = { Table: 'table', Code: 'code', Text: 'text', Agent: 'agent' } as const;
 export type PanelTabKind = (typeof PanelTabKind)[keyof typeof PanelTabKind];
 
 export type TablePayload = { columns: TableColumn[]; rows: TableRow[] };
 export type CodePayload = { lang: string | null; src: string };
 export type TextPayload = { text: string };
+/**
+ * A live sub-agent activity view. Unlike the other payloads, its content is NOT
+ * snapshot into the tab: the body reads live status/tool/context/events from
+ * `useEventsStore` keyed by `agentName` (+ `claudeSessionId` to scope the stream).
+ */
+export type AgentPayload = { agentName: string; claudeSessionId: string | null };
 
 /** A panel tab — discriminated by `kind`, so `payload` is narrowed per kind. */
 export type PanelTab =
   | { id: string; kind: typeof PanelTabKind.Table; title: string; payload: TablePayload }
   | { id: string; kind: typeof PanelTabKind.Code; title: string; payload: CodePayload }
-  | { id: string; kind: typeof PanelTabKind.Text; title: string; payload: TextPayload };
+  | { id: string; kind: typeof PanelTabKind.Text; title: string; payload: TextPayload }
+  | { id: string; kind: typeof PanelTabKind.Agent; title: string; payload: AgentPayload };
 
 /** Payload type for a given tab kind — single source for kind→payload mapping. */
 export type PayloadByKind = {
   [PanelTabKind.Table]: TablePayload;
   [PanelTabKind.Code]: CodePayload;
   [PanelTabKind.Text]: TextPayload;
+  [PanelTabKind.Agent]: AgentPayload;
 };
 
 /**
@@ -174,6 +182,16 @@ export function codeTabId(payload: CodePayload): string {
 
 export function textTabId(payload: TextPayload): string {
   return `text:${contentHash(payload.text)}`;
+}
+
+/**
+ * Stable id for a live agent tab. Identity is the (agent, conversation) pair, not
+ * content — re-clicking the same agent's presence tab must refocus the SAME panel
+ * tab while its live activity keeps updating. The session is hashed so distinct
+ * conversations of the same-named agent get distinct tabs.
+ */
+export function agentTabId(agentName: string, claudeSessionId: string | null): string {
+  return `agent:${contentHash(`${agentName}::${claudeSessionId ?? ''}`)}`;
 }
 
 /** True when two tabs carry identical payload content (for collision disambiguation). */

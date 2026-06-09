@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import {
+  agentTabId,
   codeTabId,
   type PanelTab,
   PanelTabKind,
@@ -231,6 +232,46 @@ describe('usePanelStore', () => {
     expect(s.tabs).toHaveLength(2);
     const active = s.tabs.find((t) => t.id === s.activeTabId);
     expect(active?.payload).toEqual({ lang: 'ts', src: 'B' });
+  });
+
+  it('opens an agent tab and keeps its payload', () => {
+    const { openTab } = usePanelStore.getState();
+    openTab({
+      id: 'agent:research:sess-1',
+      kind: PanelTabKind.Agent,
+      title: 'research',
+      payload: { agentName: 'research', claudeSessionId: 'sess-1' },
+    });
+    const s = usePanelStore.getState();
+    expect(s.tabs).toHaveLength(1);
+    const tab = s.tabs[0];
+    expect(tab.kind).toBe(PanelTabKind.Agent);
+    if (tab.kind !== PanelTabKind.Agent) throw new Error('not an agent tab');
+    expect(tab.payload).toEqual({ agentName: 'research', claudeSessionId: 'sess-1' });
+    expect(s.activeTabId).toBe('agent:research:sess-1');
+    expect(s.isOpen).toBe(true);
+  });
+
+  it('refocuses an existing agent tab on re-open (same id + payload)', () => {
+    const { openTab } = usePanelStore.getState();
+    const agentTab: PanelTab = {
+      id: 'agent:research:sess-1',
+      kind: PanelTabKind.Agent,
+      title: 'research',
+      payload: { agentName: 'research', claudeSessionId: 'sess-1' },
+    };
+    openTab(agentTab);
+    openTab({ ...agentTab });
+    const s = usePanelStore.getState();
+    expect(s.tabs).toHaveLength(1);
+    expect(s.activeTabId).toBe('agent:research:sess-1');
+  });
+
+  it('agentTabId is stable for the same agent+session and differs otherwise', () => {
+    expect(agentTabId('research', 'sess-1')).toBe(agentTabId('research', 'sess-1'));
+    expect(agentTabId('research', 'sess-1')).not.toBe(agentTabId('writer', 'sess-1'));
+    expect(agentTabId('research', 'sess-1')).not.toBe(agentTabId('research', 'sess-2'));
+    expect(agentTabId('research', null)).toBe(agentTabId('research', null));
   });
 
   it('width defaults to 480', () => {
