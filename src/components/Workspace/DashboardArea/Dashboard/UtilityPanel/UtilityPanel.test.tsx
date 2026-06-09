@@ -1,12 +1,22 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { PanelTabKind, usePanelStore } from '@/store/usePanelStore';
+import { useEventsStore } from '@/store/useEventsStore';
+import { agentTabId, PanelTabKind, usePanelStore } from '@/store/usePanelStore';
 
 import { UtilityPanel } from './UtilityPanel';
 
 beforeEach(() => {
   usePanelStore.setState({ isOpen: false, tabs: [], activeTabId: null, width: 480 });
+  useEventsStore.setState({
+    events: [],
+    activeAgents: new Set(),
+    waitingAgents: new Set(),
+    agentContexts: new Map(),
+    currentTools: new Map(),
+    presence: new Map(),
+    presenceSeq: new Map(),
+  });
   Object.defineProperty(window, 'innerWidth', { value: 1600, configurable: true });
 });
 
@@ -36,6 +46,63 @@ describe('UtilityPanel', () => {
     });
     render(<UtilityPanel />);
     expect(screen.getByText('Alice')).not.toBeNull();
+  });
+
+  it('renders the WorkflowView for a Workflow tab', () => {
+    usePanelStore.setState({
+      isOpen: true,
+      activeTabId: 'w1',
+      tabs: [
+        {
+          id: 'w1',
+          kind: PanelTabKind.Workflow,
+          title: 'Session overview',
+          payload: { claudeSessionId: 'sess-1' },
+        },
+      ],
+    });
+    render(<UtilityPanel />);
+    // The WorkflowView mounts its switcher (a tablist of Timeline/Tree/Board).
+    expect(screen.getByRole('tab', { name: 'Timeline' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Board' })).toBeInTheDocument();
+  });
+
+  it('opens/focuses an Agent tab when a Workflow agent is selected', () => {
+    usePanelStore.setState({
+      isOpen: true,
+      activeTabId: 'w1',
+      tabs: [
+        {
+          id: 'w1',
+          kind: PanelTabKind.Workflow,
+          title: 'Session overview',
+          payload: { claudeSessionId: 'sess-1' },
+        },
+      ],
+    });
+    useEventsStore.getState().ingest({
+      type: 'event',
+      id: 1,
+      agent_name: 'researcher',
+      session_id: 'sess-1',
+      event_type: 'PreToolUse',
+      tool_name: null,
+      tokens_in: 0,
+      tokens_out: 0,
+      cost_usd: 0,
+      created_at: '2026-06-09T00:00:00.000Z',
+    });
+    render(<UtilityPanel />);
+
+    fireEvent.click(screen.getByRole('button', { name: /researcher/ }));
+
+    const s = usePanelStore.getState();
+    const expectedId = agentTabId('researcher', 'sess-1');
+    expect(s.activeTabId).toBe(expectedId);
+    const tab = s.tabs.find((t) => t.id === expectedId);
+    expect(tab?.kind).toBe(PanelTabKind.Agent);
+    if (tab?.kind !== PanelTabKind.Agent) throw new Error('not an agent tab');
+    expect(tab.payload).toEqual({ agentName: 'researcher', claudeSessionId: 'sess-1' });
   });
 
   it('clears the drag body styles when the panel closes mid-drag', () => {
