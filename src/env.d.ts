@@ -28,13 +28,10 @@ interface Window {
 
     getRecentEvents: (limit?: number) => Promise<import("./types/events.types").LiveEvent[]>;
     getEventsByAgent: (name: string, limit?: number) => Promise<import("./types/events.types").LiveEvent[]>;
-    getStats: () => Promise<import("./hooks/useStats").Stats>;
 
     getProjectMemory: (projectId: string) => Promise<import("./types/agent.types").MemoryFile[]>;
     updateProjectMemoryFile: (projectId: string, fileName: string, content: string) => Promise<import("./types/agent.types").MemoryFile>;
     deleteProjectMemoryFile: (projectId: string, fileName: string) => Promise<void>;
-
-    getActivity: (days?: number) => Promise<import("./types/activity.types").ActivitySnapshot>;
 
     getFavorites: (projectId: string) => Promise<import("./store/useFavoritesStore").FavoriteItem[]>;
     addFavorite: (projectId: string, type: string, name: string) => Promise<void>;
