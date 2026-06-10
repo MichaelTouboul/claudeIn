@@ -10,7 +10,7 @@ import { useWorkspaceStore } from "@/store/useWorkspaceStore";
 import { LiveSessionRow } from "./LiveSessionRow/LiveSessionRow";
 import { LoadMoreModal } from "./LoadMoreModal/LoadMoreModal";
 import { RecentSessionRow } from "./RecentSessionRow/RecentSessionRow";
-import { partitionSessions } from "./utils";
+import { capRecent, partitionSessions } from "./utils";
 
 const REFETCH_DEBOUNCE_MS = 400;
 
@@ -91,7 +91,10 @@ export function SessionsPanel({ sessions, loading, refresh }: SessionsPanelProps
       !openFilePaths.has(s.filePath),
   );
 
-  const { live, recent, older, archived } = partitionSessions(visibleSessions, activeAgents);
+  const { live, recent, archived } = partitionSessions(visibleSessions, activeAgents);
+  // Live sessions are always inline. The non-live recent history is capped to the
+  // 10 most recent inline; the overflow (plus archived) goes to the Load-more modal.
+  const { inline, overflow } = capRecent(recent);
 
   // Open the conversation in the MAIN dashboard area as a `session` tab
   // (deduped by filePath in the store), and keep the row highlighted. Title =
@@ -136,8 +139,8 @@ export function SessionsPanel({ sessions, loading, refresh }: SessionsPanelProps
 
       <TierLabel label="Recent" />
       <div className="px-1 space-y-0.5">
-        {recent.length > 0 ? (
-          recent.map((s) => (
+        {inline.length > 0 ? (
+          inline.map((s) => (
             <RecentSessionRow
               key={s.sessionId}
               session={s}
@@ -153,7 +156,7 @@ export function SessionsPanel({ sessions, loading, refresh }: SessionsPanelProps
         )}
       </div>
 
-      {older.length > 0 || archived.length > 0 ? (
+      {overflow.length > 0 || archived.length > 0 ? (
         <button
           onClick={() => setModalOpen(true)}
           className="mx-3 mt-2 mb-1 px-3 py-1.5 text-[11px] font-medium rounded-lg transition-colors"
@@ -169,14 +172,14 @@ export function SessionsPanel({ sessions, loading, refresh }: SessionsPanelProps
             e.currentTarget.style.background = "var(--color-surface-2)";
           }}
         >
-          Load more ({older.length + archived.length})
+          Load more ({overflow.length + archived.length})
         </button>
       ) : null}
 
       <LoadMoreModal
         open={modalOpen}
         onOpenChange={setModalOpen}
-        sessions={older}
+        sessions={overflow}
         archived={archived}
         selectedId={selectedId}
         onSelect={handleSelect}

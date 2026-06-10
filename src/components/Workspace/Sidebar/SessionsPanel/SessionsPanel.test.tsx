@@ -66,7 +66,7 @@ afterEach(() => {
 });
 
 describe("SessionsPanel", () => {
-  it("renders the three tiers, scope-filtered to the given sessions", () => {
+  it("renders live + recent inline (under the cap), scope-filtered to the given sessions", () => {
     renderPanel([
       session("live-a", "live"),
       session("recent-a", "recent"),
@@ -75,11 +75,32 @@ describe("SessionsPanel", () => {
 
     expect(screen.getByText("Live")).toBeInTheDocument();
     expect(screen.getByText("Recent")).toBeInTheDocument();
-    // Live + Recent tiers render inline; idle is behind "Load more".
+    // Live is always inline; non-live history (recent + idle) is inline while
+    // under the 10-session cap, so there is no "Load more" affordance.
     expect(screen.getByText("Title live-a")).toBeInTheDocument();
     expect(screen.getByText("Title recent-a")).toBeInTheDocument();
-    expect(screen.queryByText("Title idle-a")).not.toBeInTheDocument();
-    expect(screen.getByText(/Load more \(1\)/)).toBeInTheDocument();
+    expect(screen.getByText("Title idle-a")).toBeInTheDocument();
+    expect(screen.queryByText(/Load more/)).not.toBeInTheDocument();
+  });
+
+  it("caps the inline non-live list at 10 most recent; the overflow goes to Load more", async () => {
+    const recents = Array.from({ length: 13 }, (_, i) => session(`r${i}`, "recent"));
+    renderPanel([session("live-a", "live"), ...recents]);
+
+    // Live is never capped — always inline.
+    expect(screen.getByText("Title live-a")).toBeInTheDocument();
+    // First 10 recents are inline; r10..r12 spill into the modal.
+    for (let i = 0; i < 10; i += 1) {
+      expect(screen.getByText(`Title r${i}`)).toBeInTheDocument();
+    }
+    expect(screen.queryByText("Title r10")).not.toBeInTheDocument();
+    expect(screen.queryByText("Title r12")).not.toBeInTheDocument();
+    expect(screen.getByText(/Load more \(3\)/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText(/Load more \(3\)/));
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText("Title r10")).toBeInTheDocument();
+    expect(within(dialog).getByText("Title r12")).toBeInTheDocument();
   });
 
   it("promotes a driven (active-agent) session into the Live tier", () => {
@@ -162,12 +183,14 @@ describe("SessionsPanel", () => {
     expect(screen.getByText("Title recent-b")).toBeInTheDocument();
   });
 
-  it("opens the older-sessions modal from Load more", async () => {
-    renderPanel([session("recent-a", "recent"), session("idle-a", "idle")]);
+  it("opens the overflow modal from Load more", async () => {
+    // 11 non-live sessions → 10 inline, 1 (the last) overflows into the modal.
+    const recents = Array.from({ length: 11 }, (_, i) => session(`r${i}`, "recent"));
+    renderPanel(recents);
 
     fireEvent.click(screen.getByText(/Load more \(1\)/));
     const dialog = await screen.findByRole("dialog");
-    expect(within(dialog).getByText("Title idle-a")).toBeInTheDocument();
+    expect(within(dialog).getByText("Title r10")).toBeInTheDocument();
   });
 
   it("keeps archived sessions out of the main tiers and shows them in the modal's Archived section", async () => {
