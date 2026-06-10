@@ -46,7 +46,7 @@ export function TabBody({ tab, cwd }: TabBodyProps) {
       : <NotFound label="Agent not found in this project." />;
   }
   if (tab.kind === 'mcp') {
-    return <McpView servers={mcp} />;
+    return <McpView servers={mcp} projectPath={cwd} />;
   }
   const skill = skills.find((s) => s.filePath === tab.skillId);
   return skill ? <SkillDetail filePath={skill.filePath} /> : <NotFound label="Skill not found in this project." />;

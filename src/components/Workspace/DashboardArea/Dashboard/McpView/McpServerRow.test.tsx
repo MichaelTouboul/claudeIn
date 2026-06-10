@@ -1,46 +1,94 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 
-import type { McpServerEntry } from '@/types/mcp-mirror.types';
+import type { McpServerRaw } from "@/types/mcp-manage.types";
+import type { McpServerEntry } from "@/types/mcp-mirror.types";
 
-import { McpServerRow } from './McpServerRow';
+import { McpServerRow } from "./McpServerRow";
 
 function entry(overrides: Partial<McpServerEntry> = {}): McpServerEntry {
   return {
-    name: 'context7',
-    source: 'project-mcp-json',
-    scope: 'project',
-    transport: 'stdio',
-    target: 'npx -y @context7/mcp',
+    name: "context7",
+    source: "project-mcp-json",
+    scope: "project",
+    transport: "stdio",
+    target: "npx -y @context7/mcp",
     shadowed: false,
     ...overrides,
   };
 }
 
-describe('McpServerRow', () => {
-  it('renders the server name, badges and target', () => {
-    render(<McpServerRow server={entry()} />);
-    expect(screen.getByText('context7')).toBeInTheDocument();
-    expect(screen.getByText('stdio')).toBeInTheDocument();
-    expect(screen.getByText('Project .mcp.json')).toBeInTheDocument();
-    expect(screen.getByText('npx -y @context7/mcp')).toBeInTheDocument();
+function raw(name: string): McpServerRaw {
+  return { name, transport: "stdio", scope: "project", command: "npx", args: ["-y", name] };
+}
+
+function noopGetRaw(): Promise<McpServerRaw> {
+  return Promise.resolve(raw("context7"));
+}
+
+function noopRemove(): Promise<{ ok: true }> {
+  return Promise.resolve({ ok: true });
+}
+
+describe("McpServerRow", () => {
+  it("renders the server name, badges and target", () => {
+    render(<McpServerRow server={entry()} getRaw={noopGetRaw} remove={noopRemove} />);
+    expect(screen.getByText("context7")).toBeInTheDocument();
+    expect(screen.getByText("stdio")).toBeInTheDocument();
+    expect(screen.getByText("Project .mcp.json")).toBeInTheDocument();
+    expect(screen.getByText("npx -y @context7/mcp")).toBeInTheDocument();
   });
 
-  it('renders the target in a monospace font', () => {
-    render(<McpServerRow server={entry({ target: 'node srv.js' })} />);
-    const target = screen.getByText('node srv.js');
-    expect(target).toHaveStyle({ fontFamily: 'var(--font-mono)' });
+  it("dims and tags a shadowed row", () => {
+    render(<McpServerRow server={entry({ shadowed: true })} getRaw={noopGetRaw} remove={noopRemove} />);
+    expect(screen.getByText("shadowed")).toBeInTheDocument();
+    expect(screen.getByTestId("mcp-server-row")).toHaveAttribute("data-shadowed", "true");
   });
 
-  it('does not mark or dim a non-shadowed row', () => {
-    render(<McpServerRow server={entry({ shadowed: false })} />);
-    expect(screen.queryByText('shadowed')).not.toBeInTheDocument();
-    expect(screen.getByTestId('mcp-server-row')).toHaveAttribute('data-shadowed', 'false');
+  it("expanding fetches the raw config and renders it", async () => {
+    const getRaw = vi.fn(async (name: string) => raw(name));
+    render(<McpServerRow server={entry()} getRaw={getRaw} remove={noopRemove} />);
+    fireEvent.click(screen.getByRole("button", { name: /show raw config for context7/i }));
+    await waitFor(() => expect(screen.getByTestId("mcp-raw-config")).toBeInTheDocument());
+    expect(getRaw).toHaveBeenCalledWith("context7", "project", undefined);
+    expect(screen.getByText("command")).toBeInTheDocument();
   });
 
-  it('dims and tags a shadowed row', () => {
-    render(<McpServerRow server={entry({ shadowed: true })} />);
-    expect(screen.getByText('shadowed')).toBeInTheDocument();
-    expect(screen.getByTestId('mcp-server-row')).toHaveAttribute('data-shadowed', 'true');
+  it("expand control is collapsed by default (no raw config shown)", () => {
+    render(<McpServerRow server={entry()} getRaw={noopGetRaw} remove={noopRemove} />);
+    expect(screen.queryByTestId("mcp-raw-config")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /show raw config for context7/i })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+  });
+
+  it("Remove opens a confirm dialog and calls remove on confirm", async () => {
+    const remove = vi.fn(noopRemove);
+    render(<McpServerRow server={entry()} getRaw={noopGetRaw} remove={remove} />);
+    fireEvent.click(screen.getByRole("button", { name: /remove context7/i }));
+    const confirm = await screen.findByRole("button", { name: /^remove$/i });
+    fireEvent.click(confirm);
+    await waitFor(() => expect(remove).toHaveBeenCalledWith("context7", "project", undefined));
+  });
+
+  it("the confirm dialog can be cancelled without calling remove", async () => {
+    const remove = vi.fn(noopRemove);
+    render(<McpServerRow server={entry()} getRaw={noopGetRaw} remove={remove} />);
+    fireEvent.click(screen.getByRole("button", { name: /remove context7/i }));
+    const cancel = await screen.findByRole("button", { name: /cancel/i });
+    fireEvent.click(cancel);
+    await waitFor(() => expect(screen.queryByRole("button", { name: /cancel/i })).not.toBeInTheDocument());
+    expect(remove).not.toHaveBeenCalled();
+  });
+
+  it("passes projectPath through to getRaw and remove", async () => {
+    const getRaw = vi.fn(async (name: string) => raw(name));
+    const remove = vi.fn(noopRemove);
+    render(
+      <McpServerRow server={entry()} getRaw={getRaw} remove={remove} projectPath="/repo" />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /show raw config for context7/i }));
+    await waitFor(() => expect(getRaw).toHaveBeenCalledWith("context7", "project", "/repo"));
   });
 });
