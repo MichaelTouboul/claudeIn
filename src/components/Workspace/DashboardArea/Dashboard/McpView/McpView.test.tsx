@@ -27,6 +27,8 @@ describe("McpView", () => {
         command: "cmd",
       })),
       removeMcpServer: vi.fn(async () => ({ ok: true as const })),
+      addMcpServer: vi.fn(async () => ({ ok: true as const })),
+      editMcpServer: vi.fn(async () => ({ ok: true as const })),
     } as unknown as Window["api"];
   });
 
@@ -67,5 +69,42 @@ describe("McpView", () => {
     fireEvent.click(await screen.findByRole("button", { name: /^remove$/i }));
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("no such server"));
     expect(screen.queryByTestId("mcp-restart-banner")).not.toBeInTheDocument();
+  });
+
+  it("the Add MCP server button opens the add dialog", () => {
+    render(<McpView servers={[entry("alpha")]} />);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /add mcp server/i }));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
+  });
+
+  it("adding a server calls addMcpServer, closes the dialog and shows the restart banner", async () => {
+    render(<McpView servers={[entry("alpha")]} />);
+    fireEvent.click(screen.getByRole("button", { name: /add mcp server/i }));
+    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: "pw" } });
+    fireEvent.change(screen.getByLabelText(/command/i), { target: { value: "npx" } });
+    fireEvent.click(screen.getByRole("button", { name: /^add$/i }));
+    await waitFor(() =>
+      expect(window.api.addMcpServer).toHaveBeenCalledWith(
+        expect.objectContaining({ name: "pw", transport: "stdio", command: "npx" }),
+      ),
+    );
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(screen.getByText("Restart your Claude sessions to apply")).toBeInTheDocument();
+  });
+
+  it("editing a row prefills from getMcpRaw and submits editMcpServer", async () => {
+    render(<McpView servers={[entry("alpha")]} />);
+    fireEvent.click(screen.getByRole("button", { name: /edit alpha/i }));
+    await waitFor(() => expect(window.api.getMcpRaw).toHaveBeenCalledWith("alpha", "project", undefined));
+    await waitFor(() => expect((screen.getByLabelText(/name/i) as HTMLInputElement).value).toBe("alpha"));
+    fireEvent.click(screen.getByRole("button", { name: /save/i }));
+    await waitFor(() =>
+      expect(window.api.editMcpServer).toHaveBeenCalledWith(
+        "alpha",
+        expect.objectContaining({ name: "alpha", transport: "stdio" }),
+      ),
+    );
   });
 });

@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { McpServerRaw } from "@/types/mcp-manage.types";
+import type { McpAddInput, McpServerRaw } from "@/types/mcp-manage.types";
 
 import { useMcpManage } from "./useMcpManage";
 
@@ -9,11 +9,17 @@ function makeRaw(name: string): McpServerRaw {
   return { name, transport: "stdio", scope: "project", command: "npx", args: ["-y", name] };
 }
 
+function makeInput(name: string): McpAddInput {
+  return { name, scope: "user", transport: "stdio", command: "npx" };
+}
+
 describe("useMcpManage", () => {
   beforeEach(() => {
     window.api = {
       getMcpRaw: vi.fn(async (name: string) => makeRaw(name)),
       removeMcpServer: vi.fn(async () => ({ ok: true as const })),
+      addMcpServer: vi.fn(async () => ({ ok: true as const })),
+      editMcpServer: vi.fn(async () => ({ ok: true as const })),
     } as unknown as Window["api"];
   });
 
@@ -79,5 +85,39 @@ describe("useMcpManage", () => {
       res = await result.current.remove("gh", "user");
     });
     expect(res).toEqual({ ok: true });
+  });
+
+  it("a successful add forwards the input and sets needsRestart", async () => {
+    const { result } = renderHook(() => useMcpManage());
+    const input = makeInput("pw");
+    await act(async () => {
+      await result.current.add(input);
+    });
+    expect(window.api.addMcpServer).toHaveBeenCalledWith(input);
+    expect(result.current.needsRestart).toBe(true);
+    expect(result.current.error).toBeNull();
+  });
+
+  it("a failed add surfaces the error and does not set needsRestart", async () => {
+    (window.api.addMcpServer as ReturnType<typeof vi.fn>).mockResolvedValue({
+      ok: false,
+      error: "duplicate name",
+    });
+    const { result } = renderHook(() => useMcpManage());
+    await act(async () => {
+      await result.current.add(makeInput("pw"));
+    });
+    expect(result.current.needsRestart).toBe(false);
+    expect(result.current.error).toBe("duplicate name");
+  });
+
+  it("a successful edit forwards name + input and sets needsRestart", async () => {
+    const { result } = renderHook(() => useMcpManage());
+    const input = makeInput("gh");
+    await act(async () => {
+      await result.current.edit("gh", input);
+    });
+    expect(window.api.editMcpServer).toHaveBeenCalledWith("gh", input);
+    expect(result.current.needsRestart).toBe(true);
   });
 });

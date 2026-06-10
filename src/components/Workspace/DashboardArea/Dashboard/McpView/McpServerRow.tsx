@@ -1,20 +1,24 @@
 import { useState } from 'react';
 
 import type {
+  McpAddInput,
   McpManageScope,
   McpMutationResult,
   McpServerRaw,
 } from '@/types/mcp-manage.types';
 import type { McpServerEntry } from '@/types/mcp-mirror.types';
 
+import { McpAddDialog } from './McpAddDialog';
 import { McpRawConfig } from './McpRawConfig';
 import { McpRemoveDialog } from './McpRemoveDialog';
+import { rawToAddInput } from './mcpRowEdit';
 import { McpServerBadges } from './McpServerBadges';
 
 export type McpServerRowProps = {
   server: McpServerEntry;
   getRaw: (name: string, scope?: McpManageScope, projectPath?: string) => Promise<McpServerRaw>;
   remove: (name: string, scope: McpManageScope, projectPath?: string) => Promise<McpMutationResult>;
+  edit: (name: string, input: McpAddInput) => Promise<McpMutationResult>;
   projectPath?: string;
 };
 
@@ -22,10 +26,12 @@ export type McpServerRowProps = {
 // an expand affordance that lazily fetches the full raw config and a Remove
 // action guarded by a confirm dialog. A `shadowed` server (a higher-precedence
 // source defines the same name) is dimmed and carries an explicit "shadowed" tag.
-export function McpServerRow({ server, getRaw, remove, projectPath }: McpServerRowProps) {
+export function McpServerRow({ server, getRaw, remove, edit, projectPath }: McpServerRowProps) {
   const [expanded, setExpanded] = useState(false);
   const [raw, setRaw] = useState<McpServerRaw | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editInitial, setEditInitial] = useState<Partial<McpAddInput> | null>(null);
   const opacity = server.shadowed ? 0.5 : 1;
 
   const toggleExpand = async () => {
@@ -37,6 +43,12 @@ export function McpServerRow({ server, getRaw, remove, projectPath }: McpServerR
     if (raw === null) {
       setRaw(await getRaw(server.name, server.scope, projectPath));
     }
+  };
+
+  const openEdit = async () => {
+    const fetched = await getRaw(server.name, server.scope, projectPath);
+    setEditInitial(rawToAddInput(fetched, server.scope));
+    setEditOpen(true);
   };
 
   return (
@@ -83,9 +95,18 @@ export function McpServerRow({ server, getRaw, remove, projectPath }: McpServerR
         ) : null}
         <button
           type="button"
+          aria-label={`Edit ${server.name}`}
+          onClick={() => void openEdit()}
+          className="ml-auto text-xs leading-none rounded px-2 py-0.5 transition-colors"
+          style={{ color: 'var(--color-accent)', fontFamily: 'var(--font-sans)' }}
+        >
+          Edit
+        </button>
+        <button
+          type="button"
           aria-label={`Remove ${server.name}`}
           onClick={() => setConfirmOpen(true)}
-          className="ml-auto text-xs leading-none rounded px-2 py-0.5 transition-colors"
+          className="text-xs leading-none rounded px-2 py-0.5 transition-colors"
           style={{ color: 'var(--color-danger)', fontFamily: 'var(--font-sans)' }}
         >
           Remove
@@ -103,6 +124,15 @@ export function McpServerRow({ server, getRaw, remove, projectPath }: McpServerR
         serverName={server.name}
         onConfirm={() => remove(server.name, server.scope, projectPath)}
       />
+      {editInitial !== null ? (
+        <McpAddDialog
+          mode="edit"
+          open={editOpen}
+          onOpenChange={setEditOpen}
+          initialValues={editInitial}
+          onSubmit={(input) => edit(server.name, input)}
+        />
+      ) : null}
     </li>
   );
 }
