@@ -142,6 +142,13 @@ export async function initDb(): Promise<void> {
       user_title  TEXT,
       cleared_at  TEXT
     );
+    CREATE TABLE IF NOT EXISTS scope_profiles (
+      scope_path   TEXT PRIMARY KEY,
+      scope        TEXT NOT NULL,
+      profile_md   TEXT NOT NULL,
+      inputs_hash  TEXT NOT NULL,
+      generated_at TEXT NOT NULL
+    );
   `);
 
   runMigrations();
