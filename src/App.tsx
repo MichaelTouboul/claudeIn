@@ -8,7 +8,6 @@ import { Workspace } from "@/components/Workspace/Workspace";
 
 import { useInitChatTitles } from "./hooks/useInitChatTitles";
 import { useProjects } from "./hooks/useProjects";
-import { useStats } from "./hooks/useStats";
 import { useAppStore } from "./store/useAppStore";
 import { useDashboardStore } from "./store/useDashboardStore";
 import { useEventsStore, useInitEvents } from "./store/useEventsStore";
@@ -32,10 +31,8 @@ export default function App() {
 
   useInitEvents();
   useInitChatTitles();
-  const events = useEventsStore((s) => s.events);
   const connected = useEventsStore((s) => s.connected);
   const activeCount = useEventsStore((s) => s.activeAgents.size);
-  const { stats } = useStats(events.length);
   const [chatOpen, setChatOpen] = useState(false);
   const prevProjectPath = useRef<string | null>(null);
 
@@ -70,10 +67,8 @@ export default function App() {
   return (
     <div className="h-full flex flex-col surface-grain" style={{ background: 'var(--color-surface-0)', color: 'var(--color-text-primary)' }}>
       <Header
-        stats={stats}
         activeCount={activeCount}
         connected={connected}
-        refreshSignal={events.length}
         onOpenChat={() => setChatOpen(true)}
       />
 
