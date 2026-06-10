@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 
 import type {
+  McpAddInput,
   McpManageScope,
   McpMutationResult,
   McpServerRaw,
@@ -9,6 +10,10 @@ import type {
 export type UseMcpManage = {
   /** Fetch a server's full raw config via `claude mcp get`. */
   getRaw: (name: string, scope?: McpManageScope, projectPath?: string) => Promise<McpServerRaw>;
+  /** Add a new server; sets `needsRestart` on success, surfaces `error` on failure. */
+  add: (input: McpAddInput) => Promise<McpMutationResult>;
+  /** Edit an existing server (remove + re-add); same restart/error semantics. */
+  edit: (name: string, input: McpAddInput) => Promise<McpMutationResult>;
   /** Remove a server; sets `needsRestart` on success, surfaces `error` on failure. */
   remove: (
     name: string,
@@ -28,25 +33,40 @@ export function useMcpManage(): UseMcpManage {
   const [needsRestart, setNeedsRestart] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Apply the shared post-mutation effect: success clears the error and arms
+  // the restart notice; failure surfaces the CLI error and leaves it disarmed.
+  const applyResult = useCallback((result: McpMutationResult) => {
+    if (result.ok) {
+      setError(null);
+      setNeedsRestart(true);
+    } else {
+      setError(result.error);
+    }
+    return result;
+  }, []);
+
   const getRaw = useCallback(
     (name: string, scope?: McpManageScope, projectPath?: string) =>
       window.api.getMcpRaw(name, scope, projectPath),
     [],
   );
 
-  const remove = useCallback(
-    async (name: string, scope: McpManageScope, projectPath?: string) => {
-      const result = await window.api.removeMcpServer(name, scope, projectPath);
-      if (result.ok) {
-        setError(null);
-        setNeedsRestart(true);
-      } else {
-        setError(result.error);
-      }
-      return result;
-    },
-    [],
+  const add = useCallback(
+    async (input: McpAddInput) => applyResult(await window.api.addMcpServer(input)),
+    [applyResult],
   );
 
-  return { getRaw, remove, needsRestart, error };
+  const edit = useCallback(
+    async (name: string, input: McpAddInput) =>
+      applyResult(await window.api.editMcpServer(name, input)),
+    [applyResult],
+  );
+
+  const remove = useCallback(
+    async (name: string, scope: McpManageScope, projectPath?: string) =>
+      applyResult(await window.api.removeMcpServer(name, scope, projectPath)),
+    [applyResult],
+  );
+
+  return { getRaw, add, edit, remove, needsRestart, error };
 }
