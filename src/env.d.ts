@@ -92,6 +92,20 @@ interface Window {
     unwatchMemory: () => Promise<void>;
     onMemoryChanged: (cb: (snapshot: import("./types/memory-mirror.types").MemorySnapshot) => void) => () => void;
 
+    getOnboardingScan: (root?: string) => Promise<import("./types/onboarding.types").Candidate[]>;
+    ingestScope: (
+      scopePath: string,
+      scope: import("./types/onboarding.types").ScopeProfile["scope"],
+      plugins: string[],
+    ) => Promise<import("./types/onboarding.types").ScopeProfile>;
+    listProfiles: () => Promise<import("./types/onboarding.types").ScopeProfile[]>;
+    getProfile: (
+      scopePath: string,
+    ) => Promise<import("./types/onboarding.types").ScopeProfile | null>;
+    refreshProfile: (
+      scopePath: string,
+    ) => Promise<import("./types/onboarding.types").ScopeProfile>;
+
     ptyCreate: (projectPath: string, cwd: string, cols: number, rows: number) => Promise<void>;
     ptyWrite: (projectPath: string, data: string) => void;
     ptyResize: (projectPath: string, cols: number, rows: number) => void;
