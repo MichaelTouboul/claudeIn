@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Footer } from "@/components/Footer/Footer";
 import { GlobalChatModal } from "@/components/GlobalChatModal/GlobalChatModal";
 import { Header } from "@/components/Header/Header";
+import { OnboardingGate } from "@/components/Onboarding/OnboardingGate/OnboardingGate";
 import { Workspace } from "@/components/Workspace/Workspace";
 
 import { useInitChatTitles } from "./hooks/useInitChatTitles";
@@ -83,6 +84,8 @@ export default function App() {
       <Footer />
 
       {chatOpen ? <GlobalChatModal onClose={() => setChatOpen(false)} /> : null}
+
+      <OnboardingGate />
     </div>
   );
 }
