@@ -84,6 +84,24 @@ interface Window {
     unwatchMcp: () => Promise<void>;
     onMcpChanged: (cb: (snapshot: import("./types/mcp-mirror.types").McpSnapshot) => void) => () => void;
 
+    getMcpRaw: (
+      name: string,
+      scope?: import("./types/mcp-manage.types").McpManageScope,
+      projectPath?: string,
+    ) => Promise<import("./types/mcp-manage.types").McpServerRaw>;
+    addMcpServer: (
+      input: import("./types/mcp-manage.types").McpAddInput,
+    ) => Promise<import("./types/mcp-manage.types").McpMutationResult>;
+    editMcpServer: (
+      name: string,
+      input: import("./types/mcp-manage.types").McpAddInput,
+    ) => Promise<import("./types/mcp-manage.types").McpMutationResult>;
+    removeMcpServer: (
+      name: string,
+      scope: import("./types/mcp-manage.types").McpManageScope,
+      projectPath?: string,
+    ) => Promise<import("./types/mcp-manage.types").McpMutationResult>;
+
     getMemoryMirror: (projectPath?: string) => Promise<import("./types/memory-mirror.types").MemorySnapshot>;
     watchMemory: (projectPath?: string) => Promise<void>;
     unwatchMemory: () => Promise<void>;

@@ -148,6 +148,21 @@ contextBridge.exposeInMainWorld("api", {
     return () => { ipcRenderer.removeListener("push-event", handler); };
   },
 
+  getMcpRaw: (
+    name: string,
+    scope?: import("../src/types/mcp-manage.types").McpManageScope,
+    projectPath?: string,
+  ) => ipcRenderer.invoke("mcp:get-raw", name, scope, projectPath),
+  addMcpServer: (input: import("../src/types/mcp-manage.types").McpAddInput) =>
+    ipcRenderer.invoke("mcp:add", input),
+  editMcpServer: (name: string, input: import("../src/types/mcp-manage.types").McpAddInput) =>
+    ipcRenderer.invoke("mcp:edit", name, input),
+  removeMcpServer: (
+    name: string,
+    scope: import("../src/types/mcp-manage.types").McpManageScope,
+    projectPath?: string,
+  ) => ipcRenderer.invoke("mcp:remove", name, scope, projectPath),
+
   getMemoryMirror: (projectPath?: string) => ipcRenderer.invoke("memory:mirror:get", projectPath),
   watchMemory: (projectPath?: string) => ipcRenderer.invoke("memory:mirror:watch", projectPath),
   unwatchMemory: () => ipcRenderer.invoke("memory:mirror:unwatch"),
