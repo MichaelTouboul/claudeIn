@@ -161,6 +161,13 @@ contextBridge.exposeInMainWorld("api", {
     return () => { ipcRenderer.removeListener("push-event", handler); };
   },
 
+  getOnboardingScan: (root?: string) => ipcRenderer.invoke("onboarding:scan", root),
+  ingestScope: (scopePath: string, scope: "user" | "project", plugins: string[]) =>
+    ipcRenderer.invoke("onboarding:ingest", scopePath, scope, plugins),
+  listProfiles: () => ipcRenderer.invoke("profiles:list"),
+  getProfile: (scopePath: string) => ipcRenderer.invoke("profiles:get", scopePath),
+  refreshProfile: (scopePath: string) => ipcRenderer.invoke("profiles:refresh", scopePath),
+
   ptyCreate: (projectPath: string, cwd: string, cols: number, rows: number) =>
     ipcRenderer.invoke("pty:create", projectPath, cwd, cols, rows),
   ptyWrite: (projectPath: string, data: string) => ipcRenderer.send("pty:write", projectPath, data),
