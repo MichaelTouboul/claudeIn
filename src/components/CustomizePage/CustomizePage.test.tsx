@@ -76,17 +76,20 @@ describe("CustomizePage", () => {
     expect(screen.getByText("home-srv")).toBeInTheDocument();
   });
 
-  it("selecting a server opens its detail in the content pane", async () => {
+  it("selecting a server opens its detail in the content pane and focuses its heading", async () => {
     render(<CustomizePage />);
     fireEvent.click(await screen.findByText("home-srv"));
     const detail = await screen.findByTestId("connector-detail");
     expect(detail).toHaveTextContent("home-srv");
     expect(screen.queryByTestId("customize-hero")).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "home-srv" })).toHaveFocus(),
+    );
   });
 
   it("switching to Skills shows the placeholder", async () => {
     render(<CustomizePage />);
-    fireEvent.click(await screen.findByRole("button", { name: /skills/i }));
+    fireEvent.click(await screen.findByRole("tab", { name: /skills/i }));
     expect(screen.getByTestId("skills-placeholder")).toBeInTheDocument();
   });
 

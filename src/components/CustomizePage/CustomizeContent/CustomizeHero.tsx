@@ -31,7 +31,8 @@ const HERO_OPTIONS: HeroOption[] = [
 ];
 
 // Default Customize content shown when nothing is selected: a "Customize Claude"
-// title plus three placeholder option cards. Purely presentational.
+// title + lead-in line plus three placeholder option cards. Purely
+// presentational — the cards are non-interactive until their flows ship.
 export function CustomizeHero() {
   return (
     <section
@@ -39,12 +40,21 @@ export function CustomizeHero() {
       aria-label="Customize Claude"
       className="flex-1 h-full overflow-auto p-8 flex flex-col gap-6"
     >
-      <h2
-        className="text-2xl font-semibold"
-        style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-sans)" }}
-      >
-        Customize Claude
-      </h2>
+      <div className="flex flex-col gap-2">
+        <h2
+          className="text-2xl font-semibold"
+          style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-sans)" }}
+        >
+          Customize Claude
+        </h2>
+        <p
+          className="text-sm leading-relaxed max-w-prose"
+          style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-sans)" }}
+        >
+          Pick a connector from the left to view or edit it, or add a new one. Skills and plugins are
+          coming soon.
+        </p>
+      </div>
       <ul className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {HERO_OPTIONS.map((option) => (
           <li

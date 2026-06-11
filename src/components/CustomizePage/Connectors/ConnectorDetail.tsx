@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type {
   McpAddInput,
@@ -39,6 +39,13 @@ export function ConnectorDetail({ server, getRaw, edit, remove, projectPath }: C
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editInitial, setEditInitial] = useState<Partial<McpAddInput> | null>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  // Move focus to the detail heading when a different server is selected so
+  // keyboard users land in the new pane instead of staying on the sidebar list.
+  useEffect(() => {
+    headingRef.current?.focus();
+  }, [server.name, server.scope]);
 
   const toggleRaw = async () => {
     if (rawOpen) {
@@ -63,7 +70,9 @@ export function ConnectorDetail({ server, getRaw, edit, remove, projectPath }: C
     >
       <header className="flex items-center gap-3 flex-wrap">
         <h2
-          className="text-lg font-semibold"
+          ref={headingRef}
+          tabIndex={-1}
+          className="text-lg font-semibold focus-visible:outline-none"
           style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-sans)" }}
         >
           {server.name}
