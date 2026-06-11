@@ -16,6 +16,7 @@ interface Window {
     deleteMemoryFile: (agentName: string, fileName: string) => Promise<void>;
 
     getHomeDir: () => Promise<string>;
+    getAppVersion: () => Promise<string>;
 
     transform: (input: { kind: import("./store/usePanelStore").PanelTabKind; instruction: string; content: string }) => Promise<string>;
 

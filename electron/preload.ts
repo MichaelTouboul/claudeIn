@@ -26,6 +26,7 @@ contextBridge.exposeInMainWorld("api", {
     ipcRenderer.invoke("agents:memory:delete", agentName, fileName),
 
   getHomeDir: () => ipcRenderer.invoke("system:home-dir"),
+  getAppVersion: () => ipcRenderer.invoke("system:appVersion"),
 
   transform: (input: { kind: "table" | "code" | "text"; instruction: string; content: string }) =>
     ipcRenderer.invoke("panel:transform", input),

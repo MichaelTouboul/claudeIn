@@ -55,6 +55,13 @@ export interface ImproveRequest {
   commit?: string;
   summary?: string;
   failureReason?: string;
+  /**
+   * Runner-owned: the new app version produced by a merged request. Written
+   * alongside `status: "merged"` after the runner bumps `package.json` in the
+   * serialized merge lane (feature → minor, else patch; see
+   * `docs/self-improve/runner-contract.md`). Absent on older merged requests.
+   */
+  version?: string;
 }
 
 /** Caller-supplied fields when submitting a request (server mints the rest). */
@@ -87,7 +94,7 @@ export interface ImproveChatInput {
  * (`merged` + `commit`/`summary`, or `failed` + `failureReason`).
  */
 export type ImproveStatusPatch = Partial<
-  Pick<ImproveRequest, "status" | "claimedAt" | "commit" | "summary" | "failureReason">
+  Pick<ImproveRequest, "status" | "claimedAt" | "commit" | "summary" | "failureReason" | "version">
 >;
 
 /**

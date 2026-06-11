@@ -95,6 +95,29 @@ describe("ImproveNotification", () => {
     expect(persisted).toContain("req-1");
   });
 
+  it("shows the produced version next to Update when the request has one", () => {
+    act(() => {
+      useImproveStore.getState().ingest(makeRequest({ version: "0.1.4" }));
+    });
+    render(<ImproveNotification />);
+
+    openPopover();
+    const update = screen.getByRole("button", { name: /update/i });
+    expect(update).toHaveTextContent("→ v0.1.4");
+  });
+
+  it("shows a plain Update (no version arrow) when the request has no version", () => {
+    act(() => {
+      useImproveStore.getState().ingest(makeRequest());
+    });
+    render(<ImproveNotification />);
+
+    openPopover();
+    const update = screen.getByRole("button", { name: /update/i });
+    expect(update).toHaveTextContent(/update/i);
+    expect(update).not.toHaveTextContent("→ v");
+  });
+
   it("Dismiss acknowledges without reloading", () => {
     act(() => {
       useImproveStore.getState().ingest(makeRequest());
