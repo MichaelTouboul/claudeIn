@@ -1,0 +1,43 @@
+import { ipcMain } from "electron";
+
+import { fillUserProfile, locateClaudeUser } from "../services/user-search.service";
+import {
+  completeOnboarding,
+  getUserProfile,
+  resetUser,
+  saveUserProfile,
+} from "../services/user-profile.service";
+import { scanRepos } from "../services/repos.service";
+import { add, list, remove } from "../services/favorite-repos.service";
+import type { UserProfile } from "../types/user.interface";
+
+/**
+ * User onboarding + favorite-repos IPC. Thin adapters delegating to
+ * `user-search.service` (locate + profile build), `user-profile.service`
+ * (persistence), `repos.service` (project-repo scan), and
+ * `favorite-repos.service`. Channels follow `domain:action`:
+ *   user:locate         → locateClaudeUser()        → string | null
+ *   user:buildProfile   → fillUserProfile(path)      → UserProfile
+ *   user:getProfile     → getUserProfile()           → UserProfile | null
+ *   user:saveProfile    → saveUserProfile(profile)    → UserProfile
+ *   user:complete       → completeOnboarding()        → UserProfile
+ *   user:reset          → resetUser()                 → void
+ *   repos:scan          → scanRepos(root?)            → RepoCandidate[]
+ *   favoriteRepos:list  → list()                      → FavoriteRepo[]
+ *   favoriteRepos:add   → add(path, label?)           → FavoriteRepo
+ *   favoriteRepos:remove→ remove(path)                → void
+ */
+export function registerUserHandlers(): void {
+  ipcMain.handle("user:locate", () => locateClaudeUser());
+  ipcMain.handle("user:buildProfile", (_e, claudePath: string) => fillUserProfile(claudePath));
+  ipcMain.handle("user:getProfile", () => getUserProfile());
+  ipcMain.handle("user:saveProfile", (_e, profile: UserProfile) => saveUserProfile(profile));
+  ipcMain.handle("user:complete", () => completeOnboarding());
+  ipcMain.handle("user:reset", () => resetUser());
+
+  ipcMain.handle("repos:scan", (_e, root?: string) => scanRepos(root));
+
+  ipcMain.handle("favoriteRepos:list", () => list());
+  ipcMain.handle("favoriteRepos:add", (_e, repoPath: string, label?: string) => add(repoPath, label));
+  ipcMain.handle("favoriteRepos:remove", (_e, repoPath: string) => remove(repoPath));
+}

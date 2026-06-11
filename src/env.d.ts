@@ -107,6 +107,25 @@ interface Window {
     unwatchMemory: () => Promise<void>;
     onMemoryChanged: (cb: (snapshot: import("./types/memory-mirror.types").MemorySnapshot) => void) => () => void;
 
+    locateClaudeUser: () => Promise<string | null>;
+    buildUserProfile: (
+      claudePath: string,
+    ) => Promise<import("./types/user.types").UserProfile>;
+    getUserProfile: () => Promise<import("./types/user.types").UserProfile | null>;
+    saveUserProfile: (
+      profile: import("./types/user.types").UserProfile,
+    ) => Promise<import("./types/user.types").UserProfile>;
+    completeOnboarding: () => Promise<import("./types/user.types").UserProfile>;
+    resetUser: () => Promise<void>;
+    scanRepos: (root?: string) => Promise<import("./types/user.types").RepoCandidate[]>;
+    listFavoriteRepos: () => Promise<import("./types/user.types").FavoriteRepo[]>;
+    addFavoriteRepo: (
+      repoPath: string,
+      label?: string,
+    ) => Promise<import("./types/user.types").FavoriteRepo>;
+    removeFavoriteRepo: (repoPath: string) => Promise<void>;
+    openDirectoryPicker: () => Promise<string | null>;
+
     getOnboardingScan: (root?: string) => Promise<import("./types/onboarding.types").Candidate[]>;
     ingestScope: (
       scopePath: string,
