@@ -1,5 +1,7 @@
 import { Bot, ChevronRight } from "lucide-react";
 
+import { SlashCommandMessage } from "@/components/AgentChat/MessageRow/SlashCommandMessage/SlashCommandMessage";
+import { decideUserContent } from "@/components/AgentChat/userContent";
 import { ResponseBody } from "@/components/ResponseBody/ResponseBody";
 import type { SessionMessage } from "@/hooks/useSessions";
 
@@ -24,6 +26,9 @@ export function SessionMessageRow({ msg }: SessionMessageRowProps) {
     : "";
 
   if (isUser) {
+    const decision = decideUserContent(msg.content);
+    // Pure plumbing / harness noise: hide the row entirely (no empty "you" header).
+    if (decision.kind === "hidden") return null;
     return (
       <div className="group">
         <div className="flex items-center gap-2 mb-0.5">
@@ -37,12 +42,16 @@ export function SessionMessageRow({ msg }: SessionMessageRowProps) {
             </span>
           ) : null}
         </div>
-        <pre
-          className="text-sm whitespace-pre-wrap ml-5 leading-relaxed"
-          style={{ color: "var(--color-accent)", fontFamily: "var(--font-mono)" }}
-        >
-          {msg.content}
-        </pre>
+        {decision.kind === "slash" ? (
+          <SlashCommandMessage parsed={decision.message} />
+        ) : (
+          <pre
+            className="text-sm whitespace-pre-wrap ml-5 leading-relaxed"
+            style={{ color: "var(--color-accent)", fontFamily: "var(--font-mono)" }}
+          >
+            {decision.text}
+          </pre>
+        )}
       </div>
     );
   }

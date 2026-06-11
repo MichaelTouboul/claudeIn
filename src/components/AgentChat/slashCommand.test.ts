@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseSlashCommand } from './slashCommand';
+import { parseSlashCommand, stripHarnessNoise } from './slashCommand';
 
 describe('parseSlashCommand', () => {
   it('parses an invocation with no args (command-name first, indented)', () => {
@@ -75,5 +75,56 @@ describe('parseSlashCommand', () => {
 
   it('returns null for prose with no tags at all', () => {
     expect(parseSlashCommand('just a normal message')).toBeNull();
+  });
+});
+
+describe('stripHarnessNoise', () => {
+  it('strips a multi-line <task-notification> block', () => {
+    const content =
+      '<task-notification>\n' +
+      '<task-id>bj40in9jm</task-id>\n' +
+      '<tool-use-id>toolu_123</tool-use-id>\n' +
+      '<output-file>/tmp/tasks/bj40in9jm.output</output-file>\n' +
+      '<status>killed</status>\n' +
+      '<summary>Background command "x" was stopped</summary>\n' +
+      '</task-notification>';
+    expect(stripHarnessNoise(content).trim()).toBe('');
+  });
+
+  it('strips a <system-reminder> block', () => {
+    const content = '<system-reminder>\nThis is a reminder injected by the harness.\n</system-reminder>';
+    expect(stripHarnessNoise(content).trim()).toBe('');
+  });
+
+  it('strips a <tool_result> block, including attributes on the opening tag', () => {
+    const content = '<tool_result tool_use_id="toolu_abc">file written</tool_result>';
+    expect(stripHarnessNoise(content).trim()).toBe('');
+  });
+
+  it('keeps genuine prose and removes an appended <system-reminder>', () => {
+    const content =
+      'Please refactor the parser to be faster.\n' +
+      '<system-reminder>Some plumbing the user never typed.</system-reminder>';
+    expect(stripHarnessNoise(content).trim()).toBe('Please refactor the parser to be faster.');
+  });
+
+  it('keeps prose that surrounds a <task-notification>', () => {
+    const content =
+      'before text ' +
+      '<task-notification><status>killed</status></task-notification>' +
+      ' after text';
+    expect(stripHarnessNoise(content).replace(/\s+/g, ' ').trim()).toBe('before text after text');
+  });
+
+  it('strips multiple noise blocks of different kinds in one turn', () => {
+    const content =
+      '<system-reminder>r1</system-reminder>\n' +
+      'real prompt\n' +
+      '<task-notification><status>completed</status></task-notification>';
+    expect(stripHarnessNoise(content).trim()).toBe('real prompt');
+  });
+
+  it('leaves content with no noise blocks untouched', () => {
+    expect(stripHarnessNoise('just a normal message')).toBe('just a normal message');
   });
 });

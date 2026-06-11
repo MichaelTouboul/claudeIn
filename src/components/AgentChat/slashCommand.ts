@@ -12,6 +12,33 @@ function tagRe(tag: string): RegExp {
   return new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`);
 }
 
+/** Matches a `<tag …attrs>…</tag>` block, tolerating attributes on the opening tag (e.g.
+ *  `<tool_result tool_use_id="…">`). Used for harness-injected noise blocks that may carry
+ *  attributes. `[^>]*` swallows any attribute text; the close tag is bare. */
+function tagReAttrs(tag: string): RegExp {
+  return new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)</${tag}>`);
+}
+
+/** Harness-injected plumbing blocks that the CLI hides from the conversation: background-task
+ *  notifications, system reminders, and tool-result payloads. They are noise, never genuine user
+ *  prose, so we strip them out of a user turn before deciding what (if anything) to render. */
+const HARNESS_NOISE_RES = [
+  tagReAttrs('task-notification'),
+  tagReAttrs('system-reminder'),
+  tagReAttrs('tool_result'),
+];
+
+/** Removes every harness-injected noise block from `content`, leaving only the genuine prose.
+ *  Pure: no DOM, no React, no side effects. The result is NOT trimmed — callers decide whether a
+ *  whitespace-only leftover means "hide the row" vs. "render the (trimmed) prose". */
+export function stripHarnessNoise(content: string): string {
+  let out = content;
+  for (const re of HARNESS_NOISE_RES) {
+    out = out.replace(new RegExp(re.source, 'g'), '');
+  }
+  return out;
+}
+
 const COMMAND_NAME_RE = tagRe('command-name');
 const COMMAND_MESSAGE_RE = tagRe('command-message');
 const COMMAND_ARGS_RE = tagRe('command-args');

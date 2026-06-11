@@ -8,7 +8,7 @@ import type { ChatMessage } from '@/types/spawn.types';
 
 import { parseAskPrompt } from '../askPrompt';
 import { AskPrompt } from '../AskPrompt/AskPrompt';
-import { parseSlashCommand } from '../slashCommand';
+import { decideUserContent } from '../userContent';
 import { CopyButton } from './CopyButton';
 import { OpenInPanelButton } from './OpenInPanelButton';
 import { SlashCommandMessage } from './SlashCommandMessage/SlashCommandMessage';
@@ -26,9 +26,10 @@ export function MessageRow({ msg, isLast, onAnswer }: MessageRowProps) {
   const hasContent = msg.content.trim().length > 0;
 
   if (isUser) {
-    const slash = parseSlashCommand(msg.content);
-    // Caveat-only plumbing: the whole row disappears (no empty "you" header).
-    if (slash?.kind === 'caveat') return null;
+    const decision = decideUserContent(msg.content);
+    // Pure plumbing / harness noise: the whole row disappears (no empty "you" header).
+    if (decision.kind === 'hidden') return null;
+    const copyText = decision.kind === 'text' ? decision.text : msg.content;
     return (
       <div className="group relative">
         <div className="flex items-center gap-2 mb-0.5">
@@ -36,12 +37,12 @@ export function MessageRow({ msg, isLast, onAnswer }: MessageRowProps) {
           <span className="text-xs text-accent font-medium">you</span>
           <span className="text-xs text-fg-subtle opacity-0 group-hover:opacity-100">{time}</span>
         </div>
-        {slash ? (
-          <SlashCommandMessage parsed={slash} />
+        {decision.kind === 'slash' ? (
+          <SlashCommandMessage parsed={decision.message} />
         ) : (
-          <pre className="text-sm text-accent whitespace-pre-wrap font-mono ml-5 leading-relaxed">{renderContentWithImages(msg.content)}</pre>
+          <pre className="text-sm text-accent whitespace-pre-wrap font-mono ml-5 leading-relaxed">{renderContentWithImages(decision.text)}</pre>
         )}
-        {hasContent ? <CopyButton text={msg.content} className="ml-5 mt-1" /> : null}
+        <CopyButton text={copyText} className="ml-5 mt-1" />
       </div>
     );
   }
