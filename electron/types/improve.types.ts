@@ -61,6 +61,19 @@ export interface ImproveRequestInput {
   transcript?: ImproveTranscriptTurn[];
 }
 
+/**
+ * Inputs for one turn of the modal's scoping chat (I4). Sent to `improve:chat`,
+ * which runs a `claude --print` turn seeded with the request `type` + component
+ * context (and, when `sourcePath` is set, the source file contents read on the
+ * main side). Shared so both the IPC contract and the service can reference it.
+ */
+export interface ImproveChatInput {
+  type: ImproveType;
+  component?: string;
+  sourcePath?: string;
+  transcript: ImproveTranscriptTurn[];
+}
+
 /** Mergeable patch the runner writes to drive a request to a terminal status. */
 export type ImproveStatusPatch = Partial<
   Pick<ImproveRequest, "status" | "commit" | "summary" | "failureReason">

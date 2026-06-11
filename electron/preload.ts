@@ -229,6 +229,8 @@ contextBridge.exposeInMainWorld("api", {
     return () => { ipcRenderer.removeListener("push-event", handler); };
   },
 
+  improveChat: (input: import("./services/improve-chat.service").ImproveChatInput) =>
+    ipcRenderer.invoke("improve:chat", input),
   submitImproveRequest: (input: import("./types/improve.types").ImproveRequestInput) =>
     ipcRenderer.invoke("improve:submit", input),
   listImproveRequests: () => ipcRenderer.invoke("improve:list"),

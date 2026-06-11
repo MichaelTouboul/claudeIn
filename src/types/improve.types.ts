@@ -1,5 +1,6 @@
 export type {
   ContextMenuRequest,
+  ImproveChatInput,
   ImproveContextTarget,
   ImproveRequest,
   ImproveRequestInput,
