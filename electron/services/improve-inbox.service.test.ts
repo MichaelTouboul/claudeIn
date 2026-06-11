@@ -126,6 +126,22 @@ describe("updateStatus", () => {
     expect(reread?.commit).toBe("abc123");
   });
 
+  it("persists a version written alongside a merge", async () => {
+    const req = await submitRequest(baseInput);
+
+    const merged = await updateStatus(req.id, {
+      status: ImproveStatus.Merged,
+      commit: "abc123",
+      summary: "shipped the toggle",
+      version: "0.2.0",
+    });
+    expect(merged?.version).toBe("0.2.0");
+
+    const reread = await getRequest(req.id);
+    expect(reread?.version).toBe("0.2.0");
+    expect(reread?.status).toBe(ImproveStatus.Merged);
+  });
+
   it("records a failure reason", async () => {
     const req = await submitRequest(baseInput);
     const updated = await updateStatus(req.id, {

@@ -31,6 +31,8 @@ export const api = {
   deleteMemoryFile: (agentName: string, fileName: string): Promise<void> =>
     window.api.deleteMemoryFile(agentName, fileName),
 
+  getAppVersion: (): Promise<string> => window.api.getAppVersion(),
+
   getProjectMemory: (projectId: string) => window.api.getProjectMemory(projectId),
   updateProjectMemoryFile: (projectId: string, fileName: string, content: string) =>
     window.api.updateProjectMemoryFile(projectId, fileName, content),

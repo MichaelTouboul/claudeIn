@@ -62,6 +62,11 @@ export function ImproveNotificationItem({
         >
           <RefreshCw size={11} />
           Update
+          {request.version ? (
+            <span className="tabular-nums" style={{ fontFamily: "var(--font-mono)" }}>
+              {`→ v${request.version}`}
+            </span>
+          ) : null}
         </Button>
       </div>
     </li>

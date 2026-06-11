@@ -54,6 +54,7 @@ the app process; it only needs filesystem access to the inbox dir.
   "claimedAt": "string?",    // set by runner when it claims the request (in_progress)
   "commit": "string?",       // set by runner on success: merged commit sha
   "summary": "string?",      // set by runner on success: what shipped
+  "version": "string?",      // set by runner on success: app version after the bump (semver)
   "failureReason": "string?" // set by runner on failure: why it could not ship
 }
 ```
@@ -63,6 +64,7 @@ Field ownership:
 - **App-owned, immutable to the runner:** `id`, `createdAt`, `type`,
   `component`, `sourcePath`, `title`, `description`, `acceptance`, `transcript`.
 - **Runner-owned:** `status`, `claimedAt` (claim write), `commit`, `summary`,
+  `version` (the post-bump app version, written with a `merged` terminal write),
   `failureReason` (terminal write).
 
 The runner MUST preserve all app-owned fields verbatim when it writes back —
@@ -109,13 +111,45 @@ watcher (returns to polling after each claim):
          `component` scope where to look
       3. run the quality gate (bash .claude/hooks/gate.sh) until green   ← parallel
       4. enter the SERIALIZED merge lane (one at a time):                ← funnel
-           merge to main → re-run gate on the merge → push
+           bump package.json (feature→minor, else patch) → merge to main
+             (bumped package.json included) → re-run gate on the merge → push
     on success:
-      write back { ...request, status: "merged", commit: <sha>, summary: <text> }
+      write back { ...request, status: "merged", commit: <sha>, summary: <text>, version: <new> }
     on failure (ambiguous spec, gate can't go green, merge conflict, ...):
       write back { ...request, status: "failed", failureReason: <text> }
   wait for the next change (watch the dir) or poll on an interval, then repeat
 ```
+
+### Versioning
+
+Every merged improvement bumps the app's **semver** version (`package.json`
+`"version"`), and the resulting version is written back into the request file so
+the app can show the user exactly which release shipped their request.
+
+- **Baseline:** `0.1.0`. Pre-1.0, everything stays in the `0.x` range.
+- **Bump rule — by request `type`:**
+  - `feature` → **minor** bump (`0.X.0`): `npm version minor --no-git-tag-version`.
+  - `bug` / `performance` / `design` / `copy` → **patch** bump (`0.0.X`):
+    `npm version patch --no-git-tag-version`.
+
+  (`--no-git-tag-version` edits `package.json` in place without creating a git
+  tag or commit, so the bump folds into the request's own merge commit.)
+
+- **Where it happens — inside the SERIALIZED merge lane.** The bump runs as part
+  of finalizing the merge, *before* the merge is committed: the runner bumps
+  `package.json`, **includes the bumped `package.json` in the merge/commit**, and
+  then records the result. Because the bump is performed in the single merge lane
+  (at most one merge at a time — see rule 3 above), versions **never race**: two
+  concurrently-built worktrees can be gated in parallel, but they are versioned
+  one after another as each enters the lane, so the sequence of versions is
+  strictly monotonic and there are no duplicate or skipped versions.
+
+- **Recording it.** On success the runner writes the bumped version into the
+  request file alongside the rest of the terminal write:
+  `updateStatus(id, { status: "merged", commit, summary, version })` (or the
+  equivalent direct read-merge-write). `version` is **runner-owned**; the app
+  never sets it. Older merged requests written before versioning existed simply
+  omit `version`, and the UI falls back to showing a plain "Update".
 
 ### Picking up work
 
@@ -153,7 +187,7 @@ Two equivalent options:
 
 - Call the app service `updateStatus(id, patch)` (it reads, merges, persists),
   for example:
-  - success: `updateStatus(id, { status: "merged", commit, summary })`
+  - success: `updateStatus(id, { status: "merged", commit, summary, version })`
   - failure: `updateStatus(id, { status: "failed", failureReason })`
 - Or write the JSON file directly (read → shallow-merge the patch → write the
   whole object back to `<id>.json`). The app's `fs.watch` re-reads the file and
