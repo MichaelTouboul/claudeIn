@@ -10,15 +10,15 @@ import { PromptBar } from '../PromptBar/PromptBar';
  * PromptBar is pinned at the bottom for one-shot LLM transforms.
  */
 export function TextTab({ tab }: { tab: PanelTab }) {
-  const updateTab = usePanelStore((s) => s.updateTab);
+  const update = usePanelStore((s) => s.update);
   const text = tab.kind === PanelTabKind.Text ? tab.payload.text : '';
 
   // Replace the prose in place with the transform result (transformed markdown).
   const applyTransform = useCallback(
     (result: string) => {
-      updateTab(tab.id, { kind: PanelTabKind.Text, payload: { text: result } });
+      update({ kind: PanelTabKind.Text, payload: { text: result } });
     },
-    [updateTab, tab.id],
+    [update],
   );
 
   if (tab.kind !== PanelTabKind.Text) return null;

@@ -9,14 +9,14 @@ export type CodeBlockProps = { data: CodeBlockData; raw: string };
 // `raw` stays on CodeBlockProps for contract uniformity but is unused in this
 // reference block, so it is not destructured (no unused-var lint error).
 export function CodeBlock({ data }: CodeBlockProps) {
-  const openTab = usePanelStore((s) => s.openTab);
+  const openPanel = usePanelStore((s) => s.open);
 
   const open: BlockAction = {
     id: 'open',
     label: 'Open',
     kind: 'local',
     run: () =>
-      openTab({
+      openPanel({
         id: codeTabId(data),
         kind: PanelTabKind.Code,
         title: 'Code',

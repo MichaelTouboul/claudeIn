@@ -41,7 +41,7 @@ beforeEach(() => {
   });
   useDashboardStore.setState({ agents: [] });
   useAgentDismissStore.setState({ dismissed: new Map() });
-  usePanelStore.setState({ isOpen: false, tabs: [], activeTabId: null, width: 480 });
+  usePanelStore.setState({ isOpen: false, current: null, width: 480 });
 });
 
 describe("AgentTabs", () => {
@@ -76,7 +76,7 @@ describe("AgentTabs", () => {
     expect(restingDot.className).not.toContain("animate-pulse");
   });
 
-  it("opens an agent tab in the right panel when a presence tab is clicked", () => {
+  it("opens an agent object in the right panel when a presence tab is clicked", () => {
     ingestEvent({ id: 1, agent_name: "researcher", session_id: "sess-1" });
 
     render(<AgentTabs claudeSessionId="sess-1" orchestratorName="orch" />);
@@ -85,15 +85,15 @@ describe("AgentTabs", () => {
     const s = usePanelStore.getState();
     const expectedId = agentTabId("researcher", "sess-1");
     expect(s.isOpen).toBe(true);
-    expect(s.activeTabId).toBe(expectedId);
-    const tab = s.tabs.find((t) => t.id === expectedId);
-    expect(tab?.kind).toBe(PanelTabKind.Agent);
-    expect(tab?.title).toBe("researcher");
-    if (tab?.kind !== PanelTabKind.Agent) throw new Error("not an agent tab");
-    expect(tab.payload).toEqual({ agentName: "researcher", claudeSessionId: "sess-1" });
+    const obj = s.current;
+    expect(obj?.id).toBe(expectedId);
+    expect(obj?.kind).toBe(PanelTabKind.Agent);
+    expect(obj?.title).toBe("researcher");
+    if (obj?.kind !== PanelTabKind.Agent) throw new Error("not an agent object");
+    expect(obj.payload).toEqual({ agentName: "researcher", claudeSessionId: "sess-1" });
   });
 
-  it("refocuses the existing agent tab on a second click (no duplicate)", () => {
+  it("re-shows the same agent object on a second click (single-object)", () => {
     ingestEvent({ id: 1, agent_name: "researcher", session_id: "sess-1" });
 
     render(<AgentTabs claudeSessionId="sess-1" orchestratorName="orch" />);
@@ -101,8 +101,7 @@ describe("AgentTabs", () => {
     fireEvent.click(screen.getByText("researcher"));
 
     const s = usePanelStore.getState();
-    expect(s.tabs).toHaveLength(1);
-    expect(s.activeTabId).toBe(agentTabId("researcher", "sess-1"));
+    expect(s.current?.id).toBe(agentTabId("researcher", "sess-1"));
   });
 
   it("hides a tab after its × is clicked, without opening the panel", () => {
@@ -135,7 +134,7 @@ describe("AgentTabs", () => {
     expect(screen.getByText("researcher")).toBeInTheDocument();
   });
 
-  it("opens a Workflow tab for the session when the overview control is clicked", () => {
+  it("opens a Workflow object for the session when the overview control is clicked", () => {
     ingestEvent({ id: 1, agent_name: "researcher", session_id: "sess-1" });
 
     render(<AgentTabs claudeSessionId="sess-1" orchestratorName="orch" />);
@@ -144,14 +143,14 @@ describe("AgentTabs", () => {
     const s = usePanelStore.getState();
     const expectedId = workflowTabId("sess-1");
     expect(s.isOpen).toBe(true);
-    expect(s.activeTabId).toBe(expectedId);
-    const tab = s.tabs.find((t) => t.id === expectedId);
-    expect(tab?.kind).toBe(PanelTabKind.Workflow);
-    if (tab?.kind !== PanelTabKind.Workflow) throw new Error("not a workflow tab");
-    expect(tab.payload).toEqual({ claudeSessionId: "sess-1" });
+    const obj = s.current;
+    expect(obj?.id).toBe(expectedId);
+    expect(obj?.kind).toBe(PanelTabKind.Workflow);
+    if (obj?.kind !== PanelTabKind.Workflow) throw new Error("not a workflow object");
+    expect(obj.payload).toEqual({ claudeSessionId: "sess-1" });
   });
 
-  it("refocuses the existing Workflow tab on a second overview click", () => {
+  it("re-shows the same Workflow object on a second overview click", () => {
     ingestEvent({ id: 1, agent_name: "researcher", session_id: "sess-1" });
 
     render(<AgentTabs claudeSessionId="sess-1" orchestratorName="orch" />);
@@ -159,8 +158,8 @@ describe("AgentTabs", () => {
     fireEvent.click(screen.getByRole("button", { name: "Open session overview" }));
 
     const s = usePanelStore.getState();
-    expect(s.tabs.filter((t) => t.kind === PanelTabKind.Workflow)).toHaveLength(1);
-    expect(s.activeTabId).toBe(workflowTabId("sess-1"));
+    expect(s.current?.kind).toBe(PanelTabKind.Workflow);
+    expect(s.current?.id).toBe(workflowTabId("sess-1"));
   });
 
   it("does not render the orchestrator as a tab", () => {

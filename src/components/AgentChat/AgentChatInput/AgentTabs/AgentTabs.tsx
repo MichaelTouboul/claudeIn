@@ -28,7 +28,7 @@ export type AgentTabsProps = {
 // conversation has no sub-agents.
 export function AgentTabs({ claudeSessionId, orchestratorName }: AgentTabsProps) {
   const agents = useConversationAgents(claudeSessionId, orchestratorName);
-  const openTab = usePanelStore((s) => s.openTab);
+  const openPanel = usePanelStore((s) => s.open);
   const dismiss = useAgentDismissStore((s) => s.dismiss);
   if (agents.length === 0) return null;
 
@@ -39,7 +39,7 @@ export function AgentTabs({ claudeSessionId, orchestratorName }: AgentTabsProps)
         aria-label="Open session overview"
         data-testid="session-overview-open"
         onClick={() =>
-          openTab({
+          openPanel({
             id: workflowTabId(claudeSessionId),
             kind: PanelTabKind.Workflow,
             title: "Session overview",
@@ -73,7 +73,7 @@ export function AgentTabs({ claudeSessionId, orchestratorName }: AgentTabsProps)
             <button
               type="button"
               onClick={() =>
-                openTab({
+                openPanel({
                   id: agentTabId(agent.name, claudeSessionId),
                   kind: PanelTabKind.Agent,
                   title: agent.name,

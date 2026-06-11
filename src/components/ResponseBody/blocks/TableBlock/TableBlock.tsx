@@ -24,14 +24,14 @@ export function TableBlock({ node, raw }: TableBlockProps) {
     minWidth: 120,
   }));
 
-  const openTab = usePanelStore((s) => s.openTab);
+  const openPanel = usePanelStore((s) => s.open);
 
   const open: BlockAction = {
     id: 'open',
     label: 'Open',
     kind: 'local',
     run: () =>
-      openTab({
+      openPanel({
         id: tableTabId({ columns, rows }),
         kind: PanelTabKind.Table,
         title: 'Table',

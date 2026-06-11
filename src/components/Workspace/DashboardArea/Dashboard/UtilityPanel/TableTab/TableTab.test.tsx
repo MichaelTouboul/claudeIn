@@ -29,7 +29,7 @@ const multiRowTab: PanelTab = {
 };
 
 beforeEach(() => {
-  usePanelStore.setState({ isOpen: true, tabs: [tab], activeTabId: tab.id });
+  usePanelStore.setState({ isOpen: true, current: tab });
 });
 
 afterEach(() => {
@@ -66,12 +66,10 @@ describe('TableTab', () => {
     render(<TableTab tab={tab} />);
     // Edit the row in the store after mount; Copy must reflect the NEW value.
     act(() => {
-      usePanelStore
-        .getState()
-        .updateTab(tab.id, {
-          kind: PanelTabKind.Table,
-          payload: { columns: tab.payload.columns, rows: [{ id: 0, name: 'Renamed' }] },
-        });
+      usePanelStore.getState().update({
+        kind: PanelTabKind.Table,
+        payload: { columns: tab.payload.columns, rows: [{ id: 0, name: 'Renamed' }] },
+      });
     });
     fireEvent.click(screen.getByRole('button', { name: /copy/i }));
     await waitFor(() =>
@@ -106,14 +104,14 @@ describe('TableTab', () => {
   });
 
   it('persists two back-to-back row edits without dropping the first (no stale closure)', () => {
-    usePanelStore.setState({ isOpen: true, tabs: [multiRowTab], activeTabId: multiRowTab.id });
+    usePanelStore.setState({ isOpen: true, current: multiRowTab });
     render(<TableTab tab={multiRowTab} />);
     const { commitRow } = usePanelStore.getState();
     // Two sequential cell commits before any re-render flushes — each must read live state.
-    commitRow(multiRowTab.id, { id: 0, name: 'Alice2' });
-    commitRow(multiRowTab.id, { id: 1, name: 'Bob2' });
-    const stored = usePanelStore.getState().tabs[0];
-    if (stored.kind !== PanelTabKind.Table) throw new Error('expected a table tab');
+    commitRow({ id: 0, name: 'Alice2' });
+    commitRow({ id: 1, name: 'Bob2' });
+    const stored = usePanelStore.getState().current;
+    if (stored?.kind !== PanelTabKind.Table) throw new Error('expected a table object');
     expect(stored.payload.rows).toEqual([
       { id: 0, name: 'Alice2' },
       { id: 1, name: 'Bob2' },

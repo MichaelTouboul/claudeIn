@@ -20,13 +20,12 @@ const EMPTY_TABLE: TablePayload = { columns: [], rows: [] };
 
 export function TableTab({ tab }: { tab: PanelTab }) {
   const commitRow = usePanelStore((s) => s.commitRow);
-  const updateTab = usePanelStore((s) => s.updateTab);
+  const update = usePanelStore((s) => s.update);
   // Read the LIVE payload from the store (not the render-time prop) so the grid,
   // the export toolbar, and processRowUpdate always see the latest edits.
-  const livePayload = usePanelStore((s) => {
-    const found = s.tabs.find((t) => t.id === tab.id);
-    return found?.kind === PanelTabKind.Table ? found.payload : null;
-  });
+  const livePayload = usePanelStore((s) =>
+    s.current?.kind === PanelTabKind.Table ? s.current.payload : null,
+  );
   // TAB_BODY only routes table tabs here; the prop fallback keeps narrowing sound.
   const fallback = tab.kind === PanelTabKind.Table ? tab.payload : EMPTY_TABLE;
   const payload = livePayload ?? fallback;
@@ -50,10 +49,10 @@ export function TableTab({ tab }: { tab: PanelTab }) {
   // never clobber each other. The source chat response stays immutable.
   const processRowUpdate = useCallback(
     (newRow: GridRowModel): GridRowModel => {
-      commitRow(tab.id, newRow as TableRow);
+      commitRow(newRow as TableRow);
       return newRow;
     },
-    [commitRow, tab.id],
+    [commitRow],
   );
 
   // Apply a one-shot transform result: the model returns a markdown table, which
@@ -62,9 +61,9 @@ export function TableTab({ tab }: { tab: PanelTab }) {
   const applyTransform = useCallback(
     (markdown: string) => {
       const next = parseMarkdownTable(markdown);
-      if (next) updateTab(tab.id, { kind: PanelTabKind.Table, payload: next });
+      if (next) update({ kind: PanelTabKind.Table, payload: next });
     },
-    [updateTab, tab.id],
+    [update],
   );
 
   return (
