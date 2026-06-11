@@ -8,6 +8,9 @@ import { ConversationItem } from './ConversationItem/ConversationItem';
 
 export type ConversationListProps = {
   sessions: SessionSummary[];
+  // Refetch the session list after an app-owned mutation (archive/delete/pin)
+  // so an archived/deleted active row disappears instead of going stale.
+  onChanged: () => void;
 };
 
 function TierLabel({ label }: { label: string }) {
@@ -31,7 +34,7 @@ function tabMatchesSession(tab: InternalTab, s: SessionSummary): boolean {
   return tab.claudeSessionId === s.sessionId;
 }
 
-export function ConversationList({ sessions }: ConversationListProps) {
+export function ConversationList({ sessions, onChanged }: ConversationListProps) {
   const dashboards = useWorkspaceStore((s) => s.dashboards);
   const activeDashboardId = useWorkspaceStore((s) => s.activeDashboardId);
   const setActiveTab = useWorkspaceStore((s) => s.setActiveTab);
@@ -101,6 +104,7 @@ export function ConversationList({ sessions }: ConversationListProps) {
                 status={statuses[s.sessionId] ?? ConversationStatus.Idle}
                 pinned
                 onActivate={() => openPinnedSession(s)}
+                onChanged={onChanged}
               />
             );
           })}
@@ -121,6 +125,7 @@ export function ConversationList({ sessions }: ConversationListProps) {
                 status={convId ? statuses[convId] ?? ConversationStatus.Idle : ConversationStatus.Idle}
                 pinned={false}
                 onActivate={() => setActiveTab(tab.id)}
+                onChanged={onChanged}
               />
             );
           })}

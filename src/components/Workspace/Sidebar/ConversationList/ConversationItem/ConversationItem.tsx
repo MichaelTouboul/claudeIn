@@ -1,17 +1,16 @@
-import { Pencil, Pin, PinOff } from 'lucide-react';
 import { useState } from 'react';
 
-import { ContextMenu, type ContextMenuItem } from '@/components/_ui/ContextMenu';
+import { ContextMenu } from '@/components/_ui/ContextMenu';
 import { RenameDialog } from '@/components/Workspace/Sidebar/SessionsPanel/SessionRowMenu/RenameDialog';
+import { buildSessionMenuItems } from '@/components/Workspace/Sidebar/SessionsPanel/SessionRowMenu/sessionMenuItems';
 import { type ConversationStatus,STATUS_DOT } from '@/store/useConversationStatusStore';
 import { useConversationTitlesStore } from '@/store/useConversationTitlesStore';
-import { usePinnedStore } from '@/store/usePinnedStore';
 
 // A normalized view of one ACTIVITY row — produced from either an open tab or a
 // pinned session by ConversationList. The item itself stays presentation-only.
 export type ConversationItemProps = {
   // The conversation's persisted title key (claudeSessionId). undefined for a
-  // brand-new chat with no session id yet → no Pin/Rename for it.
+  // brand-new chat with no session id yet → no menu for it.
   convId: string | undefined;
   // Base label (already the tab/session title); overlaid with the titles store.
   title: string;
@@ -23,9 +22,12 @@ export type ConversationItemProps = {
   // Effective pinned state (override-aware), used to flip the menu label.
   pinned: boolean;
   onActivate: () => void;
+  // Called after any app-owned meta mutation (archive/delete/pin/rename) so the
+  // Activity list refetches — mirrors SessionRowMenu's onChanged.
+  onChanged: () => void;
 };
 
-export function ConversationItem({ convId, title, isActive, status, pinned, onActivate }: ConversationItemProps) {
+export function ConversationItem({ convId, title, isActive, status, pinned, onActivate, onChanged }: ConversationItemProps) {
   const dot = STATUS_DOT[status];
   const [renameOpen, setRenameOpen] = useState(false);
 
@@ -34,20 +36,18 @@ export function ConversationItem({ convId, title, isActive, status, pinned, onAc
   const stored = useConversationTitlesStore((s) => (convId ? s.conversationTitles[convId] : undefined));
   const label = stored?.userTitle ?? stored?.aiTitle ?? title;
 
-  // Optimistic pin toggle: reflect in the store immediately, then persist.
-  const togglePin = () => {
-    if (!convId) return;
-    const next = !pinned;
-    usePinnedStore.getState().setPinned(convId, next);
-    void (next ? window.api.pinConversation(convId) : window.api.unpinConversation(convId));
-  };
-
-  const items: ContextMenuItem[] = [
-    { label: 'Rename…', icon: <Pencil size={13} />, onSelect: () => setRenameOpen(true) },
-    pinned
-      ? { label: 'Unpin', icon: <PinOff size={13} />, onSelect: togglePin }
-      : { label: 'Pin to top', icon: <Pin size={13} />, onSelect: togglePin },
-  ];
+  // Active/open conversations are never archived, so the menu always offers
+  // "Archive". The full item set is built by the shared session-menu builder so
+  // this surface stays in lockstep with SessionRowMenu.
+  const items = convId
+    ? buildSessionMenuItems({
+        sessionId: convId,
+        pinned,
+        archived: false,
+        onRename: () => setRenameOpen(true),
+        onChanged,
+      })
+    : [];
 
   return (
     <div className="group relative">
@@ -78,7 +78,7 @@ export function ConversationItem({ convId, title, isActive, status, pinned, onAc
           onOpenChange={setRenameOpen}
           claudeSessionId={convId}
           currentTitle={label}
-          onRenamed={() => {}}
+          onRenamed={onChanged}
         />
       ) : null}
     </div>
