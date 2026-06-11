@@ -16,7 +16,7 @@ export function CustomizeTopBar({ onBack }: CustomizeTopBarProps) {
         type="button"
         aria-label="Back to home"
         onClick={onBack}
-        className="flex items-center gap-1.5 rounded-md px-2 py-1 text-sm transition-colors"
+        className="flex items-center gap-1.5 rounded-md px-2 py-1 text-sm transition-colors hover:bg-surface-2 hover:text-fg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
         style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-sans)" }}
       >
         <ArrowLeft size={16} />

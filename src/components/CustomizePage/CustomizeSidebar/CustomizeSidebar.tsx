@@ -54,7 +54,10 @@ export function CustomizeSidebar({
       <CustomizeNav active={section} onSelect={setSection} />
 
       {section === CustomizeSection.Connectors ? (
-        <div className="flex flex-col gap-4">
+        <div
+          className="flex flex-col gap-4 pt-4"
+          style={{ borderTop: "1px solid var(--color-border-subtle)" }}
+        >
           {repoScope !== null ? (
             <ConnectorServerList
               label="This repo"
