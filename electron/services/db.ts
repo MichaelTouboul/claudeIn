@@ -149,6 +149,25 @@ export async function initDb(): Promise<void> {
       inputs_hash  TEXT NOT NULL,
       generated_at TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS user_profile (
+      id                      INTEGER PRIMARY KEY CHECK (id = 1),
+      claude_user_path        TEXT,
+      name                    TEXT,
+      role                    TEXT,
+      plugins                 TEXT,
+      capabilities            TEXT,
+      summary                 TEXT,
+      domains                 TEXT,
+      workflow                TEXT,
+      onboarding_completed_at TEXT,
+      generated_at            TEXT,
+      updated_at              TEXT
+    );
+    CREATE TABLE IF NOT EXISTS favorite_repos (
+      path     TEXT PRIMARY KEY,
+      label    TEXT,
+      added_at TEXT
+    );
   `);
 
   runMigrations();

@@ -15,6 +15,7 @@ import { registerSettingsHandlers } from "./settings.ipc";
 import { registerActivityHandlers } from "./activity.ipc";
 import { registerTransformHandlers } from "./transform.ipc";
 import { registerOnboardingHandlers } from "./onboarding.ipc";
+import { registerUserHandlers } from "./user.ipc";
 
 export function registerAllHandlers(): void {
   registerAgentHandlers();
@@ -34,4 +35,5 @@ export function registerAllHandlers(): void {
   registerActivityHandlers();
   registerTransformHandlers();
   registerOnboardingHandlers();
+  registerUserHandlers();
 }

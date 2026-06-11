@@ -176,6 +176,20 @@ contextBridge.exposeInMainWorld("api", {
     return () => { ipcRenderer.removeListener("push-event", handler); };
   },
 
+  locateClaudeUser: () => ipcRenderer.invoke("user:locate"),
+  buildUserProfile: (claudePath: string) => ipcRenderer.invoke("user:buildProfile", claudePath),
+  getUserProfile: () => ipcRenderer.invoke("user:getProfile"),
+  saveUserProfile: (profile: import("../src/types/user.types").UserProfile) =>
+    ipcRenderer.invoke("user:saveProfile", profile),
+  completeOnboarding: () => ipcRenderer.invoke("user:complete"),
+  resetUser: () => ipcRenderer.invoke("user:reset"),
+  scanRepos: (root?: string) => ipcRenderer.invoke("repos:scan", root),
+  listFavoriteRepos: () => ipcRenderer.invoke("favoriteRepos:list"),
+  addFavoriteRepo: (repoPath: string, label?: string) =>
+    ipcRenderer.invoke("favoriteRepos:add", repoPath, label),
+  removeFavoriteRepo: (repoPath: string) => ipcRenderer.invoke("favoriteRepos:remove", repoPath),
+  openDirectoryPicker: () => ipcRenderer.invoke("dialog:open-directory"),
+
   getOnboardingScan: (root?: string) => ipcRenderer.invoke("onboarding:scan", root),
   ingestScope: (scopePath: string, scope: "user" | "project", plugins: string[]) =>
     ipcRenderer.invoke("onboarding:ingest", scopePath, scope, plugins),

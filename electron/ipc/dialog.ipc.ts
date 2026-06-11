@@ -16,6 +16,15 @@ export function registerDialogHandlers(): void {
     return result.filePaths;
   });
 
+  ipcMain.handle("dialog:open-directory", async () => {
+    const win = BrowserWindow.getFocusedWindow();
+    const result = await dialog.showOpenDialog(win!, {
+      properties: ["openDirectory"],
+    });
+    if (result.canceled || result.filePaths.length === 0) return null;
+    return result.filePaths[0];
+  });
+
   ipcMain.handle("dialog:read-image", async (_e, filePath: string) => {
     try {
       if (!fs.existsSync(filePath)) return null;
