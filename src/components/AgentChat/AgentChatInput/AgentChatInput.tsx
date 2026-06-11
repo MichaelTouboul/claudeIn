@@ -2,10 +2,12 @@ import { ChevronRight, Loader2, Paperclip, Send, X } from 'lucide-react';
 import { type RefObject, useState } from 'react';
 
 import { Button } from '@/components/_ui/Button';
+import type { FilePickerKind } from '@/types/attachment.types';
 import type { SpawnSession } from '@/types/spawn.types';
 
 import { RichEditor, type RichEditorHandle } from '../RichEditor/RichEditor';
 import { AgentTabs } from './AgentTabs/AgentTabs';
+import { AttachMenu } from './AttachMenu/AttachMenu';
 import { InputMenu } from './InputMenu';
 import { useInputMenus } from './useInputMenus';
 
@@ -35,7 +37,8 @@ export type AgentChatInputProps = {
   /** Dismiss the model picker without choosing. */
   onCloseModelPicker: () => void;
   onRemoveAttachment: (index: number) => void;
-  onAttach: () => void;
+  /** Open the native file picker for the chosen kind and attach the result. */
+  onAttach: (kind: FilePickerKind) => void;
   onSend: () => void;
 };
 
@@ -192,9 +195,7 @@ export function AgentChatInput({
           onEnter={handleEnter}
           onNavKey={handleNavKey}
         />
-        <Button intent="ghost" size="icon" onClick={onAttach} title="Attach file">
-          <Paperclip size={16} />
-        </Button>
+        <AttachMenu onAttach={onAttach} />
         <Button
           intent="ghost"
           size="icon"

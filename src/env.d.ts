@@ -60,7 +60,9 @@ interface Window {
         messages: import("./types/session.types").SessionMessage[];
       }) => void,
     ) => () => void;
-    openFilePicker: () => Promise<string[]>;
+    openFilePicker: (
+      kind?: import("./types/attachment.types").FilePickerKind,
+    ) => Promise<string[]>;
     readImageAsDataUrl: (filePath: string) => Promise<string | null>;
     getPathForFile: (file: File) => string;
 

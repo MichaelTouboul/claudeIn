@@ -89,7 +89,7 @@ contextBridge.exposeInMainWorld("api", {
       }
     });
   },
-  openFilePicker: () => ipcRenderer.invoke("dialog:open-file"),
+  openFilePicker: (kind: "all" | "image" = "all") => ipcRenderer.invoke("dialog:open-file", kind),
   readImageAsDataUrl: (filePath: string) => ipcRenderer.invoke("dialog:read-image", filePath),
   // Resolve a dropped File's absolute path. Modern Electron strips `.path` from
   // renderer File objects, so we use the renderer-safe synchronous `webUtils`
