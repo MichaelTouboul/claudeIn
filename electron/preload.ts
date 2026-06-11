@@ -207,4 +207,22 @@ contextBridge.exposeInMainWorld("api", {
     ipcRenderer.on("pty:data", handler);
     return () => { ipcRenderer.removeListener("pty:data", handler); };
   },
+
+  submitImproveRequest: (input: import("./types/improve.types").ImproveRequestInput) =>
+    ipcRenderer.invoke("improve:submit", input),
+  listImproveRequests: () => ipcRenderer.invoke("improve:list"),
+  getImproveRequest: (id: string) => ipcRenderer.invoke("improve:get", id),
+  watchImproveInbox: () => ipcRenderer.invoke("improve:watch"),
+  unwatchImproveInbox: () => ipcRenderer.invoke("improve:unwatch"),
+  onImproveRequestChanged: (
+    cb: (request: import("./types/improve.types").ImproveRequest) => void,
+  ) => {
+    const handler = (_e: unknown, data: { type?: string; request?: unknown }) => {
+      if (data?.type === "improve_request_changed" && data.request) {
+        cb(data.request as import("./types/improve.types").ImproveRequest);
+      }
+    };
+    ipcRenderer.on("push-event", handler);
+    return () => { ipcRenderer.removeListener("push-event", handler); };
+  },
 });
