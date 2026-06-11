@@ -7,9 +7,13 @@ import type { BuildImproveRequestArgs, ChatMessage } from './types';
  *
  * Mapping (robust + documented):
  *   1. PREFERRED — the latest *assistant* message is parsed as a structured
- *      recap: `Title:`, `Description:`, and an `Acceptance:` block of `-`/`*`
- *      bullets. The system prompt asks the assistant to end with exactly this
- *      shape, so when scoping converged we lift it verbatim.
+ *      recap. The scoping prompt asks the assistant to END with a fenced
+ *      ```recap block (`TITLE:` / `DESCRIPTION:` / `ACCEPTANCE:` bullets), so
+ *      when present we lift that verbatim. The parser is tolerant: it also
+ *      accepts a bare (un-fenced) recap, **markdown-bold** labels
+ *      (`**Title:**`, `**Titre** :`), the French `Titre`/`Critères` aliases,
+ *      `:` or ` :`, `-`/`*`/`•` bullets, and ignores `---` rules plus any
+ *      trailing prose/questions after the acceptance list.
  *   2. FALLBACK — if no parseable recap exists (user submitted early, or the
  *      assistant only asked questions), we use the FIRST user message as the
  *      title and the whole transcript as the description, with empty acceptance.
@@ -34,24 +38,85 @@ function clampTitle(raw: string): string {
 /** A parsed structured recap, or null when the text isn't one. */
 type ParsedRecap = { title: string; description: string; acceptance: string[] };
 
-function parseRecap(text: string): ParsedRecap | null {
-  const titleMatch = text.match(/^\s*title:\s*(.+)$/im);
-  if (!titleMatch) return null;
+/** Label aliases per recap field — `Title`/`Titre`, etc. (case-insensitive). */
+const LABEL_ALTERNATIVES = {
+  title: '(?:title|titre)',
+  description: '(?:description)',
+  acceptance: '(?:acceptance|crit[eè]res)',
+} as const;
 
-  const descMatch = text.match(/^\s*description:\s*([\s\S]*?)(?=^\s*acceptance:|$(?![\s\S]))/im);
+/** Strip leading markdown bold/heading markers and a trailing `**` from a label-bearing line. */
+function stripLineMarkup(line: string): string {
+  return line.replace(/\*\*/g, '').replace(/^\s*#+\s*/, '');
+}
+
+/**
+ * Extract the fenced ```recap block body when present, else return the whole
+ * text. A bare recap (no fence) is still parsed by the field matchers below.
+ */
+function recapScope(text: string): string {
+  const fenced = text.match(/```recap\s*\n([\s\S]*?)```/i);
+  return fenced ? fenced[1] : text;
+}
+
+/** Match a single-line field (`Title: …` / `**Titre** : …`), markup-tolerant. */
+function matchField(scope: string, alt: string): string | null {
+  const re = new RegExp(`^\\s*(?:\\*\\*)?\\s*${alt}\\s*(?:\\*\\*)?\\s*:\\s*(?:\\*\\*)?\\s*(.+)$`, 'im');
+  const m = scope.match(re);
+  return m ? m[1].replace(/\*\*/g, '').trim() : null;
+}
+
+/** Match a multi-line field's body up to the next known label or end of scope. */
+function matchBlock(scope: string, alt: string): string | null {
+  const stop = `(?:\\*\\*)?\\s*(?:${LABEL_ALTERNATIVES.acceptance}|${LABEL_ALTERNATIVES.title})\\s*(?:\\*\\*)?\\s*:`;
+  const re = new RegExp(
+    `^\\s*(?:\\*\\*)?\\s*${alt}\\s*(?:\\*\\*)?\\s*:\\s*(?:\\*\\*)?\\s*([\\s\\S]*?)(?=^\\s*${stop}|$(?![\\s\\S]))`,
+    'im',
+  );
+  const m = scope.match(re);
+  if (!m) return null;
+  return m[1]
+    .split('\n')
+    .map((l) => stripLineMarkup(l))
+    .join('\n')
+    .replace(/^[\s-]*$/gm, '')
+    .trim();
+}
+
+/**
+ * Collect bullets after the `Acceptance:` label, ignoring `---` rules and
+ * stopping at trailing prose (a non-bullet, non-blank line ends the list).
+ */
+function parseAcceptance(scope: string): string[] {
+  const re = new RegExp(
+    `^\\s*(?:\\*\\*)?\\s*${LABEL_ALTERNATIVES.acceptance}\\s*(?:\\*\\*)?\\s*:\\s*(?:\\*\\*)?\\s*$([\\s\\S]*)`,
+    'im',
+  );
+  const block = scope.match(re);
+  if (!block) return [];
   const acceptance: string[] = [];
-  const acceptanceBlock = text.match(/^\s*acceptance:\s*([\s\S]*)$/im);
-  if (acceptanceBlock) {
-    for (const line of acceptanceBlock[1].split('\n')) {
-      const bullet = line.match(/^\s*[-*]\s+(.+)$/);
-      if (bullet) acceptance.push(bullet[1].trim());
+  for (const raw of block[1].split('\n')) {
+    const line = raw.trim();
+    if (line === '' || /^-{3,}$/.test(line)) continue;
+    const bullet = line.match(/^[-*•]\s+(.+)$/);
+    if (bullet) {
+      acceptance.push(bullet[1].replace(/\*\*/g, '').trim());
+      continue;
     }
+    break; // first non-bullet, non-rule line is trailing prose → stop
   }
+  return acceptance;
+}
+
+function parseRecap(text: string): ParsedRecap | null {
+  const scope = recapScope(text);
+  const title = matchField(scope, LABEL_ALTERNATIVES.title);
+  if (!title) return null;
 
   return {
-    title: clampTitle(titleMatch[1]),
-    description: (descMatch?.[1] ?? '').trim(),
-    acceptance,
+    title: clampTitle(title),
+    description: matchBlock(scope, LABEL_ALTERNATIVES.description) ?? '',
+    acceptance: parseAcceptance(scope),
   };
 }
 

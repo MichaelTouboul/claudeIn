@@ -69,10 +69,25 @@ function renderContext(input: ImproveChatPromptInput): string {
 }
 
 /**
+ * The exact machine-parsable recap shape the assistant must emit once scoping
+ * has converged. `recap.ts` prefers extracting this fenced block. Kept as one
+ * string so the prompt and the renderer parser describe the same contract.
+ */
+const RECAP_BLOCK_SPEC = [
+  "```recap",
+  "TITLE: <one line>",
+  "DESCRIPTION: <a few sentences>",
+  "ACCEPTANCE:",
+  "- <criterion>",
+  "- <criterion>",
+  "```",
+].join("\n");
+
+/**
  * Build the single `claude --print` prompt for one scoping turn. The assistant
- * is told to run a SHORT clarifying dialogue (1–3 targeted questions) and then
- * propose a concise structured recap (one-line title, description, optional
- * acceptance bullets). Discussion only — explicitly no tool use / no edits.
+ * runs a SHORT clarifying dialogue (1–3 targeted questions); once it has enough,
+ * it ENDS its message with the exact fenced ```recap block above so the app can
+ * parse it deterministically. Discussion only — explicitly no tool use / edits.
  */
 export function buildImproveChatPrompt(input: ImproveChatPromptInput): string {
   return [
@@ -85,9 +100,15 @@ export function buildImproveChatPrompt(input: ImproveChatPromptInput): string {
     renderTranscript(input.transcript),
     "",
     "Your job is a SHORT scoping dialogue. If the request is still unclear, ask",
-    "1–3 targeted clarifying questions (one short message). Once you have enough,",
-    "propose a concise structured recap: a one-line Title, a Description, and",
-    "optional Acceptance bullets. Discussion only — do NOT use tools, do NOT edit",
-    "files. Reply with just your next message to the user.",
+    "1–3 targeted clarifying questions (one short message). Discussion only — do",
+    "NOT use tools, do NOT edit files.",
+    "",
+    "Once you have enough information, you may chat conversationally first, then",
+    "END your message with EXACTLY this fenced block (no other fenced blocks):",
+    "",
+    RECAP_BLOCK_SPEC,
+    "",
+    "Write TITLE / DESCRIPTION / ACCEPTANCE in the SAME LANGUAGE as the user.",
+    "Reply with just your next message to the user.",
   ].join("\n");
 }
