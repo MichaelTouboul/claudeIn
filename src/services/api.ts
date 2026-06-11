@@ -1,5 +1,10 @@
 import type { AgentFile } from "../types/agent.types";
 import type { SkillFile } from "../types/dashboard.types";
+import type {
+  ImproveChatInput,
+  ImproveRequest,
+  ImproveRequestInput,
+} from "../types/improve.types";
 
 export const api = {
   getAgents: (): Promise<AgentFile[]> => window.api.getAgents(),
@@ -30,4 +35,9 @@ export const api = {
     window.api.updateProjectMemoryFile(projectId, fileName, content),
   deleteProjectMemoryFile: (projectId: string, fileName: string): Promise<void> =>
     window.api.deleteProjectMemoryFile(projectId, fileName),
+
+  // Self-Improve loop (I4): one scoping-chat turn + submit the final request.
+  improveChat: (input: ImproveChatInput): Promise<string> => window.api.improveChat(input),
+  submitImproveRequest: (input: ImproveRequestInput): Promise<ImproveRequest> =>
+    window.api.submitImproveRequest(input),
 };

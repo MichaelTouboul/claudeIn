@@ -1,5 +1,6 @@
 import { ipcMain } from "electron";
 
+import { improveChat, type ImproveChatInput } from "../services/improve-chat.service";
 import {
   getRequest,
   listRequests,
@@ -18,9 +19,11 @@ import type { ImproveRequestInput } from "../types/improve.types";
  *   improve:get     → getRequest(id)       → ImproveRequest | null
  *   improve:watch   → watchInbox()         → void (push `improve_request_changed`)
  *   improve:unwatch → unwatchInbox()       → void
+ *   improve:chat    → improveChat(input)   → string (assistant's next reply)
  */
 export function registerImproveHandlers(): void {
   ipcMain.handle("improve:submit", (_e, input: ImproveRequestInput) => submitRequest(input));
+  ipcMain.handle("improve:chat", (_e, input: ImproveChatInput) => improveChat(input));
   ipcMain.handle("improve:list", () => listRequests());
   ipcMain.handle("improve:get", (_e, id: string) => getRequest(id));
   ipcMain.handle("improve:watch", () => watchInbox());

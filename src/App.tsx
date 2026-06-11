@@ -3,6 +3,7 @@ import { type ReactElement } from "react";
 import { CustomizePage } from "@/components/CustomizePage/CustomizePage";
 import { DashboardPage } from "@/components/DashboardPage/DashboardPage";
 import { HomePage } from "@/components/HomePage/HomePage";
+import { ImproveModal } from "@/components/ImproveModal/ImproveModal";
 import { OnboardingPage } from "@/components/OnboardingPage/OnboardingPage";
 import { useBootPage } from "@/hooks/useBootPage";
 import { useImproveContextMenu } from "@/hooks/useImproveContextMenu";
@@ -32,5 +33,10 @@ export default function App() {
   if (currentPage === null) {
     return <BootLoader />;
   }
-  return PAGE_VIEW[currentPage]();
+  return (
+    <>
+      {PAGE_VIEW[currentPage]()}
+      <ImproveModal />
+    </>
+  );
 }

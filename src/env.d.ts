@@ -155,6 +155,9 @@ interface Window {
       cb: (target: import("./types/improve.types").ImproveContextTarget | null) => void,
     ) => () => void;
 
+    improveChat: (
+      input: import("./types/improve.types").ImproveChatInput,
+    ) => Promise<string>;
     submitImproveRequest: (
       input: import("./types/improve.types").ImproveRequestInput,
     ) => Promise<import("./types/improve.types").ImproveRequest>;
