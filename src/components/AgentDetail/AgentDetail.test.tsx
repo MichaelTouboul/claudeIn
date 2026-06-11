@@ -10,8 +10,11 @@ vi.mock('./AgentDetailContent/AgentDetailContent', () => ({
   AgentDetailContent: ({ agent }: { agent: AgentFile }) => <div>content:{agent.id}</div>,
 }));
 
-const { getAgent } = vi.hoisted(() => ({ getAgent: vi.fn<(name: string) => Promise<AgentFile | null>>() }));
-vi.mock('@/services/api', () => ({ api: { getAgent } }));
+const { getAgent, getAgentByPath } = vi.hoisted(() => ({
+  getAgent: vi.fn<(name: string) => Promise<AgentFile | null>>(),
+  getAgentByPath: vi.fn<(filePath: string) => Promise<AgentFile | null>>(),
+}));
+vi.mock('@/services/api', () => ({ api: { getAgent, getAgentByPath } }));
 
 function fullAgent(id: string): AgentFile {
   return {
@@ -21,7 +24,10 @@ function fullAgent(id: string): AgentFile {
   };
 }
 
-beforeEach(() => getAgent.mockReset());
+beforeEach(() => {
+  getAgent.mockReset();
+  getAgentByPath.mockReset();
+});
 
 describe('AgentDetail on-demand fetch', () => {
   it('shows a loading state, then the content once loaded', async () => {
@@ -50,5 +56,20 @@ describe('AgentDetail on-demand fetch', () => {
     rerender(<AgentDetail agentId="a2" onDelete={() => {}} />);
     await waitFor(() => expect(screen.getByText('content:a2')).toBeInTheDocument());
     expect(getAgent).toHaveBeenCalledTimes(2);
+  });
+
+  it('resolves a PROJECT-scope agent by filePath, not the user-only id lookup', async () => {
+    // Regression: a project agent (sidebar mirror) has a filePath outside
+    // ~/.claude/agents. The id-only getAgent would return null → "Agent not
+    // found"; getAgentByPath is scope-agnostic and must be used instead.
+    getAgentByPath.mockResolvedValue(fullAgent('tw-repo'));
+
+    render(
+      <AgentDetail agentId="tw-repo" filePath="/proj/.claude/agents/tw-repo.md" onDelete={() => {}} />,
+    );
+
+    await waitFor(() => expect(screen.getByText('content:tw-repo')).toBeInTheDocument());
+    expect(getAgentByPath).toHaveBeenCalledWith('/proj/.claude/agents/tw-repo.md');
+    expect(getAgent).not.toHaveBeenCalled();
   });
 });

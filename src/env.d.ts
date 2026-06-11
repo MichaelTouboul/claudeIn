@@ -7,6 +7,7 @@ interface Window {
     platform: NodeJS.Platform;
     getAgents: () => Promise<import("./types/agent.types").AgentFile[]>;
     getAgent: (name: string) => Promise<import("./types/agent.types").AgentFile | null>;
+    getAgentByPath: (filePath: string) => Promise<import("./types/agent.types").AgentFile | null>;
     getFolders: () => Promise<string[]>;
     createAgent: (payload: unknown) => Promise<import("./types/agent.types").AgentFile>;
     updateAgent: (name: string, payload: unknown) => Promise<import("./types/agent.types").AgentFile>;

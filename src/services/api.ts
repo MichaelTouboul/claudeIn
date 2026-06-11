@@ -9,6 +9,7 @@ import type {
 export const api = {
   getAgents: (): Promise<AgentFile[]> => window.api.getAgents(),
   getAgent: (name: string): Promise<AgentFile | null> => window.api.getAgent(name),
+  getAgentByPath: (filePath: string): Promise<AgentFile | null> => window.api.getAgentByPath(filePath),
   getSkill: (filePath: string): Promise<SkillFile | null> => window.api.getSkill(filePath),
   getFolders: (): Promise<string[]> => window.api.getFolders(),
 
