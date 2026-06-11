@@ -19,14 +19,23 @@ export function FavoriteReposGrid({ repos, loading, onOpen, onRemove, onAdd }: F
         Dépôts favoris
       </h2>
       {loading ? (
-        <p className="text-sm text-fg-subtle">Chargement…</p>
+        <p className="text-sm text-fg-subtle" aria-busy="true">
+          Chargement…
+        </p>
       ) : (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-3">
-          {repos.map((repo) => (
-            <FavoriteRepoCard key={repo.path} repo={repo} onOpen={onOpen} onRemove={onRemove} />
-          ))}
-          <AddRepoCard onAdd={onAdd} />
-        </div>
+        <>
+          {repos.length === 0 ? (
+            <p className="text-sm text-fg-subtle">
+              Aucun dépôt favori pour le moment. Ajoutez-en un pour le retrouver ici.
+            </p>
+          ) : null}
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-3">
+            {repos.map((repo) => (
+              <FavoriteRepoCard key={repo.path} repo={repo} onOpen={onOpen} onRemove={onRemove} />
+            ))}
+            <AddRepoCard onAdd={onAdd} />
+          </div>
+        </>
       )}
     </section>
   );

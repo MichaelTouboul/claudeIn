@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 
 import { Dialog } from "@/components/_ui/Dialog";
+import { DevReset } from "@/components/DevReset/DevReset";
 import { UserProfileView } from "@/components/UserProfileView/UserProfileView";
 import { useFavoriteRepos } from "@/hooks/useFavoriteRepos";
 import { useProjects } from "@/hooks/useProjects";
@@ -64,6 +65,9 @@ export function HomePage() {
           onAdd={() => void addFavorite()}
         />
         <HomeActions onOpenUserAgent={openUserAgent} />
+        <div className="mt-2 flex justify-end">
+          <DevReset />
+        </div>
       </div>
 
       <Dialog

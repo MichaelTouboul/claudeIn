@@ -70,6 +70,14 @@ describe("HomePage", () => {
     expect(screen.getByText("Beta")).toBeInTheDocument();
   });
 
+  it("shows an empty-state hint when there are no favorite repos", async () => {
+    listFavoriteRepos.mockResolvedValue([]);
+    render(<HomePage />);
+    expect(await screen.findByText(/aucun dépôt favori/i)).toBeInTheDocument();
+    // The add affordance stays so the user can act on the empty state.
+    expect(screen.getByRole("button", { name: /ajouter/i })).toBeInTheDocument();
+  });
+
   it("opening a favorite navigates to the dashboard and selects that project", async () => {
     listFavoriteRepos.mockResolvedValue([repo("/code/alpha")]);
     render(<HomePage />);

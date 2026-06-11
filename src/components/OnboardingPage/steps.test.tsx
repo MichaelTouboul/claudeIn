@@ -78,4 +78,15 @@ describe("DoneStep", () => {
     fireEvent.click(screen.getByRole("button", { name: /terminer/i }));
     expect(onFinish).toHaveBeenCalledTimes(1);
   });
+
+  it("disables the button while finishing so completion can't be double-fired", () => {
+    const onFinish = vi.fn();
+    render(<DoneStep onFinish={onFinish} />);
+    const btn = screen.getByRole("button", { name: /terminer/i });
+    fireEvent.click(btn);
+    expect(btn).toBeDisabled();
+    expect(btn).toHaveAttribute("aria-busy", "true");
+    fireEvent.click(btn);
+    expect(onFinish).toHaveBeenCalledTimes(1);
+  });
 });
