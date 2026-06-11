@@ -7,6 +7,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { ConversationStatus, useConversationStatusStore } from '@/store/useConversationStatusStore';
 import { useConversationTitlesStore } from '@/store/useConversationTitlesStore';
 import { useDashboardUIStore } from '@/store/useDashboardUIStore';
+import { useImproveModalStore } from '@/store/useImproveModalStore';
 import { MODELS, useModelStore } from '@/store/useModelStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 import type { ChatMessage,SpawnSession } from '@/types/spawn.types';
@@ -123,6 +124,7 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
     agentName, projectPath, claudeSessionId, model: selectedModel,
     openModelPicker: () => setModelPickerOpen(true),
     openView: (view) => useDashboardUIStore.getState().openPanel(VIEW_PANEL_KEY[view]),
+    openImprove: (target) => useImproveModalStore.getState().openImprove(target),
     editorRef, pendingUserMsgs,
     setInput, setAttachedFiles, setQueue, setMessages,
     setAwaitingResponse, setWaitingInput, setSession, setClaudeSessionId,

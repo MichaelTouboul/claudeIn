@@ -65,3 +65,25 @@ export interface ImproveRequestInput {
 export type ImproveStatusPatch = Partial<
   Pick<ImproveRequest, "status" | "commit" | "summary" | "failureReason">
 >;
+
+/**
+ * The component context captured for the right-click "Improve this…" entry (I3).
+ * Resolved by the renderer (`elementToComponent`) from the clicked element's
+ * dev-only `data-component` / `data-source` attributes, then passed to the main
+ * process to build the native context menu. Both fields are optional: a clicked
+ * element may resolve only a component name (no nearby `data-source`), and `null`
+ * is sent when nothing is annotated (still allows a general improve).
+ */
+export interface ImproveContextTarget {
+  component?: string;
+  sourcePath?: string;
+}
+
+/**
+ * Payload the renderer sends to open the native context menu (I3). `isDev` gates
+ * the "Improve this…" item (the source attributes only exist in dev builds).
+ */
+export interface ContextMenuRequest {
+  target: ImproveContextTarget | null;
+  isDev: boolean;
+}

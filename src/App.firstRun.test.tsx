@@ -70,6 +70,7 @@ beforeEach(() => {
     removeFavoriteRepo,
     openDirectoryPicker,
     getProjects,
+    onImproveContextMenuSelected: () => () => {},
   } as unknown as Window["api"];
 });
 

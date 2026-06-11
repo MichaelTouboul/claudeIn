@@ -1,4 +1,6 @@
 export type {
+  ContextMenuRequest,
+  ImproveContextTarget,
   ImproveRequest,
   ImproveRequestInput,
   ImproveStatusPatch,

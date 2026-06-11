@@ -208,6 +208,27 @@ contextBridge.exposeInMainWorld("api", {
     return () => { ipcRenderer.removeListener("pty:data", handler); };
   },
 
+  // Self-Improve loop — native right-click menu (I3). The renderer asks the main
+  // process to pop the native Electron menu (editing roles + a dev-only "Improve
+  // this…" item) carrying the resolved component target; main replies through the
+  // shared `push-event` channel when "Improve this…" is chosen.
+  openContextMenu: (request: import("./types/improve.types").ContextMenuRequest) =>
+    ipcRenderer.send("context-menu:open", request),
+  onImproveContextMenuSelected: (
+    cb: (target: import("./types/improve.types").ImproveContextTarget | null) => void,
+  ) => {
+    const handler = (
+      _e: unknown,
+      data: { type?: string; target?: import("./types/improve.types").ImproveContextTarget | null },
+    ) => {
+      if (data?.type === "improve_context_menu_selected") {
+        cb(data.target ?? null);
+      }
+    };
+    ipcRenderer.on("push-event", handler);
+    return () => { ipcRenderer.removeListener("push-event", handler); };
+  },
+
   submitImproveRequest: (input: import("./types/improve.types").ImproveRequestInput) =>
     ipcRenderer.invoke("improve:submit", input),
   listImproveRequests: () => ipcRenderer.invoke("improve:list"),

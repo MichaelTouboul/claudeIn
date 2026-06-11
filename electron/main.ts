@@ -2,6 +2,7 @@ import { app, BrowserWindow } from "electron";
 import path from "path";
 import { initDb } from "./services/db";
 import { registerAllHandlers } from "./ipc";
+import { registerContextMenu } from "./services/context-menu.service";
 import { killAll } from "./services/pty.service";
 
 let mainWindow: BrowserWindow | null = null;
@@ -37,6 +38,7 @@ function createWindow() {
 app.whenReady().then(async () => {
   await initDb();
   registerAllHandlers();
+  registerContextMenu();
   createWindow();
 
   app.on("activate", () => {

@@ -148,6 +148,13 @@ interface Window {
     ptyKill: (projectPath: string) => void;
     onPtyData: (cb: (p: { projectPath: string; data: string }) => void) => () => void;
 
+    openContextMenu: (
+      request: import("./types/improve.types").ContextMenuRequest,
+    ) => void;
+    onImproveContextMenuSelected: (
+      cb: (target: import("./types/improve.types").ImproveContextTarget | null) => void,
+    ) => () => void;
+
     submitImproveRequest: (
       input: import("./types/improve.types").ImproveRequestInput,
     ) => Promise<import("./types/improve.types").ImproveRequest>;

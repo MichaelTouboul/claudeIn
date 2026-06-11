@@ -1,3 +1,5 @@
+import type { ImproveContextTarget } from '@/types/improve.types';
+
 // The single source of truth for slash commands — drives BOTH the autocomplete
 // menu (`SLASH_COMMANDS`) AND dispatch (`dispatchSlashCommand`). A command's
 // `kind` declares how it is handled; there is no scattered `if (cmd === …)`
@@ -18,6 +20,10 @@ export const SlashCommandKind = {
   // `view` target; the caller supplies the open function (the `openView` dep),
   // same injected-handler pattern as `local` commands. Never forwarded to claude.
   View: 'view',
+  // Opens the Self-Improve modal (`/improve`, `/feature-request`) with NO
+  // component target — a general improvement request. The caller supplies the
+  // open function (`openImprove`). Never forwarded to claude.
+  Improve: 'improve',
 } as const;
 export type SlashCommandKind = (typeof SlashCommandKind)[keyof typeof SlashCommandKind];
 
@@ -36,7 +42,13 @@ type LocalSlashCommand = { cmd: string; desc: string; kind: typeof SlashCommandK
 type CliSlashCommand = { cmd: string; desc: string; kind: typeof SlashCommandKind.Cli };
 type ModelSlashCommand = { cmd: string; desc: string; kind: typeof SlashCommandKind.Model };
 type ViewSlashCommand = { cmd: string; desc: string; kind: typeof SlashCommandKind.View; view: SlashViewTarget };
-export type SlashCommand = LocalSlashCommand | CliSlashCommand | ModelSlashCommand | ViewSlashCommand;
+type ImproveSlashCommand = { cmd: string; desc: string; kind: typeof SlashCommandKind.Improve };
+export type SlashCommand =
+  | LocalSlashCommand
+  | CliSlashCommand
+  | ModelSlashCommand
+  | ViewSlashCommand
+  | ImproveSlashCommand;
 
 // v1 HONESTY PASS: every entry here works through `claude --print` or opens a
 // real app view. Dead interactive-TUI placeholders (`/vim`, `/config`, `/login`,
@@ -52,6 +64,8 @@ export const SLASH_COMMANDS: SlashCommand[] = [
   { cmd: '/model', desc: 'Switch model', kind: SlashCommandKind.Model },
   { cmd: '/agents', desc: 'Browse sub-agents', kind: SlashCommandKind.View, view: 'agents' },
   { cmd: '/skills', desc: 'Browse skills', kind: SlashCommandKind.View, view: 'skills' },
+  { cmd: '/improve', desc: 'Request an improvement to the app', kind: SlashCommandKind.Improve },
+  { cmd: '/feature-request', desc: 'Request an improvement to the app', kind: SlashCommandKind.Improve },
 ];
 
 const BY_CMD: Record<string, SlashCommand> = Object.fromEntries(
@@ -73,6 +87,9 @@ export type DispatchDeps = {
   // Open the in-app screen a `view` command targets (e.g. agents/skills panel).
   // The caller owns the open mechanism (same injected-handler pattern).
   openView: (view: SlashViewTarget) => void;
+  // Open the Self-Improve modal with NO component target (general request) for
+  // `/improve` / `/feature-request`. The caller owns the open mechanism.
+  openImprove: (target: ImproveContextTarget | null) => void;
 };
 
 // Per-kind behavior, keyed by the finite `kind` — no `if (cmd === …)` chains.
@@ -90,6 +107,10 @@ const KIND_BEHAVIOR: Record<SlashCommandKind, (cmd: SlashCommand, deps: Dispatch
   [SlashCommandKind.View]: (cmd, deps) => {
     // Only a ViewSlashCommand reaches here (its kind is View), so `view` exists.
     deps.openView((cmd as ViewSlashCommand).view);
+  },
+  [SlashCommandKind.Improve]: (_cmd, deps) => {
+    // `/improve` is a general request — no component is captured from chat.
+    deps.openImprove(null);
   },
 };
 
