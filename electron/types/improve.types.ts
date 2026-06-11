@@ -19,9 +19,14 @@ export const ImproveType = {
 } as const;
 export type ImproveType = (typeof ImproveType)[keyof typeof ImproveType];
 
-/** Lifecycle of a request. `pending` until the runner reaches a terminal state. */
+/**
+ * Lifecycle of a request. A request is `pending` until the runner claims it
+ * (writing `in_progress` + `claimedAt` as the file-based lock), then reaches one
+ * of the terminal states `merged` / `failed`. See `docs/self-improve/runner-contract.md`.
+ */
 export const ImproveStatus = {
   Pending: "pending",
+  InProgress: "in_progress",
   Merged: "merged",
   Failed: "failed",
 } as const;
@@ -45,6 +50,8 @@ export interface ImproveRequest {
   acceptance: string[];
   transcript: ImproveTranscriptTurn[];
   status: ImproveStatus;
+  /** ISO-8601 set by the runner when it claims the request (`in_progress`). */
+  claimedAt?: string;
   commit?: string;
   summary?: string;
   failureReason?: string;
@@ -74,9 +81,13 @@ export interface ImproveChatInput {
   transcript: ImproveTranscriptTurn[];
 }
 
-/** Mergeable patch the runner writes to drive a request to a terminal status. */
+/**
+ * Mergeable patch the runner writes to advance a request: a claim
+ * (`status: "in_progress"` + `claimedAt`) or a terminal write
+ * (`merged` + `commit`/`summary`, or `failed` + `failureReason`).
+ */
 export type ImproveStatusPatch = Partial<
-  Pick<ImproveRequest, "status" | "commit" | "summary" | "failureReason">
+  Pick<ImproveRequest, "status" | "claimedAt" | "commit" | "summary" | "failureReason">
 >;
 
 /**
