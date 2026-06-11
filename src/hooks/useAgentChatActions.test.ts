@@ -29,6 +29,7 @@ function makeParams(overrides: Partial<Parameters<typeof useAgentChatActions>[0]
     model: undefined as string | undefined,
     openModelPicker: vi.fn(),
     openView: vi.fn(),
+    openImprove: vi.fn(),
     editorRef,
     pendingUserMsgs,
     setInput: vi.fn(),
@@ -143,6 +144,27 @@ describe('useAgentChatActions handleSend — normal message (regression guard)',
     await result.current.handleSend();
 
     expect(params.openView).toHaveBeenCalledWith('skills');
+    expect(spawnMock).not.toHaveBeenCalled();
+  });
+
+  it('opens the improve modal (target null) for /improve instead of spawning', async () => {
+    const params = makeParams({ input: '/improve' });
+    const { result } = renderHook(() => useAgentChatActions(params));
+
+    await result.current.handleSend();
+
+    expect(params.openImprove).toHaveBeenCalledWith(null);
+    expect(spawnMock).not.toHaveBeenCalled();
+    expect(sendInputMock).not.toHaveBeenCalled();
+  });
+
+  it('opens the improve modal for the /feature-request alias too', async () => {
+    const params = makeParams({ input: '/feature-request' });
+    const { result } = renderHook(() => useAgentChatActions(params));
+
+    await result.current.handleSend();
+
+    expect(params.openImprove).toHaveBeenCalledWith(null);
     expect(spawnMock).not.toHaveBeenCalled();
   });
 });

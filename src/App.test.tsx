@@ -43,7 +43,10 @@ const getUserProfile = vi.fn<() => Promise<UserProfile | null>>();
 beforeEach(() => {
   useAppStore.setState({ currentPage: null, selectedProject: null });
   getUserProfile.mockReset();
-  window.api = { getUserProfile } as unknown as Window["api"];
+  window.api = {
+    getUserProfile,
+    onImproveContextMenuSelected: () => () => {},
+  } as unknown as Window["api"];
 });
 
 describe("App router boot decision", () => {

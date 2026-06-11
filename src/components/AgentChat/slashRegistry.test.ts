@@ -26,6 +26,7 @@ describe('slash registry — data', () => {
       SlashCommandKind.Cli,
       SlashCommandKind.Model,
       SlashCommandKind.View,
+      SlashCommandKind.Improve,
     ];
     for (const c of SLASH_COMMANDS) {
       expect(c.cmd.startsWith('/')).toBe(true);
@@ -36,7 +37,15 @@ describe('slash registry — data', () => {
 
   it('exposes ONLY the honest v1 menu (no dead placeholders)', () => {
     const cmds = SLASH_COMMANDS.map((c) => c.cmd).sort();
-    expect(cmds).toEqual(['/agents', '/clear', '/compact', '/model', '/skills']);
+    expect(cmds).toEqual([
+      '/agents',
+      '/clear',
+      '/compact',
+      '/feature-request',
+      '/improve',
+      '/model',
+      '/skills',
+    ]);
   });
 
   it.each([
@@ -86,12 +95,14 @@ describe('dispatchSlashCommand — routing by kind', () => {
     sendToCli: ReturnType<typeof vi.fn>;
     openModelPicker: ReturnType<typeof vi.fn>;
     openView: ReturnType<typeof vi.fn>;
+    openImprove: ReturnType<typeof vi.fn>;
   } {
     return {
       handlers: { clear: vi.fn() },
       sendToCli: vi.fn(),
       openModelPicker: vi.fn(),
       openView: vi.fn(),
+      openImprove: vi.fn(),
     };
   }
 
@@ -141,6 +152,24 @@ describe('dispatchSlashCommand — routing by kind', () => {
     expect(deps.openView).toHaveBeenCalledWith('skills');
     expect(deps.sendToCli).not.toHaveBeenCalled();
     expect(deps.openModelPicker).not.toHaveBeenCalled();
+  });
+
+  it("routes /improve to openImprove(null) — a general request, NOT to the CLI", () => {
+    const deps = makeDeps();
+    const handled = dispatchSlashCommand('/improve', deps);
+    expect(handled).toBe(true);
+    expect(deps.openImprove).toHaveBeenCalledWith(null);
+    expect(deps.sendToCli).not.toHaveBeenCalled();
+    expect(deps.openModelPicker).not.toHaveBeenCalled();
+    expect(deps.openView).not.toHaveBeenCalled();
+  });
+
+  it('routes the /feature-request alias to openImprove(null) too', () => {
+    const deps = makeDeps();
+    const handled = dispatchSlashCommand('/feature-request', deps);
+    expect(handled).toBe(true);
+    expect(deps.openImprove).toHaveBeenCalledWith(null);
+    expect(deps.sendToCli).not.toHaveBeenCalled();
   });
 
   it('returns false for an unregistered command (caller falls back to a normal send)', () => {

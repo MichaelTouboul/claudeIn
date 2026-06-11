@@ -5,6 +5,7 @@ import { DashboardPage } from "@/components/DashboardPage/DashboardPage";
 import { HomePage } from "@/components/HomePage/HomePage";
 import { OnboardingPage } from "@/components/OnboardingPage/OnboardingPage";
 import { useBootPage } from "@/hooks/useBootPage";
+import { useImproveContextMenu } from "@/hooks/useImproveContextMenu";
 import { AppPage } from "@/store/useAppStore";
 
 /** Value→render map: each page maps to its component (no fallback chains). */
@@ -25,6 +26,9 @@ function BootLoader() {
 
 export default function App() {
   const currentPage = useBootPage();
+  // Right-click "Improve this…" entry point — captures the clicked component and
+  // opens the improve modal via the native context menu (I3). App-root scope.
+  useImproveContextMenu();
   if (currentPage === null) {
     return <BootLoader />;
   }
