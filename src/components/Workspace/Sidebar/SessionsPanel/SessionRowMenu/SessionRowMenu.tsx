@@ -1,11 +1,11 @@
-import { Archive, ArchiveRestore, Clipboard, Eraser, Minimize2, Pencil, Pin, PinOff, Trash2 } from "lucide-react";
 import { useState } from "react";
 
-import { ContextMenu, type ContextMenuItem } from "@/components/_ui/ContextMenu";
+import { ContextMenu } from "@/components/_ui/ContextMenu";
 import type { SessionSummary } from "@/hooks/useSessions";
 import { usePinnedStore } from "@/store/usePinnedStore";
 
 import { RenameDialog } from "./RenameDialog";
+import { buildSessionMenuItems } from "./sessionMenuItems";
 
 export type SessionRowMenuProps = {
   session: SessionSummary;
@@ -27,42 +27,14 @@ export function SessionRowMenu({ session, piloted = false, onChanged }: SessionR
 
   const currentTitle = session.title ?? session.firstPrompt ?? "";
 
-  const run = async (op: Promise<unknown>) => {
-    await op;
-    onChanged();
-  };
-
-  // Reflect the toggle in the store immediately, then persist + refetch.
-  const togglePin = (pinned: boolean) => {
-    usePinnedStore.getState().setPinned(sessionId, pinned);
-    void run(pinned ? window.api.pinConversation(sessionId) : window.api.unpinConversation(sessionId));
-  };
-
-  const items: ContextMenuItem[] = [
-    { label: "Rename…", icon: <Pencil size={13} />, onSelect: () => setRenameOpen(true) },
-    { label: "Copy session id", icon: <Clipboard size={13} />, onSelect: () => void navigator.clipboard.writeText(sessionId) },
-    isPinned
-      ? { label: "Unpin", icon: <PinOff size={13} />, onSelect: () => togglePin(false) }
-      : { label: "Pin to top", icon: <Pin size={13} />, onSelect: () => togglePin(true) },
-    session.archived
-      ? { label: "Unarchive", icon: <ArchiveRestore size={13} />, onSelect: () => void run(window.api.unarchiveConversation(sessionId)) }
-      : { label: "Archive", icon: <Archive size={13} />, onSelect: () => void run(window.api.archiveConversation(sessionId)) },
-  ];
-
-  // clear/compact are native in-session commands (reserve 1): live/piloted only.
-  // Wiring them to the running session is not cleanly feasible from this surface
-  // (no conversation→spawn-session mapping), so they are shown disabled/"soon"
-  // for piloted rows and omitted otherwise — never faked.
-  if (piloted) {
-    items.push(
-      { label: "Clear (soon)", icon: <Eraser size={13} />, tone: "default", onSelect: () => {} },
-      { label: "Compact (soon)", icon: <Minimize2 size={13} />, tone: "default", onSelect: () => {} },
-    );
-  }
-
-  items.push(
-    { label: "Delete", icon: <Trash2 size={13} />, tone: "danger", onSelect: () => void run(window.api.softDeleteConversation(sessionId)) },
-  );
+  const items = buildSessionMenuItems({
+    sessionId,
+    pinned: isPinned,
+    archived: session.archived,
+    piloted,
+    onRename: () => setRenameOpen(true),
+    onChanged,
+  });
 
   return (
     <>

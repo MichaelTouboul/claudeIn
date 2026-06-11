@@ -56,7 +56,7 @@ describe("ConversationList", () => {
       dashboards: [{ id: "d1", scope: { kind: "project", project }, cwd: project.path, activeTabId: "", tabs: [] }],
       activeDashboardId: "d1",
     });
-    render(<ConversationList sessions={[session("a")]} />);
+    render(<ConversationList sessions={[session("a")]} onChanged={vi.fn()} />);
     expect(screen.getByText("No active conversations.")).toBeInTheDocument();
   });
 
@@ -76,6 +76,7 @@ describe("ConversationList", () => {
           session("pinned-db", { pinned: true, pinnedAt: "2026-01-01T00:00:00Z" }),
           session("open-a"),
         ]}
+        onChanged={vi.fn()}
       />,
     );
 
@@ -97,7 +98,7 @@ describe("ConversationList", () => {
       ],
       activeDashboardId: "d1",
     });
-    render(<ConversationList sessions={[session("open-a")]} />);
+    render(<ConversationList sessions={[session("open-a")]} onChanged={vi.fn()} />);
 
     // Appears once, via the Pinned group (its session title), not the tab title.
     expect(screen.getByText("Title open-a")).toBeInTheDocument();
@@ -109,7 +110,7 @@ describe("ConversationList", () => {
       dashboards: [{ id: "d1", scope: { kind: "project", project }, cwd: project.path, activeTabId: "", tabs: [] }],
       activeDashboardId: "d1",
     });
-    render(<ConversationList sessions={[session("pinned-x", { pinned: true })]} />);
+    render(<ConversationList sessions={[session("pinned-x", { pinned: true })]} onChanged={vi.fn()} />);
 
     fireEvent.click(screen.getByText("Title pinned-x"));
     const tabs = useWorkspaceStore.getState().dashboards[0].tabs;
@@ -131,7 +132,7 @@ describe("ConversationList", () => {
       activeDashboardId: "d1",
     });
     usePinnedStore.setState({ overrides: { "pin-a": true } });
-    render(<ConversationList sessions={[session("pin-a")]} />);
+    render(<ConversationList sessions={[session("pin-a")]} onChanged={vi.fn()} />);
 
     fireEvent.click(screen.getByText("Title pin-a"));
     expect(useWorkspaceStore.getState().dashboards[0].activeTabId).toBe("t-pin");
@@ -149,7 +150,7 @@ describe("ConversationList", () => {
       ],
       activeDashboardId: "d1",
     });
-    render(<ConversationList sessions={[session("open-a")]} />);
+    render(<ConversationList sessions={[session("open-a")]} onChanged={vi.fn()} />);
 
     const row = screen.getByText("Open one").closest(".group") as HTMLElement;
     openRowMenu(row);
@@ -164,7 +165,7 @@ describe("ConversationList", () => {
       dashboards: [{ id: "d1", scope: { kind: "project", project }, cwd: project.path, activeTabId: "", tabs: [] }],
       activeDashboardId: "d1",
     });
-    render(<ConversationList sessions={[session("pinned-y", { pinned: true })]} />);
+    render(<ConversationList sessions={[session("pinned-y", { pinned: true })]} onChanged={vi.fn()} />);
 
     const row = screen.getByText("Title pinned-y").closest(".group") as HTMLElement;
     openRowMenu(row);
@@ -195,7 +196,7 @@ describe("ConversationList", () => {
       statuses: { "conv-run": ConversationStatus.Running, "conv-wait": ConversationStatus.Waiting },
     });
 
-    render(<ConversationList sessions={[]} />);
+    render(<ConversationList sessions={[]} onChanged={vi.fn()} />);
 
     const runRow = screen.getByText("Running chat").closest(".group") as HTMLElement;
     const waitRow = screen.getByText("Waiting chat").closest(".group") as HTMLElement;
