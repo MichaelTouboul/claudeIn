@@ -62,8 +62,9 @@ export async function getRequest(id: string): Promise<ImproveRequest | null> {
 
 /**
  * Merge `patch` into the stored request and persist. Returns the updated
- * request, or null if the id doesn't exist. The runner uses this to mark a
- * request `merged`/`failed`; exposed so tests can simulate the runner.
+ * request, or null if the id doesn't exist. The runner uses this to claim a
+ * request (`in_progress` + `claimedAt`) and then mark it `merged`/`failed`;
+ * exposed so tests can simulate the runner.
  */
 export async function updateStatus(
   id: string,

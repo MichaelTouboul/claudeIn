@@ -46,6 +46,11 @@ describe("useImproveStore", () => {
     expect(selectUnacknowledgedMerged(useImproveStore.getState())).toHaveLength(0);
   });
 
+  it("ignores an in_progress request (only merged ones notify)", () => {
+    useImproveStore.getState().ingest(makeRequest({ status: ImproveStatus.InProgress }));
+    expect(selectUnacknowledgedMerged(useImproveStore.getState())).toHaveLength(0);
+  });
+
   it("acknowledging a request hides it and persists the id to localStorage", () => {
     useImproveStore.getState().ingest(makeRequest());
     useImproveStore.getState().acknowledge("req-1");

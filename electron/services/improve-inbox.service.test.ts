@@ -139,6 +139,47 @@ describe("updateStatus", () => {
   it("returns null for an unknown id", async () => {
     expect(await updateStatus("nope", { status: ImproveStatus.Merged })).toBeNull();
   });
+
+  it("persists a pending → in_progress → merged sequence", async () => {
+    const req = await submitRequest(baseInput);
+
+    const claimed = await updateStatus(req.id, {
+      status: ImproveStatus.InProgress,
+      claimedAt: "2026-06-11T12:00:00.000Z",
+    });
+    expect(claimed?.status).toBe(ImproveStatus.InProgress);
+    expect(claimed?.claimedAt).toBe("2026-06-11T12:00:00.000Z");
+
+    const afterClaim = await getRequest(req.id);
+    expect(afterClaim?.status).toBe(ImproveStatus.InProgress);
+    expect(afterClaim?.claimedAt).toBe("2026-06-11T12:00:00.000Z");
+
+    const merged = await updateStatus(req.id, {
+      status: ImproveStatus.Merged,
+      commit: "abc123",
+      summary: "shipped it",
+    });
+    expect(merged?.status).toBe(ImproveStatus.Merged);
+    expect(merged?.claimedAt).toBe("2026-06-11T12:00:00.000Z"); // preserved across patch
+
+    const reread = await getRequest(req.id);
+    expect(reread?.status).toBe(ImproveStatus.Merged);
+    expect(reread?.commit).toBe("abc123");
+  });
+
+  it("keeps listRequests sorted by createdAt descending after an in_progress claim", async () => {
+    const a = await submitRequest({ ...baseInput, title: "first" });
+    await sleep(5);
+    const b = await submitRequest({ ...baseInput, title: "second" });
+
+    await updateStatus(a.id, {
+      status: ImproveStatus.InProgress,
+      claimedAt: new Date().toISOString(),
+    });
+
+    const list = await listRequests();
+    expect(list.map((r) => r.id)).toEqual([b.id, a.id]);
+  });
 });
 
 function changeEvents(): { type: string; request: ImproveRequest }[] {
