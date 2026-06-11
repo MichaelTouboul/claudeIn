@@ -96,29 +96,12 @@ describe("SessionRowMenu", () => {
     expect(screen.getByText("Compact (soon)")).toBeInTheDocument();
   });
 
-  it("copies the internal localSessionId to the clipboard when provided", async () => {
+  it("copies the session's claudeSessionId to the clipboard", async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.assign(navigator, { clipboard: { writeText } });
-    render(
-      <SessionRowMenu
-        session={makeSession({ sessionId: "claude-side-id" })}
-        localSessionId="local-internal-id"
-        onChanged={vi.fn()}
-      />,
-    );
+    render(<SessionRowMenu session={makeSession({ sessionId: "claude-side-id" })} onChanged={vi.fn()} />);
     openMenu();
     fireEvent.click(await screen.findByText("Copy session id"));
-    await waitFor(() => expect(writeText).toHaveBeenCalledWith("local-internal-id"));
-    // Never the claude-side id.
-    expect(writeText).not.toHaveBeenCalledWith("claude-side-id");
-  });
-
-  it("falls back to the row's session id when no localSessionId is provided", async () => {
-    const writeText = vi.fn().mockResolvedValue(undefined);
-    Object.assign(navigator, { clipboard: { writeText } });
-    render(<SessionRowMenu session={makeSession({ sessionId: "s1" })} onChanged={vi.fn()} />);
-    openMenu();
-    fireEvent.click(await screen.findByText("Copy session id"));
-    await waitFor(() => expect(writeText).toHaveBeenCalledWith("s1"));
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith("claude-side-id"));
   });
 });

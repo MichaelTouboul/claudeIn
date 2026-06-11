@@ -12,15 +12,11 @@ export type SessionRowMenuProps = {
   // True when ClaudeIn is currently driving this session (its agent is live).
   // clear/compact are in-session ops — surfaced only here, otherwise omitted.
   piloted?: boolean;
-  // The internal (live-process) session id — the randomUUID spawn.service mints
-  // for a piloted session. "Copy session id" copies THIS when present; absent it
-  // falls back to the row's claudeSessionId so the action is always useful.
-  localSessionId?: string;
   // Called after any app-owned meta mutation so the list refetches.
   onChanged: () => void;
 };
 
-export function SessionRowMenu({ session, piloted = false, localSessionId, onChanged }: SessionRowMenuProps) {
+export function SessionRowMenu({ session, piloted = false, onChanged }: SessionRowMenuProps) {
   const [renameOpen, setRenameOpen] = useState(false);
   const { sessionId } = session;
 
@@ -42,13 +38,9 @@ export function SessionRowMenu({ session, piloted = false, localSessionId, onCha
     void run(pinned ? window.api.pinConversation(sessionId) : window.api.unpinConversation(sessionId));
   };
 
-  // Copy the internal id when we have it (piloted/live rows), else the row's
-  // claudeSessionId — never silently no-op.
-  const copyId = localSessionId ?? sessionId;
-
   const items: ContextMenuItem[] = [
     { label: "Rename…", icon: <Pencil size={13} />, onSelect: () => setRenameOpen(true) },
-    { label: "Copy session id", icon: <Clipboard size={13} />, onSelect: () => void navigator.clipboard.writeText(copyId) },
+    { label: "Copy session id", icon: <Clipboard size={13} />, onSelect: () => void navigator.clipboard.writeText(sessionId) },
     isPinned
       ? { label: "Unpin", icon: <PinOff size={13} />, onSelect: () => togglePin(false) }
       : { label: "Pin to top", icon: <Pin size={13} />, onSelect: () => togglePin(true) },
