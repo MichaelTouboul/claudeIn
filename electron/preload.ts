@@ -4,6 +4,7 @@ contextBridge.exposeInMainWorld("api", {
   platform: process.platform,
   getAgents: () => ipcRenderer.invoke("agents:list"),
   getAgent: (name: string) => ipcRenderer.invoke("agents:get", name),
+  getAgentByPath: (filePath: string) => ipcRenderer.invoke("agents:get-by-path", filePath),
   getFolders: () => ipcRenderer.invoke("agents:folders"),
   createAgent: (payload: unknown) => ipcRenderer.invoke("agents:create", payload),
   updateAgent: (name: string, payload: unknown) => ipcRenderer.invoke("agents:update", name, payload),

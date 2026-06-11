@@ -36,11 +36,13 @@ export function TabBody({ tab, cwd }: TabBodyProps) {
   }
   if (tab.kind === 'agent') {
     // The summary list is the source of truth for existence; AgentDetail fetches
-    // the full content on-demand from the id. Wire delete to the store action
-    // (previously a no-op) so deleting from the detail tab actually deletes.
+    // the full content on-demand. Pass the summary's absolute filePath so it
+    // resolves by path (scope-agnostic) — project-scope agents otherwise fail to
+    // load via the id-only getAgent, which scans ~/.claude/agents only. Wire
+    // delete to the store action so deleting from the detail tab actually deletes.
     const summary = agents.find((a) => a.id === tab.agentName);
     return summary
-      ? <AgentDetail agentId={summary.id} onDelete={(name) => void deleteAgent(name)} />
+      ? <AgentDetail agentId={summary.id} filePath={summary.filePath} onDelete={(name) => void deleteAgent(name)} />
       : <NotFound label="Agent not found in this project." />;
   }
   const skill = skills.find((s) => s.filePath === tab.skillId);

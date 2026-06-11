@@ -99,13 +99,35 @@ async function getMemoryFiles(agentDir: string): Promise<MemoryFile[]> {
   return files;
 }
 
+/**
+ * Resolve the agents-root a file belongs to. User agents live under
+ * `~/.claude/agents`; project agents under `<project>/.claude/agents`. We walk
+ * up to the nearest ancestor `agents` dir whose parent is `.claude` so the
+ * `relativePath`/`folder` are computed against the agent's OWN root regardless
+ * of scope (the legacy code hard-coded the user `AGENTS_DIR`, which is wrong for
+ * project agents). Falls back to the user `AGENTS_DIR` when no such ancestor
+ * exists (keeps existing behavior for user-scope files).
+ */
+function agentsRootFor(filePath: string): string {
+  let dir = path.dirname(filePath);
+  while (true) {
+    if (path.basename(dir) === "agents" && path.basename(path.dirname(dir)) === ".claude") {
+      return dir;
+    }
+    const parent = path.dirname(dir);
+    if (parent === dir) return AGENTS_DIR;
+    dir = parent;
+  }
+}
+
 function parseAgent(filePath: string, raw: string): AgentFile | null {
   try {
     const { data, content } = matter(raw);
     if (!data.name) return null;
 
     const frontmatter = data as AgentFrontmatter;
-    const relativePath = path.relative(AGENTS_DIR, filePath);
+    const root = agentsRootFor(filePath);
+    const relativePath = path.relative(root, filePath);
     const folder = path.dirname(relativePath);
 
     return {
@@ -127,6 +149,38 @@ function parseAgent(filePath: string, raw: string): AgentFile | null {
   }
 }
 
+/**
+ * Attach the heavy on-disk content (memory files, annex files, shared parent
+ * `.env`) to a parsed agent. Shared by the bulk `getAllAgents` walk and the
+ * single-file `getAgentByPath` resolver so both scopes enrich identically.
+ */
+async function enrichAgent(agent: AgentFile): Promise<AgentFile> {
+  const filePath = agent.filePath;
+  agent.memoryFiles = await getMemoryFiles(path.dirname(filePath));
+  agent.annexFiles = await findAnnexFiles(path.dirname(filePath), path.basename(filePath));
+
+  const root = agentsRootFor(filePath);
+  const parentDir = path.dirname(path.dirname(filePath));
+  const parentRelative = path.relative(root, parentDir);
+  if (parentRelative && parentRelative !== ".") {
+    const parentEnvPath = path.join(parentDir, ".env");
+    if (await exists(parentEnvPath)) {
+      const alreadyHas = agent.annexFiles.some((f) => f.path === parentEnvPath);
+      if (!alreadyHas) {
+        const content = await fs.readFile(parentEnvPath, "utf-8");
+        agent.annexFiles.push({
+          name: ".env (shared)",
+          path: parentEnvPath,
+          content,
+          isEnv: true,
+        });
+      }
+    }
+  }
+
+  return agent;
+}
+
 export async function getAllAgents(): Promise<AgentFile[]> {
   const mdFiles = await findMdFiles(AGENTS_DIR);
   const agents: AgentFile[] = [];
@@ -135,28 +189,7 @@ export async function getAllAgents(): Promise<AgentFile[]> {
     const raw = await fs.readFile(filePath, "utf-8");
     const agent = parseAgent(filePath, raw);
     if (agent) {
-      agent.memoryFiles = await getMemoryFiles(path.dirname(filePath));
-      agent.annexFiles = await findAnnexFiles(path.dirname(filePath), path.basename(filePath));
-
-      const parentDir = path.dirname(path.dirname(filePath));
-      const parentRelative = path.relative(AGENTS_DIR, parentDir);
-      if (parentRelative && parentRelative !== ".") {
-        const parentEnvPath = path.join(parentDir, ".env");
-        if (await exists(parentEnvPath)) {
-          const alreadyHas = agent.annexFiles.some((f) => f.path === parentEnvPath);
-          if (!alreadyHas) {
-            const content = await fs.readFile(parentEnvPath, "utf-8");
-            agent.annexFiles.push({
-              name: ".env (shared)",
-              path: parentEnvPath,
-              content,
-              isEnv: true,
-            });
-          }
-        }
-      }
-
-      agents.push(agent);
+      agents.push(await enrichAgent(agent));
     }
   }
 
@@ -166,6 +199,24 @@ export async function getAllAgents(): Promise<AgentFile[]> {
 export async function getAgent(name: string): Promise<AgentFile | null> {
   const all = await getAllAgents();
   return all.find((a) => a.id === name) ?? null;
+}
+
+/**
+ * Resolve the full agent from its absolute file path — scope-agnostic. The
+ * sidebar mirror lists BOTH user and project agents and carries each one's
+ * absolute `filePath`; the management view uses this to open any of them.
+ *
+ * The legacy `getAgent(name)` only scanned `~/.claude/agents`, so clicking a
+ * project-scope agent resolved to null → "Agent not found". This resolver reads
+ * the exact file the summary points at, so project agents open correctly.
+ * Returns null when the file is missing or has no frontmatter `name`.
+ */
+export async function getAgentByPath(filePath: string): Promise<AgentFile | null> {
+  if (!(await exists(filePath))) return null;
+  const raw = await fs.readFile(filePath, "utf-8");
+  const agent = parseAgent(filePath, raw);
+  if (!agent) return null;
+  return enrichAgent(agent);
 }
 
 export async function createAgent(payload: AgentCreatePayload): Promise<AgentFile> {

@@ -5,6 +5,7 @@ import * as agentsMirror from "../services/agents.mirror";
 export function registerAgentHandlers(): void {
   ipcMain.handle("agents:list", () => agentService.getAllAgents());
   ipcMain.handle("agents:get", (_e, name: string) => agentService.getAgent(name));
+  ipcMain.handle("agents:get-by-path", (_e, filePath: string) => agentService.getAgentByPath(filePath));
   ipcMain.handle("agents:folders", () => agentService.getFolders());
   ipcMain.handle("agents:create", (_e, payload) => agentService.createAgent(payload));
   ipcMain.handle("agents:update", (_e, name: string, payload) => agentService.updateAgent(name, payload));
