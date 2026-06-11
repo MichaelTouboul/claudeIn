@@ -15,71 +15,56 @@ function tableTab(id: string, title = 'Table'): PanelTab {
   return { id, kind: PanelTabKind.Table, title, payload: { columns: [], rows: [] } };
 }
 
-/** Narrow a looked-up tab to its table payload for assertions (throws otherwise). */
-function tablePayloadOf(id: string): TablePayload {
-  const tab = usePanelStore.getState().tabs.find((t) => t.id === id);
-  if (!tab || tab.kind !== PanelTabKind.Table) throw new Error(`no table tab ${id}`);
-  return tab.payload;
+/** Narrow `current` to its table payload for assertions (throws otherwise). */
+function currentTablePayload(): TablePayload {
+  const cur = usePanelStore.getState().current;
+  if (!cur || cur.kind !== PanelTabKind.Table) throw new Error('current is not a table');
+  return cur.payload;
 }
 
 beforeEach(() => {
-  usePanelStore.setState({ isOpen: false, tabs: [], activeTabId: null, width: 480 });
+  usePanelStore.setState({ isOpen: false, current: null, width: 480 });
 });
 
 describe('usePanelStore', () => {
-  it('openTab adds a tab, focuses it, and opens the panel', () => {
-    usePanelStore.getState().openTab(tableTab('a'));
+  it('open sets current and opens the panel', () => {
+    usePanelStore.getState().open(tableTab('a'));
     const s = usePanelStore.getState();
-    expect(s.tabs.map((t) => t.id)).toEqual(['a']);
-    expect(s.activeTabId).toBe('a');
+    expect(s.current?.id).toBe('a');
     expect(s.isOpen).toBe(true);
   });
 
-  it('openTab with an existing id does not duplicate, just refocuses', () => {
-    const { openTab } = usePanelStore.getState();
-    openTab(tableTab('a'));
-    openTab(tableTab('b'));
-    openTab(tableTab('a'));
+  it('open REPLACES the current object (single-object, no tabs)', () => {
+    const { open } = usePanelStore.getState();
+    open(tableTab('a', 'First'));
+    open(tableTab('b', 'Second'));
     const s = usePanelStore.getState();
-    expect(s.tabs.map((t) => t.id)).toEqual(['a', 'b']);
-    expect(s.activeTabId).toBe('a');
+    expect(s.current?.id).toBe('b');
+    expect(s.current?.title).toBe('Second');
+    expect(s.isOpen).toBe(true);
   });
 
-  it('closeTab removes the tab and reassigns active to the last remaining', () => {
-    const { openTab, closeTab } = usePanelStore.getState();
-    openTab(tableTab('a'));
-    openTab(tableTab('b'));
-    closeTab('b');
-    expect(usePanelStore.getState().activeTabId).toBe('a');
-    closeTab('a');
-    expect(usePanelStore.getState().tabs).toEqual([]);
-    expect(usePanelStore.getState().activeTabId).toBeNull();
-  });
-
-  it('closeTab closes the panel when the last tab is removed', () => {
-    const { openTab, closeTab } = usePanelStore.getState();
-    openTab(tableTab('a'));
-    expect(usePanelStore.getState().isOpen).toBe(true);
-    closeTab('a');
+  it('close hides the panel but keeps the current object', () => {
+    const { open, close } = usePanelStore.getState();
+    open(tableTab('a'));
+    close();
     const s = usePanelStore.getState();
-    expect(s.tabs).toEqual([]);
     expect(s.isOpen).toBe(false);
+    expect(s.current?.id).toBe('a');
   });
 
-  it('closeTab keeps the panel open while tabs remain', () => {
-    const { openTab, closeTab } = usePanelStore.getState();
-    openTab(tableTab('a'));
-    openTab(tableTab('b'));
-    closeTab('b');
-    expect(usePanelStore.getState().isOpen).toBe(true);
+  it('reopening the same object replaces (no dedup/tab list)', () => {
+    const { open } = usePanelStore.getState();
+    const payload = { columns: [{ field: 'x', headerName: 'X' }], rows: [{ id: 0, x: '1' }] };
+    const id = tableTabId(payload);
+    open({ id, kind: PanelTabKind.Table, title: 'Table', payload });
+    open({ id, kind: PanelTabKind.Table, title: 'Table', payload });
+    expect(usePanelStore.getState().current?.id).toBe(id);
   });
 
-  it('setActive / setOpen / togglePanel mutate flags', () => {
-    const { openTab, setActive, setOpen, togglePanel } = usePanelStore.getState();
-    openTab(tableTab('a'));
-    openTab(tableTab('b'));
-    setActive('a');
-    expect(usePanelStore.getState().activeTabId).toBe('a');
+  it('setOpen / togglePanel mutate the open flag', () => {
+    const { open, setOpen, togglePanel } = usePanelStore.getState();
+    open(tableTab('a'));
     setOpen(false);
     expect(usePanelStore.getState().isOpen).toBe(false);
     togglePanel();
@@ -94,69 +79,46 @@ describe('usePanelStore', () => {
     expect(a).not.toBe(c);
   });
 
-  it('openTab dedups identical content even when the same payload is reopened', () => {
-    const { openTab } = usePanelStore.getState();
-    const payload = { columns: [{ field: 'x', headerName: 'X' }], rows: [{ id: 0, x: '1' }] };
-    const id = tableTabId(payload);
-    openTab({ id, kind: PanelTabKind.Table, title: 'Table', payload });
-    openTab({ id, kind: PanelTabKind.Table, title: 'Table', payload });
-    const s = usePanelStore.getState();
-    expect(s.tabs).toHaveLength(1);
-    expect(s.activeTabId).toBe(id);
-  });
-
-  it('updateTab patches the targeted tab payload in place, leaving others untouched', () => {
-    const { openTab, updateTab } = usePanelStore.getState();
-    openTab(tableTab('a'));
-    openTab(tableTab('b'));
+  it('update patches the current object payload in place', () => {
+    const { open, update } = usePanelStore.getState();
+    open(tableTab('a'));
     const patched = {
       columns: [{ field: 'name', headerName: 'Name' }],
       rows: [{ id: 0, name: 'Edited' }],
     };
-    updateTab('a', { kind: PanelTabKind.Table, payload: patched });
-    const s = usePanelStore.getState();
-    const a = s.tabs.find((t) => t.id === 'a');
-    const b = s.tabs.find((t) => t.id === 'b');
-    expect(a?.payload).toEqual(patched);
-    expect(b?.payload).toEqual({ columns: [], rows: [] });
-    // identity / other fields preserved
-    expect(a?.title).toBe('Table');
-    expect(a?.kind).toBe(PanelTabKind.Table);
+    update({ kind: PanelTabKind.Table, payload: patched });
+    const cur = usePanelStore.getState().current;
+    expect(cur?.payload).toEqual(patched);
+    expect(cur?.title).toBe('Table');
+    expect(cur?.kind).toBe(PanelTabKind.Table);
   });
 
-  it('updateTab can patch the title without touching the payload', () => {
-    const { openTab, updateTab } = usePanelStore.getState();
-    openTab(tableTab('a'));
-    updateTab('a', { title: 'Renamed' });
-    const a = usePanelStore.getState().tabs.find((t) => t.id === 'a');
-    expect(a?.title).toBe('Renamed');
-    expect(a?.payload).toEqual({ columns: [], rows: [] });
+  it('update can patch the title without touching the payload', () => {
+    const { open, update } = usePanelStore.getState();
+    open(tableTab('a'));
+    update({ title: 'Renamed' });
+    const cur = usePanelStore.getState().current;
+    expect(cur?.title).toBe('Renamed');
+    expect(cur?.payload).toEqual({ columns: [], rows: [] });
   });
 
-  it('updateTab rejects a payload whose kind differs from the target tab', () => {
-    const { openTab, updateTab } = usePanelStore.getState();
-    openTab(tableTab('a'));
-    // A rogue/unsafe caller (e.g. via a stale cast) tries to slot a TextPayload
-    // into a Table tab. The runtime guard must drop the payload, leaving the tab
-    // structurally intact: kind 'table' keeps its TablePayload.
-    updateTab('a', { kind: PanelTabKind.Text, payload: { text: 'rogue' } });
-    const a = usePanelStore.getState().tabs.find((t) => t.id === 'a');
-    expect(a?.kind).toBe(PanelTabKind.Table);
-    expect(a?.payload).toEqual({ columns: [], rows: [] });
+  it('update rejects a payload whose kind differs from the current object', () => {
+    const { open, update } = usePanelStore.getState();
+    open(tableTab('a'));
+    update({ kind: PanelTabKind.Text, payload: { text: 'rogue' } });
+    const cur = usePanelStore.getState().current;
+    expect(cur?.kind).toBe(PanelTabKind.Table);
+    expect(cur?.payload).toEqual({ columns: [], rows: [] });
   });
 
-  it('updateTab is a no-op when the id does not exist', () => {
-    const { openTab, updateTab } = usePanelStore.getState();
-    openTab(tableTab('a'));
-    updateTab('missing', { title: 'X' });
-    const s = usePanelStore.getState();
-    expect(s.tabs).toHaveLength(1);
-    expect(s.tabs[0].title).toBe('Table');
+  it('update is a no-op when the panel is empty', () => {
+    usePanelStore.getState().update({ title: 'X' });
+    expect(usePanelStore.getState().current).toBeNull();
   });
 
   it('commitRow replaces a single row by id, reading live state each call', () => {
-    const { openTab, commitRow } = usePanelStore.getState();
-    openTab({
+    const { open, commitRow } = usePanelStore.getState();
+    open({
       id: 'a',
       kind: PanelTabKind.Table,
       title: 'Table',
@@ -168,52 +130,35 @@ describe('usePanelStore', () => {
         ],
       },
     });
-    // Sequential commits without a re-render in between must both stick.
-    commitRow('a', { id: 0, name: 'Alice2' });
-    commitRow('a', { id: 1, name: 'Bob2' });
-    expect(tablePayloadOf('a').rows).toEqual([
+    commitRow({ id: 0, name: 'Alice2' });
+    commitRow({ id: 1, name: 'Bob2' });
+    expect(currentTablePayload().rows).toEqual([
       { id: 0, name: 'Alice2' },
       { id: 1, name: 'Bob2' },
     ]);
   });
 
-  it('commitRow is a no-op when the tab id is absent', () => {
-    const { openTab, commitRow } = usePanelStore.getState();
-    openTab(tableTab('a'));
-    commitRow('missing', { id: 0, name: 'X' });
-    expect(usePanelStore.getState().tabs[0].payload).toEqual({ columns: [], rows: [] });
+  it('commitRow is a no-op when the current object is not a table', () => {
+    const { open, commitRow } = usePanelStore.getState();
+    open({ id: 'c', kind: PanelTabKind.Code, title: 'Code', payload: { lang: 'ts', src: 'x' } });
+    commitRow({ id: 0, name: 'X' });
+    expect(usePanelStore.getState().current?.kind).toBe(PanelTabKind.Code);
   });
 
-  it('opens a code tab and keeps its payload, deduping identical source', () => {
-    const { openTab } = usePanelStore.getState();
+  it('opens a code object and keeps its payload', () => {
+    const { open } = usePanelStore.getState();
     const id = codeTabId({ lang: 'ts', src: 'const x = 1;' });
-    openTab({
-      id,
-      kind: PanelTabKind.Code,
-      title: 'Code',
-      payload: { lang: 'ts', src: 'const x = 1;' },
-    });
-    openTab({
-      id,
-      kind: PanelTabKind.Code,
-      title: 'Code',
-      payload: { lang: 'ts', src: 'const x = 1;' },
-    });
-    const s = usePanelStore.getState();
-    expect(s.tabs).toHaveLength(1);
-    const tab = s.tabs[0];
-    expect(tab.kind).toBe(PanelTabKind.Code);
-    expect(tab.payload).toEqual({ lang: 'ts', src: 'const x = 1;' });
+    open({ id, kind: PanelTabKind.Code, title: 'Code', payload: { lang: 'ts', src: 'const x = 1;' } });
+    const cur = usePanelStore.getState().current;
+    expect(cur?.kind).toBe(PanelTabKind.Code);
+    expect(cur?.payload).toEqual({ lang: 'ts', src: 'const x = 1;' });
   });
 
-  it('opens a text tab and keeps its payload, deduping identical text', () => {
-    const { openTab } = usePanelStore.getState();
+  it('opens a text object and keeps its payload', () => {
+    const { open } = usePanelStore.getState();
     const id = textTabId({ text: '# Title' });
-    openTab({ id, kind: PanelTabKind.Text, title: 'Text', payload: { text: '# Title' } });
-    openTab({ id, kind: PanelTabKind.Text, title: 'Text', payload: { text: '# Title' } });
-    const s = usePanelStore.getState();
-    expect(s.tabs).toHaveLength(1);
-    expect(s.tabs[0].payload).toEqual({ text: '# Title' });
+    open({ id, kind: PanelTabKind.Text, title: 'Text', payload: { text: '# Title' } });
+    expect(usePanelStore.getState().current?.payload).toEqual({ text: '# Title' });
   });
 
   it('codeTabId / textTabId are stable for identical content and differ otherwise', () => {
@@ -223,48 +168,19 @@ describe('usePanelStore', () => {
     expect(textTabId({ text: 'a' })).not.toBe(textTabId({ text: 'b' }));
   });
 
-  it('mints a fresh id when a code tab id collides with different content', () => {
-    const { openTab } = usePanelStore.getState();
-    const id = 'code:COLLIDE';
-    openTab({ id, kind: PanelTabKind.Code, title: 'A', payload: { lang: 'ts', src: 'A' } });
-    openTab({ id, kind: PanelTabKind.Code, title: 'B', payload: { lang: 'ts', src: 'B' } });
-    const s = usePanelStore.getState();
-    expect(s.tabs).toHaveLength(2);
-    const active = s.tabs.find((t) => t.id === s.activeTabId);
-    expect(active?.payload).toEqual({ lang: 'ts', src: 'B' });
-  });
-
-  it('opens an agent tab and keeps its payload', () => {
-    const { openTab } = usePanelStore.getState();
-    openTab({
+  it('opens an agent object and keeps its payload', () => {
+    const { open } = usePanelStore.getState();
+    open({
       id: 'agent:research:sess-1',
       kind: PanelTabKind.Agent,
       title: 'research',
       payload: { agentName: 'research', claudeSessionId: 'sess-1' },
     });
-    const s = usePanelStore.getState();
-    expect(s.tabs).toHaveLength(1);
-    const tab = s.tabs[0];
-    expect(tab.kind).toBe(PanelTabKind.Agent);
-    if (tab.kind !== PanelTabKind.Agent) throw new Error('not an agent tab');
-    expect(tab.payload).toEqual({ agentName: 'research', claudeSessionId: 'sess-1' });
-    expect(s.activeTabId).toBe('agent:research:sess-1');
-    expect(s.isOpen).toBe(true);
-  });
-
-  it('refocuses an existing agent tab on re-open (same id + payload)', () => {
-    const { openTab } = usePanelStore.getState();
-    const agentTab: PanelTab = {
-      id: 'agent:research:sess-1',
-      kind: PanelTabKind.Agent,
-      title: 'research',
-      payload: { agentName: 'research', claudeSessionId: 'sess-1' },
-    };
-    openTab(agentTab);
-    openTab({ ...agentTab });
-    const s = usePanelStore.getState();
-    expect(s.tabs).toHaveLength(1);
-    expect(s.activeTabId).toBe('agent:research:sess-1');
+    const cur = usePanelStore.getState().current;
+    expect(cur?.kind).toBe(PanelTabKind.Agent);
+    if (cur?.kind !== PanelTabKind.Agent) throw new Error('not an agent object');
+    expect(cur.payload).toEqual({ agentName: 'research', claudeSessionId: 'sess-1' });
+    expect(usePanelStore.getState().isOpen).toBe(true);
   });
 
   it('agentTabId is stable for the same agent+session and differs otherwise', () => {
@@ -274,22 +190,19 @@ describe('usePanelStore', () => {
     expect(agentTabId('research', null)).toBe(agentTabId('research', null));
   });
 
-  it('opens a Workflow tab carrying the session id and narrows by kind', () => {
-    const { openTab } = usePanelStore.getState();
-    openTab({
+  it('opens a Workflow object carrying the session id and narrows by kind', () => {
+    const { open } = usePanelStore.getState();
+    open({
       id: 'workflow:sess-1',
       kind: PanelTabKind.Workflow,
       title: 'Session overview',
       payload: { claudeSessionId: 'sess-1' },
     });
-    const s = usePanelStore.getState();
-    expect(s.tabs).toHaveLength(1);
-    const tab = s.tabs[s.tabs.length - 1];
-    expect(tab.kind).toBe(PanelTabKind.Workflow);
-    if (tab.kind !== PanelTabKind.Workflow) throw new Error('not a workflow tab');
-    expect(tab.payload.claudeSessionId).toBe('sess-1');
-    expect(s.activeTabId).toBe('workflow:sess-1');
-    expect(s.isOpen).toBe(true);
+    const cur = usePanelStore.getState().current;
+    expect(cur?.kind).toBe(PanelTabKind.Workflow);
+    if (cur?.kind !== PanelTabKind.Workflow) throw new Error('not a workflow object');
+    expect(cur.payload.claudeSessionId).toBe('sess-1');
+    expect(usePanelStore.getState().isOpen).toBe(true);
   });
 
   it('width defaults to 480', () => {
@@ -312,24 +225,5 @@ describe('usePanelStore', () => {
     Object.defineProperty(window, 'innerWidth', { value: 1000, configurable: true });
     usePanelStore.getState().setWidth(5000);
     expect(usePanelStore.getState().width).toBe(900);
-  });
-
-  it('openTab never aliases distinct content to the same tab on an id collision', () => {
-    const { openTab } = usePanelStore.getState();
-    const payloadA = { columns: [{ field: 'x', headerName: 'X' }], rows: [{ id: 0, x: 'A' }] };
-    const payloadB = { columns: [{ field: 'x', headerName: 'X' }], rows: [{ id: 0, x: 'B' }] };
-    // Force a collision: both tabs share the SAME id but carry DIFFERENT payloads.
-    const collidingId = 'table:COLLIDE';
-    openTab({ id: collidingId, kind: PanelTabKind.Table, title: 'A', payload: payloadA });
-    openTab({ id: collidingId, kind: PanelTabKind.Table, title: 'B', payload: payloadB });
-    const s = usePanelStore.getState();
-    // Distinct content must not be silently aliased: two separate tabs survive,
-    // and the second tab keeps its own (B) payload rather than showing A's.
-    expect(s.tabs).toHaveLength(2);
-    const active = s.tabs.find((t) => t.id === s.activeTabId);
-    expect(active?.kind).toBe(PanelTabKind.Table);
-    if (active?.kind !== PanelTabKind.Table) throw new Error('active tab is not a table');
-    expect(active.payload.rows[0].x).toBe('B');
-    expect(active.title).toBe('B');
   });
 });

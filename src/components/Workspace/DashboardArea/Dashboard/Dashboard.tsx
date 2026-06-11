@@ -15,15 +15,19 @@ export function Dashboard() {
   const isLauncher = active?.scope.kind === 'launcher';
 
   return (
-    <div className="flex-1 flex flex-col h-full relative">
+    <div className="flex-1 flex flex-col h-full">
       {isLauncher ? null : <InternalTabBar onOpenPanel={() => setPanelOpen(true)} />}
 
-      <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
-        {isLauncher && active ? <LauncherView dashboardId={active.id} /> : null}
-        <DashboardSurface />
+      {/* Content row: chat (flex-1) on the left, the inline panel on the right.
+          The panel lives INSIDE the Dashboard content area, so it shrinks the
+          chat and never overlaps Header / WorkspaceBar / Console / Footer. */}
+      <div className="flex-1 min-h-0 overflow-hidden flex">
+        <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
+          {isLauncher && active ? <LauncherView dashboardId={active.id} /> : null}
+          <DashboardSurface />
+        </div>
+        <UtilityPanel />
       </div>
-
-      <UtilityPanel />
     </div>
   );
 }

@@ -7,7 +7,7 @@ import type { ChatMessage } from '@/types/spawn.types';
 import { MessageRow } from './MessageRow';
 
 beforeEach(() => {
-  usePanelStore.setState({ isOpen: false, tabs: [], activeTabId: null });
+  usePanelStore.setState({ isOpen: false, current: null });
 });
 
 function assistant(content: string): ChatMessage {
@@ -88,17 +88,16 @@ describe('MessageRow', () => {
     expect(screen.queryByRole('button', { name: 'Copy message' })).not.toBeInTheDocument();
   });
 
-  it('opens the message prose as a Text panel tab from the footer button', () => {
+  it('opens the message prose as a Text panel object from the footer button', () => {
     const content = 'Here is a summary of the work.';
     render(<MessageRow msg={assistant(content)} isLast onAnswer={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: 'Open in panel' }));
     const s = usePanelStore.getState();
     expect(s.isOpen).toBe(true);
-    expect(s.tabs).toHaveLength(1);
-    const tab = s.tabs[0];
-    expect(tab.id).toBe(textTabId({ text: content }));
-    expect(tab.kind).toBe(PanelTabKind.Text);
-    expect(tab.payload).toEqual({ text: content });
+    const obj = s.current;
+    expect(obj?.id).toBe(textTabId({ text: content }));
+    expect(obj?.kind).toBe(PanelTabKind.Text);
+    expect(obj?.payload).toEqual({ text: content });
   });
 
   it('shows no panel footer button for an authorization prompt or empty prose', () => {

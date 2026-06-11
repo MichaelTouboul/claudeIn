@@ -40,16 +40,15 @@ const node = {
 };
 
 beforeEach(() => {
-  usePanelStore.setState({ isOpen: false, tabs: [], activeTabId: null });
+  usePanelStore.setState({ isOpen: false, current: null });
 });
 
 describe('TableBlock Open action', () => {
-  it('clicking Open pushes a table tab and opens the panel', () => {
+  it('clicking Open shows a table object and opens the panel', () => {
     render(<TableBlock node={node} raw="" />);
     fireEvent.click(screen.getByRole('button', { name: 'Open' }));
     const s = usePanelStore.getState();
     expect(s.isOpen).toBe(true);
-    expect(s.tabs).toHaveLength(1);
-    expect(s.tabs[0].kind).toBe('table');
+    expect(s.current?.kind).toBe('table');
   });
 });

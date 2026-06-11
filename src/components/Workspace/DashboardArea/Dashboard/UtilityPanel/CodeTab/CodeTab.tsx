@@ -10,16 +10,16 @@ import { PromptBar } from '../PromptBar/PromptBar';
  * A shared PromptBar is pinned at the bottom for one-shot LLM transforms.
  */
 export function CodeTab({ tab }: { tab: PanelTab }) {
-  const updateTab = usePanelStore((s) => s.updateTab);
+  const update = usePanelStore((s) => s.update);
   const src = tab.kind === PanelTabKind.Code ? tab.payload.src : '';
   const lang = tab.kind === PanelTabKind.Code ? tab.payload.lang : null;
 
   // Replace the code in place with the transform result (raw code, no fences).
   const applyTransform = useCallback(
     (result: string) => {
-      updateTab(tab.id, { kind: PanelTabKind.Code, payload: { lang, src: result } });
+      update({ kind: PanelTabKind.Code, payload: { lang, src: result } });
     },
-    [updateTab, tab.id, lang],
+    [update, lang],
   );
 
   // Defensive narrowing: TAB_BODY only routes code tabs here, but the union prop

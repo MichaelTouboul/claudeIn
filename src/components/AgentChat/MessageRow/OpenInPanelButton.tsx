@@ -13,11 +13,11 @@ export type OpenInPanelButtonProps = {
  * as a Text tab (rendered markdown), isolated from the chat conversation.
  */
 export function OpenInPanelButton({ text }: OpenInPanelButtonProps) {
-  const openTab = usePanelStore((s) => s.openTab);
+  const openPanel = usePanelStore((s) => s.open);
   const [hovered, setHovered] = useState(false);
 
   const handleOpen = () =>
-    openTab({ id: textTabId({ text }), kind: PanelTabKind.Text, title: 'Text', payload: { text } });
+    openPanel({ id: textTabId({ text }), kind: PanelTabKind.Text, title: 'Text', payload: { text } });
 
   return (
     <button

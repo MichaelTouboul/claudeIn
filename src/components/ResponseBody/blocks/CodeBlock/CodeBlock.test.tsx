@@ -6,7 +6,7 @@ import { codeTabId, PanelTabKind, usePanelStore } from '@/store/usePanelStore';
 import { CodeBlock } from './CodeBlock';
 
 beforeEach(() => {
-  usePanelStore.setState({ isOpen: false, tabs: [], activeTabId: null });
+  usePanelStore.setState({ isOpen: false, current: null });
 });
 
 describe('CodeBlock', () => {
@@ -27,10 +27,9 @@ describe('CodeBlock', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Open' }));
     const s = usePanelStore.getState();
     expect(s.isOpen).toBe(true);
-    expect(s.tabs).toHaveLength(1);
-    const tab = s.tabs[0];
-    expect(tab.id).toBe(codeTabId(data));
-    expect(tab.kind).toBe(PanelTabKind.Code);
-    expect(tab.payload).toEqual(data);
+    const obj = s.current;
+    expect(obj?.id).toBe(codeTabId(data));
+    expect(obj?.kind).toBe(PanelTabKind.Code);
+    expect(obj?.payload).toEqual(data);
   });
 });
