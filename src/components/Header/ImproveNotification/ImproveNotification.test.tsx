@@ -28,7 +28,7 @@ function makeRequest(overrides: Partial<ImproveRequest> = {}): ImproveRequest {
 const reload = vi.fn();
 
 function openPopover() {
-  fireEvent.click(screen.getByRole("button", { name: /improvements? ready/i }));
+  fireEvent.click(screen.getByRole("button", { name: /updates|improvements? ready/i }));
 }
 
 beforeEach(() => {
@@ -43,17 +43,30 @@ afterEach(() => {
 });
 
 describe("ImproveNotification", () => {
-  it("shows no count when there are no merged improvements", () => {
+  it("always renders the trigger button, even with no merged improvements", () => {
     render(<ImproveNotification />);
-    expect(screen.queryByText("1")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /updates|improvements? ready/i }),
+    ).toBeInTheDocument();
   });
 
-  it("surfaces a count when a merged improvement arrives", () => {
+  it("shows no count badge when there are no merged improvements", () => {
+    render(<ImproveNotification />);
+    expect(screen.queryByTestId("improve-count")).not.toBeInTheDocument();
+  });
+
+  it("opening with no improvements shows a discreet empty state", () => {
+    render(<ImproveNotification />);
+    openPopover();
+    expect(screen.getByText(/no updates yet/i)).toBeInTheDocument();
+  });
+
+  it("surfaces a count badge when a merged improvement arrives", () => {
     render(<ImproveNotification />);
     act(() => {
       useImproveStore.getState().ingest(makeRequest());
     });
-    expect(screen.getByText("1")).toBeInTheDocument();
+    expect(screen.getByTestId("improve-count")).toHaveTextContent("1");
   });
 
   it("opening the trigger lists the merged improvement's title and summary", () => {

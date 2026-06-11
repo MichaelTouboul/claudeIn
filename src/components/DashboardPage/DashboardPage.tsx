@@ -5,7 +5,6 @@ import { GlobalChatModal } from "@/components/GlobalChatModal/GlobalChatModal";
 import { Header } from "@/components/Header/Header";
 import { Workspace } from "@/components/Workspace/Workspace";
 import { useInitChatTitles } from "@/hooks/useInitChatTitles";
-import { useInitImprove } from "@/hooks/useInitImprove";
 import { useProjects } from "@/hooks/useProjects";
 import { AppPage, useAppStore } from "@/store/useAppStore";
 import { useDashboardStore } from "@/store/useDashboardStore";
@@ -36,7 +35,6 @@ export function DashboardPage() {
 
   useInitEvents();
   useInitChatTitles();
-  useInitImprove();
   const connected = useEventsStore((s) => s.connected);
   const activeCount = useEventsStore((s) => s.activeAgents.size);
   const [chatOpen, setChatOpen] = useState(false);

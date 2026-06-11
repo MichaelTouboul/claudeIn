@@ -13,6 +13,7 @@ export function ImproveNotificationList({
   onUpdate,
   onDismiss,
 }: ImproveNotificationListProps) {
+  const empty = requests.length === 0;
   return (
     <div className="w-80 max-w-[90vw]">
       <div
@@ -27,16 +28,22 @@ export function ImproveNotificationList({
           relaunch.
         </p>
       </div>
-      <ul className="max-h-[60vh] overflow-y-auto">
-        {requests.map((request) => (
-          <ImproveNotificationItem
-            key={request.id}
-            request={request}
-            onUpdate={onUpdate}
-            onDismiss={onDismiss}
-          />
-        ))}
-      </ul>
+      {empty ? (
+        <p className="px-3 py-6 text-center text-xs leading-snug text-fg-subtle">
+          No updates yet — merged improvements will land here.
+        </p>
+      ) : (
+        <ul className="max-h-[60vh] overflow-y-auto">
+          {requests.map((request) => (
+            <ImproveNotificationItem
+              key={request.id}
+              request={request}
+              onUpdate={onUpdate}
+              onDismiss={onDismiss}
+            />
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
