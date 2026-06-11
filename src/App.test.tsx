@@ -2,6 +2,7 @@ import { act, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AppPage, useAppStore } from "@/store/useAppStore";
+import { useImproveStore } from "@/store/useImproveStore";
 import type { UserProfile } from "@/types/user.types";
 
 import App from "./App";
@@ -39,13 +40,26 @@ function makeProfile(overrides: Partial<UserProfile> = {}): UserProfile {
 }
 
 const getUserProfile = vi.fn<() => Promise<UserProfile | null>>();
+const watchImproveInbox = vi.fn<() => Promise<void>>();
+const unwatchImproveInbox = vi.fn<() => Promise<void>>();
+const listImproveRequests = vi.fn<() => Promise<[]>>();
+const onImproveRequestChanged = vi.fn(() => () => {});
 
 beforeEach(() => {
   useAppStore.setState({ currentPage: null, selectedProject: null });
+  useImproveStore.setState({ requests: {}, acknowledgedIds: new Set() });
   getUserProfile.mockReset();
+  watchImproveInbox.mockReset().mockResolvedValue(undefined);
+  unwatchImproveInbox.mockReset().mockResolvedValue(undefined);
+  listImproveRequests.mockReset().mockResolvedValue([]);
+  onImproveRequestChanged.mockClear();
   window.api = {
     getUserProfile,
     onImproveContextMenuSelected: () => () => {},
+    watchImproveInbox,
+    unwatchImproveInbox,
+    listImproveRequests,
+    onImproveRequestChanged,
   } as unknown as Window["api"];
 });
 
@@ -118,5 +132,55 @@ describe("App router navigation", () => {
       useAppStore.getState().navigate(AppPage.Home);
     });
     await waitFor(() => expect(screen.getByTestId("home-page")).toBeInTheDocument());
+  });
+});
+
+describe("App global Self-Improve notification", () => {
+  const trigger = /updates|improvements? ready/i;
+
+  it("initialises the improve watch/subscription from the App root", async () => {
+    getUserProfile.mockResolvedValue(makeProfile({ onboardingCompletedAt: "x" }));
+    render(<App />);
+    await screen.findByTestId("home-page");
+
+    expect(watchImproveInbox).toHaveBeenCalledTimes(1);
+    expect(listImproveRequests).toHaveBeenCalledTimes(1);
+    expect(onImproveRequestChanged).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders the always-visible trigger on the Home page", async () => {
+    getUserProfile.mockResolvedValue(makeProfile({ onboardingCompletedAt: "x" }));
+    render(<App />);
+    await screen.findByTestId("home-page");
+    expect(screen.getByRole("button", { name: trigger })).toBeInTheDocument();
+  });
+
+  it("renders the trigger on the Dashboard page", async () => {
+    getUserProfile.mockResolvedValue(makeProfile({ onboardingCompletedAt: "x" }));
+    render(<App />);
+    await screen.findByTestId("home-page");
+    act(() => {
+      useAppStore.getState().navigate(AppPage.Dashboard);
+    });
+    await screen.findByTestId("dashboard-page");
+    expect(screen.getByRole("button", { name: trigger })).toBeInTheDocument();
+  });
+
+  it("renders the trigger on the Customize page", async () => {
+    getUserProfile.mockResolvedValue(makeProfile({ onboardingCompletedAt: "x" }));
+    render(<App />);
+    await screen.findByTestId("home-page");
+    act(() => {
+      useAppStore.getState().navigate(AppPage.Customize);
+    });
+    await screen.findByTestId("customize-page");
+    expect(screen.getByRole("button", { name: trigger })).toBeInTheDocument();
+  });
+
+  it("does NOT render the trigger on the Onboarding page", async () => {
+    getUserProfile.mockResolvedValue(makeProfile({ onboardingCompletedAt: null }));
+    render(<App />);
+    await screen.findByTestId("onboarding-page");
+    expect(screen.queryByRole("button", { name: trigger })).not.toBeInTheDocument();
   });
 });

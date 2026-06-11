@@ -71,6 +71,10 @@ beforeEach(() => {
     openDirectoryPicker,
     getProjects,
     onImproveContextMenuSelected: () => () => {},
+    watchImproveInbox: () => Promise.resolve(),
+    unwatchImproveInbox: () => Promise.resolve(),
+    listImproveRequests: () => Promise.resolve([]),
+    onImproveRequestChanged: () => () => {},
   } as unknown as Window["api"];
 });
 

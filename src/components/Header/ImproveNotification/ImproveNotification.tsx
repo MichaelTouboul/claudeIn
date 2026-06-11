@@ -8,12 +8,14 @@ import { unacknowledgedMerged, useImproveStore } from "@/store/useImproveStore";
 import { ImproveNotificationList } from "./ImproveNotificationList";
 
 /**
- * Self-Improve notification (I5). A discreet Header affordance: a button with a
- * count badge when merged improvements await acknowledgement; a popover lists
- * each with an "Update" (reload + ack) and "Dismiss" (ack only) action.
+ * Self-Improve notification (I5). An always-visible app affordance: a button so
+ * the user always knows where merged improvements land. A count badge appears
+ * only when merged improvements await acknowledgement; the popover lists each
+ * with an "Update" (reload + ack) and "Dismiss" (ack only) action, or a discreet
+ * empty state when nothing is pending.
  *
- * Renders nothing when there is nothing to show, so it stays invisible in the
- * common case.
+ * Mounted once at the App root as a fixed overlay (see `App.tsx`), so it is
+ * present on every page except Onboarding.
  */
 export function ImproveNotification() {
   // Select the raw slices (stable references) and derive the array with useMemo
@@ -37,9 +39,12 @@ export function ImproveNotification() {
     [acknowledge],
   );
 
-  if (requests.length === 0) return null;
-
   const count = requests.length;
+  const label =
+    count === 0
+      ? "Self-Improve updates"
+      : `${count} improvement${count === 1 ? "" : "s"} ready`;
+
   return (
     <Popover
       align="end"
@@ -47,7 +52,7 @@ export function ImproveNotification() {
         <Button
           intent="outline"
           size="sm"
-          aria-label={`${count} improvement${count === 1 ? "" : "s"} ready`}
+          aria-label={label}
           className="relative glow-cyan text-accent"
           style={{
             fontFamily: "var(--font-mono)",
@@ -55,12 +60,15 @@ export function ImproveNotification() {
           }}
         >
           <Sparkles size={12} />
-          <span
-            className="tabular-nums"
-            style={{ minWidth: "0.75rem", textAlign: "center" }}
-          >
-            {count}
-          </span>
+          {count > 0 ? (
+            <span
+              data-testid="improve-count"
+              className="tabular-nums"
+              style={{ minWidth: "0.75rem", textAlign: "center" }}
+            >
+              {count}
+            </span>
+          ) : null}
         </Button>
       }
     >
