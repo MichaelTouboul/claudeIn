@@ -9,6 +9,7 @@ import {
   KEY_ARROW_UP_COMMAND,
   KEY_ENTER_COMMAND,
   KEY_ESCAPE_COMMAND,
+  KEY_TAB_COMMAND,
   type LexicalCommand,
 } from 'lexical';
 import { useEffect } from 'react';
@@ -46,6 +47,18 @@ export function SubmitPlugin({ onEnter, onNavKey }: SubmitPluginProps) {
           event?.preventDefault();
           if (onEnter()) return true;
           editor.dispatchCommand(SUBMIT_INTENT, undefined);
+          return true;
+        },
+        COMMAND_PRIORITY_HIGH
+      ),
+      editor.registerCommand<KeyboardEvent | null>(
+        KEY_TAB_COMMAND,
+        (event) => {
+          // Tab confirms the highlighted suggestion — identical to Enter — but ONLY
+          // while a slash/mention menu is open and consumes it. When no menu is open
+          // `onEnter()` returns false, so we leave Tab's default focus behavior intact.
+          if (!onEnter()) return false;
+          event?.preventDefault();
           return true;
         },
         COMMAND_PRIORITY_HIGH
