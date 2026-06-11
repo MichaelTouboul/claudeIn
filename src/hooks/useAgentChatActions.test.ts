@@ -9,6 +9,8 @@ import { useAgentChatActions } from './useAgentChatActions';
 const spawnMock = vi.fn();
 const sendInputMock = vi.fn();
 const clearConversationApiMock = vi.fn();
+const openFilePickerMock = vi.fn();
+const readImageAsDataUrlMock = vi.fn();
 
 const editorClear = vi.fn();
 const editorFocus = vi.fn();
@@ -48,9 +50,17 @@ beforeEach(() => {
   spawnMock.mockReset().mockResolvedValue({ claudeSessionId: 'claude-2' });
   sendInputMock.mockReset().mockResolvedValue(undefined);
   clearConversationApiMock.mockReset().mockResolvedValue(undefined);
+  openFilePickerMock.mockReset().mockResolvedValue([]);
+  readImageAsDataUrlMock.mockReset().mockResolvedValue('data:image/png;base64,xxx');
   editorClear.mockClear();
   editorFocus.mockClear();
-  window.api = { spawn: spawnMock, sendInput: sendInputMock, clearConversation: clearConversationApiMock } as unknown as typeof window.api;
+  window.api = {
+    spawn: spawnMock,
+    sendInput: sendInputMock,
+    clearConversation: clearConversationApiMock,
+    openFilePicker: openFilePickerMock,
+    readImageAsDataUrl: readImageAsDataUrlMock,
+  } as unknown as typeof window.api;
 });
 
 describe('useAgentChatActions handleSend — /clear', () => {
@@ -166,5 +176,47 @@ describe('useAgentChatActions handleSend — normal message (regression guard)',
 
     expect(params.openImprove).toHaveBeenCalledWith(null);
     expect(spawnMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('useAgentChatActions handleAttach — picker kind', () => {
+  it('opens an unfiltered picker by default and attaches non-image files', async () => {
+    openFilePickerMock.mockResolvedValueOnce(['/docs/spec.pdf']);
+    const setAttachedFiles = vi.fn();
+    const params = makeParams({ setAttachedFiles });
+    const { result } = renderHook(() => useAgentChatActions(params));
+
+    await result.current.handleAttach();
+
+    // default kind is "all"
+    expect(openFilePickerMock).toHaveBeenCalledWith('all');
+    // a non-image file is attached with a null dataUrl (no image read)
+    expect(readImageAsDataUrlMock).not.toHaveBeenCalled();
+    const updater = setAttachedFiles.mock.calls[0][0] as (p: { path: string; dataUrl: string | null }[]) => unknown;
+    expect(updater([])).toEqual([{ path: '/docs/spec.pdf', dataUrl: null }]);
+  });
+
+  it('opens an image-scoped picker and reads the image as a data url when kind="image"', async () => {
+    openFilePickerMock.mockResolvedValueOnce(['/pics/photo.png']);
+    const setAttachedFiles = vi.fn();
+    const params = makeParams({ setAttachedFiles });
+    const { result } = renderHook(() => useAgentChatActions(params));
+
+    await result.current.handleAttach('image');
+
+    expect(openFilePickerMock).toHaveBeenCalledWith('image');
+    expect(readImageAsDataUrlMock).toHaveBeenCalledWith('/pics/photo.png');
+    const updater = setAttachedFiles.mock.calls[0][0] as (p: { path: string; dataUrl: string | null }[]) => unknown;
+    expect(updater([])).toEqual([{ path: '/pics/photo.png', dataUrl: 'data:image/png;base64,xxx' }]);
+  });
+
+  it('no-ops when the picker is cancelled (empty selection)', async () => {
+    openFilePickerMock.mockResolvedValueOnce([]);
+    const params = makeParams();
+    const { result } = renderHook(() => useAgentChatActions(params));
+
+    await result.current.handleAttach('all');
+
+    expect(params.setAttachedFiles).not.toHaveBeenCalled();
   });
 });

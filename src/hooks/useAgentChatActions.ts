@@ -3,6 +3,7 @@ import { type RefObject, useCallback } from 'react';
 import type { RichEditorHandle } from '@/components/AgentChat/RichEditor/RichEditor';
 import { dispatchSlashCommand, type LocalSlashHandlers, type SlashViewTarget } from '@/components/AgentChat/slashRegistry';
 import type { QueueItem } from '@/components/AgentChat/types';
+import { FilePickerKind } from '@/types/attachment.types';
 import type { ImproveContextTarget } from '@/types/improve.types';
 import type { ChatMessage, SpawnSession } from '@/types/spawn.types';
 
@@ -161,8 +162,8 @@ export function useAgentChatActions({
     await sendMessage(fullText);
   }, [input, attachedFiles, dispatchSlash, sendMessage, editorRef, setInput, setAttachedFiles]);
 
-  const handleAttach = useCallback(async () => {
-    const paths = await window.api.openFilePicker();
+  const handleAttach = useCallback(async (kind: FilePickerKind = FilePickerKind.All) => {
+    const paths = await window.api.openFilePicker(kind);
     if (paths.length === 0) return;
 
     const imageExts = ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg'];

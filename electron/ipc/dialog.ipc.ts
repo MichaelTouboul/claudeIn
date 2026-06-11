@@ -3,14 +3,16 @@ import fs from "fs";
 import path from "path";
 
 export function registerDialogHandlers(): void {
-  ipcMain.handle("dialog:open-file", async () => {
+  ipcMain.handle("dialog:open-file", async (_e, kind: "all" | "image" = "all") => {
     const win = BrowserWindow.getFocusedWindow();
+    const imageFilter = { name: "Images", extensions: ["png", "jpg", "jpeg", "webp", "gif", "svg"] };
+    const allFilter = { name: "All Files", extensions: ["*"] };
+    // "image" scopes the picker to image types only; "all" leaves it unfiltered
+    // (images still surfaced as a secondary filter for convenience).
+    const filters = kind === "image" ? [imageFilter] : [allFilter, imageFilter];
     const result = await dialog.showOpenDialog(win!, {
       properties: ["openFile", "multiSelections"],
-      filters: [
-        { name: "All Files", extensions: ["*"] },
-        { name: "Images", extensions: ["png", "jpg", "jpeg", "webp", "gif", "svg"] },
-      ],
+      filters,
     });
     if (result.canceled) return [];
     return result.filePaths;
