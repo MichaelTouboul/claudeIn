@@ -1,6 +1,7 @@
 import { Home, MessageSquare } from 'lucide-react';
 
 import { Button } from '@/components/_ui/Button';
+import { ImproveNotification } from '@/components/Header/ImproveNotification/ImproveNotification';
 import { Logo } from '@/components/Logo/Logo';
 import { StatsBar } from '@/components/StatsBar/StatsBar';
 import { cn } from '@/lib/cn';
@@ -28,6 +29,7 @@ export function Header({ activeCount, connected, onOpenChat, onGoHome }: HeaderP
         </Button>
       ) : null}
       <div className="flex-1" />
+      <ImproveNotification />
       <StatsBar activeCount={activeCount} connected={connected} />
       <Button intent="outline" size="sm" onClick={onOpenChat} className="glow-cyan text-accent" style={{ fontFamily: 'var(--font-mono)', border: '1px solid rgba(6, 182, 212, 0.25)' }}>
         <MessageSquare size={12} />
