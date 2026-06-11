@@ -64,7 +64,7 @@ export function HomePage() {
           onRemove={(repo) => void remove(repo.path)}
           onAdd={() => void addFavorite()}
         />
-        <HomeActions onOpenUserAgent={openUserAgent} />
+        <HomeActions onOpenUserAgent={openUserAgent} onCustomize={() => navigate(AppPage.Customize)} />
         <div className="mt-2 flex justify-end">
           <DevReset />
         </div>

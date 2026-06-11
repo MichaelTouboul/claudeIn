@@ -21,7 +21,6 @@ import { SectionLabel } from '../SectionLabel/SectionLabel';
 import { SessionsPanel } from '../SessionsPanel/SessionsPanel';
 import { partitionSessions } from '../SessionsPanel/utils';
 import { SkillRow } from '../SkillRow/SkillRow';
-import { McpNavItem } from './McpNavItem';
 
 export type PanelsAreaProps = {
   sessions: SessionSummary[];
@@ -86,8 +85,6 @@ export function PanelsArea({
     <div className="flex-1 flex flex-col min-h-0">
       {/* Spacer pushes panels to bottom when all are closed */}
       {!openPanels.size ? <div className="flex-1" /> : null}
-
-      <McpNavItem />
 
       {([
       sessionsPanel,

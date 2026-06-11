@@ -17,6 +17,9 @@ vi.mock("@/components/HomePage/HomePage", () => ({
 vi.mock("@/components/DashboardPage/DashboardPage", () => ({
   DashboardPage: () => <div data-testid="dashboard-page" />,
 }));
+vi.mock("@/components/CustomizePage/CustomizePage", () => ({
+  CustomizePage: () => <div data-testid="customize-page" />,
+}));
 
 function makeProfile(overrides: Partial<UserProfile> = {}): UserProfile {
   return {
@@ -83,6 +86,18 @@ describe("App router navigation", () => {
       useAppStore.getState().navigate(AppPage.Dashboard);
     });
     await waitFor(() => expect(screen.getByTestId("dashboard-page")).toBeInTheDocument());
+    expect(screen.queryByTestId("home-page")).not.toBeInTheDocument();
+  });
+
+  it("renders the customize page after navigate('customize')", async () => {
+    getUserProfile.mockResolvedValue(makeProfile({ onboardingCompletedAt: "x" }));
+    render(<App />);
+    await screen.findByTestId("home-page");
+
+    act(() => {
+      useAppStore.getState().navigate(AppPage.Customize);
+    });
+    await waitFor(() => expect(screen.getByTestId("customize-page")).toBeInTheDocument());
     expect(screen.queryByTestId("home-page")).not.toBeInTheDocument();
   });
 

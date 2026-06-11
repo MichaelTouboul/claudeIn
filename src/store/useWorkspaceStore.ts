@@ -6,7 +6,7 @@ import { useAppStore } from './useAppStore';
 
 export type InternalTab = {
   id: string;
-  kind: 'chat' | 'agent' | 'skill' | 'session' | 'mcp';
+  kind: 'chat' | 'agent' | 'skill' | 'session';
   title: string;
   agentName?: string;
   skillId?: string;
@@ -73,7 +73,6 @@ function matchesChatTab(tab: InternalTab, agentName: string): boolean {
 // focus it instead of duplicating. Identity is per kind:
 //   • agent  → agentName
 //   • skill  → skillId
-//   • mcp    → kind alone (one MCP tab per project)
 //   • session→ same conversation: sessionFilePath OR sessionId match. Matching on
 //     either makes the dedup robust if the same conversation is opened from a
 //     path that differs only cosmetically. (A live `chat` tab does not carry its
@@ -82,7 +81,6 @@ function matchesChatTab(tab: InternalTab, agentName: string): boolean {
 function findDuplicateTab(tabs: InternalTab[], tab: Omit<InternalTab, 'id'>): InternalTab | undefined {
   if (tab.kind === 'agent') return tabs.find((t) => t.kind === 'agent' && t.agentName === tab.agentName);
   if (tab.kind === 'skill') return tabs.find((t) => t.kind === 'skill' && t.skillId === tab.skillId);
-  if (tab.kind === 'mcp') return tabs.find((t) => t.kind === 'mcp');
   if (tab.kind === 'session') {
     return tabs.find(
       (t) =>
