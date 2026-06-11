@@ -147,5 +147,18 @@ interface Window {
     ptyResize: (projectPath: string, cols: number, rows: number) => void;
     ptyKill: (projectPath: string) => void;
     onPtyData: (cb: (p: { projectPath: string; data: string }) => void) => () => void;
+
+    submitImproveRequest: (
+      input: import("./types/improve.types").ImproveRequestInput,
+    ) => Promise<import("./types/improve.types").ImproveRequest>;
+    listImproveRequests: () => Promise<import("./types/improve.types").ImproveRequest[]>;
+    getImproveRequest: (
+      id: string,
+    ) => Promise<import("./types/improve.types").ImproveRequest | null>;
+    watchImproveInbox: () => Promise<void>;
+    unwatchImproveInbox: () => Promise<void>;
+    onImproveRequestChanged: (
+      cb: (request: import("./types/improve.types").ImproveRequest) => void,
+    ) => () => void;
   };
 }
