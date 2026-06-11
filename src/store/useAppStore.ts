@@ -23,6 +23,7 @@ export const AppPage = {
   Onboarding: "onboarding",
   Home: "home",
   Dashboard: "dashboard",
+  Customize: "customize",
 } as const;
 export type AppPage = (typeof AppPage)[keyof typeof AppPage];
 

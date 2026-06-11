@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useDashboardStore } from '@/store/useDashboardStore';
 import type { InternalTab } from '@/store/useWorkspaceStore';
-import type { McpServerEntry } from '@/types/mcp-mirror.types';
+import type { AgentSummary } from '@/types/agents-mirror.types';
 
 import { TabBody } from './TabBody';
 
@@ -14,30 +14,31 @@ vi.mock('../SessionViewer/SessionViewer', () => ({ SessionViewer: () => <div dat
 vi.mock('../SkillDetail/SkillDetail', () => ({ SkillDetail: () => <div data-testid="skill-detail" /> }));
 vi.mock('@/components/AgentDetail/AgentDetail', () => ({ AgentDetail: () => <div data-testid="agent-detail" /> }));
 
-const mcpTab: InternalTab = { id: 'tab-mcp', kind: 'mcp', title: 'MCP Servers' };
+const agentTab: InternalTab = { id: 'tab-agent', kind: 'agent', title: 'alpha', agentName: 'alpha' };
 
-const server = (name: string): McpServerEntry => ({
-  name, source: 'project-mcp-json', scope: 'project', transport: 'stdio', target: 'cmd', shadowed: false,
-});
+const agent = (id: string): AgentSummary =>
+  ({ id, scope: 'project' }) as unknown as AgentSummary;
 
 const initial = useDashboardStore.getState();
 beforeEach(() => {
   useDashboardStore.setState(initial, true);
 });
 
-describe('TabBody mcp routing', () => {
-  it('renders McpView for a kind:"mcp" tab, fed from the dashboard store mcp slice', () => {
-    useDashboardStore.setState({ mcp: [server('alpha'), server('beta')] });
-    render(<TabBody tab={mcpTab} cwd="/p/a" />);
-    const view = screen.getByTestId('mcp-view');
-    expect(view).toBeInTheDocument();
-    expect(view).toHaveTextContent('alpha');
-    expect(view).toHaveTextContent('beta');
+describe('TabBody routing', () => {
+  it('renders the chat tab for a kind:"chat" tab', () => {
+    render(<TabBody tab={{ id: 't', kind: 'chat', title: 'Chat' }} cwd="/p/a" />);
+    expect(screen.getByTestId('chat-tab')).toBeInTheDocument();
   });
 
-  it('renders the McpView empty state when no servers are configured', () => {
-    useDashboardStore.setState({ mcp: [] });
-    render(<TabBody tab={mcpTab} cwd="/p/a" />);
-    expect(screen.getByTestId('mcp-view')).toHaveTextContent('No MCP servers configured');
+  it('renders AgentDetail for a known agent tab', () => {
+    useDashboardStore.setState({ agents: [agent('alpha')] });
+    render(<TabBody tab={agentTab} cwd="/p/a" />);
+    expect(screen.getByTestId('agent-detail')).toBeInTheDocument();
+  });
+
+  it('renders a not-found body for an unknown agent tab', () => {
+    useDashboardStore.setState({ agents: [] });
+    render(<TabBody tab={agentTab} cwd="/p/a" />);
+    expect(screen.getByText(/agent not found/i)).toBeInTheDocument();
   });
 });

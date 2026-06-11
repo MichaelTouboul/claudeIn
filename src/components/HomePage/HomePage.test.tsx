@@ -139,6 +139,17 @@ describe("HomePage", () => {
     expect(task).toBeDisabled();
   });
 
+  it("the Customize Claude action navigates to the customize page", async () => {
+    render(<HomePage />);
+    const customize = await screen.findByRole("button", { name: /customize claude/i });
+
+    await act(async () => {
+      fireEvent.click(customize);
+    });
+
+    expect(useAppStore.getState().currentPage).toBe(AppPage.Customize);
+  });
+
   it("opens the profile view from the 'voir mon profil' affordance", async () => {
     render(<HomePage />);
     const link = await screen.findByRole("button", { name: /voir mon profil/i });

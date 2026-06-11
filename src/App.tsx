@@ -1,5 +1,6 @@
 import { type ReactElement } from "react";
 
+import { CustomizePage } from "@/components/CustomizePage/CustomizePage";
 import { DashboardPage } from "@/components/DashboardPage/DashboardPage";
 import { HomePage } from "@/components/HomePage/HomePage";
 import { OnboardingPage } from "@/components/OnboardingPage/OnboardingPage";
@@ -11,6 +12,7 @@ const PAGE_VIEW: Record<AppPage, () => ReactElement> = {
   [AppPage.Onboarding]: () => <OnboardingPage />,
   [AppPage.Home]: () => <HomePage />,
   [AppPage.Dashboard]: () => <DashboardPage />,
+  [AppPage.Customize]: () => <CustomizePage />,
 };
 
 function BootLoader() {
