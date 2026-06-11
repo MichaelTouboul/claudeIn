@@ -5,6 +5,7 @@ import { useConversationTail } from "@/hooks/useConversationTail";
 import type { ChatMessage } from "@/types/spawn.types";
 
 import { ResumeChoice } from "./ResumeChoice/ResumeChoice";
+import { recommendResumeOption } from "./ResumeChoice/resumeRecommendation";
 import { SessionMessageRow } from "./SessionMessageRow/SessionMessageRow";
 
 export type SessionViewerProps = {
@@ -33,7 +34,11 @@ function CenteredNote({ label }: { label: string }) {
  * scrolls to the newest message unless the user has scrolled up.
  */
 export function SessionViewer({ filePath, sessionId, title, cwd }: SessionViewerProps) {
-  const { messages, state } = useConversationTail(filePath);
+  const { messages, meta, state } = useConversationTail(filePath);
+  // Recommend compact only for heavy conversations (≥50% of the context window),
+  // mirroring terminal Claude Code. While unloaded (meta null), the safe
+  // non-destructive default ('continue') applies.
+  const recommended = recommendResumeOption(meta ? { ...meta, messages } : null);
   // null = read-only viewer; 'continue' = plain resume; 'compact' = resume and
   // run an automatic /compact turn first (compact-on-resume). Both modes render
   // the SAME live AgentChat seeded with the prior transcript — 'compact' just
@@ -106,6 +111,7 @@ export function SessionViewer({ filePath, sessionId, title, cwd }: SessionViewer
         </span>
       </div>
       <ResumeChoice
+        recommended={recommended}
         onContinue={() => setResumeMode("continue")}
         onCompact={() => setResumeMode("compact")}
       />
