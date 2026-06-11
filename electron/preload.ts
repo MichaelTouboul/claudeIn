@@ -1,5 +1,16 @@
 import { contextBridge, ipcRenderer, webUtils } from "electron";
 
+import { createPushBus } from "./pushBus";
+
+// Single multiplexer over the one real-time IPC channel (`push-event`). Every
+// `onXxx`/`onEvent` subscription below routes through `pushBus.subscribe`, so
+// `IpcRenderer` holds exactly ONE `push-event` listener regardless of how many
+// features subscribe — no more `MaxListenersExceededWarning`. The underlying
+// `ipcRenderer.on` is attached lazily on the first subscribe.
+const pushBus = createPushBus((emit) => {
+  ipcRenderer.on("push-event", (_e, data: unknown) => emit(data));
+});
+
 contextBridge.exposeInMainWorld("api", {
   platform: process.platform,
   getAgents: () => ipcRenderer.invoke("agents:list"),
@@ -68,19 +79,15 @@ contextBridge.exposeInMainWorld("api", {
       messages: import("./types/session.types").SessionMessage[];
     }) => void,
   ) => {
-    const handler = (
-      _e: unknown,
-      data: { type?: string; filePath?: string; messages?: unknown },
-    ) => {
+    return pushBus.subscribe((raw) => {
+      const data = raw as { type?: string; filePath?: string; messages?: unknown };
       if (data?.type === "conversation_appended" && typeof data.filePath === "string") {
         cb({
           filePath: data.filePath,
           messages: data.messages as import("./types/session.types").SessionMessage[],
         });
       }
-    };
-    ipcRenderer.on("push-event", handler);
-    return () => { ipcRenderer.removeListener("push-event", handler); };
+    });
   },
   openFilePicker: () => ipcRenderer.invoke("dialog:open-file"),
   readImageAsDataUrl: (filePath: string) => ipcRenderer.invoke("dialog:read-image", filePath),
@@ -91,35 +98,31 @@ contextBridge.exposeInMainWorld("api", {
   getPathForFile: (file: File) => webUtils.getPathForFile(file),
 
   onEvent: (cb: (data: unknown) => void) => {
-    const handler = (_e: unknown, data: unknown) => cb(data);
-    ipcRenderer.on("push-event", handler);
-    return () => { ipcRenderer.removeListener("push-event", handler); };
+    return pushBus.subscribe(cb);
   },
 
   getSettings: (projectPath?: string) => ipcRenderer.invoke("settings:get", projectPath),
   watchSettings: (projectPath?: string) => ipcRenderer.invoke("settings:watch", projectPath),
   unwatchSettings: () => ipcRenderer.invoke("settings:unwatch"),
   onSettingsChanged: (cb: (snapshot: import("../src/types/settings.types").SettingsSnapshot) => void) => {
-    const handler = (_e: unknown, data: { type?: string; snapshot?: unknown }) => {
+    return pushBus.subscribe((raw) => {
+      const data = raw as { type?: string; snapshot?: unknown };
       if (data?.type === "settings_changed" && data.snapshot) {
         cb(data.snapshot as import("../src/types/settings.types").SettingsSnapshot);
       }
-    };
-    ipcRenderer.on("push-event", handler);
-    return () => { ipcRenderer.removeListener("push-event", handler); };
+    });
   },
 
   getAgentsMirror: (projectPath?: string) => ipcRenderer.invoke("agents:mirror:get", projectPath),
   watchAgents: (projectPath?: string) => ipcRenderer.invoke("agents:mirror:watch", projectPath),
   unwatchAgents: () => ipcRenderer.invoke("agents:mirror:unwatch"),
   onAgentsChanged: (cb: (snapshot: import("../src/types/agents-mirror.types").AgentsSnapshot) => void) => {
-    const handler = (_e: unknown, data: { type?: string; snapshot?: unknown }) => {
+    return pushBus.subscribe((raw) => {
+      const data = raw as { type?: string; snapshot?: unknown };
       if (data?.type === "agents_changed" && data.snapshot) {
         cb(data.snapshot as import("../src/types/agents-mirror.types").AgentsSnapshot);
       }
-    };
-    ipcRenderer.on("push-event", handler);
-    return () => { ipcRenderer.removeListener("push-event", handler); };
+    });
   },
 
   getSkill: (filePath: string) => ipcRenderer.invoke("skills:get", filePath),
@@ -127,26 +130,24 @@ contextBridge.exposeInMainWorld("api", {
   watchSkills: (projectPath?: string) => ipcRenderer.invoke("skills:mirror:watch", projectPath),
   unwatchSkills: () => ipcRenderer.invoke("skills:mirror:unwatch"),
   onSkillsChanged: (cb: (snapshot: import("../src/types/skills-mirror.types").SkillsSnapshot) => void) => {
-    const handler = (_e: unknown, data: { type?: string; snapshot?: unknown }) => {
+    return pushBus.subscribe((raw) => {
+      const data = raw as { type?: string; snapshot?: unknown };
       if (data?.type === "skills_changed" && data.snapshot) {
         cb(data.snapshot as import("../src/types/skills-mirror.types").SkillsSnapshot);
       }
-    };
-    ipcRenderer.on("push-event", handler);
-    return () => { ipcRenderer.removeListener("push-event", handler); };
+    });
   },
 
   getMcp: (projectPath?: string) => ipcRenderer.invoke("mcp:mirror:get", projectPath),
   watchMcp: (projectPath?: string) => ipcRenderer.invoke("mcp:mirror:watch", projectPath),
   unwatchMcp: () => ipcRenderer.invoke("mcp:mirror:unwatch"),
   onMcpChanged: (cb: (snapshot: import("../src/types/mcp-mirror.types").McpSnapshot) => void) => {
-    const handler = (_e: unknown, data: { type?: string; snapshot?: unknown }) => {
+    return pushBus.subscribe((raw) => {
+      const data = raw as { type?: string; snapshot?: unknown };
       if (data?.type === "mcp_changed" && data.snapshot) {
         cb(data.snapshot as import("../src/types/mcp-mirror.types").McpSnapshot);
       }
-    };
-    ipcRenderer.on("push-event", handler);
-    return () => { ipcRenderer.removeListener("push-event", handler); };
+    });
   },
 
   getMcpRaw: (
@@ -168,13 +169,12 @@ contextBridge.exposeInMainWorld("api", {
   watchMemory: (projectPath?: string) => ipcRenderer.invoke("memory:mirror:watch", projectPath),
   unwatchMemory: () => ipcRenderer.invoke("memory:mirror:unwatch"),
   onMemoryChanged: (cb: (snapshot: import("../src/types/memory-mirror.types").MemorySnapshot) => void) => {
-    const handler = (_e: unknown, data: { type?: string; snapshot?: unknown }) => {
+    return pushBus.subscribe((raw) => {
+      const data = raw as { type?: string; snapshot?: unknown };
       if (data?.type === "memory_changed" && data.snapshot) {
         cb(data.snapshot as import("../src/types/memory-mirror.types").MemorySnapshot);
       }
-    };
-    ipcRenderer.on("push-event", handler);
-    return () => { ipcRenderer.removeListener("push-event", handler); };
+    });
   },
 
   locateClaudeUser: () => ipcRenderer.invoke("user:locate"),
@@ -218,16 +218,15 @@ contextBridge.exposeInMainWorld("api", {
   onImproveContextMenuSelected: (
     cb: (target: import("./types/improve.types").ImproveContextTarget | null) => void,
   ) => {
-    const handler = (
-      _e: unknown,
-      data: { type?: string; target?: import("./types/improve.types").ImproveContextTarget | null },
-    ) => {
+    return pushBus.subscribe((raw) => {
+      const data = raw as {
+        type?: string;
+        target?: import("./types/improve.types").ImproveContextTarget | null;
+      };
       if (data?.type === "improve_context_menu_selected") {
         cb(data.target ?? null);
       }
-    };
-    ipcRenderer.on("push-event", handler);
-    return () => { ipcRenderer.removeListener("push-event", handler); };
+    });
   },
 
   improveChat: (input: import("./services/improve-chat.service").ImproveChatInput) =>
@@ -241,12 +240,11 @@ contextBridge.exposeInMainWorld("api", {
   onImproveRequestChanged: (
     cb: (request: import("./types/improve.types").ImproveRequest) => void,
   ) => {
-    const handler = (_e: unknown, data: { type?: string; request?: unknown }) => {
+    return pushBus.subscribe((raw) => {
+      const data = raw as { type?: string; request?: unknown };
       if (data?.type === "improve_request_changed" && data.request) {
         cb(data.request as import("./types/improve.types").ImproveRequest);
       }
-    };
-    ipcRenderer.on("push-event", handler);
-    return () => { ipcRenderer.removeListener("push-event", handler); };
+    });
   },
 });
