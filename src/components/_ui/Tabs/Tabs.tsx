@@ -1,7 +1,7 @@
 import { X } from 'lucide-react';
 import { type ReactNode } from 'react';
 
-import { cn } from '@/lib/cn';
+import { cn } from '@/lib/utils';
 
 export type TabItem = { key: string; label: string; icon?: ReactNode; onClose?: (key: string) => void };
 

@@ -13,7 +13,8 @@ This is the **sandboxed** side: Chromium + React 19, the UI. It has **no Node ac
 - **`store/useAppStore.ts`** — global state (zustand).
 - **`pages/`** — top-level views.
 - **`env.d.ts`** — TypeScript declaration of `window.api` (the IPC contract the front sees).
-- **`index.css`** — design system CSS custom properties. **`lib/cn.ts`** — `cn()` (`clsx` + `tailwind-merge`).
+- **`lib/`** — framework-agnostic helpers, split into **`lib/utils/`** (functions) and **`lib/types/`** (shared types), each with an `index.ts` barrel. See "lib structure" below.
+- **`index.css`** — design system CSS custom properties. **`lib/utils/cn.ts`** — `cn()` (`clsx` + `tailwind-merge`).
 
 ### App shell
 
@@ -61,9 +62,32 @@ components/
 - **Promotion rule:** as soon as a child is used by **more than one parent**, promote it → to `_ui/` if it's a generic primitive, otherwise to `components/` root (sibling of its former parents).
 - **Nesting follows real ownership — no hard depth cap.** Nest a single-owner child inside its true parent **even at depth 3–4** if that's where the component hierarchy actually puts it (e.g. `Workspace/DashboardArea/Dashboard/InternalTabBar/`). The folder tree must mirror the component tree; do **not** hoist a single-owner child to the root just to stay shallow. (This is folder depth only — the 300-line file limit and code-nesting concerns are separate.) Depth beyond ~4 is a smell worth questioning the component decomposition, not a rule violation.
 - `_ui/` holds **reusable primitives with no domain knowledge**. **Only** `_ui/` components get an `index.ts` barrel; feature components do not.
-- Do **not** restructure `hooks/`, `services/`, `store/`, `types/` — they stay flat. One-folder-per-thing is for components only.
+- Do **not** apply one-folder-per-thing to `hooks/`, `services/`, `store/`, `types/` — their **source files** stay flat (the only structure they gain is a `__tests__/`, see "Tests" below). One-folder-per-thing is for components only.
 
 When a component file nears 300 lines, split it (front-specific targets, see root for the general rule): extract sub-components into their own folders, then custom hooks into `hooks/`, then helpers/types into sibling files.
+
+## `lib/` structure
+
+`lib/` is split by kind, each with a barrel:
+
+```
+lib/
+├── utils/          ← pure helper functions (cn, contentHash, elementToComponent, formatTokens, platform)
+│   └── index.ts    ← barrel: import utils via `@/lib/utils`
+├── types/          ← shared types (e.g. ComponentSource)
+│   └── index.ts    ← barrel: import types via `@/lib/types`
+└── __tests__/      ← lib tests
+```
+
+- **Consume utils and types through their barrel** (`@/lib/utils`, `@/lib/types`) — the category in the path tells you what kind of thing it is.
+- **No top-level `lib/index.ts` barrel.** We want imports to name their category explicitly, not collapse everything behind one `@/lib`.
+
+## Tests live in `__tests__/`
+
+Test files are **never co-located** in the source listing — they pollute the tree and bury the real files. Each area keeps its tests in a `__tests__/` folder:
+
+- **`store/`, `hooks/`, `lib/`** — one `__tests__/` at the folder root (sources stay flat next to it).
+- **`components/`** — a single **`components/__tests__/` that mirrors the component tree** (`components/__tests__/Workspace/DashboardArea/Console/Console.test.tsx`). Component tests reference sources via **`@/` aliases**, never deep `../../../` relatives — the alias is stable regardless of how deep the mirror goes.
 
 ## Design system
 
@@ -94,7 +118,7 @@ All styling uses CSS custom properties defined in `index.css`:
 `_ui/` components are built on three libraries. **Feature components consume `_ui/` primitives — they never touch Radix or `cva` directly.** `cn` is used everywhere.
 
 - **Radix UI** — accessible, unstyled behavior. Install per primitive (`npm i @radix-ui/react-dialog`), wrap each in a `_ui/` component that owns the styling. Feature components import from `_ui/`, never from `@radix-ui/*`.
-- **`cn`** (`clsx` + `tailwind-merge`, defined once at `lib/cn.ts`) — for any conditional/merged className or when merging an incoming `className` prop: `cn('px-3 py-1', isActive && 'bg-active', className)`.
+- **`cn`** (`clsx` + `tailwind-merge`, defined once at `lib/utils/cn.ts`, imported via `@/lib/utils`) — for any conditional/merged className or when merging an incoming `className` prop: `cn('px-3 py-1', isActive && 'bg-active', className)`.
 - **`cva`** — typed variants (size, intent, …), **inside `_ui/` components only**. Variants must compose Tailwind utilities wired to design-system CSS vars — never hardcoded colors.
 
 `_ui/` primitives extend `React.ComponentProps<'tag'>` so native DOM props are inherited, and **export** their props type:

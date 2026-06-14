@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-import { elementToComponent } from '@/lib/elementToComponent';
+import { elementToComponent } from '@/lib/utils';
 import { useImproveModalStore } from '@/store/useImproveModalStore';
 
 /**

@@ -108,6 +108,16 @@ When a file approaches the limit, split it (in order of preference):
 
 If the file you're about to write would exceed 300 lines, **STOP and split first** — never write the oversized file.
 
+### Tests live in `__tests__/`
+
+Test files are **never co-located** in the source listing — co-located `*.test.ts` files bury the real files and pollute the tree. Every area keeps its tests in a `__tests__/` folder beside the sources it covers:
+
+- **Back (`electron/services/`)** — sources are grouped into domain subfolders; **all** tests live in one central `electron/services/__tests__/`.
+- **Front (`src/store/`, `src/hooks/`, `src/lib/`)** — one `__tests__/` at the folder root; sources stay flat next to it.
+- **Front (`src/components/`)** — a single `src/components/__tests__/` that **mirrors** the component tree; component tests import sources via `@/` aliases (never deep `../../../` relatives).
+
+Tests still import their target by its real (post-move) path — `__tests__/` is a layout convention, not a module boundary. Details per side in `src/CLAUDE.md`.
+
 ### Linting policy
 
 **0 errors AND 0 warnings** before any diff lands (`eslint.config.mjs`, flat config). `error` blocks the build; `warn` is still a defect — both are the same standard.

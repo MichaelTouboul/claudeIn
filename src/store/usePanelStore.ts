@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 import type { TableColumn, TableRow } from '@/components/ResponseBody/blocks/TableBlock/parseTable';
-import { contentHash } from '@/lib/contentHash';
+import { contentHash } from '@/lib/utils';
 
 export type { TableColumn, TableRow };
 

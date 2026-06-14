@@ -1,7 +1,7 @@
 import { RotateCcw } from "lucide-react";
 import { useCallback, useState } from "react";
 
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import { AppPage, useAppStore } from "@/store/useAppStore";
 
 type DevResetProps = {

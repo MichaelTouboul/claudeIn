@@ -3,8 +3,7 @@ import { Home, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/_ui/Button';
 import { Logo } from '@/components/Logo/Logo';
 import { StatsBar } from '@/components/StatsBar/StatsBar';
-import { cn } from '@/lib/cn';
-import { isMac } from '@/lib/platform';
+import { cn, isMac  } from '@/lib/utils';
 
 export type HeaderProps = {
   activeCount: number;

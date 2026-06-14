@@ -1,0 +1,51 @@
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+
+import { Tabs } from '@/components/_ui/Tabs/Tabs';
+
+const items = [
+  { key: 'chat', label: 'Chat' },
+  { key: 'context', label: 'Context' },
+  { key: 'task', label: 'Task' },
+];
+
+describe('Tabs', () => {
+  it('renders one tab button per item and marks the active one', () => {
+    render(<Tabs tabs={items} active="context" onChange={() => {}} />);
+    expect(screen.getAllByRole('tab')).toHaveLength(3);
+    expect(screen.getByRole('tab', { name: 'Context' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('tab', { name: 'Chat' })).toHaveAttribute('aria-selected', 'false');
+  });
+
+  it('fires onChange with the tab key on click', () => {
+    const onChange = vi.fn();
+    render(<Tabs tabs={items} active="chat" onChange={onChange} />);
+    fireEvent.click(screen.getByRole('tab', { name: 'Task' }));
+    expect(onChange).toHaveBeenCalledWith('task');
+  });
+
+  it('moves selection with ArrowRight/ArrowLeft', () => {
+    const onChange = vi.fn();
+    render(<Tabs tabs={items} active="chat" onChange={onChange} />);
+    fireEvent.keyDown(screen.getByRole('tab', { name: 'Chat' }), { key: 'ArrowRight' });
+    expect(onChange).toHaveBeenCalledWith('context');
+  });
+
+  it('truncates a long label and carries the full title, keeping the close button visible', () => {
+    const longLabel = 'est-ce que Claude Desktop peut afficher du html?';
+    const onClose = vi.fn();
+    render(<Tabs tabs={[{ key: 'a', label: longLabel, onClose }]} active="a" onChange={() => {}} />);
+    const label = screen.getByText(longLabel);
+    expect(label).toHaveClass('truncate');
+    expect(label).toHaveAttribute('title', longLabel);
+    expect(screen.getByRole('button', { name: `Close ${longLabel}` })).toBeInTheDocument();
+  });
+
+  it('renders a close affordance only when onClose is given and fires it', () => {
+    const onClose = vi.fn();
+    render(<Tabs tabs={[{ key: 'a', label: 'A', onClose }, { key: 'b', label: 'B' }]} active="a" onChange={() => {}} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Close A' }));
+    expect(onClose).toHaveBeenCalledWith('a');
+    expect(screen.queryByRole('button', { name: 'Close B' })).toBeNull();
+  });
+});

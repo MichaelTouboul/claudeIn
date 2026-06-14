@@ -2,7 +2,7 @@ import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
 import { type ReactNode, useState } from 'react';
 
-import { cn } from '@/lib/cn';
+import { cn } from '@/lib/utils';
 
 export type ContextMenuTone = 'default' | 'danger' | 'accent' | 'warning';
 

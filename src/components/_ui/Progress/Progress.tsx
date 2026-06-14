@@ -1,7 +1,7 @@
 import * as RadixProgress from '@radix-ui/react-progress';
 import { type ComponentProps } from 'react';
 
-import { cn } from '@/lib/cn';
+import { cn } from '@/lib/utils';
 
 export type ProgressProps = Omit<ComponentProps<typeof RadixProgress.Root>, 'value'> & {
   /** Fill ratio in the 0–1 range; clamped. */
