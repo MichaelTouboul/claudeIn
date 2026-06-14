@@ -67,33 +67,33 @@ describe("OnboardingPage", () => {
   it("renders the welcome step first inside a dialog", async () => {
     render(<OnboardingPage />);
     expect(screen.getByRole("dialog", { name: /onboarding/i })).toBeInTheDocument();
-    expect(await screen.findByRole("button", { name: /commencer/i })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: /get started/i })).toBeInTheDocument();
   });
 
   it("offers no skip option on either consent step", async () => {
     render(<OnboardingPage />);
-    await click(/commencer/i);
-    expect(screen.getByRole("button", { name: /autoriser/i })).toBeInTheDocument();
+    await click(/get started/i);
+    expect(screen.getByRole("button", { name: /authorize/i })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /passer|ignorer|skip/i })).toBeNull();
   });
 
   it("advances welcome → consent → search → profile review", async () => {
     render(<OnboardingPage />);
-    await click(/commencer/i);
-    await click(/autoriser/i);
+    await click(/get started/i);
+    await click(/authorize/i);
     expect(await screen.findByText(/A tidy setup\./)).toBeInTheDocument();
     expect(buildUserProfile).toHaveBeenCalledWith("/home/u/.claude");
   });
 
   it("runs the full flow to Done, which completes onboarding and navigates home", async () => {
     render(<OnboardingPage />);
-    await click(/commencer/i);
-    await click(/autoriser/i);
+    await click(/get started/i);
+    await click(/authorize/i);
     await screen.findByText(/A tidy setup\./);
-    await click(/confirmer/i);
-    await click(/autoriser/i);
-    await click(/continuer/i);
-    await click(/terminer/i);
+    await click(/confirm/i);
+    await click(/authorize/i);
+    await click(/continue/i);
+    await click(/finish/i);
 
     await waitFor(() => expect(completeOnboarding).toHaveBeenCalledTimes(1));
     expect(useAppStore.getState().currentPage).toBe(AppPage.Home);

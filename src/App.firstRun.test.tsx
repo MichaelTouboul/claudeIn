@@ -94,13 +94,13 @@ describe("first-run path", () => {
     expect(screen.getByRole("dialog", { name: /onboarding/i })).toBeInTheDocument();
 
     // Full consent-gated flow with no skip.
-    await clickButton(/commencer/i);
-    await clickButton(/autoriser/i); // consent user
+    await clickButton(/get started/i);
+    await clickButton(/authorize/i); // consent user
     await screen.findByText(/A tidy setup\./);
-    await clickButton(/confirmer/i);
-    await clickButton(/autoriser/i); // consent repos
-    await clickButton(/continuer/i);
-    await clickButton(/terminer/i);
+    await clickButton(/confirm/i);
+    await clickButton(/authorize/i); // consent repos
+    await clickButton(/continue/i);
+    await clickButton(/finish/i);
 
     // Done → completeOnboarding → home.
     await waitFor(() => expect(completeOnboarding).toHaveBeenCalledTimes(1));
@@ -111,6 +111,6 @@ describe("first-run path", () => {
     await clickButton(/reset onboarding \(dev\)/i);
     await waitFor(() => expect(resetUser).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(useAppStore.getState().currentPage).toBe(AppPage.Onboarding));
-    expect(await screen.findByRole("button", { name: /commencer/i })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: /get started/i })).toBeInTheDocument();
   });
 });

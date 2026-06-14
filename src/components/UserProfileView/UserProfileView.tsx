@@ -25,7 +25,7 @@ export function UserProfileView({ profile, onSave }: UserProfileViewProps) {
   const [editing, setEditing] = useState(false);
 
   if (profile === null) {
-    return <p className="text-sm text-fg-subtle">Aucun profil pour le moment.</p>;
+    return <p className="text-sm text-fg-subtle">No profile yet.</p>;
   }
 
   if (editing) {
@@ -46,30 +46,30 @@ export function UserProfileView({ profile, onSave }: UserProfileViewProps) {
     <div className="flex flex-col gap-4">
       <div className="flex items-start justify-between gap-2">
         <h2 className="text-sm font-semibold text-fg" style={{ fontFamily: "var(--font-mono)" }}>
-          Mon profil
+          My profile
         </h2>
         <Button intent="outline" size="sm" onClick={() => setEditing(true)}>
-          Modifier
+          Edit
         </Button>
       </div>
 
-      <ProfileRow label="Identité">
+      <ProfileRow label="Identity">
         <span>{profile.name ?? "—"}</span>
         {profile.role !== null ? <span className="text-fg-subtle"> · {profile.role}</span> : null}
       </ProfileRow>
-      <ProfileRow label="Dossier .claude">
+      <ProfileRow label=".claude folder">
         <span style={{ fontFamily: "var(--font-mono)" }}>{profile.claudeUserPath ?? "—"}</span>
       </ProfileRow>
       <ProfileRow label="Plugins">
-        <TagList items={profile.plugins} empty="aucun" />
+        <TagList items={profile.plugins} empty="none" />
       </ProfileRow>
-      <ProfileRow label="Capacités">
+      <ProfileRow label="Capabilities">
         <span style={{ fontFamily: "var(--font-mono)" }}>{caps(profile)}</span>
       </ProfileRow>
-      <ProfileRow label="Résumé">
+      <ProfileRow label="Summary">
         <span>{profile.summary ?? "—"}</span>
       </ProfileRow>
-      <ProfileRow label="Domaines">
+      <ProfileRow label="Domains">
         <TagList items={profile.domains} empty="—" />
       </ProfileRow>
       <ProfileRow label="Workflow">

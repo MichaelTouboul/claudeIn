@@ -8,7 +8,7 @@ type HomeActionsProps = {
 /**
  * Actions row: a user-scope chat opener, a "Customize Claude" entry into the
  * Customize page, and a placeholder "Task" action. "Task" is disabled with a
- * "bientôt" hint until the task pillar lands.
+ * "soon" hint until the task pillar lands.
  */
 export function HomeActions({ onOpenUserAgent, onCustomize }: HomeActionsProps) {
   return (
@@ -23,8 +23,8 @@ export function HomeActions({ onOpenUserAgent, onCustomize }: HomeActionsProps) 
         <Button intent="outline" size="md" onClick={onCustomize}>
           Customize Claude
         </Button>
-        <Button intent="outline" size="md" disabled title="bientôt" aria-label="Task — bientôt">
-          Task <span className="text-fg-subtle">· bientôt</span>
+        <Button intent="outline" size="md" disabled title="soon" aria-label="Task — soon">
+          Task <span className="text-fg-subtle">· soon</span>
         </Button>
       </div>
     </section>

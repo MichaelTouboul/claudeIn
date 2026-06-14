@@ -11,23 +11,23 @@ type ReposPickStepProps = {
 
 /**
  * Step 6 — list scanned repos (with LLM labels) as favorite checkboxes, plus an
- * "Ajouter un dossier" picker. Favorites persist immediately via the
- * favoriteRepos IPC (see `useReposPick`); "Continuer" advances.
+ * "Add a folder" picker. Favorites persist immediately via the
+ * favoriteRepos IPC (see `useReposPick`); "Continue" advances.
  */
 export function ReposPickStep({ onNext }: ReposPickStepProps) {
   const { repos, loading, favorites, toggle, addFolder } = useReposPick();
 
   return (
     <OnbShell
-      title="Vos dépôts favoris"
-      subtitle="Choisissez les dépôts à épingler sur votre accueil."
+      title="Your favorite repositories"
+      subtitle="Choose the repositories to pin on your home screen."
     >
       {loading ? (
-        <p className="text-sm text-fg-subtle">Recherche des dépôts…</p>
+        <p className="text-sm text-fg-subtle">Searching for repositories…</p>
       ) : (
         <div className="flex max-h-64 flex-col gap-2 overflow-y-auto">
           {repos.length === 0 ? (
-            <p className="text-sm text-fg-subtle">Aucun dépôt détecté.</p>
+            <p className="text-sm text-fg-subtle">No repositories found.</p>
           ) : (
             repos.map((repo) => (
               <RepoRow
@@ -42,10 +42,10 @@ export function ReposPickStep({ onNext }: ReposPickStepProps) {
       )}
       <div className="flex items-center justify-between">
         <Button intent="outline" size="md" onClick={() => void addFolder()}>
-          Ajouter un dossier
+          Add a folder
         </Button>
         <Button intent="primary" size="md" onClick={onNext}>
-          Continuer
+          Continue
         </Button>
       </div>
     </OnbShell>

@@ -67,10 +67,10 @@ describe("ReposPickStep", () => {
     await waitFor(() => expect(removeFavoriteRepo).toHaveBeenCalledWith("/code/alpha"));
   });
 
-  it("'Ajouter un dossier' picks a folder and pins it", async () => {
+  it("'Add a folder' picks a folder and pins it", async () => {
     openDirectoryPicker.mockResolvedValue("/code/manual");
     render(<ReposPickStep onNext={vi.fn()} />);
-    const add = await screen.findByRole("button", { name: /ajouter un dossier/i });
+    const add = await screen.findByRole("button", { name: /add a folder/i });
 
     await act(async () => {
       fireEvent.click(add);
@@ -80,10 +80,10 @@ describe("ReposPickStep", () => {
     expect(await screen.findByText("manual")).toBeInTheDocument();
   });
 
-  it("'Continuer' advances", async () => {
+  it("'Continue' advances", async () => {
     const onNext = vi.fn();
     render(<ReposPickStep onNext={onNext} />);
-    const next = await screen.findByRole("button", { name: /continuer/i });
+    const next = await screen.findByRole("button", { name: /continue/i });
 
     await act(async () => {
       fireEvent.click(next);

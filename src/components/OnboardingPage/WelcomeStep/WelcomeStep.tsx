@@ -7,20 +7,20 @@ type WelcomeStepProps = {
   onNext: () => void;
 };
 
-/** Step 1 — intro to the first-run experience with a single "Commencer" CTA. */
+/** Step 1 — intro to the first-run experience with a single "Get started" CTA. */
 export function WelcomeStep({ onNext }: WelcomeStepProps) {
   return (
     <OnbShell
-      title="Bienvenue dans ClaudeIn"
-      subtitle="Quelques étapes pour préparer votre espace de travail."
+      title="Welcome to ClaudeIn"
+      subtitle="A few steps to set up your workspace."
     >
       <p className="text-sm text-fg-muted">
-        ClaudeIn analyse votre configuration Claude Code locale pour vous offrir une expérience sur
-        mesure. Aucune donnée ne quitte votre machine.
+        ClaudeIn analyzes your local Claude Code setup to give you a tailored experience. None of
+        your data leaves your machine.
       </p>
       <div className="flex justify-end">
         <Button intent="primary" size="md" onClick={onNext}>
-          Commencer
+          Get started
         </Button>
       </div>
     </OnbShell>

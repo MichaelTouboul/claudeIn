@@ -20,7 +20,7 @@ export function RepoRow({ repo, checked, onToggle }: RepoRowProps) {
         checked={checked}
         onChange={() => onToggle(repo.path)}
         className="mt-1 accent-[var(--color-accent)]"
-        aria-label={`Favori ${name}`}
+        aria-label={`Favorite ${name}`}
       />
       <span className="min-w-0">
         <span className="block truncate text-sm font-medium text-fg">{name}</span>

@@ -72,9 +72,9 @@ describe("HomePage", () => {
   it("shows an empty-state hint when there are no favorite repos", async () => {
     listFavoriteRepos.mockResolvedValue([]);
     render(<HomePage />);
-    expect(await screen.findByText(/aucun dépôt favori/i)).toBeInTheDocument();
+    expect(await screen.findByText(/no favorite repositories/i)).toBeInTheDocument();
     // The add affordance stays so the user can act on the empty state.
-    expect(screen.getByRole("button", { name: /ajouter/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
   });
 
   it("opening a favorite navigates to the dashboard and selects that project", async () => {
@@ -82,7 +82,7 @@ describe("HomePage", () => {
     render(<HomePage />);
     const card = await screen.findByText("alpha");
     const open = within(card.closest("[data-repo-card]") as HTMLElement).getByRole("button", {
-      name: /ouvrir/i,
+      name: /open/i,
     });
 
     await act(async () => {
@@ -93,12 +93,12 @@ describe("HomePage", () => {
     expect(useAppStore.getState().selectedProject?.path).toBe("/code/alpha");
   });
 
-  it("the + ajouter card opens the folder picker and adds the chosen dir", async () => {
+  it("the + add card opens the folder picker and adds the chosen dir", async () => {
     openDirectoryPicker.mockResolvedValue("/code/new");
     addFavoriteRepo.mockResolvedValue(repo("/code/new"));
     listFavoriteRepos.mockResolvedValueOnce([]).mockResolvedValueOnce([repo("/code/new")]);
     render(<HomePage />);
-    const addCard = await screen.findByRole("button", { name: /ajouter/i });
+    const addCard = await screen.findByRole("button", { name: /add/i });
 
     await act(async () => {
       fireEvent.click(addCard);
@@ -110,7 +110,7 @@ describe("HomePage", () => {
   it("does not add a favorite when the picker is cancelled", async () => {
     openDirectoryPicker.mockResolvedValue(null);
     render(<HomePage />);
-    const addCard = await screen.findByRole("button", { name: /ajouter/i });
+    const addCard = await screen.findByRole("button", { name: /add/i });
 
     await act(async () => {
       fireEvent.click(addCard);
@@ -123,7 +123,7 @@ describe("HomePage", () => {
     listFavoriteRepos.mockResolvedValueOnce([repo("/code/alpha")]).mockResolvedValueOnce([]);
     render(<HomePage />);
     const card = (await screen.findByText("alpha")).closest("[data-repo-card]") as HTMLElement;
-    const remove = within(card).getByRole("button", { name: /retirer/i });
+    const remove = within(card).getByRole("button", { name: /remove/i });
 
     await act(async () => {
       fireEvent.click(remove);
@@ -132,7 +132,7 @@ describe("HomePage", () => {
     expect(removeFavoriteRepo).toHaveBeenCalledWith("/code/alpha");
   });
 
-  it("shows the Task action as disabled with a 'bientôt' hint", async () => {
+  it("shows the Task action as disabled with a 'soon' hint", async () => {
     render(<HomePage />);
     const task = await screen.findByRole("button", { name: /task/i });
     expect(task).toBeDisabled();
@@ -149,9 +149,9 @@ describe("HomePage", () => {
     expect(useAppStore.getState().currentPage).toBe(AppPage.Customize);
   });
 
-  it("opens the profile view from the 'voir mon profil' affordance", async () => {
+  it("opens the profile view from the 'view my profile' affordance", async () => {
     render(<HomePage />);
-    const link = await screen.findByRole("button", { name: /voir mon profil/i });
+    const link = await screen.findByRole("button", { name: /view my profile/i });
 
     await act(async () => {
       fireEvent.click(link);

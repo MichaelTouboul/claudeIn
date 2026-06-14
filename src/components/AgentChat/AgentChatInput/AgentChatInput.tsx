@@ -82,13 +82,31 @@ export function AgentChatInput({
     editorRef.current?.focus();
   };
 
-  // Enter inside an open menu = select the highlight (consumes the key).
+  // Enter inside an open menu = select the highlight (consumes the key). For a slash
+  // command this launches it; for a mention it inserts the mention.
   const handleEnter = (): boolean => {
     if (menus.kind && menus.activeId) {
       handleSelect(menus.activeId);
       return true;
     }
     return false;
+  };
+
+  // Tab inside an open slash/mention menu = COMPLETE the highlighted suggestion into
+  // the input as text (and keep focus) WITHOUT launching/submitting it. The user can
+  // then type args or press Enter to send. The model picker isn't a typed token, so
+  // Tab is left to its default behavior there.
+  const handleComplete = (): boolean => {
+    if (!menus.activeId) return false;
+    if (menus.kind === 'slash') {
+      editorRef.current?.insertSlashCommand(menus.activeId);
+    } else if (menus.kind === 'mention') {
+      editorRef.current?.insertMention(menus.activeId);
+    } else {
+      return false;
+    }
+    editorRef.current?.focus();
+    return true;
   };
 
   // ↑/↓ to move, Esc to dismiss; only while a menu is open. Other keys pass through.
@@ -192,6 +210,7 @@ export function AgentChatInput({
           }}
           onSubmit={onSend}
           onEnter={handleEnter}
+          onComplete={handleComplete}
           onNavKey={handleNavKey}
         />
         <AttachMenu onAttach={onAttach} />

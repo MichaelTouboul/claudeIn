@@ -38,45 +38,52 @@ function makeTabEvent(): KeyboardEvent {
   return new KeyboardEvent('keydown', { key: 'Tab', cancelable: true });
 }
 
-describe('SubmitPlugin — Tab confirms the highlighted suggestion', () => {
-  it('Tab confirms the highlight via onEnter and prevents default when a menu is open', () => {
-    const onEnter = vi.fn(() => true); // menu open + highlight present → consumed
+describe('SubmitPlugin — Tab completes the highlighted suggestion (no submit)', () => {
+  it('Tab completes via onComplete (not onEnter) and prevents default when a menu is open', () => {
+    const onEnter = vi.fn(() => true);
+    const onComplete = vi.fn(() => true); // menu open + highlight present → consumed
     const onNavKey = vi.fn(() => false);
-    const editor = renderPlugin({ onEnter, onNavKey });
+    const editor = renderPlugin({ onEnter, onComplete, onNavKey });
 
     const event = makeTabEvent();
     const preventDefault = vi.spyOn(event, 'preventDefault');
     const consumed = editor.dispatchCommand(KEY_TAB_COMMAND, event);
 
-    expect(onEnter).toHaveBeenCalledTimes(1);
+    expect(onComplete).toHaveBeenCalledTimes(1);
+    // Tab must NOT route through the Enter (select + submit/launch) path.
+    expect(onEnter).not.toHaveBeenCalled();
     expect(consumed).toBe(true);
     expect(preventDefault).toHaveBeenCalledTimes(1);
   });
 
   it('Tab keeps its default behavior (no preventDefault) when no menu is open', () => {
-    const onEnter = vi.fn(() => false); // no menu → not consumed
+    const onEnter = vi.fn(() => false);
+    const onComplete = vi.fn(() => false); // no menu → not consumed
     const onNavKey = vi.fn(() => false);
-    const editor = renderPlugin({ onEnter, onNavKey });
+    const editor = renderPlugin({ onEnter, onComplete, onNavKey });
 
     const event = makeTabEvent();
     const preventDefault = vi.spyOn(event, 'preventDefault');
     const consumed = editor.dispatchCommand(KEY_TAB_COMMAND, event);
 
-    expect(onEnter).toHaveBeenCalledTimes(1);
+    expect(onComplete).toHaveBeenCalledTimes(1);
     expect(consumed).toBe(false);
     expect(preventDefault).not.toHaveBeenCalled();
   });
 
-  it('Tab uses the same confirm handler (onEnter) that Enter does', () => {
+  it('Tab and Enter use distinct handlers — Tab completes, Enter confirms', () => {
     const onEnter = vi.fn(() => true);
+    const onComplete = vi.fn(() => true);
     const onNavKey = vi.fn(() => false);
-    const editor = renderPlugin({ onEnter, onNavKey });
+    const editor = renderPlugin({ onEnter, onComplete, onNavKey });
 
     editor.dispatchCommand(KEY_ENTER_COMMAND, makeTabEvent());
-    const afterEnter = onEnter.mock.calls.length;
-    editor.dispatchCommand(KEY_TAB_COMMAND, makeTabEvent());
+    expect(onEnter).toHaveBeenCalledTimes(1);
+    expect(onComplete).not.toHaveBeenCalled();
 
-    // Both keys route through the very same onEnter confirm path.
-    expect(onEnter.mock.calls.length).toBe(afterEnter + 1);
+    editor.dispatchCommand(KEY_TAB_COMMAND, makeTabEvent());
+    expect(onComplete).toHaveBeenCalledTimes(1);
+    // Enter was not called again by the Tab press.
+    expect(onEnter).toHaveBeenCalledTimes(1);
   });
 });
