@@ -94,7 +94,7 @@ Shared types go in a `types/` folder with a barrel `index.ts` — **front:** `sr
 - **Named imports only** — no default exports except `src/App.tsx` and `src/main.tsx`.
 - **React:** `import { useEffect } from 'react'`. **Never** `import * as React from 'react'`, never `import React from 'react'` (the JSX transform handles it).
 - Prefer `import type { … }` for type-only imports; use inline `type` for mixed imports (`import { spawn, type SpawnOptions } from 'node:child_process'`).
-- **No file extensions** in import paths (`@/lib/cn`, not `@/lib/cn.ts`).
+- **No file extensions** in import paths (`@/lib/utils`, not `@/lib/utils/index.ts`).
 - Import **ordering/grouping is handled by the formatter plugin** — don't hand-manage it.
 
 ### File size — 300-line hard limit
