@@ -39,13 +39,13 @@ export function SkillDetailContent({ skill }: SkillDetailContentProps) {
       <div className="px-6 pt-5 pb-3">
         <div className="flex items-center gap-2 mb-1">
           <Wrench size={16} className="text-active" />
-          <h2 className="text-lg font-bold text-white">{skill.name}</h2>
+          <h2 className="text-lg font-bold text-fg">{skill.name}</h2>
           <button
             onClick={onToggleFavorite}
             className="p-1 rounded hover:bg-surface-2 transition-colors"
             title={isFavorite ? "Remove from favorites" : "Add to favorites"}
           >
-            <Star size={16} className={isFavorite ? "text-yellow-400 fill-yellow-400" : "text-fg-subtle hover:text-yellow-400"} />
+            <Star size={16} className={isFavorite ? "text-[var(--color-warning)] fill-[var(--color-warning)]" : "text-fg-subtle hover:text-[var(--color-warning)]"} />
           </button>
           <Badge shape="pill" variant={skill.scope === "user" ? "yellow" : "cyan"}>
             {skill.scope}
@@ -59,7 +59,7 @@ export function SkillDetailContent({ skill }: SkillDetailContentProps) {
           onClick={() => setTab("chat")}
           className={`flex items-center gap-1.5 px-3 py-1.5 my-1.5 mr-2 text-xs font-medium rounded-lg transition-colors ${
             tab === "chat"
-              ? "bg-accent text-white"
+              ? "bg-accent text-surface-0"
               : "bg-surface-3 text-fg hover:bg-surface-3"
           }`}
         >

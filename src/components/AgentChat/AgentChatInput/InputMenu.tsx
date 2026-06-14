@@ -23,13 +23,15 @@ export type InputMenuProps = {
   activeIndex: number;
   /** Monospace + accent-tinted label column (used by the slash menu). */
   mono?: boolean;
+  /** Accessible name for the listbox (e.g. "Slash commands" / "Mentions"). */
+  ariaLabel: string;
   onSelect: (id: string) => void;
 };
 
 /** Shared dropdown surface for the slash (`/`) and mention (`@`) input menus.
  *  Kept local to AgentChat: it encodes chat-specific grouping/label layout rather
  *  than being a generic primitive, so it does not belong in `_ui/`. */
-export function InputMenu({ groups, activeIndex, mono, onSelect }: InputMenuProps) {
+export function InputMenu({ groups, activeIndex, mono, ariaLabel, onSelect }: InputMenuProps) {
   const listRef = useRef<HTMLDivElement>(null);
 
   // Keep the highlighted row scrolled into view as the user arrows through.
@@ -42,6 +44,7 @@ export function InputMenu({ groups, activeIndex, mono, onSelect }: InputMenuProp
     <div
       ref={listRef}
       role="listbox"
+      aria-label={ariaLabel}
       className="absolute bottom-full left-3 right-3 mb-1 rounded-lg shadow-xl max-h-56 overflow-y-auto py-1 z-20"
       style={{
         background: 'var(--color-surface-2)',

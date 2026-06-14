@@ -70,7 +70,7 @@ export function PanelsArea({
   const sessionsPanel = {
     key: "sessions",
     label: "Sessions",
-    icon: <History size={11} className="text-purple-400" />,
+    icon: <History size={11} className="text-[var(--color-history)]" />,
     count: sessionsShownCount,
     content: (
       <SessionsPanel
@@ -90,7 +90,7 @@ export function PanelsArea({
       hasFavorites ? {
         key: "favorites",
         label: "Favorites",
-        icon: <Star size={11} className="text-yellow-400" />,
+        icon: <Star size={11} className="text-[var(--color-warning)]" />,
         count: favAgents.length + favSkills.length + favHooks.length,
         content: (
           <>
@@ -105,7 +105,7 @@ export function PanelsArea({
                 ))}
               </> : null}
             {favHooks.length > 0 ? <>
-                <SectionLabel icon={<Settings size={10} className="text-yellow-400" />} label="Hooks" />
+                <SectionLabel icon={<Settings size={10} className="text-[var(--color-warning)]" />} label="Hooks" />
                 {favHooks.map((h) => (
                   <HookRow key={`${h.event}:${h.matcher}`} hook={h} />
                 ))}
@@ -207,7 +207,7 @@ export function PanelsArea({
       hooks.length > 0 ? {
         key: "hooks",
         label: "Hooks",
-        icon: <Settings size={11} className="text-yellow-400" />,
+        icon: <Settings size={11} className="text-[var(--color-warning)]" />,
         count: hooks.length,
         content: hooks.map((h) => (
           <HookRow key={`${h.event}:${h.matcher}`} hook={h} />

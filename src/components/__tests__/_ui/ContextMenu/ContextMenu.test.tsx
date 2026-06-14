@@ -23,6 +23,16 @@ describe("ContextMenu", () => {
     await waitFor(() => expect(onSelect).toHaveBeenCalledTimes(1));
   });
 
+  it("gives the default icon-only trigger an accessible name", () => {
+    const items: ContextMenuItem[] = [{ label: "Rename", onSelect: vi.fn() }];
+
+    const { rerender } = render(<ContextMenu items={items} />);
+    expect(screen.getByRole("button", { name: "More actions" })).toBeInTheDocument();
+
+    rerender(<ContextMenu items={items} triggerLabel="Agent actions" />);
+    expect(screen.getByRole("button", { name: "Agent actions" })).toBeInTheDocument();
+  });
+
   it("does not let an item-select click fall through to a sibling beneath the menu", async () => {
     // Mirrors the sidebar row layout: a full-size clickable surface with the
     // menu overlaid on top. Selecting a menu item must NOT trigger the row's

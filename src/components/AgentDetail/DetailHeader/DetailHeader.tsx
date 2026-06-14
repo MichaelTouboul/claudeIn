@@ -64,7 +64,7 @@ export function DetailHeader({
               className="p-1 rounded hover:bg-surface-2 transition-colors"
               title={isFavorite ? "Remove from favorites" : "Add to favorites"}
             >
-              <Star size={16} className={isFavorite ? "text-yellow-400 fill-yellow-400" : "text-fg-subtle hover:text-yellow-400"} />
+              <Star size={16} className={isFavorite ? "text-[var(--color-warning)] fill-[var(--color-warning)]" : "text-fg-subtle hover:text-[var(--color-warning)]"} />
             </button> : null}
           <Badge variant={agent.frontmatter.model === "opus" ? "purple" : "blue"}>
             {agent.frontmatter.model || "inherit"}

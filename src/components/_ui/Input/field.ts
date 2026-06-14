@@ -18,7 +18,7 @@ export const field = cva(
       },
       variant: {
         filled:
-          'rounded border border-border bg-surface-2 focus-visible:ring-1 focus-visible:ring-accent focus-visible:border-accent transition-colors',
+          'rounded border border-border-strong bg-surface-2 focus-visible:ring-1 focus-visible:ring-accent focus-visible:border-accent transition-colors',
         bare: 'bg-transparent border-0 px-0 py-0',
       },
     },

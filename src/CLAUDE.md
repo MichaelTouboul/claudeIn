@@ -100,15 +100,21 @@ All styling uses CSS custom properties defined in `index.css`:
 --color-surface-2: #111620    (card/hover backgrounds)
 --color-surface-3: #181e2a    (elevated elements)
 --color-border: #1e2636        --color-border-subtle: #151b26
---color-text-primary: #e2e8f0  --color-text-secondary: #8892a4  --color-text-muted: #4a5568
+--color-border-strong: #5a6a8c (3:1 control/input outlines — WCAG 1.4.11; decorative hairlines keep --color-border)
+--color-fg: #e2e8f0            --color-fg-muted: #8892a4       --color-fg-subtle: #717c90
+  (legacy aliases: --color-text-primary / -secondary / -muted map onto these)
 --color-accent: #06b6d4 (cyan) --color-accent-dim: rgba(6,182,212,0.12)
 --color-active: #4ade80        --color-danger: #f87171
+--color-warning: #facc15 (yellow — tool/auth/hooks)  --color-info: #60a5fa (blue — sub-agent)
+--color-history: #c084fc (purple — memory/history)
+--color-neutral-fg/-bg/-fg-strong  (#9ca3af / #374151 / #d1d5db — attachment chip neutrals)
 --font-sans: 'IBM Plex Sans'   --font-mono: 'JetBrains Mono'
 ```
 
 **Rules:**
-- **Tailwind CSS 4** + PostCSS. **NEVER** use hardcoded Tailwind colors (`bg-gray-800`, `text-cyan-400`) — use the CSS vars.
-- Reference CSS vars via `style={{ }}` (Tailwind can't reference them).
+- **No raw color values in components — always a token in `index.css`.** Every color is a CSS var defined in `index.css`; components never carry a hex/`rgb()`/named-Tailwind-palette color. New hue? Add a semantic token to `index.css` first, then reference it. (The ONE exception is the interactive-block library-theme bridge below.)
+- **Tailwind CSS 4** + PostCSS. **NEVER** use hardcoded Tailwind palette colors (`bg-gray-800`, `text-yellow-400`) — use the CSS-var tokens.
+- Reference CSS vars in `style={{ }}` *or* via a Tailwind arbitrary value in `className` (`text-[var(--color-warning)]`, `bg-[var(--color-info)]`) — match the file's existing pattern. Plain token utilities (`text-fg`, `bg-surface-2`, `border-border-strong`) are generated from the `@theme` block.
 - `var(--font-mono)` for code/data, `var(--font-sans)` for UI labels. `tabular-nums` for numbers.
 - Hover states via `onMouseEnter`/`onMouseLeave` (inline style changes).
 - Utility classes available: `surface-grain`, `glow-cyan`, `glow-active`.

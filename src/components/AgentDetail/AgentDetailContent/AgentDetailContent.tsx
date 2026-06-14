@@ -145,7 +145,7 @@ export function AgentDetailContent({
           className="flex items-center gap-1.5 px-3.5 py-1.5 my-1.5 mr-2 text-sm font-medium rounded-lg transition-all duration-150"
           style={{
             background: tab === "chat" ? 'var(--color-accent)' : 'var(--color-surface-3)',
-            color: tab === "chat" ? '#fff' : 'var(--color-text-secondary)',
+            color: tab === "chat" ? 'var(--color-surface-0)' : 'var(--color-text-secondary)',
             boxShadow: tab === "chat" ? '0 0 12px rgba(6,182,212,0.2), 0 1px 3px rgba(0,0,0,0.3)' : 'none',
             border: tab === "chat" ? 'none' : '1px solid var(--color-border-subtle)',
           }}

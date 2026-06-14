@@ -1,7 +1,7 @@
 export const colorMap: Record<string, string> = {
-  cyan: "bg-accent", blue: "bg-blue-500", green: "bg-active",
-  yellow: "bg-yellow-500", orange: "bg-orange-500", red: "bg-danger",
-  purple: "bg-purple-500", pink: "bg-pink-500",
+  cyan: "bg-accent", blue: "bg-[var(--color-info)]", green: "bg-active",
+  yellow: "bg-[var(--color-warning)]", orange: "bg-orange-500", red: "bg-danger",
+  purple: "bg-[var(--color-history)]", pink: "bg-pink-500",
 };
 
 export function formatTokens(n: number): string {
@@ -12,6 +12,6 @@ export function formatTokens(n: number): string {
 
 export function progressColor(percent: number): string {
   if (percent >= 90) return "bg-danger/20";
-  if (percent >= 70) return "bg-yellow-500/20";
+  if (percent >= 70) return "bg-[var(--color-warning)]/20";
   return "bg-accent/15";
 }
