@@ -1,5 +1,6 @@
 import { Menu } from 'lucide-react';
 
+import { Flex } from '@/components/_ui/Flex';
 import { type TabItem,Tabs } from '@/components/_ui/Tabs';
 import { useConversationTitlesStore } from '@/store/useConversationTitlesStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
@@ -39,16 +40,19 @@ export function InternalTabBar({ onOpenPanel }: InternalTabBarProps) {
         <Tabs tabs={tabs} active={active.activeTabId} onChange={setActiveTab} className="min-w-0 overflow-x-auto" />
         <AddTabMenu />
       </div>
-      <button
+      <Flex
+        as="button"
+        align="center"
+        justify="center"
         onClick={onOpenPanel}
         title="Context · Task · Plan"
-        className="flex items-center justify-center w-7 h-7 rounded-md mr-2 shrink-0"
+        className="w-7 h-7 rounded-md mr-2 shrink-0"
         style={{ color: 'var(--color-text-muted)' }}
         onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-surface-2)')}
         onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
       >
         <Menu size={16} />
-      </button>
+      </Flex>
     </div>
   );
 }

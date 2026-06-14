@@ -1,5 +1,6 @@
 import { Plus, X } from 'lucide-react';
 
+import { Flex } from '@/components/_ui/Flex';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
 import { dashboardLabel } from './tabLabel';
@@ -47,17 +48,20 @@ export function WorkspaceBar() {
           </div>
         );
       })}
-      <button
+      <Flex
+        as="button"
+        align="center"
+        justify="center"
         onClick={() => openLauncher()}
         title="New tab"
         aria-label="New tab"
-        className="flex items-center justify-center w-7 h-7 rounded-md transition-colors shrink-0"
+        className="w-7 h-7 rounded-md transition-colors shrink-0"
         style={{ color: 'var(--color-text-muted)' }}
         onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-surface-2)')}
         onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
       >
         <Plus size={15} />
-      </button>
+      </Flex>
     </div>
   );
 }

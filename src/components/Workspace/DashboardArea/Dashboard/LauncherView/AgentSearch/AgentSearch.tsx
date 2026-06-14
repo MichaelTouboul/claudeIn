@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { Input } from '@/components/_ui/Input';
+import { Stack } from '@/components/_ui/Stack';
 import type { AgentFile } from '@/lib/types';
 import { api } from '@/services/api';
 
@@ -27,7 +28,7 @@ export function AgentSearch({ onSelect }: AgentSearchProps) {
   }, [agents, query]);
 
   return (
-    <div className="flex flex-col gap-2">
+    <Stack gap={2}>
       <Input
         autoFocus
         value={query}
@@ -62,6 +63,6 @@ export function AgentSearch({ onSelect }: AgentSearchProps) {
           ))
         )}
       </div>
-    </div>
+    </Stack>
   );
 }

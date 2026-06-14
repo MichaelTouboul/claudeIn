@@ -1,6 +1,8 @@
 import { useState } from "react";
 
 import { Button } from "@/components/_ui/Button";
+import { Inline } from "@/components/_ui/Inline";
+import { Stack } from "@/components/_ui/Stack";
 import type { UserProfile } from "@/lib/types";
 
 import { ProfileRow, TagList } from "./ProfileRow";
@@ -43,15 +45,15 @@ export function UserProfileView({ profile, onSave }: UserProfileViewProps) {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-start justify-between gap-2">
+    <Stack gap={4}>
+      <Inline gap={2} align="start" justify="between">
         <h2 className="text-sm font-semibold text-fg" style={{ fontFamily: "var(--font-mono)" }}>
           My profile
         </h2>
         <Button intent="outline" size="sm" onClick={() => setEditing(true)}>
           Edit
         </Button>
-      </div>
+      </Inline>
 
       <ProfileRow label="Identity">
         <span>{profile.name ?? "—"}</span>
@@ -75,6 +77,6 @@ export function UserProfileView({ profile, onSave }: UserProfileViewProps) {
       <ProfileRow label="Workflow">
         <span>{profile.workflow ?? "—"}</span>
       </ProfileRow>
-    </div>
+    </Stack>
   );
 }

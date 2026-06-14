@@ -1,8 +1,10 @@
 import { type CSSProperties, type FormEvent,useState } from "react";
 
 import { Button } from "@/components/_ui/Button";
+import { Flex } from "@/components/_ui/Flex";
 import { Input } from "@/components/_ui/Input";
 import { Select } from "@/components/_ui/Select";
+import { Stack } from "@/components/_ui/Stack";
 import type {
   McpAddInput,
   McpManageScope,
@@ -64,8 +66,8 @@ export function McpServerForm({ mode, onSubmit, initialValues }: McpServerFormPr
   };
 
   return (
-    <form className="flex flex-col gap-3 px-4 py-4" onSubmit={(e) => void submit(e)} noValidate>
-      <label className="flex flex-col gap-1 text-xs" style={labelStyle}>
+    <Stack as="form" gap={3} className="px-4 py-4" onSubmit={(e: FormEvent) => void submit(e)} noValidate>
+      <Stack as="label" gap={1} className="text-xs" style={labelStyle}>
         Name
         <Input
           type="text"
@@ -74,8 +76,8 @@ export function McpServerForm({ mode, onSubmit, initialValues }: McpServerFormPr
           value={state.name}
           onChange={(e) => patch({ name: e.target.value })}
         />
-      </label>
-      <label className="flex flex-col gap-1 text-xs" style={labelStyle}>
+      </Stack>
+      <Stack as="label" gap={1} className="text-xs" style={labelStyle}>
         Scope
         <Select
           size="sm"
@@ -89,8 +91,8 @@ export function McpServerForm({ mode, onSubmit, initialValues }: McpServerFormPr
             </option>
           ))}
         </Select>
-      </label>
-      <label className="flex flex-col gap-1 text-xs" style={labelStyle}>
+      </Stack>
+      <Stack as="label" gap={1} className="text-xs" style={labelStyle}>
         Transport
         <Select
           size="sm"
@@ -104,18 +106,18 @@ export function McpServerForm({ mode, onSubmit, initialValues }: McpServerFormPr
             </option>
           ))}
         </Select>
-      </label>
+      </Stack>
       <McpFormTransportFields state={state} patch={patch} labelStyle={labelStyle} />
       {error !== null ? (
         <p role="alert" className="text-xs" style={{ color: "var(--color-danger)", fontFamily: "var(--font-mono)" }}>
           {error}
         </p>
       ) : null}
-      <div className="flex justify-end">
+      <Flex justify="end">
         <Button type="submit" intent="primary" size="sm" disabled={submitting}>
           {submitLabel[mode]}
         </Button>
-      </div>
-    </form>
+      </Flex>
+    </Stack>
   );
 }

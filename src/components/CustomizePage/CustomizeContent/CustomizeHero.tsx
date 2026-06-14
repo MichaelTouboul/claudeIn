@@ -1,6 +1,8 @@
 import { Boxes,Plug, Sparkles } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { Stack } from "@/components/_ui/Stack";
+
 type HeroOption = {
   key: string;
   icon: ReactNode;
@@ -40,7 +42,7 @@ export function CustomizeHero() {
       aria-label="Customize Claude"
       className="flex-1 h-full overflow-auto p-8 flex flex-col gap-6"
     >
-      <div className="flex flex-col gap-2">
+      <Stack gap={2}>
         <h2
           className="text-2xl font-semibold"
           style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-sans)" }}
@@ -54,7 +56,7 @@ export function CustomizeHero() {
           Pick a connector from the left to view or edit it, or add a new one. Skills and plugins are
           coming soon.
         </p>
-      </div>
+      </Stack>
       <ul className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {HERO_OPTIONS.map((option) => (
           <li

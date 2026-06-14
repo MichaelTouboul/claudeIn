@@ -1,4 +1,5 @@
 import { Button } from "@/components/_ui/Button";
+import { Inline } from "@/components/_ui/Inline";
 import type { FavoriteRepo } from "@/lib/types";
 
 import { repoLabel } from "../openFavorite";
@@ -25,14 +26,14 @@ export function FavoriteRepoCard({ repo, onOpen, onRemove }: FavoriteRepoCardPro
           {repo.path}
         </p>
       </div>
-      <div className="flex items-center gap-2">
+      <Inline gap={2}>
         <Button intent="primary" size="sm" onClick={() => onOpen(repo)} aria-label={`Open ${label}`}>
           Open
         </Button>
         <Button intent="ghost" size="sm" onClick={() => onRemove(repo)} aria-label={`Remove ${label}`}>
           Remove
         </Button>
-      </div>
+      </Inline>
     </div>
   );
 }

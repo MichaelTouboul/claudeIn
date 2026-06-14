@@ -1,7 +1,9 @@
 import { useState } from "react";
 
 import { Button } from "@/components/_ui/Button";
+import { Inline } from "@/components/_ui/Inline";
 import { Input } from "@/components/_ui/Input";
+import { Stack } from "@/components/_ui/Stack";
 import { Textarea } from "@/components/_ui/Textarea";
 import type { UserProfile } from "@/lib/types";
 
@@ -64,45 +66,45 @@ export function UserProfileEdit({ profile, onSave, onCancel }: UserProfileEditPr
   };
 
   return (
-    <form className="flex flex-col gap-4" onSubmit={submit}>
-      <label className="flex flex-col gap-1 text-sm">
+    <Stack as="form" gap={4} onSubmit={submit}>
+      <Stack as="label" gap={1} className="text-sm">
         <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
           Name
         </span>
         <Input className="bg-surface-0" value={draft.name} onChange={set("name")} />
-      </label>
-      <label className="flex flex-col gap-1 text-sm">
+      </Stack>
+      <Stack as="label" gap={1} className="text-sm">
         <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
           Role
         </span>
         <Input className="bg-surface-0" value={draft.role} onChange={set("role")} />
-      </label>
-      <label className="flex flex-col gap-1 text-sm">
+      </Stack>
+      <Stack as="label" gap={1} className="text-sm">
         <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
           Summary
         </span>
         <Textarea className="bg-surface-0" rows={3} value={draft.summary} onChange={set("summary")} />
-      </label>
-      <label className="flex flex-col gap-1 text-sm">
+      </Stack>
+      <Stack as="label" gap={1} className="text-sm">
         <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
           Domains (comma-separated)
         </span>
         <Input className="bg-surface-0" value={draft.domains} onChange={set("domains")} />
-      </label>
-      <label className="flex flex-col gap-1 text-sm">
+      </Stack>
+      <Stack as="label" gap={1} className="text-sm">
         <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
           Workflow
         </span>
         <Textarea className="bg-surface-0" rows={2} value={draft.workflow} onChange={set("workflow")} />
-      </label>
-      <div className="flex items-center gap-2">
+      </Stack>
+      <Inline gap={2}>
         <Button type="submit" intent="primary" size="md" disabled={saving}>
           Save
         </Button>
         <Button type="button" intent="ghost" size="md" onClick={onCancel} disabled={saving}>
           Cancel
         </Button>
-      </div>
-    </form>
+      </Inline>
+    </Stack>
   );
 }

@@ -1,5 +1,6 @@
 import { Bot, ChevronRight, Shield, Wrench } from 'lucide-react';
 
+import { Inline } from '@/components/_ui/Inline';
 import { renderContentWithImages } from '@/components/_ui/InlineImage';
 import { DiffBlock } from '@/components/ResponseBody/blocks/DiffBlock/DiffBlock';
 import { parseEditTool } from '@/components/ResponseBody/blocks/DiffBlock/parseEditTool';
@@ -32,11 +33,11 @@ export function MessageRow({ msg, isLast, onAnswer }: MessageRowProps) {
     const copyText = decision.kind === 'text' ? decision.text : msg.content;
     return (
       <div className="group relative">
-        <div className="flex items-center gap-2 mb-0.5">
+        <Inline gap={2} className="mb-0.5">
           <ChevronRight size={12} className="text-accent" />
           <span className="text-xs text-accent font-medium">you</span>
           <span className="text-xs text-fg-subtle opacity-0 group-hover:opacity-100">{time}</span>
-        </div>
+        </Inline>
         {decision.kind === 'slash' ? (
           <SlashCommandMessage parsed={decision.message} />
         ) : (
@@ -54,11 +55,11 @@ export function MessageRow({ msg, isLast, onAnswer }: MessageRowProps) {
     const showCopy = hasContent && fileDiff === null;
     return (
       <div className="group relative ml-5">
-        <div className="flex items-center gap-2 mb-0.5">
+        <Inline gap={2} className="mb-0.5">
           <Wrench size={10} className="text-yellow-500" />
           <span className="text-xs text-yellow-500 font-mono">{msg.toolName || "tool"}</span>
           <span className="text-xs text-fg-subtle opacity-0 group-hover:opacity-100">{time}</span>
-        </div>
+        </Inline>
         {fileDiff && msg.toolName ? (
           <DiffBlock diff={fileDiff} toolName={msg.toolName} />
         ) : (
@@ -76,7 +77,7 @@ export function MessageRow({ msg, isLast, onAnswer }: MessageRowProps) {
 
   return (
     <div className="group relative">
-      <div className="flex items-center gap-2 mb-0.5">
+      <Inline gap={2} className="mb-0.5">
         {isAuthorization ? (
           <Shield size={12} className="text-yellow-400" />
         ) : (
@@ -86,7 +87,7 @@ export function MessageRow({ msg, isLast, onAnswer }: MessageRowProps) {
           {isAuthorization ? "authorization" : "agent"}
         </span>
         <span className="text-xs text-fg-subtle opacity-0 group-hover:opacity-100">{time}</span>
-      </div>
+      </Inline>
       <div className="ml-5">
         <ResponseBody content={msg.content} />
       </div>

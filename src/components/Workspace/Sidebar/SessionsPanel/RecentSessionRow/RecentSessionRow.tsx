@@ -1,5 +1,6 @@
 import { GitBranch, MessageSquare, Pin } from "lucide-react";
 
+import { Inline } from "@/components/_ui/Inline";
 import type { SessionSummary } from "@/hooks/useSessions";
 import { useConversationTitlesStore } from "@/store/useConversationTitlesStore";
 import { usePinnedStore } from "@/store/usePinnedStore";
@@ -44,7 +45,7 @@ export function RecentSessionRow({ session, selected, onSelect, onChanged }: Rec
           if (!selected) e.currentTarget.style.background = "transparent";
         }}
       >
-        <div className="flex items-center gap-2">
+        <Inline gap={2}>
           {isPinned ? <Pin size={10} style={{ color: "var(--color-accent)", flexShrink: 0 }} /> : null}
           <span
             className="text-xs font-medium truncate"
@@ -52,9 +53,10 @@ export function RecentSessionRow({ session, selected, onSelect, onChanged }: Rec
           >
             {label}
           </span>
-        </div>
-        <div
-          className="mt-1 flex items-center gap-2.5 text-[10px]"
+        </Inline>
+        <Inline
+          gap={2.5}
+          className="mt-1 text-[10px]"
           style={{
             color: "var(--color-text-muted)",
             fontFamily: "var(--font-mono)",
@@ -72,7 +74,7 @@ export function RecentSessionRow({ session, selected, onSelect, onChanged }: Rec
               {session.branch}
             </span>
           ) : null}
-        </div>
+        </Inline>
       </button>
     </div>
   );

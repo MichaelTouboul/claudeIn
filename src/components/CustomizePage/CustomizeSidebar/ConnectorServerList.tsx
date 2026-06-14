@@ -1,6 +1,8 @@
 import { Plus } from "lucide-react";
 
 import { Button } from "@/components/_ui/Button";
+import { Inline } from "@/components/_ui/Inline";
+import { Stack } from "@/components/_ui/Stack";
 import type { McpServerEntry } from "@/lib/types";
 
 export type ConnectorServerListProps = {
@@ -31,8 +33,8 @@ export function ConnectorServerList({
   const labelId = `connector-group-${label.toLowerCase().replace(/\s+/g, "-")}`;
 
   return (
-    <div className="flex flex-col gap-1">
-      <div className="flex items-center justify-between gap-2 px-1">
+    <Stack gap={1}>
+      <Inline gap={2} justify="between" className="px-1">
         <span
           id={labelId}
           className="text-[11px] uppercase tracking-wide"
@@ -50,7 +52,7 @@ export function ConnectorServerList({
         >
           <Plus size={14} />
         </Button>
-      </div>
+      </Inline>
       {servers.length === 0 ? (
         <p
           className="px-2 py-1.5 text-xs leading-relaxed"
@@ -59,7 +61,7 @@ export function ConnectorServerList({
           No connectors yet — use <span aria-hidden>＋</span> to add one.
         </p>
       ) : (
-        <ul role="listbox" aria-labelledby={labelId} className="flex flex-col gap-0.5">
+        <Stack as="ul" gap={0.5} role="listbox" aria-labelledby={labelId}>
           {servers.map((server) => {
             const key = serverKey(server);
             const selected = key === selectedKey;
@@ -86,8 +88,8 @@ export function ConnectorServerList({
               </li>
             );
           })}
-        </ul>
+        </Stack>
       )}
-    </div>
+    </Stack>
   );
 }

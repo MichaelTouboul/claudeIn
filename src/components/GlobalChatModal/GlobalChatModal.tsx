@@ -1,8 +1,10 @@
 import { MessageSquare,Minus, X } from "lucide-react";
-import { useState } from "react";
+import { type MouseEvent, useState } from "react";
 
 import { Button } from '@/components/_ui/Button';
 import { Dialog } from '@/components/_ui/Dialog';
+import { Flex } from '@/components/_ui/Flex';
+import { Inline } from '@/components/_ui/Inline';
 import { Input } from '@/components/_ui/Input';
 import { StatusDot } from '@/components/_ui/StatusDot';
 import { AgentChat } from '@/components/AgentChat/AgentChat';
@@ -20,19 +22,21 @@ export function GlobalChatModal({
 
   if (minimized) {
     return (
-      <button
+      <Inline
+        as="button"
+        gap={2}
         onClick={() => setMinimized(false)}
-        className="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-200 group"
+        className="fixed bottom-4 right-4 z-50 px-4 py-2.5 rounded-xl transition-all duration-200 group"
         style={{
           background: 'var(--color-surface-3)',
           border: '1px solid var(--color-border)',
           boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
         }}
-        onMouseEnter={(e) => {
+        onMouseEnter={(e: MouseEvent<HTMLButtonElement>) => {
           e.currentTarget.style.borderColor = 'rgba(6,182,212,0.2)';
           e.currentTarget.style.boxShadow = '0 4px 24px rgba(0,0,0,0.4), 0 0 12px rgba(6,182,212,0.08)';
         }}
-        onMouseLeave={(e) => {
+        onMouseLeave={(e: MouseEvent<HTMLButtonElement>) => {
           e.currentTarget.style.borderColor = 'var(--color-border)';
           e.currentTarget.style.boxShadow = '0 4px 24px rgba(0,0,0,0.4)';
         }}
@@ -40,7 +44,7 @@ export function GlobalChatModal({
         <MessageSquare size={14} style={{ color: 'var(--color-accent)' }} />
         <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>{title}</span>
         <StatusDot size="xs" pulse style={{ background: 'rgba(6,182,212,0.5)' }} />
-      </button>
+      </Inline>
     );
   }
 
@@ -54,11 +58,13 @@ export function GlobalChatModal({
           boxShadow: '0 8px 48px rgba(0,0,0,0.6), 0 0 1px rgba(6,182,212,0.1)',
         }}
       >
-        <div
-          className="flex items-center justify-between px-5 py-3.5 border-b rounded-t-2xl"
+        <Flex
+          align="center"
+          justify="between"
+          className="px-5 py-3.5 border-b rounded-t-2xl"
           style={{ background: 'var(--color-surface-3)', borderColor: 'var(--color-border)' }}
         >
-          <div className="flex items-center gap-2.5">
+          <Inline gap={2.5}>
             <MessageSquare size={15} style={{ color: 'var(--color-accent)' }} />
             {editingTitle ? (
               <Input
@@ -101,16 +107,16 @@ export function GlobalChatModal({
             >
               global
             </span>
-          </div>
-          <div className="flex items-center gap-0.5">
+          </Inline>
+          <Inline gap={0.5}>
             <Button intent="ghost" size="icon" onClick={() => setMinimized(true)} title="Minimize">
               <Minus size={14} />
             </Button>
             <Button intent="ghost" size="icon" onClick={onClose} title="Close" aria-label="Close chat">
               <X size={14} />
             </Button>
-          </div>
-        </div>
+          </Inline>
+        </Flex>
 
         <div className="flex-1 min-h-0 p-3">
           <AgentChat agentName="_main" />

@@ -1,3 +1,4 @@
+import { Stack } from '@/components/_ui/Stack';
 import { StatusDot } from '@/components/_ui/StatusDot';
 import type { WorkflowAgent } from '@/hooks/useSessionWorkflow';
 
@@ -50,7 +51,7 @@ function TreeAgentNode({
 export function WorkflowTree({ agents, onSelectAgent }: WorkflowViewProps) {
   return (
     <div role="tabpanel" aria-label="Tree" className="min-h-0 flex-1 overflow-auto p-3">
-      <ul role="tree" className="flex flex-col gap-1">
+      <Stack as="ul" gap={1} role="tree">
         <li role="treeitem" aria-selected={false} aria-label="Session">
           <div
             className="flex items-center gap-2 rounded-md px-2 py-1.5 text-xs font-semibold"
@@ -59,17 +60,19 @@ export function WorkflowTree({ agents, onSelectAgent }: WorkflowViewProps) {
             <StatusDot size="sm" style={{ background: 'var(--color-accent)' }} />
             Session
           </div>
-          <ul
+          <Stack
+            as="ul"
+            gap={1}
             role="group"
-            className="ml-3 mt-1 flex flex-col gap-1 border-l"
+            className="ml-3 mt-1 border-l"
             style={{ borderColor: 'var(--color-border)' }}
           >
             {agents.map((agent) => (
               <TreeAgentNode key={agent.agentName} agent={agent} onSelectAgent={onSelectAgent} />
             ))}
-          </ul>
+          </Stack>
         </li>
-      </ul>
+      </Stack>
     </div>
   );
 }

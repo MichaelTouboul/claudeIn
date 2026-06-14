@@ -1,5 +1,6 @@
 import { Loader2, X } from 'lucide-react';
 
+import { Inline } from '@/components/_ui/Inline';
 import { ResponseBody } from '@/components/ResponseBody/ResponseBody';
 
 import { AskPhase } from '../useDiffAsk';
@@ -35,13 +36,14 @@ export function DiffAskPopover({ phase, answer, onDismiss }: DiffAskPopoverProps
         <X size={13} />
       </button>
       {phase === AskPhase.Loading ? (
-        <div
-          className="flex items-center gap-2 text-xs"
+        <Inline
+          gap={2}
+          className="text-xs"
           style={{ color: 'var(--color-text-secondary)' }}
         >
           <Loader2 size={13} className="animate-spin" />
           Asking Claude…
-        </div>
+        </Inline>
       ) : (
         <div className="pr-5">
           <ResponseBody content={answer} />

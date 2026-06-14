@@ -2,6 +2,8 @@ import { Edit3, RefreshCw, Save, Star, Trash2, X } from 'lucide-react';
 
 import { Badge } from '@/components/_ui/Badge';
 import { Button } from '@/components/_ui/Button';
+import { Flex } from '@/components/_ui/Flex';
+import { Inline } from '@/components/_ui/Inline';
 import type { AgentFile } from '@/lib/types';
 
 export type DetailHeaderProps = {
@@ -45,8 +47,8 @@ export function DetailHeader({
         borderColor: editing ? 'rgba(6,182,212,0.2)' : 'var(--color-border)',
       }}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <Flex align="center" justify="between">
+        <Inline gap={3}>
           <span
             className="w-3 h-3 rounded-full"
             style={{ backgroundColor: `var(--agent-color, var(--color-accent))` }}
@@ -77,8 +79,8 @@ export function DetailHeader({
             >
               EDITING
             </span> : null}
-        </div>
-        <div className="flex gap-2">
+        </Inline>
+        <Flex gap={2}>
           {editing ? (
             <>
               <Button intent="outline" onClick={onCancel}>
@@ -112,7 +114,7 @@ export function DetailHeader({
                 Edit
               </Button>
               {confirmDelete ? (
-                <div className="flex items-center gap-2">
+                <Inline gap={2}>
                   <span className="text-xs text-danger" style={{ fontFamily: 'var(--font-mono)' }}>Confirm?</span>
                   <Button
                     intent="danger-solid"
@@ -124,7 +126,7 @@ export function DetailHeader({
                   <Button intent="ghost" size="icon" onClick={onCancelDelete} title="Cancel delete">
                     <X size={14} />
                   </Button>
-                </div>
+                </Inline>
               ) : (
                 <Button intent="danger" size="icon" onClick={onConfirmDelete} title="Delete agent">
                   <Trash2 size={14} />
@@ -132,8 +134,8 @@ export function DetailHeader({
               )}
             </>
           )}
-        </div>
-      </div>
+        </Flex>
+      </Flex>
       <div className="text-xs font-mono mt-1.5 text-fg-subtle">{agent.filePath}</div>
     </div>
   );

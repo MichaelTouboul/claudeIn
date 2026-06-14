@@ -1,4 +1,5 @@
 import { Button } from "@/components/_ui/Button";
+import { Flex } from "@/components/_ui/Flex";
 import { UserProfileView } from "@/components/UserProfileView/UserProfileView";
 import type { UserProfile } from "@/lib/types";
 
@@ -24,11 +25,11 @@ export function ProfileReviewStep({ profile, onSave, onConfirm }: ProfileReviewS
       subtitle="Review and adjust the details before continuing."
     >
       <UserProfileView profile={profile} onSave={onSave} />
-      <div className="flex justify-end">
+      <Flex justify="end">
         <Button intent="primary" size="md" onClick={onConfirm}>
           Confirm
         </Button>
-      </div>
+      </Flex>
     </OnbShell>
   );
 }

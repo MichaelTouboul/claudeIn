@@ -1,3 +1,5 @@
+import { Inline } from '@/components/_ui/Inline';
+import { Stack } from '@/components/_ui/Stack';
 import { StatusDot } from '@/components/_ui/StatusDot';
 import type { WorkflowAgent } from '@/hooks/useSessionWorkflow';
 import { AgentPresenceStatus } from '@/store/useEventsStore';
@@ -24,25 +26,27 @@ function totalTokens(agent: WorkflowAgent): number {
 function BoardCard({ agent, onSelectAgent }: { agent: WorkflowAgent; onSelectAgent: WorkflowViewProps['onSelectAgent'] }) {
   const presentation = AGENT_PRESENTATION[agent.status];
   return (
-    <button
+    <Stack
+      as="button"
+      gap={1}
       type="button"
       onClick={() => onSelectAgent(agent.agentName)}
-      className="flex w-full flex-col gap-1 rounded-md border px-2.5 py-2 text-left text-xs transition-colors hover:bg-surface-2"
+      className="w-full rounded-md border px-2.5 py-2 text-left text-xs transition-colors hover:bg-surface-2"
       style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
     >
-      <span className="flex items-center gap-2">
+      <Inline as="span" gap={2}>
         <StatusDot
           size="sm"
           pulse={presentation.dot}
           style={{ background: presentation.colorVar }}
         />
         <span className="truncate font-medium">{agent.agentName}</span>
-      </span>
-      <span className="flex items-center justify-between gap-2" style={{ color: 'var(--color-text-muted)' }}>
+      </Inline>
+      <Inline as="span" gap={2} justify="between" style={{ color: 'var(--color-text-muted)' }}>
         <span className="truncate font-mono">{agent.tool ?? '—'}</span>
         <span className="shrink-0 tabular-nums">{totalTokens(agent).toLocaleString()} tok</span>
-      </span>
-    </button>
+      </Inline>
+    </Stack>
   );
 }
 

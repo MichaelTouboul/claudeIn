@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { Stack } from "@/components/_ui/Stack";
+
 type ProfileRowProps = {
   label: string;
   children: ReactNode;
@@ -8,14 +10,14 @@ type ProfileRowProps = {
 /** A labelled read-only profile row (label column + value). */
 export function ProfileRow({ label, children }: ProfileRowProps) {
   return (
-    <div className="flex flex-col gap-1">
+    <Stack gap={1}>
       <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
         {label}
       </span>
       <div className="text-sm text-fg" style={{ fontFamily: "var(--font-sans)" }}>
         {children}
       </div>
-    </div>
+    </Stack>
   );
 }
 

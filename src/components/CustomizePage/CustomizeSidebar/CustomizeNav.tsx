@@ -1,6 +1,7 @@
 import { Plug, Sparkles } from "lucide-react";
 import type { KeyboardEvent, ReactNode } from "react";
 
+import { Stack } from "@/components/_ui/Stack";
 import { CustomizeSection } from "@/store/useCustomizeStore";
 
 export type CustomizeNavProps = {
@@ -44,11 +45,11 @@ export function CustomizeNav({ active, onSelect }: CustomizeNavProps) {
   };
 
   return (
-    <div
+    <Stack
+      gap={0.5}
       role="tablist"
       aria-label="Customize sections"
       aria-orientation="vertical"
-      className="flex flex-col gap-0.5"
     >
       {SECTIONS.map((section) => {
         const { label, icon } = NAV_PRESENTATION[section];
@@ -74,6 +75,6 @@ export function CustomizeNav({ active, onSelect }: CustomizeNavProps) {
           </button>
         );
       })}
-    </div>
+    </Stack>
   );
 }

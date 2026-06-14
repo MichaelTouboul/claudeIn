@@ -1,4 +1,5 @@
 import { Button } from "@/components/_ui/Button";
+import { Flex } from "@/components/_ui/Flex";
 
 import { OnbShell } from "../OnbShell/OnbShell";
 
@@ -18,11 +19,11 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
         ClaudeIn analyzes your local Claude Code setup to give you a tailored experience. None of
         your data leaves your machine.
       </p>
-      <div className="flex justify-end">
+      <Flex justify="end">
         <Button intent="primary" size="md" onClick={onNext}>
           Get started
         </Button>
-      </div>
+      </Flex>
     </OnbShell>
   );
 }

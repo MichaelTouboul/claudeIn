@@ -1,6 +1,7 @@
 import { X } from 'lucide-react';
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 
+import { Flex } from '@/components/_ui/Flex';
 import { maxPanelWidth, MIN_PANEL_WIDTH, usePanelStore } from '@/store/usePanelStore';
 
 import { PanelResizeHandle } from './PanelResizeHandle';
@@ -107,17 +108,20 @@ export function UtilityPanel() {
         >
           {current?.title ?? ''}
         </span>
-        <button
+        <Flex
+          as="button"
+          align="center"
+          justify="center"
           onClick={close}
           title="Close"
           aria-label="Close panel"
-          className="flex items-center justify-center w-7 h-7 rounded-md shrink-0"
+          className="w-7 h-7 rounded-md shrink-0"
           style={{ color: 'var(--color-text-muted)' }}
           onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-surface-2)')}
           onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
         >
           <X size={15} />
-        </button>
+        </Flex>
       </div>
       <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
         {current && Body ? (
