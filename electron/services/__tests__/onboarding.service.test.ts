@@ -74,4 +74,22 @@ describe("scanCandidates", () => {
     const c = byPath(found).get(tmpRoot);
     expect(c).toMatchObject({ path: tmpRoot, scope: "user", hasClaude: true });
   });
+
+  it("descends THROUGH a root that has its own .claude to find child project repos", async () => {
+    // The root itself is a user-scope candidate (like $HOME/.claude) AND has
+    // child dirs each with their own .claude — the children must still surface
+    // as project candidates (the "No repositories found" regression).
+    mkClaude(tmpRoot);
+    const childA = path.join(tmpRoot, "repo-a");
+    const childB = path.join(tmpRoot, "ai-gateway");
+    mkClaude(childA);
+    mkClaude(childB);
+
+    const found = await scanCandidates(tmpRoot);
+    const map = byPath(found);
+
+    expect(map.get(tmpRoot)).toMatchObject({ path: tmpRoot, scope: "user" });
+    expect(map.get(childA)).toMatchObject({ path: childA, scope: "project", hasClaude: true });
+    expect(map.get(childB)).toMatchObject({ path: childB, scope: "project", hasClaude: true });
+  });
 });

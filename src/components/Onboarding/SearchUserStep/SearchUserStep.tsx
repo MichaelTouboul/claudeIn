@@ -2,12 +2,12 @@ import { type ReactElement, useCallback } from "react";
 
 import { Button } from "@/components/_ui/Button";
 import { Flex } from "@/components/_ui/Flex";
-import { Progress } from "@/components/_ui/Progress";
 import type { UserProfile } from "@/lib/types";
 
 import { OnbShell } from "../OnbShell/OnbShell";
 import { SearchPhase } from "./searchPhase";
 import { useUserSearch } from "./useUserSearch";
+import { WorkingView } from "./WorkingView";
 
 type SearchUserStepProps = {
   /** Receives the built profile; the page advances to ProfileReview. */
@@ -29,12 +29,7 @@ export function SearchUserStep({ onProfile }: SearchUserStepProps) {
   }, [buildFrom]);
 
   const view: Record<SearchPhase, () => ReactElement> = {
-    [SearchPhase.Working]: () => (
-      <>
-        <p className="text-sm text-fg-muted">Analyzing your setup…</p>
-        <Progress value={0.6} fillColor="var(--color-accent)" className="h-1.5 w-full" />
-      </>
-    ),
+    [SearchPhase.Working]: () => <WorkingView />,
     [SearchPhase.LocateFailed]: () => (
       <>
         <p className="text-sm text-fg-muted">

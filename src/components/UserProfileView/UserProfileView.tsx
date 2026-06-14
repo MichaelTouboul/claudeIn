@@ -5,7 +5,8 @@ import { Inline } from "@/components/_ui/Inline";
 import { Stack } from "@/components/_ui/Stack";
 import type { UserProfile } from "@/lib/types";
 
-import { ProfileRow, TagList } from "./ProfileRow";
+import { ProfileHeader } from "./ProfileHeader";
+import { ProfileSection, TagList } from "./ProfileRow";
 import { UserProfileEdit } from "./UserProfileEdit";
 
 type UserProfileViewProps = {
@@ -13,15 +14,12 @@ type UserProfileViewProps = {
   onSave: (next: UserProfile) => Promise<UserProfile>;
 };
 
-function caps(profile: UserProfile): string {
-  const { agents, skills, mcp, hooks } = profile.capabilities;
-  return `${agents.count} agents · ${skills} skills · ${mcp} MCP · ${hooks} hooks`;
-}
-
 /**
- * Read + inline-edit view of the user profile. Deterministic fields (paths,
- * counts, plugins) are read-only; narrative + identity fields are editable via
- * `UserProfileEdit`. Reused on Home and (later) the onboarding ProfileReview.
+ * Read + inline-edit view of the user profile. A header identity block (name,
+ * role, path, capability chips, plugins) sits above readable narrative sections
+ * (Summary / Domains / Workflow). Deterministic fields are read-only; narrative +
+ * identity fields are editable via `UserProfileEdit`. Reused on Home and the
+ * onboarding ProfileReview.
  */
 export function UserProfileView({ profile, onSave }: UserProfileViewProps) {
   const [editing, setEditing] = useState(false);
@@ -55,28 +53,19 @@ export function UserProfileView({ profile, onSave }: UserProfileViewProps) {
         </Button>
       </Inline>
 
-      <ProfileRow label="Identity">
-        <span>{profile.name ?? "—"}</span>
-        {profile.role !== null ? <span className="text-fg-subtle"> · {profile.role}</span> : null}
-      </ProfileRow>
-      <ProfileRow label=".claude folder">
-        <span style={{ fontFamily: "var(--font-mono)" }}>{profile.claudeUserPath ?? "—"}</span>
-      </ProfileRow>
-      <ProfileRow label="Plugins">
-        <TagList items={profile.plugins} empty="none" />
-      </ProfileRow>
-      <ProfileRow label="Capabilities">
-        <span style={{ fontFamily: "var(--font-mono)" }}>{caps(profile)}</span>
-      </ProfileRow>
-      <ProfileRow label="Summary">
-        <span>{profile.summary ?? "—"}</span>
-      </ProfileRow>
-      <ProfileRow label="Domains">
-        <TagList items={profile.domains} empty="—" />
-      </ProfileRow>
-      <ProfileRow label="Workflow">
-        <span>{profile.workflow ?? "—"}</span>
-      </ProfileRow>
+      <ProfileHeader profile={profile} />
+
+      <Stack gap={4} className="border-t border-border-subtle pt-4">
+        <ProfileSection label="Summary">
+          <p className="max-w-prose leading-relaxed text-fg-muted">{profile.summary ?? "—"}</p>
+        </ProfileSection>
+        <ProfileSection label="Domains">
+          <TagList items={profile.domains} empty="—" />
+        </ProfileSection>
+        <ProfileSection label="Workflow">
+          <p className="max-w-prose leading-relaxed text-fg-muted">{profile.workflow ?? "—"}</p>
+        </ProfileSection>
+      </Stack>
     </Stack>
   );
 }
