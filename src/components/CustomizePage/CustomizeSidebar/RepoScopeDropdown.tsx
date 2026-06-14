@@ -1,7 +1,7 @@
 import { Select } from "@/components/_ui/Select";
 import { Stack } from "@/components/_ui/Stack";
-import { repoLabel } from "@/components/HomePage/openFavorite";
 import type { FavoriteRepo } from "@/lib/types";
+import { repoLabel } from "@/lib/utils";
 
 export type RepoScopeDropdownProps = {
   repos: FavoriteRepo[];

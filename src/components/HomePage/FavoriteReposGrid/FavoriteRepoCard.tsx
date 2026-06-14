@@ -1,8 +1,7 @@
 import { Button } from "@/components/_ui/Button";
 import { Inline } from "@/components/_ui/Inline";
 import type { FavoriteRepo } from "@/lib/types";
-
-import { repoLabel } from "../openFavorite";
+import { repoLabel } from "@/lib/utils";
 
 type FavoriteRepoCardProps = {
   repo: FavoriteRepo;

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { projectForFavorite, repoLabel } from "@/components/HomePage/openFavorite";
 import type { FavoriteRepo,Project  } from "@/lib/types";
+import { projectForFavorite, repoLabel } from "@/lib/utils";
 
 function repo(path: string, label: string | null = null): FavoriteRepo {
   return { path, label, addedAt: "2026-06-11T00:00:00Z" };

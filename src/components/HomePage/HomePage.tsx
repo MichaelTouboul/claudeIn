@@ -7,13 +7,13 @@ import { useFavoriteRepos } from "@/hooks/useFavoriteRepos";
 import { useProjects } from "@/hooks/useProjects";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import type { FavoriteRepo } from "@/lib/types";
+import { projectForFavorite } from "@/lib/utils";
 import { AppPage, useAppStore } from "@/store/useAppStore";
 import { useWorkspaceStore } from "@/store/useWorkspaceStore";
 
 import { FavoriteReposGrid } from "./FavoriteReposGrid/FavoriteReposGrid";
 import { HomeActions } from "./HomeActions/HomeActions";
 import { HomeGreeting } from "./HomeGreeting/HomeGreeting";
-import { projectForFavorite } from "./openFavorite";
 
 /**
  * Home page (layout A — stacked sections): greeting + profile link, a favorite-
