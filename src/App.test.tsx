@@ -9,16 +9,16 @@ import App from "./App";
 
 // Mock the three pages so the router decision is observed in isolation, without
 // pulling in the heavy Dashboard subtree.
-vi.mock("@/components/OnboardingPage/OnboardingPage", () => ({
+vi.mock("@/pages/OnboardingPage/OnboardingPage", () => ({
   OnboardingPage: () => <div data-testid="onboarding-page" />,
 }));
-vi.mock("@/components/HomePage/HomePage", () => ({
+vi.mock("@/pages/HomePage/HomePage", () => ({
   HomePage: () => <div data-testid="home-page" />,
 }));
-vi.mock("@/components/DashboardPage/DashboardPage", () => ({
+vi.mock("@/pages/DashboardPage/DashboardPage", () => ({
   DashboardPage: () => <div data-testid="dashboard-page" />,
 }));
-vi.mock("@/components/CustomizePage/CustomizePage", () => ({
+vi.mock("@/pages/CustomizePage/CustomizePage", () => ({
   CustomizePage: () => <div data-testid="customize-page" />,
 }));
 

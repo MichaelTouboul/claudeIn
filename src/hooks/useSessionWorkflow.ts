@@ -1,5 +1,5 @@
 import type { LiveEvent } from "@/lib/types";
-import { AgentPresenceStatus, useEventsStore } from "@/store/useEventsStore";
+import { AgentPresenceStatus, useEventsStore } from "@/store/dashboard/useEventsStore";
 
 import { buildSegments } from "./useSessionWorkflow.segments";
 

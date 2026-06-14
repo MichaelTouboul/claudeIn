@@ -44,11 +44,12 @@ Two process boundaries in Electron:
 
 ### Renderer — `src/`
 
-- **`src/App.tsx`** — root component
-- **`src/components/`** — UI components; feature components live at the root, generic primitives in `src/components/_ui/`
-- **`src/hooks/`** — `useIPC.ts`, `useSessions.ts`, `useProjects.ts`, `useFavorites.ts`, etc.
+- **`src/App.tsx`** — root component (a `PAGE_VIEW` map renders the current page)
+- **`src/pages/`** — the page **entry** components, one folder per page (`pages/{Onboarding,Home,Dashboard,Customize}Page/`)
+- **`src/components/`** — UI components grouped per page (`components/{Onboarding,Home,Customize,Dashboard}/`); shared/app-mounted components at the root; generic primitives in `src/components/_ui/`
+- **`src/hooks/`** — `useIPC.ts`, `useSessions.ts`, `useProjects.ts`, `useFavorites.ts`, etc. (flat — shared across pages)
 - **`src/services/api.ts`** — thin wrapper over `window.api`
-- **`src/store/useAppStore.ts`** — global state with zustand
+- **`src/store/`** — zustand state; app-global stores at the root (`useAppStore`, …), per-page stores under `store/dashboard/` and `store/customize/`
 - **`src/env.d.ts`** — TypeScript declaration of `window.api` (the IPC contract)
 - **`src/index.css`** — design system CSS custom properties
 - **`src/lib/`** — framework-agnostic helpers split into `lib/utils/` + `lib/types/` (each with a barrel); `cn()` lives at `src/lib/utils/cn.ts`

@@ -7,22 +7,22 @@ This is the **sandboxed** side: Chromium + React 19, the UI. It has **no Node ac
 ## Layout
 
 - **`App.tsx`** — root component (one of the only allowed default exports, with `main.tsx`).
-- **`components/`** — feature components at the root; generic primitives in **`components/_ui/`**.
-- **`hooks/`** — `useIPC.ts`, `useSessions.ts`, `useProjects.ts`, `useFavorites.ts`, …
+- **`pages/`** — the page **entry** components only, one folder per page: `pages/{Onboarding,Home,Dashboard,Customize}Page/<Page>Page.tsx` (+ `pages/__tests__/<Page>/` mirror for the page-entry tests). `App.tsx`'s `PAGE_VIEW` map renders them. A page's child components do **not** live here — they live under `components/<Page>/` (see Component placement).
+- **`components/`** — feature components grouped **per page** (`components/{Onboarding,Home,Customize,Dashboard}/`); generic primitives in **`components/_ui/`**; shared/app-mounted components stay at the `components/` root (see Component placement).
+- **`hooks/`** — `useIPC.ts`, `useSessions.ts`, `useProjects.ts`, `useFavorites.ts`, … (kept **flat** — several hooks are shared across pages).
 - **`services/api.ts`** — thin wrapper over `window.api`. **All** back communication goes through here.
-- **`store/useAppStore.ts`** — global state (zustand only — no React contexts here).
+- **`store/`** — zustand stores (no React contexts here). App-global/shared stores sit at the root (`useAppStore`, `useImproveStore`, `useImproveModalStore`, `useWorkspaceStore`); per-page stores are grouped under `store/dashboard/` and `store/customize/` (see Store placement).
 - **`contexts/`** — React contexts (e.g. `ProjectContext`), the home for `createContext` providers/hooks. Distinct from `store/` (zustand).
-- **`pages/`** — top-level views.
 - **`env.d.ts`** — TypeScript declaration of `window.api` (the IPC contract the front sees).
 - **`lib/`** — framework-agnostic helpers, split into **`lib/utils/`** (functions) and **`lib/types/`** (shared types), each with an `index.ts` barrel. See "lib structure" below.
 - **`index.css`** — design system CSS custom properties. **`lib/utils/cn.ts`** — `cn()` (`clsx` + `tailwind-merge`).
 
 ### App shell
 
-`App.tsx` is a thin, fixed `h-full flex flex-col` shell (no page scroll — only inner panes scroll): `Header` · `Workspace` (flex-1) · `Footer`. The shell tree:
+`DashboardPage` is a thin, fixed `h-full flex flex-col` shell (no page scroll — only inner panes scroll): `Header` · `Workspace` (flex-1) · `Footer`. The shell components belong to the Dashboard page, so they live under `components/Dashboard/`:
 
 ```
-components/
+components/Dashboard/
 ├── Header/                  ← top bar (logo, ProjectSwitcher, StatsBar, Chat)
 ├── Footer/                  ← thin status band (placeholder for now)
 └── Workspace/               ← middle shell
@@ -33,6 +33,8 @@ components/
         ├── Dashboard/       ← InternalTabBar, DashboardSurface (keep-alive tab bodies), LauncherView, UtilityPanel, SkillDetail, ChatTab
         └── Console/         ← terminal / events panel (TerminalView)
 ```
+
+(`components/Dashboard/Header/` holds the Dashboard top bar's `Header.tsx`; the App-mounted `Header/ImproveNotification` overlay stays at the `components/` root — see Component placement.)
 
 ## Talking to the back
 
@@ -61,9 +63,13 @@ components/
 - One folder per component; folder name = component name. A `.css` file exists **only when the component has its own styles** — never create an empty one.
 - A component used by a **single parent** lives **inside that parent's folder**. Two independently-used components are **sibling folders**.
 - **Promotion rule:** as soon as a child is used by **more than one parent**, promote it → to `_ui/` if it's a generic primitive, otherwise to `components/` root (sibling of its former parents).
-- **Nesting follows real ownership — no hard depth cap.** Nest a single-owner child inside its true parent **even at depth 3–4** if that's where the component hierarchy actually puts it (e.g. `Workspace/DashboardArea/Dashboard/InternalTabBar/`). The folder tree must mirror the component tree; do **not** hoist a single-owner child to the root just to stay shallow. (This is folder depth only — the 300-line file limit and code-nesting concerns are separate.) Depth beyond ~4 is a smell worth questioning the component decomposition, not a rule violation.
+- **Nesting follows real ownership — no hard depth cap.** Nest a single-owner child inside its true parent **even at depth 3–4** if that's where the component hierarchy actually puts it (e.g. `Dashboard/Workspace/DashboardArea/Dashboard/InternalTabBar/`). The folder tree must mirror the component tree; do **not** hoist a single-owner child to the root just to stay shallow. (This is folder depth only — the 300-line file limit and code-nesting concerns are separate.) Depth beyond ~4 is a smell worth questioning the component decomposition, not a rule violation.
 - `_ui/` holds **reusable primitives with no domain knowledge**. **Only** `_ui/` components get an `index.ts` barrel; feature components do not.
-- Do **not** apply one-folder-per-thing to `hooks/`, `services/`, `store/`, `types/` — their **source files** stay flat (the only structure they gain is a `__tests__/`, see "Tests" below). One-folder-per-thing is for components only.
+- Do **not** apply one-folder-per-thing to `hooks/`, `services/`, `store/`, `types/` — their **source files** stay flat. `hooks/`, `services/`, `types/` keep a single flat folder; `store/` files are flat **within** their grouping folder (root / `dashboard/` / `customize/`, see "Store placement"). The only structure these areas gain is a `__tests__/` (see "Tests" below). One-folder-per-thing is for components only.
+
+### Per-page grouping
+
+Feature components are grouped by the page that owns them — `components/{Onboarding,Home,Customize,Dashboard}/` — while the page **entry** lives in `pages/<Page>Page/` (see Layout). A component owned by exactly one page lives under that page's `components/<Page>/` folder (then nested by ownership inside it). A component shared by **two or more pages**, or mounted by the `App` shell itself, stays at the **`components/` root** (e.g. `UserProfileView` — Onboarding+Home; `DevReset` — Home+Dashboard; `ImproveModal` and `Header/ImproveNotification` — App-mounted overlays). The same promotion rule applies one level up: a single-page component that becomes used by a second page is promoted from `components/<Page>/` to the `components/` root.
 
 When a component file nears 300 lines, split it (front-specific targets, see root for the general rule): extract sub-components into their own folders, then custom hooks into `hooks/`, then helpers/types into sibling files.
 
@@ -84,12 +90,38 @@ lib/
 - **No top-level `lib/index.ts` barrel.** We want imports to name their category explicitly, not collapse everything behind one `@/lib`.
 - **`lib/types/` is the single home for shared renderer types** — there is no `src/types/`. The **only** exception is **component-local types** (a component's own `types.ts`), which stay next to the component (see "Component placement"). New shared types go in `lib/types/<name>.types.ts` and get re-exported from its `index.ts`.
 
+## Store placement
+
+`store/` mirrors the page split that `components/` uses, but only one level deep (the files stay flat within each group — no one-folder-per-store):
+
+```
+store/
+├── useAppStore.ts            ← app-global / shared stores stay at the root:
+├── useImproveStore.ts          useAppStore, useImproveStore, useImproveModalStore, useWorkspaceStore
+├── useImproveModalStore.ts
+├── useWorkspaceStore.ts
+├── dashboard/                ← stores owned by the Dashboard page
+│   ├── useEventsStore.ts  usePanelStore.ts  useConsoleStore.ts  useDashboardStore.ts
+│   ├── useDashboardUIStore.ts  useModelStore.ts  useConversationStatusStore.ts
+│   ├── useConversationTitlesStore.ts  useAgentDismissStore.ts  useFavoritesStore.ts
+│   ├── useWorkflowViewStore.ts  usePinnedStore.ts
+│   └── __tests__/
+└── customize/                ← stores owned by the Customize page
+    ├── useCustomizeStore.ts
+    └── __tests__/
+```
+
+- Import via the real (grouped) path: `@/store/dashboard/useEventsStore`, `@/store/customize/useCustomizeStore`, `@/store/useAppStore` for the root ones. There is no store barrel.
+- A store used app-wide or by 2+ pages lives at the **root**; a single-page store lives in that page's group. Promote root-ward if a grouped store gains a second page consumer.
+
 ## Tests live in `__tests__/`
 
 Test files are **never co-located** in the source listing — they pollute the tree and bury the real files. Each area keeps its tests in a `__tests__/` folder:
 
-- **`store/`, `hooks/`, `lib/`** — one `__tests__/` at the folder root (sources stay flat next to it).
-- **`components/`** — a single **`components/__tests__/` that mirrors the component tree** (`components/__tests__/Workspace/DashboardArea/Console/Console.test.tsx`). Component tests reference sources via **`@/` aliases**, never deep `../../../` relatives — the alias is stable regardless of how deep the mirror goes.
+- **`hooks/`, `lib/`** — one `__tests__/` at the folder root (sources stay flat next to it).
+- **`store/`** — a `__tests__/` per grouping folder (`store/__tests__/` for the root stores, `store/dashboard/__tests__/`, `store/customize/__tests__/`); sources stay flat next to each.
+- **`pages/`** — `pages/__tests__/<Page>/` mirrors the page entries.
+- **`components/`** — a single **`components/__tests__/` that mirrors the component tree** (`components/__tests__/Dashboard/Workspace/DashboardArea/Console/Console.test.tsx`). Component tests reference sources via **`@/` aliases**, never deep `../../../` relatives — the alias is stable regardless of how deep the mirror goes.
 
 ## Design system
 

@@ -1,6 +1,6 @@
-import { dismissKey, useAgentDismissStore } from "@/store/useAgentDismissStore";
-import { useDashboardStore } from "@/store/useDashboardStore";
-import { AgentPresenceStatus, useEventsStore } from "@/store/useEventsStore";
+import { dismissKey, useAgentDismissStore } from "@/store/dashboard/useAgentDismissStore";
+import { useDashboardStore } from "@/store/dashboard/useDashboardStore";
+import { AgentPresenceStatus, useEventsStore } from "@/store/dashboard/useEventsStore";
 
 // Re-export the store's presence enum under the hook's public name so callers
 // (AgentTabs) keep a single import surface. There is ONE authoritative status

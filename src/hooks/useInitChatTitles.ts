@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-import { useConversationTitlesStore } from '@/store/useConversationTitlesStore';
+import { useConversationTitlesStore } from '@/store/dashboard/useConversationTitlesStore';
 
 type ConversationTitledEvent = {
   type?: string;
