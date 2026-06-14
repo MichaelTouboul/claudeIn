@@ -33,16 +33,20 @@ async function makeCandidate(dir: string, root: string): Promise<Candidate> {
 /**
  * Discover repos with a root-level `.claude` under `root` (default `$HOME`).
  * Depth-limited and skip-list-bounded via the shared `project.service` constants.
- * A found candidate is NOT descended into, so a nested `.claude` is never a
- * separate candidate. The scan root itself (or `$HOME`) maps to `user` scope.
+ * The root is always descended into (so child repos under `$HOME` are listed)
+ * even when it has its own `.claude`; a NON-root found candidate is not descended
+ * into, so a nested `.claude` is never a separate candidate. The scan root itself
+ * (or `$HOME`) maps to `user` scope.
  */
 export async function scanCandidates(root: string = HOME): Promise<Candidate[]> {
   const candidates: Candidate[] = [];
 
   async function walk(dir: string, depth: number) {
-    if (await exists(path.join(dir, ".claude"))) {
+    const hasClaude = await exists(path.join(dir, ".claude"));
+    if (hasClaude) {
       candidates.push(await makeCandidate(dir, root));
-      return; // do not descend into a found candidate
+      // Record the root but still descend THROUGH it; stop at nested candidates.
+      if (dir !== root) return;
     }
     if (depth >= PROJECT_SCAN_DEPTH) return;
     try {
