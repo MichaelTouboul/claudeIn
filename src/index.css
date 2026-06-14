@@ -136,6 +136,25 @@
 .agent-color-purple { --agent-color: #a855f7; }
 .agent-color-pink { --agent-color: #ec4899; }
 
+/* --- Indeterminate progress (onboarding "analyzing" bar) --- */
+@keyframes progress-indeterminate {
+  0% {
+    transform: translateX(-100%) scaleX(0.4);
+  }
+  50% {
+    transform: translateX(20%) scaleX(0.6);
+  }
+  100% {
+    transform: translateX(220%) scaleX(0.4);
+  }
+}
+
+.progress-indeterminate {
+  width: 60%;
+  transform-origin: left;
+  animation: progress-indeterminate 1.4s ease-in-out infinite;
+}
+
 /* --- Top bar native drag region --- */
 .titlebar-drag {
   -webkit-app-region: drag;
