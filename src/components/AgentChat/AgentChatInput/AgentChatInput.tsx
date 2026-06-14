@@ -154,7 +154,7 @@ export function AgentChatInput({
                   className="flex items-center gap-1 text-[11px] px-2 py-1 rounded-lg"
                   style={{
                     background: "rgba(255,255,255,0.05)",
-                    color: "#9ca3af",
+                    color: "var(--color-neutral-fg)",
                     border: "1px solid rgba(255,255,255,0.1)",
                   }}
                 >
@@ -167,7 +167,7 @@ export function AgentChatInput({
                 title="Remove attachment"
                 aria-label="Remove attachment"
                 className="absolute -top-1.5 -right-1.5 p-0.5 rounded-full opacity-0 group-hover/attach:opacity-100 transition-opacity"
-                style={{ background: "#374151", color: "#d1d5db" }}
+                style={{ background: "var(--color-neutral-bg)", color: "var(--color-neutral-fg-strong)" }}
               >
                 <X size={10} />
               </button>
@@ -190,7 +190,7 @@ export function AgentChatInput({
       <AgentTabs claudeSessionId={claudeSessionId} orchestratorName={agentName} />
 
       <div className="flex gap-2 items-end">
-        <div className={`flex items-center text-sm shrink-0 pt-1.5 ${waitingInput ? "text-yellow-400" : "text-accent"}`}>
+        <div className={`flex items-center text-sm shrink-0 pt-1.5 ${waitingInput ? "text-[var(--color-warning)]" : "text-accent"}`}>
           <ChevronRight size={14} />
         </div>
         <RichEditor

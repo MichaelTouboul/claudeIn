@@ -32,6 +32,17 @@
 
   --color-active: #4ade80;
   --color-danger: #f87171;
+  /* Status hues — semantic, used by icons/labels (warning = tool/auth, info =
+     sub-agent, history = memory/history). Tokenized so no component carries a
+     raw color value; same visible hues the UI already used. */
+  --color-warning: #facc15;
+  --color-info: #60a5fa;
+  --color-history: #c084fc;
+
+  /* Neutral grays for the attachment chip (preserved exact values). */
+  --color-neutral-fg: #9ca3af;
+  --color-neutral-bg: #374151;
+  --color-neutral-fg-strong: #d1d5db;
 
   --font-sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;

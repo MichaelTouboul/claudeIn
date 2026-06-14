@@ -27,7 +27,7 @@ function SizeGauge({ label, current, max, unit }: { label: string; current: numb
     "var(--color-accent)";
   const textColor =
     percent >= 90 ? "text-danger" :
-    percent >= 70 ? "text-yellow-400" :
+    percent >= 70 ? "text-[var(--color-warning)]" :
     "text-fg-muted";
 
   return (
@@ -120,7 +120,7 @@ function MemoryFileCard({
           {isIndex ? <div className="space-y-1.5 mt-3 mb-3">
               <SizeGauge label="Lines" current={lines} max={MAX_LINES} unit="lines" />
               <SizeGauge label="Size" current={bytes} max={MAX_BYTES} unit="B" />
-              {lines > MAX_LINES * 0.8 ? <div className="flex items-center gap-1.5 text-[10px] text-yellow-400/90 mt-1">
+              {lines > MAX_LINES * 0.8 ? <div className="flex items-center gap-1.5 text-[10px] text-[var(--color-warning)]/90 mt-1">
                   <AlertTriangle size={10} />
                   Approaching limit — content past line {MAX_LINES} is truncated at session start
                 </div> : null}

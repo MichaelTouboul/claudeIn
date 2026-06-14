@@ -32,7 +32,7 @@ export function AgentRow({
       <button
         onClick={() => onSelect(agent)}
         className={`relative flex-1 flex items-center gap-2 px-3 py-2 rounded-lg transition-colors overflow-hidden ${
-          selected ? "bg-surface-3 text-white" : "text-fg hover:bg-surface-2"
+          selected ? "bg-surface-3 text-fg" : "text-fg hover:bg-surface-2"
         }`}
       >
         {active && context && context.percent > 0 ? <ContextBar percent={context.percent} tokensIn={context.tokensIn} tokensOut={context.tokensOut} costUsd={context.costUsd} /> : null}

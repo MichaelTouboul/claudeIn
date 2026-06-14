@@ -28,7 +28,7 @@ export function SkillRow({
       <button
         onClick={() => onSelect(skill)}
         className={`flex-1 flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors ${
-          selected ? "bg-surface-3 text-white" : "text-fg hover:bg-surface-2"
+          selected ? "bg-surface-3 text-fg" : "text-fg hover:bg-surface-2"
         }`}
       >
         <Wrench size={11} className="text-active shrink-0" />

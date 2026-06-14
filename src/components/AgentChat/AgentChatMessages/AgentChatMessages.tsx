@@ -36,7 +36,7 @@ export function AgentChatMessages({
           <div className="text-center">
             <Terminal size={32} className="text-fg-subtle mx-auto mb-2" />
             <p className="text-fg-subtle text-xs">Type a prompt to start a session with <span className="text-accent">{agentName}</span></p>
-            <p className="text-fg-subtle text-xs mt-1">Type <span className="text-yellow-500">/</span> for commands</p>
+            <p className="text-fg-subtle text-xs mt-1">Type <span className="text-[var(--color-warning)]">/</span> for commands</p>
           </div>
         </div>
       ) : null}
