@@ -1,4 +1,4 @@
-import type { McpSource, McpTransport } from '@/types/mcp-mirror.types';
+import type { McpSource, McpTransport } from '@/lib/types';
 
 /**
  * Presentation behavior maps for the MCP view.

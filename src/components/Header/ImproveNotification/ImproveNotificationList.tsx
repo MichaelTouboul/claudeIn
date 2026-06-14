@@ -1,4 +1,4 @@
-import type { ImproveRequest } from "@/types/improve.types";
+import type { ImproveRequest } from "@/lib/types";
 
 import { ImproveNotificationItem } from "./ImproveNotificationItem";
 

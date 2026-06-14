@@ -4,9 +4,8 @@ import type {
   McpAddInput,
   McpManageScope,
   McpMutationResult,
-  McpServerRaw,
-} from "@/types/mcp-manage.types";
-import type { McpServerEntry } from "@/types/mcp-mirror.types";
+McpServerEntry, 
+  McpServerRaw} from "@/lib/types";
 
 import { McpAddDialog } from "./McpAddDialog";
 import { McpRawConfig } from "./McpRawConfig";

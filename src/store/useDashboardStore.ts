@@ -1,9 +1,6 @@
 import { create } from "zustand";
 
-import type { AgentSummary } from "@/types/agents-mirror.types";
-import type { HookConfig, Project } from "@/types/dashboard.types";
-import type { McpServerEntry } from "@/types/mcp-mirror.types";
-import type { SkillSummary } from "@/types/skills-mirror.types";
+import type { AgentSummary, HookConfig, McpServerEntry , Project , SkillSummary  } from "@/lib/types";
 
 type DashboardState = {
   project: Project | null;

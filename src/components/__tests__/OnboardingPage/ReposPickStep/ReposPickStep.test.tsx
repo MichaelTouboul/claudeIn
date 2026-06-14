@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ReposPickStep } from "@/components/OnboardingPage/ReposPickStep/ReposPickStep";
-import type { FavoriteRepo, RepoCandidate } from "@/types/user.types";
+import type { FavoriteRepo, RepoCandidate } from "@/lib/types";
 
 function candidate(path: string, label: string | null = null): RepoCandidate {
   return { path, scope: "project", hasClaude: true, plugins: [], label };

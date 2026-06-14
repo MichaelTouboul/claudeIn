@@ -1,4 +1,4 @@
-import type { FavoriteRepo } from "@/types/user.types";
+import type { FavoriteRepo } from "@/lib/types";
 
 import { AddRepoCard } from "./AddRepoCard";
 import { FavoriteRepoCard } from "./FavoriteRepoCard";

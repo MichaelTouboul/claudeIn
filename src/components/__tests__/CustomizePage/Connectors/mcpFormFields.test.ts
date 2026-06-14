@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { mcpFormFields } from "@/components/CustomizePage/Connectors/mcpFormFields";
-import type { McpTransportInput } from "@/types/mcp-manage.types";
+import type { McpTransportInput } from "@/lib/types";
 
 const allTransports: McpTransportInput[] = ["stdio", "http", "sse"];
 

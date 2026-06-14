@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import type { FavoriteRepo } from "@/types/user.types";
+import type { FavoriteRepo } from "@/lib/types";
 
 export type UseFavoriteRepos = {
   repos: FavoriteRepo[];

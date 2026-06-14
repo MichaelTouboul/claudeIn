@@ -4,9 +4,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { InputMenu } from '@/components/AgentChat/AgentChatInput/InputMenu';
 import { useInputMenus } from '@/components/AgentChat/AgentChatInput/useInputMenus';
+import type { AgentSummary, SkillSummary  } from '@/lib/types';
 import { useDashboardStore } from '@/store/useDashboardStore';
-import type { AgentSummary } from '@/types/agents-mirror.types';
-import type { SkillSummary } from '@/types/skills-mirror.types';
 
 function makeAgent(name: string): AgentSummary {
   return {

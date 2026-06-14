@@ -2,9 +2,9 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { WorkflowView } from '@/components/Workspace/DashboardArea/Dashboard/UtilityPanel/WorkflowView/WorkflowView';
+import type { LiveEvent } from '@/lib/types';
 import { useEventsStore } from '@/store/useEventsStore';
 import { useWorkflowViewStore, WorkflowViewKind } from '@/store/useWorkflowViewStore';
-import type { LiveEvent } from '@/types/events.types';
 
 function liveEvent(over: Partial<LiveEvent>): LiveEvent {
   return {

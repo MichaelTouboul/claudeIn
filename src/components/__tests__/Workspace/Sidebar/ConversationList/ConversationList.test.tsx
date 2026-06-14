@@ -3,11 +3,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ConversationList } from "@/components/Workspace/Sidebar/ConversationList/ConversationList";
 import type { SessionStatus, SessionSummary } from "@/hooks/useSessions";
+import type { Project } from "@/lib/types";
 import { ConversationStatus, useConversationStatusStore } from "@/store/useConversationStatusStore";
 import { useConversationTitlesStore } from "@/store/useConversationTitlesStore";
 import { usePinnedStore } from "@/store/usePinnedStore";
 import { useWorkspaceStore } from "@/store/useWorkspaceStore";
-import type { Project } from "@/types/dashboard.types";
 
 const ipc = {
   pinConversation: vi.fn().mockResolvedValue(undefined),

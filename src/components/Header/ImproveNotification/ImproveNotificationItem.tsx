@@ -2,8 +2,8 @@ import { RefreshCw, X } from "lucide-react";
 
 import { Badge, type BadgeVariant } from "@/components/_ui/Badge";
 import { Button } from "@/components/_ui/Button";
-import type { ImproveRequest } from "@/types/improve.types";
-import { ImproveType } from "@/types/improve.types";
+import type { ImproveRequest } from "@/lib/types";
+import { ImproveType } from "@/lib/types";
 
 // Type→badge appearance (CLAUDE.md: enum + behavior map, not a fallback chain).
 const TYPE_BADGE: Record<ImproveType, { label: string; variant: BadgeVariant }> = {

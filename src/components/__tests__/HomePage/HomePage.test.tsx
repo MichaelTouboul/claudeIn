@@ -2,9 +2,9 @@ import { act, fireEvent, render, screen, waitFor, within } from "@testing-librar
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { HomePage } from "@/components/HomePage/HomePage";
+import type { FavoriteRepo, UserProfile } from "@/lib/types";
 import { AppPage, useAppStore } from "@/store/useAppStore";
 import { useWorkspaceStore } from "@/store/useWorkspaceStore";
-import type { FavoriteRepo, UserProfile } from "@/types/user.types";
 
 function makeProfile(overrides: Partial<UserProfile> = {}): UserProfile {
   return {

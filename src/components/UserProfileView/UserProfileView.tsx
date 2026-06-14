@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { Button } from "@/components/_ui/Button";
-import type { UserProfile } from "@/types/user.types";
+import type { UserProfile } from "@/lib/types";
 
 import { ProfileRow, TagList } from "./ProfileRow";
 import { UserProfileEdit } from "./UserProfileEdit";

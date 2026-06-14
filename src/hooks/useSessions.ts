@@ -3,7 +3,7 @@ import { useCallback,useEffect, useState } from "react";
 import type {
   SessionConversation,
   SessionSummary,
-} from "@/types/session.types";
+} from "@/lib/types";
 
 // Re-export the session type family from its single source of truth
 // (electron/types/session.types, via @/types/session.types) so existing
@@ -13,7 +13,7 @@ export type {
   SessionMessage,
   SessionStatus,
   SessionSummary,
-} from "@/types/session.types";
+} from "@/lib/types";
 
 export function useSessions(projectPath: string | null) {
   const [sessions, setSessions] = useState<SessionSummary[]>([]);

@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SessionViewer } from "@/components/Workspace/DashboardArea/Dashboard/SessionViewer/SessionViewer";
 import type { SessionConversation, SessionMessage } from "@/hooks/useSessions";
-import type { ChatMessage } from "@/types/spawn.types";
+import type { ChatMessage } from "@/lib/types";
 
 // Stub the live-chat so the resume-entry test can assert which props the viewer
 // hands AgentChat without mounting the full editor stack. AgentChat's own resume

@@ -5,7 +5,7 @@ import type {
   McpManageScope,
   McpMutationResult,
   McpServerRaw,
-} from "@/types/mcp-manage.types";
+} from "@/lib/types";
 
 export type UseMcpManage = {
   /** Fetch a server's full raw config via `claude mcp get`. */

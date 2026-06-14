@@ -6,7 +6,7 @@ import { ConsentUserStep } from "@/components/OnboardingPage/ConsentUserStep/Con
 import { DoneStep } from "@/components/OnboardingPage/DoneStep/DoneStep";
 import { ProfileReviewStep } from "@/components/OnboardingPage/ProfileReviewStep/ProfileReviewStep";
 import { WelcomeStep } from "@/components/OnboardingPage/WelcomeStep/WelcomeStep";
-import type { UserProfile } from "@/types/user.types";
+import type { UserProfile } from "@/lib/types";
 
 function makeProfile(): UserProfile {
   return {

@@ -2,8 +2,8 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ImproveModal } from '@/components/ImproveModal/ImproveModal';
+import type { ImproveChatInput, ImproveRequestInput } from '@/lib/types';
 import { useImproveModalStore } from '@/store/useImproveModalStore';
-import type { ImproveChatInput, ImproveRequestInput } from '@/types/improve.types';
 
 const improveChat = vi.fn<(input: ImproveChatInput) => Promise<string>>();
 const submitImproveRequest = vi.fn<(input: ImproveRequestInput) => Promise<unknown>>();

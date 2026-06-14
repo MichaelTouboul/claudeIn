@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 
-import type { McpTransportInput } from "@/types/mcp-manage.types";
+import type { McpTransportInput } from "@/lib/types";
 
 import type { McpFormState } from "./mcpFormParse";
 

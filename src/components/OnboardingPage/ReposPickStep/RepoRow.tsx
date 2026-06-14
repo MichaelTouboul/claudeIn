@@ -1,5 +1,5 @@
 import { repoBasename } from "@/components/HomePage/openFavorite";
-import type { RepoCandidate } from "@/types/user.types";
+import type { RepoCandidate } from "@/lib/types";
 
 type RepoRowProps = {
   repo: RepoCandidate;

@@ -1,4 +1,4 @@
-import type { ImproveContextTarget } from '@/types/improve.types';
+import type { ImproveContextTarget } from '@/lib/types';
 
 // The single source of truth for slash commands — drives BOTH the autocomplete
 // menu (`SLASH_COMMANDS`) AND dispatch (`dispatchSlashCommand`). A command's

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { AgentChat } from "@/components/AgentChat/AgentChat";
 import { useConversationTail } from "@/hooks/useConversationTail";
-import type { ChatMessage } from "@/types/spawn.types";
+import type { ChatMessage } from "@/lib/types";
 
 import { ResumeChoice } from "./ResumeChoice/ResumeChoice";
 import { recommendResumeOption } from "./ResumeChoice/resumeRecommendation";

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import type { Project } from '@/types/dashboard.types';
+import type { Project } from '@/lib/types';
 
 import { useAppStore } from '../useAppStore';
 import { useWorkspaceStore } from '../useWorkspaceStore';

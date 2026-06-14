@@ -2,9 +2,9 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AgentList } from "@/components/Workspace/Sidebar/AgentList/AgentList";
+import type { AgentSummary } from "@/lib/types";
 import { useEventsStore } from "@/store/useEventsStore";
 import { useFavoritesStore } from "@/store/useFavoritesStore";
-import type { AgentSummary } from "@/types/agents-mirror.types";
 
 // AgentRow reads the project via context; the list itself does not. Stub the
 // hook so we can render rows without an enclosing ProjectProvider.

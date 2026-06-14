@@ -2,7 +2,7 @@ import { type ReactElement, useCallback } from "react";
 
 import { Button } from "@/components/_ui/Button";
 import { Progress } from "@/components/_ui/Progress";
-import type { UserProfile } from "@/types/user.types";
+import type { UserProfile } from "@/lib/types";
 
 import { OnbShell } from "../OnbShell/OnbShell";
 import { SearchPhase } from "./searchPhase";

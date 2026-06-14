@@ -1,6 +1,6 @@
 import { Plus } from "lucide-react";
 
-import type { McpServerEntry } from "@/types/mcp-mirror.types";
+import type { McpServerEntry } from "@/lib/types";
 
 export type ConnectorServerListProps = {
   label: string;

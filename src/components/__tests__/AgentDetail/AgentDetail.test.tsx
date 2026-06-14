@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AgentDetail } from '@/components/AgentDetail/AgentDetail';
-import type { AgentFile } from '@/types/agent.types';
+import type { AgentFile } from '@/lib/types';
 
 // Isolate the fetching wrapper: stub the heavy content child and the api.
 vi.mock('@/components/AgentDetail/AgentDetailContent/AgentDetailContent', () => ({

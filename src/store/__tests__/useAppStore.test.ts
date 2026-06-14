@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import type { UserProfile } from "@/types/user.types";
+import type { UserProfile } from "@/lib/types";
 
 import { AppPage, bootPageFor, useAppStore } from "../useAppStore";
 

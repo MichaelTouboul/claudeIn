@@ -1,4 +1,4 @@
-import type { ImproveContextTarget, ImproveType } from '@/types/improve.types';
+import type { ImproveContextTarget, ImproveType } from '@/lib/types';
 
 /** One message in the modal's scoping chat (local UI state). */
 export interface ChatMessage {

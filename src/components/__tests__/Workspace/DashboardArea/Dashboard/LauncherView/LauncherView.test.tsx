@@ -2,10 +2,9 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { LauncherView } from '@/components/Workspace/DashboardArea/Dashboard/LauncherView/LauncherView';
+import type { AgentFile, Project  } from '@/lib/types';
 import { useAppStore } from '@/store/useAppStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
-import type { AgentFile } from '@/types/agent.types';
-import type { Project } from '@/types/dashboard.types';
 
 const proj = (id: string): Project => ({
   id, name: id, path: `/p/${id}`, claudeDir: `/p/${id}/.claude`,

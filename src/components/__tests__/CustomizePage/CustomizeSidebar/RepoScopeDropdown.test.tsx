@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { RepoScopeDropdown } from "@/components/CustomizePage/CustomizeSidebar/RepoScopeDropdown";
-import type { FavoriteRepo } from "@/types/user.types";
+import type { FavoriteRepo } from "@/lib/types";
 
 function repo(path: string, label: string | null = null): FavoriteRepo {
   return { path, label, addedAt: "2026-06-11T00:00:00Z" };

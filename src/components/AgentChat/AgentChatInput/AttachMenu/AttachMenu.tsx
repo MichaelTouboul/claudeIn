@@ -2,7 +2,7 @@ import { FileUp, ImageUp, Paperclip } from 'lucide-react';
 
 import { Button } from '@/components/_ui/Button';
 import { ContextMenu, type ContextMenuItem } from '@/components/_ui/ContextMenu';
-import { FilePickerKind } from '@/types/attachment.types';
+import { FilePickerKind } from '@/lib/types';
 
 export type AttachMenuProps = {
   /** Open the native file picker for the chosen kind and attach the result. */

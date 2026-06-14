@@ -1,6 +1,6 @@
+import type { Project } from '@/lib/types';
 import { ProjectProvider } from '@/store/ProjectContext';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
-import type { Project } from '@/types/dashboard.types';
 
 import { DashboardArea } from './DashboardArea/DashboardArea';
 import { ProjectGrid } from './ProjectGrid/ProjectGrid';

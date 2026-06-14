@@ -6,7 +6,7 @@ import {
   HEAVY_CONTEXT_RATIO,
   recommendResumeOption,
 } from "@/components/Workspace/DashboardArea/Dashboard/SessionViewer/ResumeChoice/resumeRecommendation";
-import type { SessionConversation, SessionMessage } from "@/types/session.types";
+import type { SessionConversation, SessionMessage } from "@/lib/types";
 
 const msg = (content: string): SessionMessage => ({
   role: "user",

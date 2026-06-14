@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 
+import type { ImproveContextTarget, ImproveType } from '@/lib/types';
 import { api } from '@/services/api';
-import type { ImproveContextTarget, ImproveType } from '@/types/improve.types';
 
 import type { ChatMessage } from './types';
 

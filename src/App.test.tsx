@@ -1,9 +1,9 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { UserProfile } from "@/lib/types";
 import { AppPage, useAppStore } from "@/store/useAppStore";
 import { useImproveStore } from "@/store/useImproveStore";
-import type { UserProfile } from "@/types/user.types";
 
 import App from "./App";
 

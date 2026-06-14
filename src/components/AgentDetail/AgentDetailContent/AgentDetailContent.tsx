@@ -3,11 +3,11 @@ import { useState } from 'react';
 
 import { MarkdownBody } from '@/components/_ui/MarkdownBody';
 import { AgentChat } from '@/components/AgentChat/AgentChat';
+import type { AgentFile, AgentFrontmatter } from '@/lib/types';
 import { api } from '@/services/api';
 import { useProject } from '@/store/ProjectContext';
 import { useDashboardUIStore } from '@/store/useDashboardUIStore';
 import { useFavoritesStore } from '@/store/useFavoritesStore';
-import type { AgentFile, AgentFrontmatter } from '@/types/agent.types';
 
 import { DetailHeader } from '../DetailHeader/DetailHeader';
 import { FrontmatterTable } from '../FrontmatterTable/FrontmatterTable';

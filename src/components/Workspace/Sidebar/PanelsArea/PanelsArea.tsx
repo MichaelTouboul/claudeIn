@@ -6,14 +6,13 @@ import { type ReactNode } from "react";
 
 import { Accordion } from '@/components/_ui/Accordion';
 import type { SessionSummary } from '@/hooks/useSessions';
+import type { AgentSummary, SkillSummary  } from '@/lib/types';
 import { useProject } from '@/store/ProjectContext';
 import { useDashboardStore } from '@/store/useDashboardStore';
 import { useDashboardUIStore } from '@/store/useDashboardUIStore';
 import { useEventsStore } from '@/store/useEventsStore';
 import { EMPTY, useFavoritesStore } from '@/store/useFavoritesStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
-import type { AgentSummary } from '@/types/agents-mirror.types';
-import type { SkillSummary } from '@/types/skills-mirror.types';
 
 import { AgentList } from '../AgentList/AgentList';
 import { HookRow } from '../HookRow/HookRow';

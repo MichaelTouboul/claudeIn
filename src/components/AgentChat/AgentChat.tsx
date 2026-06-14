@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useAgentChatActions } from '@/hooks/useAgentChatActions';
 import { useChatDropzone } from '@/hooks/useChatDropzone';
 import { useCompactOnResume } from '@/hooks/useCompactOnResume';
+import type { ChatMessage,SpawnSession } from '@/lib/types';
 import { useAppStore } from '@/store/useAppStore';
 import { ConversationStatus, useConversationStatusStore } from '@/store/useConversationStatusStore';
 import { useConversationTitlesStore } from '@/store/useConversationTitlesStore';
@@ -10,7 +11,6 @@ import { useDashboardUIStore } from '@/store/useDashboardUIStore';
 import { useImproveModalStore } from '@/store/useImproveModalStore';
 import { MODELS, useModelStore } from '@/store/useModelStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
-import type { ChatMessage,SpawnSession } from '@/types/spawn.types';
 
 import { AgentChatHeader } from './AgentChatHeader/AgentChatHeader';
 import { AgentChatInput } from './AgentChatInput/AgentChatInput';

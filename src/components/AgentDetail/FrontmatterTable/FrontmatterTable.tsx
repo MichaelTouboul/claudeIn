@@ -1,4 +1,4 @@
-import type { AgentFile, AgentFrontmatter } from '@/types/agent.types';
+import type { AgentFile, AgentFrontmatter } from '@/lib/types';
 
 import { EditField } from '../EditField/EditField';
 import { fieldDisplayValue,FIELDS } from '../fields';

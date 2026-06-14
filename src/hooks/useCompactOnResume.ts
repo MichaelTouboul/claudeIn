@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import type { SpawnSession } from '@/types/spawn.types';
+import type { SpawnSession } from '@/lib/types';
 
 // Status of the one-shot compact-on-resume turn (the automatic `/compact` run
 // fired on mount). Drives a small inline banner; never locks the input.

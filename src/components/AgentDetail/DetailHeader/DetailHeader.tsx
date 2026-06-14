@@ -2,7 +2,7 @@ import { Edit3, RefreshCw, Save, Star, Trash2, X } from 'lucide-react';
 
 import { Badge } from '@/components/_ui/Badge';
 import { Button } from '@/components/_ui/Button';
-import type { AgentFile } from '@/types/agent.types';
+import type { AgentFile } from '@/lib/types';
 
 export type DetailHeaderProps = {
   agent: AgentFile;

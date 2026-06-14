@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
+import type { AgentFile } from '@/lib/types';
 import { api } from '@/services/api';
-import type { AgentFile } from '@/types/agent.types';
 
 export type AgentSearchProps = {
   onSelect: (agentName: string) => void;

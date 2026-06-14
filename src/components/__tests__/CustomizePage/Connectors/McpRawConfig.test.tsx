@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { McpRawConfig } from "@/components/CustomizePage/Connectors/McpRawConfig";
-import type { McpServerRaw } from "@/types/mcp-manage.types";
+import type { McpServerRaw } from "@/lib/types";
 
 function stdioRaw(overrides: Partial<McpServerRaw> = {}): McpServerRaw {
   return {

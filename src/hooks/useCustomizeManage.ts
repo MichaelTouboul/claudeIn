@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 import type { UseMcpManage } from "@/components/CustomizePage/Connectors/useMcpManage";
 import { useMcpManage } from "@/components/CustomizePage/Connectors/useMcpManage";
-import type { McpMutationResult } from "@/types/mcp-manage.types";
+import type { McpMutationResult } from "@/lib/types";
 
 /**
  * Wrap `useMcpManage` so every successful mutation also re-reads the Customize

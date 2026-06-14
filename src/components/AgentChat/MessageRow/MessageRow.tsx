@@ -4,7 +4,7 @@ import { renderContentWithImages } from '@/components/_ui/InlineImage';
 import { DiffBlock } from '@/components/ResponseBody/blocks/DiffBlock/DiffBlock';
 import { parseEditTool } from '@/components/ResponseBody/blocks/DiffBlock/parseEditTool';
 import { ResponseBody } from '@/components/ResponseBody/ResponseBody';
-import type { ChatMessage } from '@/types/spawn.types';
+import type { ChatMessage } from '@/lib/types';
 
 import { parseAskPrompt } from '../askPrompt';
 import { AskPrompt } from '../AskPrompt/AskPrompt';

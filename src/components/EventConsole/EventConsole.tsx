@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-import type { LiveEvent } from "@/types/events.types";
+import type { LiveEvent } from "@/lib/types";
 
 const eventColorMap: Record<string, string> = {
   PreToolUse: "#facc15",

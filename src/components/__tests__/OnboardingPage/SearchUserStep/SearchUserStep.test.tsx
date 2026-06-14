@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SearchUserStep } from "@/components/OnboardingPage/SearchUserStep/SearchUserStep";
-import type { UserProfile } from "@/types/user.types";
+import type { UserProfile } from "@/lib/types";
 
 function makeProfile(): UserProfile {
   return {

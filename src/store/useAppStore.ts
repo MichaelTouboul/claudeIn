@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-import type { UserProfile } from "@/types/user.types";
+import type { UserProfile } from "@/lib/types";
 
 export type Project = {
   id: string;

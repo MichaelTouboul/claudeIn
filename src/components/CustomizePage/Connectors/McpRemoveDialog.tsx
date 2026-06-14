@@ -1,5 +1,5 @@
 import { Dialog } from "@/components/_ui/Dialog";
-import type { McpMutationResult } from "@/types/mcp-manage.types";
+import type { McpMutationResult } from "@/lib/types";
 
 export type McpRemoveDialogProps = {
   open: boolean;

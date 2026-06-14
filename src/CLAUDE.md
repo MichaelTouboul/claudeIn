@@ -74,13 +74,14 @@ When a component file nears 300 lines, split it (front-specific targets, see roo
 lib/
 ├── utils/          ← pure helper functions (cn, contentHash, elementToComponent, formatTokens, platform)
 │   └── index.ts    ← barrel: import utils via `@/lib/utils`
-├── types/          ← shared types (e.g. ComponentSource)
+├── types/          ← ALL renderer shared types live here (agent.types, spawn.types, …, ComponentSource)
 │   └── index.ts    ← barrel: import types via `@/lib/types`
 └── __tests__/      ← lib tests
 ```
 
 - **Consume utils and types through their barrel** (`@/lib/utils`, `@/lib/types`) — the category in the path tells you what kind of thing it is.
 - **No top-level `lib/index.ts` barrel.** We want imports to name their category explicitly, not collapse everything behind one `@/lib`.
+- **`lib/types/` is the single home for shared renderer types** — there is no `src/types/`. The **only** exception is **component-local types** (a component's own `types.ts`), which stay next to the component (see "Component placement"). New shared types go in `lib/types/<name>.types.ts` and get re-exported from its `index.ts`.
 
 ## Tests live in `__tests__/`
 

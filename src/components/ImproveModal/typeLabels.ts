@@ -1,4 +1,4 @@
-import { ImproveType } from '@/types/improve.types';
+import { ImproveType } from '@/lib/types';
 
 /** Human label per request type — drives the dropdown options (no fallback chains). */
 export const IMPROVE_TYPE_LABEL: Record<ImproveType, string> = {

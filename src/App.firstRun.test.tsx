@@ -1,8 +1,8 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { RepoCandidate, UserProfile } from "@/lib/types";
 import { AppPage, useAppStore } from "@/store/useAppStore";
-import type { RepoCandidate, UserProfile } from "@/types/user.types";
 
 import App from "./App";
 

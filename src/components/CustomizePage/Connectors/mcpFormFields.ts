@@ -1,4 +1,4 @@
-import type { McpTransportInput } from "@/types/mcp-manage.types";
+import type { McpTransportInput } from "@/lib/types";
 
 /** Which input fields a given transport requires before it can be submitted. */
 export type McpFormFieldSpec = {

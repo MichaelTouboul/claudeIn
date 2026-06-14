@@ -2,9 +2,9 @@ import { useState } from 'react';
 
 import { Button } from '@/components/_ui/Button/Button';
 import { Dialog } from '@/components/_ui/Dialog/Dialog';
+import { ImproveType } from '@/lib/types';
 import { api } from '@/services/api';
 import { useImproveModalStore } from '@/store/useImproveModalStore';
-import { ImproveType } from '@/types/improve.types';
 
 import { ImproveChat } from './ImproveChat/ImproveChat';
 import { ImproveModalHeader } from './ImproveModalHeader/ImproveModalHeader';

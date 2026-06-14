@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ProfileView } from "@/components/Onboarding/ProfileView/ProfileView";
-import type { ScopeProfile } from "@/types/onboarding.types";
+import type { ScopeProfile } from "@/lib/types";
 
 function makeProfile(overrides: Partial<ScopeProfile> = {}): ScopeProfile {
   return {

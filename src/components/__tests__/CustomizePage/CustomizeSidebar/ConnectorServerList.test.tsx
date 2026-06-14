@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { ConnectorServerList } from "@/components/CustomizePage/CustomizeSidebar/ConnectorServerList";
-import type { McpServerEntry } from "@/types/mcp-mirror.types";
+import type { McpServerEntry } from "@/lib/types";
 
 function entry(name: string, overrides: Partial<McpServerEntry> = {}): McpServerEntry {
   return {

@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/_ui/Button";
 import { MarkdownBody } from "@/components/_ui/MarkdownBody";
-import type { ScopeProfile } from "@/types/onboarding.types";
+import type { ScopeProfile } from "@/lib/types";
 
 type ProfileViewProps = {
   scopePath: string;

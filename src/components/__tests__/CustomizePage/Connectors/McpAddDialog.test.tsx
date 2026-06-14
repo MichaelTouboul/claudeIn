@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { McpAddDialog } from "@/components/CustomizePage/Connectors/McpAddDialog";
-import type { McpMutationResult } from "@/types/mcp-manage.types";
+import type { McpMutationResult } from "@/lib/types";
 
 function okSubmit(): Promise<McpMutationResult> {
   return Promise.resolve({ ok: true });

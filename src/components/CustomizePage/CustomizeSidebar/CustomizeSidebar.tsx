@@ -2,10 +2,8 @@ import { useState } from "react";
 
 import { McpAddDialog } from "@/components/CustomizePage/Connectors/McpAddDialog";
 import type { UseMcpManage } from "@/components/CustomizePage/Connectors/useMcpManage";
+import type { FavoriteRepo,McpAddInput, McpManageScope, McpServerEntry   } from "@/lib/types";
 import { CustomizeSection,useCustomizeStore } from "@/store/useCustomizeStore";
-import type { McpAddInput, McpManageScope } from "@/types/mcp-manage.types";
-import type { McpServerEntry } from "@/types/mcp-mirror.types";
-import type { FavoriteRepo } from "@/types/user.types";
 
 import { ConnectorServerList, serverKey } from "./ConnectorServerList";
 import { CustomizeNav } from "./CustomizeNav";

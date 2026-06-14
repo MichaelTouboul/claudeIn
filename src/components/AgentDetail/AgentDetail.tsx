@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 
 import { DetailStatus } from '@/components/_ui/DetailStatus';
+import type { AgentFile } from '@/lib/types';
 import { api } from '@/services/api';
-import type { AgentFile } from '@/types/agent.types';
 
 import { AgentDetailContent } from './AgentDetailContent/AgentDetailContent';
 

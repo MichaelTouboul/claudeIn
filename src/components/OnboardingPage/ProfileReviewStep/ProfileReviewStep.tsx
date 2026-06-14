@@ -1,6 +1,6 @@
 import { Button } from "@/components/_ui/Button";
 import { UserProfileView } from "@/components/UserProfileView/UserProfileView";
-import type { UserProfile } from "@/types/user.types";
+import type { UserProfile } from "@/lib/types";
 
 import { OnbShell } from "../OnbShell/OnbShell";
 
