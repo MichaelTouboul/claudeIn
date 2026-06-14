@@ -9,8 +9,8 @@ type ConsentReposStepProps = {
 export function ConsentReposStep({ onAuthorize }: ConsentReposStepProps) {
   return (
     <ConsentStep
-      title="Trouver vos dépôts"
-      explanation="ClaudeIn va parcourir vos dossiers de code locaux pour repérer les dépôts utilisant Claude Code. Vous choisirez ensuite vos favoris. Tout reste local."
+      title="Find your repositories"
+      explanation="ClaudeIn will scan your local code folders to detect repositories that use Claude Code. You'll then pick your favorites. Everything stays local."
       onAuthorize={onAuthorize}
     />
   );

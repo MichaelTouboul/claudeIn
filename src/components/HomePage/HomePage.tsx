@@ -17,7 +17,7 @@ import { projectForFavorite } from "./openFavorite";
 
 /**
  * Home page (layout A — stacked sections): greeting + profile link, a favorite-
- * repos grid (open → Dashboard, "+ ajouter" → folder picker), and an Actions row.
+ * repos grid (open → Dashboard, "+ add" → folder picker), and an Actions row.
  * Real favorites/profile data via `useFavoriteRepos` / `useUserProfile`.
  */
 export function HomePage() {
@@ -74,7 +74,7 @@ export function HomePage() {
         open={profileOpen}
         onOpenChange={setProfileOpen}
         variant="drawer-right"
-        title="Mon profil"
+        title="My profile"
         contentClassName="w-[28rem] max-w-[90vw]"
       >
         <div className="h-full w-full overflow-y-auto border-l border-border bg-surface-1 p-6">

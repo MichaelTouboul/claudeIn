@@ -10,7 +10,7 @@ type DoneStepProps = {
 };
 
 /**
- * Step 7 — confirmation; "Terminer" completes onboarding and enters the app.
+ * Step 7 — confirmation; "Finish" completes onboarding and enters the app.
  * The button disables itself on click so the async completion can't be
  * double-triggered, and announces its busy state for assistive tech.
  */
@@ -18,10 +18,10 @@ export function DoneStep({ onFinish }: DoneStepProps) {
   const [finishing, setFinishing] = useState(false);
 
   return (
-    <OnbShell title="Tout est prêt" subtitle="Votre espace de travail est configuré.">
+    <OnbShell title="All set" subtitle="Your workspace is ready.">
       <p className="text-sm text-fg-muted">
-        Vous pouvez retrouver et modifier votre profil et vos dépôts favoris à tout moment depuis
-        l’accueil.
+        You can find and edit your profile and favorite repositories at any time from the home
+        screen.
       </p>
       <div className="flex justify-end">
         <Button
@@ -34,7 +34,7 @@ export function DoneStep({ onFinish }: DoneStepProps) {
             onFinish();
           }}
         >
-          {finishing ? "Finalisation…" : "Terminer"}
+          {finishing ? "Finishing…" : "Finish"}
         </Button>
       </div>
     </OnbShell>

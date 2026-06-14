@@ -11,7 +11,7 @@ type ConsentStepProps = {
 };
 
 /**
- * Shared consent screen: an explanation plus a single "Autoriser" action. The
+ * Shared consent screen: an explanation plus a single "Authorize" action. The
  * flow is consent-gated with NO skip option anywhere — both user-info and repo
  * searches reuse this presentational step.
  */
@@ -21,7 +21,7 @@ export function ConsentStep({ title, explanation, onAuthorize }: ConsentStepProp
       <p className="text-sm text-fg-muted">{explanation}</p>
       <div className="flex justify-end">
         <Button intent="primary" size="md" onClick={onAuthorize}>
-          Autoriser
+          Authorize
         </Button>
       </div>
     </OnbShell>

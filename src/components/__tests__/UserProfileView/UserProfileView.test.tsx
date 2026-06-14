@@ -34,7 +34,7 @@ describe("UserProfileView (read mode)", () => {
 
   it("renders a first-run empty state when profile is null", () => {
     render(<UserProfileView profile={null} onSave={vi.fn()} />);
-    expect(screen.getByText(/aucun profil/i)).toBeInTheDocument();
+    expect(screen.getByText(/no profile/i)).toBeInTheDocument();
   });
 });
 
@@ -43,13 +43,13 @@ describe("UserProfileView (edit mode)", () => {
     const onSave = vi.fn<(p: UserProfile) => Promise<UserProfile>>().mockImplementation((p) => Promise.resolve(p));
     render(<UserProfileView profile={makeProfile()} onSave={onSave} />);
 
-    fireEvent.click(screen.getByRole("button", { name: /modifier/i }));
+    fireEvent.click(screen.getByRole("button", { name: /edit/i }));
 
-    fireEvent.change(screen.getByLabelText(/nom/i), { target: { value: "Grace" } });
-    fireEvent.change(screen.getByLabelText(/résumé/i), { target: { value: "Updated summary." } });
+    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: "Grace" } });
+    fireEvent.change(screen.getByLabelText(/summary/i), { target: { value: "Updated summary." } });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /enregistrer/i }));
+      fireEvent.click(screen.getByRole("button", { name: /save/i }));
     });
 
     expect(onSave).toHaveBeenCalledTimes(1);
@@ -63,9 +63,9 @@ describe("UserProfileView (edit mode)", () => {
 
   it("cancel discards edits", () => {
     render(<UserProfileView profile={makeProfile()} onSave={vi.fn()} />);
-    fireEvent.click(screen.getByRole("button", { name: /modifier/i }));
-    fireEvent.change(screen.getByLabelText(/nom/i), { target: { value: "Grace" } });
-    fireEvent.click(screen.getByRole("button", { name: /annuler/i }));
+    fireEvent.click(screen.getByRole("button", { name: /edit/i }));
+    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: "Grace" } });
+    fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
     expect(screen.getByText("Ada")).toBeInTheDocument();
     expect(screen.queryByDisplayValue("Grace")).not.toBeInTheDocument();
   });

@@ -11,22 +11,22 @@ type FavoriteReposGridProps = {
   onAdd: () => void;
 };
 
-/** Stacked-layout section: a grid of favorite-repo cards + the "+ ajouter" card. */
+/** Stacked-layout section: a grid of favorite-repo cards + the "+ add" card. */
 export function FavoriteReposGrid({ repos, loading, onOpen, onRemove, onAdd }: FavoriteReposGridProps) {
   return (
-    <section aria-label="Dépôts favoris" className="flex flex-col gap-3">
+    <section aria-label="Favorite repositories" className="flex flex-col gap-3">
       <h2 className="text-xs uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
-        Dépôts favoris
+        Favorite repositories
       </h2>
       {loading ? (
         <p className="text-sm text-fg-subtle" aria-busy="true">
-          Chargement…
+          Loading…
         </p>
       ) : (
         <>
           {repos.length === 0 ? (
             <p className="text-sm text-fg-subtle">
-              Aucun dépôt favori pour le moment. Ajoutez-en un pour le retrouver ici.
+              No favorite repositories yet. Add one to find it here.
             </p>
           ) : null}
           <div className="grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-3">

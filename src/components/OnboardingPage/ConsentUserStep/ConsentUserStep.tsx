@@ -9,8 +9,8 @@ type ConsentUserStepProps = {
 export function ConsentUserStep({ onAuthorize }: ConsentUserStepProps) {
   return (
     <ConsentStep
-      title="Analyser votre profil"
-      explanation="ClaudeIn va localiser votre dossier .claude et résumer votre configuration (agents, skills, MCP, hooks) pour construire votre profil. Tout reste local."
+      title="Analyze your profile"
+      explanation="ClaudeIn will locate your .claude folder and summarize your setup (agents, skills, MCP, hooks) to build your profile. Everything stays local."
       onAuthorize={onAuthorize}
     />
   );

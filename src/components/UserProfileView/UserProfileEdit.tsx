@@ -68,25 +68,25 @@ export function UserProfileEdit({ profile, onSave, onCancel }: UserProfileEditPr
     <form className="flex flex-col gap-4" onSubmit={submit}>
       <label className="flex flex-col gap-1 text-sm">
         <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
-          Nom
+          Name
         </span>
         <input className={fieldClass} value={draft.name} onChange={set("name")} />
       </label>
       <label className="flex flex-col gap-1 text-sm">
         <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
-          Rôle
+          Role
         </span>
         <input className={fieldClass} value={draft.role} onChange={set("role")} />
       </label>
       <label className="flex flex-col gap-1 text-sm">
         <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
-          Résumé
+          Summary
         </span>
         <textarea className={fieldClass} rows={3} value={draft.summary} onChange={set("summary")} />
       </label>
       <label className="flex flex-col gap-1 text-sm">
         <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
-          Domaines (séparés par des virgules)
+          Domains (comma-separated)
         </span>
         <input className={fieldClass} value={draft.domains} onChange={set("domains")} />
       </label>
@@ -98,10 +98,10 @@ export function UserProfileEdit({ profile, onSave, onCancel }: UserProfileEditPr
       </label>
       <div className="flex items-center gap-2">
         <Button type="submit" intent="primary" size="md" disabled={saving}>
-          Enregistrer
+          Save
         </Button>
         <Button type="button" intent="ghost" size="md" onClick={onCancel} disabled={saving}>
-          Annuler
+          Cancel
         </Button>
       </div>
     </form>
