@@ -1,13 +1,16 @@
 import { ChevronRight, Loader2, Paperclip, Send, X } from 'lucide-react';
-import { type RefObject, useState } from 'react';
+import { type RefObject, useMemo, useState } from 'react';
 
 import { Button } from '@/components/_ui/Button';
 import type { FilePickerKind, SpawnSession  } from '@/lib/types';
+import { buildJsonAttachment } from '@/lib/utils';
+import { byComposer, useToonStore } from '@/store/useToonStore';
 
 import { RichEditor, type RichEditorHandle } from '../RichEditor/RichEditor';
 import { AgentTabs } from './AgentTabs/AgentTabs';
 import { AttachMenu } from './AttachMenu/AttachMenu';
 import { InputMenu } from './InputMenu';
+import { JsonChip } from './JsonChip/JsonChip';
 import { useInputMenus } from './useInputMenus';
 
 export type AttachedFile = { path: string; dataUrl: string | null };
@@ -23,6 +26,9 @@ export type AgentChatInputProps = {
   // used to scope the sub-agent presence tabs to this conversation.
   claudeSessionId: string | null;
   agentName: string;
+  // Identifies this chat's composer — scopes the pasted-JSON attachments in
+  // `useToonStore` (one composer per chat tab). Same value AgentChat sends from.
+  composerId: string;
   editorRef: RefObject<RichEditorHandle | null>;
   onInputChange: (val: string) => void;
   /** Execute a chosen slash command (e.g. `/compact`). */
@@ -50,6 +56,7 @@ export function AgentChatInput({
   session,
   claudeSessionId,
   agentName,
+  composerId,
   editorRef,
   onInputChange,
   onSelectSlash,
@@ -63,6 +70,24 @@ export function AgentChatInput({
 }: AgentChatInputProps) {
   const [plainText, setPlainText] = useState('');
   const menus = useInputMenus(plainText, modelPickerOpen);
+
+  // Select the stable `attachments` record (zustand selectors must return a stable
+  // reference — `byComposer` builds a NEW array each call, which would loop), then
+  // derive THIS composer's slice with useMemo so the chip strip recomputes only
+  // when the record actually changes.
+  const attachments = useToonStore((s) => s.attachments);
+  const jsonAttachments = useMemo(() => byComposer(attachments, composerId), [attachments, composerId]);
+  const addAttachment = useToonStore((s) => s.add);
+
+  // On paste: if the text is substantial JSON, build an attachment (auto-encode
+  // TOON, ≈token delta, default to the smaller format) and CLAIM the paste so the
+  // raw blob never lands in the editor. Anything else falls through as normal text.
+  const handlePasteText = (text: string): boolean => {
+    const attachment = buildJsonAttachment(text, composerId);
+    if (!attachment) return false;
+    addAttachment(attachment);
+    return true;
+  };
 
   // Auto-focus when a turn finishes lives in AgentChat (on `spawn_exit`), since
   // the old `waitingInput`-based effect here never fired: `claude --print` is
@@ -133,6 +158,15 @@ export function AgentChatInput({
 
   return (
     <div className={`relative border-t p-3 ${waitingInput ? "border-yellow-500/50 bg-yellow-500/5" : "border-border"}`}>
+      {/* Pasted-JSON (TOON) attachments */}
+      {jsonAttachments.length > 0 ? (
+        <div className="flex flex-wrap gap-2 px-3 pt-2 pb-1">
+          {jsonAttachments.map((att) => (
+            <JsonChip key={att.id} attachment={att} />
+          ))}
+        </div>
+      ) : null}
+
       {/* Attached files preview */}
       {attachedFiles.length > 0 ? (
         <div className="flex flex-wrap gap-2 px-3 pt-2 pb-1">
@@ -213,13 +247,14 @@ export function AgentChatInput({
           onEnter={handleEnter}
           onComplete={handleComplete}
           onNavKey={handleNavKey}
+          onPasteText={handlePasteText}
         />
         <AttachMenu onAttach={onAttach} />
         <Button
           intent="ghost"
           size="icon"
           onClick={onSend}
-          disabled={(!input.trim() && attachedFiles.length === 0) || spawning}
+          disabled={(!input.trim() && attachedFiles.length === 0 && jsonAttachments.length === 0) || spawning}
           title="Send"
         >
           {spawning ? (

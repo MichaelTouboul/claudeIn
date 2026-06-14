@@ -12,6 +12,7 @@ import { $getRoot, $getSelection, $isRangeSelection, $isTextNode, type LexicalEd
 import { type Ref, useEffect, useImperativeHandle } from 'react';
 
 import { CHAT_TRANSFORMERS } from './markdownTransformers';
+import { PastePlugin } from './plugins/PastePlugin';
 import { SUBMIT_INTENT, SubmitPlugin } from './plugins/SubmitPlugin';
 import { editorToMarkdown } from './serialize';
 import { Toolbar } from './Toolbar';
@@ -35,6 +36,10 @@ export type RichEditorProps = {
   onComplete: () => boolean;
   /** Returns true if an ↑/↓/Esc key was consumed by an open menu. */
   onNavKey: (key: string) => boolean;
+  /** Intercepts a plain-text paste BEFORE it is inserted. Returning `true` claims
+   *  the paste — Lexical's default insert is prevented (used for substantial-JSON
+   *  paste → TOON attachment). Returning `false`/undefined lets the paste proceed. */
+  onPasteText?: (text: string) => boolean;
   handleRef: Ref<RichEditorHandle>;
   placeholder: string;
 };
@@ -97,7 +102,7 @@ function HandlePlugin({ handleRef }: { handleRef: Ref<RichEditorHandle> }) {
   return null;
 }
 
-export function RichEditor({ onChange, onSubmit, onEnter, onComplete, onNavKey, handleRef, placeholder }: RichEditorProps) {
+export function RichEditor({ onChange, onSubmit, onEnter, onComplete, onNavKey, onPasteText, handleRef, placeholder }: RichEditorProps) {
   return (
     <LexicalComposer
       initialConfig={{
@@ -135,6 +140,7 @@ export function RichEditor({ onChange, onSubmit, onEnter, onComplete, onNavKey, 
         <HistoryPlugin />
         <MarkdownShortcutPlugin transformers={CHAT_TRANSFORMERS} />
         <SubmitPlugin onEnter={onEnter} onComplete={onComplete} onNavKey={onNavKey} />
+        <PastePlugin onPasteText={onPasteText} />
         <SubmitBridge onSubmit={onSubmit} />
         <HandlePlugin handleRef={handleRef} />
         <OnChangePlugin
