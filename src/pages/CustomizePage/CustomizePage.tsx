@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 
-import { McpRestartBanner } from "@/components/CustomizePage/Connectors/McpRestartBanner";
-import { CustomizeContent } from "@/components/CustomizePage/CustomizeContent/CustomizeContent";
-import { CustomizeSidebar } from "@/components/CustomizePage/CustomizeSidebar/CustomizeSidebar";
-import { CustomizeTopBar } from "@/components/CustomizePage/CustomizeTopBar";
+import { McpRestartBanner } from "@/components/Customize/Connectors/McpRestartBanner";
+import { CustomizeContent } from "@/components/Customize/CustomizeContent/CustomizeContent";
+import { CustomizeSidebar } from "@/components/Customize/CustomizeSidebar/CustomizeSidebar";
+import { CustomizeTopBar } from "@/components/Customize/CustomizeTopBar";
 import { useCustomizeManage } from "@/hooks/useCustomizeManage";
 import { useCustomizeMcp } from "@/hooks/useCustomizeMcp";
 import { useFavoriteRepos } from "@/hooks/useFavoriteRepos";

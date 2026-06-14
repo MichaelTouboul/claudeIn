@@ -1,8 +1,8 @@
 import { type RefObject, useCallback } from 'react';
 
-import type { RichEditorHandle } from '@/components/AgentChat/RichEditor/RichEditor';
-import { dispatchSlashCommand, type LocalSlashHandlers, type SlashViewTarget } from '@/components/AgentChat/slashRegistry';
-import type { QueueItem } from '@/components/AgentChat/types';
+import type { RichEditorHandle } from '@/components/Dashboard/AgentChat/RichEditor/RichEditor';
+import { dispatchSlashCommand, type LocalSlashHandlers, type SlashViewTarget } from '@/components/Dashboard/AgentChat/slashRegistry';
+import type { QueueItem } from '@/components/Dashboard/AgentChat/types';
 import type { ChatMessage, ImproveContextTarget, SpawnSession  } from '@/lib/types';
 import { FilePickerKind } from '@/lib/types';
 

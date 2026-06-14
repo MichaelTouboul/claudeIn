@@ -2,9 +2,9 @@ import { useCallback, useState } from "react";
 
 import { Dialog } from "@/components/_ui/Dialog";
 import { DevReset } from "@/components/DevReset/DevReset";
-import { FavoriteReposGrid } from "@/components/HomePage/FavoriteReposGrid/FavoriteReposGrid";
-import { HomeActions } from "@/components/HomePage/HomeActions/HomeActions";
-import { HomeGreeting } from "@/components/HomePage/HomeGreeting/HomeGreeting";
+import { FavoriteReposGrid } from "@/components/Home/FavoriteReposGrid/FavoriteReposGrid";
+import { HomeActions } from "@/components/Home/HomeActions/HomeActions";
+import { HomeGreeting } from "@/components/Home/HomeGreeting/HomeGreeting";
 import { UserProfileView } from "@/components/UserProfileView/UserProfileView";
 import { useFavoriteRepos } from "@/hooks/useFavoriteRepos";
 import { useProjects } from "@/hooks/useProjects";

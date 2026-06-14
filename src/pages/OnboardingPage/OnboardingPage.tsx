@@ -1,13 +1,13 @@
 import { type ReactElement, useCallback, useState } from "react";
 
-import { ConsentReposStep } from "@/components/OnboardingPage/ConsentReposStep/ConsentReposStep";
-import { ConsentUserStep } from "@/components/OnboardingPage/ConsentUserStep/ConsentUserStep";
-import { DoneStep } from "@/components/OnboardingPage/DoneStep/DoneStep";
-import { OnbStep } from "@/components/OnboardingPage/onbStep";
-import { ProfileReviewStep } from "@/components/OnboardingPage/ProfileReviewStep/ProfileReviewStep";
-import { ReposPickStep } from "@/components/OnboardingPage/ReposPickStep/ReposPickStep";
-import { SearchUserStep } from "@/components/OnboardingPage/SearchUserStep/SearchUserStep";
-import { WelcomeStep } from "@/components/OnboardingPage/WelcomeStep/WelcomeStep";
+import { ConsentReposStep } from "@/components/Onboarding/ConsentReposStep/ConsentReposStep";
+import { ConsentUserStep } from "@/components/Onboarding/ConsentUserStep/ConsentUserStep";
+import { DoneStep } from "@/components/Onboarding/DoneStep/DoneStep";
+import { OnbStep } from "@/components/Onboarding/onbStep";
+import { ProfileReviewStep } from "@/components/Onboarding/ProfileReviewStep/ProfileReviewStep";
+import { ReposPickStep } from "@/components/Onboarding/ReposPickStep/ReposPickStep";
+import { SearchUserStep } from "@/components/Onboarding/SearchUserStep/SearchUserStep";
+import { WelcomeStep } from "@/components/Onboarding/WelcomeStep/WelcomeStep";
 import type { UserProfile } from "@/lib/types";
 import { AppPage, useAppStore } from "@/store/useAppStore";
 

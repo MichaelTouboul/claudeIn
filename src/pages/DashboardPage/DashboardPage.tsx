@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 
-import { Footer } from "@/components/Footer/Footer";
-import { GlobalChatModal } from "@/components/GlobalChatModal/GlobalChatModal";
-import { Header } from "@/components/Header/Header";
-import { Workspace } from "@/components/Workspace/Workspace";
+import { Footer } from "@/components/Dashboard/Footer/Footer";
+import { GlobalChatModal } from "@/components/Dashboard/GlobalChatModal/GlobalChatModal";
+import { Header } from "@/components/Dashboard/Header/Header";
+import { Workspace } from "@/components/Dashboard/Workspace/Workspace";
 import { useInitChatTitles } from "@/hooks/useInitChatTitles";
 import { useProjects } from "@/hooks/useProjects";
 import { useDashboardStore } from "@/store/dashboard/useDashboardStore";

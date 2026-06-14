@@ -1,6 +1,6 @@
 import * as Progress from '@radix-ui/react-progress';
 
-import { formatTokens, progressColor } from '@/components/Workspace/utils';
+import { formatTokens, progressColor } from '@/components/Dashboard/Workspace/utils';
 
 export type ContextBarProps = {
   percent: number;

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 
-import type { UseMcpManage } from "@/components/CustomizePage/Connectors/useMcpManage";
-import { useMcpManage } from "@/components/CustomizePage/Connectors/useMcpManage";
+import type { UseMcpManage } from "@/components/Customize/Connectors/useMcpManage";
+import { useMcpManage } from "@/components/Customize/Connectors/useMcpManage";
 import type { McpMutationResult } from "@/lib/types";
 
 /**
