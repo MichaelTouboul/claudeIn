@@ -2,9 +2,11 @@ import { type RefObject, useCallback } from 'react';
 
 import type { RichEditorHandle } from '@/components/Dashboard/AgentChat/RichEditor/RichEditor';
 import { dispatchSlashCommand, type LocalSlashHandlers, type SlashViewTarget } from '@/components/Dashboard/AgentChat/slashRegistry';
+import { inlineToonAttachments } from '@/components/Dashboard/AgentChat/toonAttachments';
 import type { QueueItem } from '@/components/Dashboard/AgentChat/types';
 import type { ChatMessage, ImproveContextTarget, SpawnSession  } from '@/lib/types';
 import { FilePickerKind } from '@/lib/types';
+import { byComposer, useToonStore } from '@/store/useToonStore';
 
 type SetState<T> = React.Dispatch<React.SetStateAction<T>>;
 type AttachedFile = { path: string; dataUrl: string | null };
@@ -24,6 +26,9 @@ type UseAgentChatActionsParams = {
   agentName: string;
   projectPath: string | undefined;
   claudeSessionId: string | null;
+  // This chat's composer id — scopes the pasted-JSON (TOON) attachments staged in
+  // `useToonStore` that get inlined into the outgoing prompt then cleared on send.
+  composerId: string;
   // The model id selected for THIS conversation (from useModelStore), or
   // undefined for claude's default. Passed on every spawn/resume turn.
   model: string | undefined;
@@ -55,6 +60,7 @@ export function useAgentChatActions({
   agentName,
   projectPath,
   claudeSessionId,
+  composerId,
   model,
   openModelPicker,
   openView,
@@ -138,12 +144,13 @@ export function useAgentChatActions({
     [clearConversation, sendMessage, openModelPicker, openView, openImprove]);
 
   const handleSend = useCallback(async () => {
-    if (!input.trim() && attachedFiles.length === 0) return;
+    const jsonAttachments = byComposer(useToonStore.getState().attachments, composerId);
+    if (!input.trim() && attachedFiles.length === 0 && jsonAttachments.length === 0) return;
     const text = input.trim();
 
-    // A bare registered slash command (no attachments) goes through the single
-    // dispatcher: `local` runs in-app (e.g. /clear), `cli` forwards to claude.
-    if (attachedFiles.length === 0 && dispatchSlash(text)) {
+    // A bare registered slash command (no attachments of any kind) goes through the
+    // single dispatcher: `local` runs in-app (e.g. /clear), `cli` forwards to claude.
+    if (attachedFiles.length === 0 && jsonAttachments.length === 0 && dispatchSlash(text)) {
       setInput('');
       editorRef.current?.clear();
       editorRef.current?.focus();
@@ -151,7 +158,10 @@ export function useAgentChatActions({
     }
 
     const filePaths = attachedFiles.map((f) => f.path).join('\n');
-    const fullText = filePaths ? (text ? text + '\n' + filePaths : filePaths) : text;
+    const withFiles = filePaths ? (text ? text + '\n' + filePaths : filePaths) : text;
+    // Inline each staged TOON/JSON attachment as a fenced block, then drop them.
+    const fullText = inlineToonAttachments(withFiles, jsonAttachments);
+    if (jsonAttachments.length > 0) useToonStore.getState().clearComposer(composerId);
 
     setInput('');
     setAttachedFiles([]);
@@ -159,7 +169,7 @@ export function useAgentChatActions({
     editorRef.current?.focus();
 
     await sendMessage(fullText);
-  }, [input, attachedFiles, dispatchSlash, sendMessage, editorRef, setInput, setAttachedFiles]);
+  }, [input, attachedFiles, composerId, dispatchSlash, sendMessage, editorRef, setInput, setAttachedFiles]);
 
   const handleAttach = useCallback(async (kind: FilePickerKind = FilePickerKind.All) => {
     const paths = await window.api.openFilePicker(kind);

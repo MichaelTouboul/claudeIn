@@ -121,7 +121,7 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
   const { isDragging, dragHandlers } = useChatDropzone(setAttachedFiles);
   const { handleSend, handleAttach, onAnswer, handleKill, dispatchSlash } = useAgentChatActions({
     input, attachedFiles, awaitingResponse, compacting, session, isRunning: isRunning ?? false,
-    agentName, projectPath, claudeSessionId, model: selectedModel,
+    agentName, projectPath, claudeSessionId, composerId: conversationKey, model: selectedModel,
     openModelPicker: () => setModelPickerOpen(true),
     openView: (view) => useDashboardUIStore.getState().openPanel(VIEW_PANEL_KEY[view]),
     openImprove: (target) => useImproveModalStore.getState().openImprove(target),
@@ -318,7 +318,7 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
       <AgentChatInput
         input={input} attachedFiles={attachedFiles} waitingInput={waitingInput}
         isRunning={isRunning ?? false} spawning={spawning} session={session}
-        claudeSessionId={claudeSessionId} agentName={agentName}
+        claudeSessionId={claudeSessionId} agentName={agentName} composerId={conversationKey}
         editorRef={editorRef} onInputChange={handleInputChange}
         onSelectSlash={handleSelectSlash}
         modelPickerOpen={modelPickerOpen}

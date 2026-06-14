@@ -12,6 +12,7 @@ export const PanelTabKind = {
   Text: 'text',
   Agent: 'agent',
   Workflow: 'workflow',
+  Toon: 'toon',
 } as const;
 export type PanelTabKind = (typeof PanelTabKind)[keyof typeof PanelTabKind];
 
@@ -30,6 +31,12 @@ export type AgentPayload = { agentName: string; claudeSessionId: string | null }
  * `claudeSessionId` (the same key the Agent view uses).
  */
 export type WorkflowPayload = { claudeSessionId: string | null };
+/**
+ * A TOON-converter view. Like the live views it carries no snapshot — the body
+ * reads the staged attachment from `useToonStore` by `attachmentId` so chip edits
+ * and panel edits stay in sync. Identity is the attachment, not its content.
+ */
+export type ToonPayload = { attachmentId: string };
 
 /**
  * A panel object — discriminated by `kind`, so `payload` is narrowed per kind.
@@ -42,7 +49,8 @@ export type PanelTab =
   | { id: string; kind: typeof PanelTabKind.Code; title: string; payload: CodePayload }
   | { id: string; kind: typeof PanelTabKind.Text; title: string; payload: TextPayload }
   | { id: string; kind: typeof PanelTabKind.Agent; title: string; payload: AgentPayload }
-  | { id: string; kind: typeof PanelTabKind.Workflow; title: string; payload: WorkflowPayload };
+  | { id: string; kind: typeof PanelTabKind.Workflow; title: string; payload: WorkflowPayload }
+  | { id: string; kind: typeof PanelTabKind.Toon; title: string; payload: ToonPayload };
 
 /** Payload type for a given object kind — single source for kind→payload mapping. */
 export type PayloadByKind = {
@@ -51,6 +59,7 @@ export type PayloadByKind = {
   [PanelTabKind.Text]: TextPayload;
   [PanelTabKind.Agent]: AgentPayload;
   [PanelTabKind.Workflow]: WorkflowPayload;
+  [PanelTabKind.Toon]: ToonPayload;
 };
 
 /**
@@ -191,4 +200,13 @@ export function agentTabId(agentName: string, claudeSessionId: string | null): s
  */
 export function workflowTabId(claudeSessionId: string | null): string {
   return `workflow:${contentHash(claudeSessionId ?? '')}`;
+}
+
+/**
+ * Stable id for a TOON-converter object. Identity is the attachment id itself —
+ * re-opening the same attachment reuses the SAME panel object while the body reads
+ * its live state from `useToonStore`.
+ */
+export function toonTabId(attachmentId: string): string {
+  return `toon:${attachmentId}`;
 }

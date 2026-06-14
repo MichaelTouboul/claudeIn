@@ -6,6 +6,7 @@ import { AgentChatInput } from '@/components/Dashboard/AgentChat/AgentChatInput/
 import type { RichEditorHandle } from '@/components/Dashboard/AgentChat/RichEditor/RichEditor';
 import type { AgentSummary } from '@/lib/types';
 import { useDashboardStore } from '@/store/dashboard/useDashboardStore';
+import { byComposer, useToonStore } from '@/store/useToonStore';
 
 // Capture the RichEditor wiring so a test can simulate the user pressing Tab (onComplete)
 // or Enter (onEnter) while a suggestion menu is open, and observe the imperative-handle
@@ -13,6 +14,7 @@ import { useDashboardStore } from '@/store/dashboard/useDashboardStore';
 let editorOnChange: ((markdown: string, plain: string) => void) | null = null;
 let editorOnEnter: (() => boolean) | null = null;
 let editorOnComplete: (() => boolean) | null = null;
+let editorOnPasteText: ((text: string) => boolean) | null = null;
 
 const insertSlashCommand = vi.fn();
 const insertMention = vi.fn();
@@ -25,16 +27,19 @@ vi.mock('@/components/Dashboard/AgentChat/RichEditor/RichEditor', () => ({
     onChange,
     onEnter,
     onComplete,
+    onPasteText,
   }: {
     handleRef: Ref<RichEditorHandle>;
     onChange: (markdown: string, plain: string) => void;
     onEnter: () => boolean;
     onComplete: () => boolean;
+    onPasteText?: (text: string) => boolean;
   }) => {
     useImperativeHandle(handleRef, () => ({ focus, clear, insertMention, insertSlashCommand }));
     editorOnChange = onChange;
     editorOnEnter = onEnter;
     editorOnComplete = onComplete;
+    editorOnPasteText = onPasteText ?? null;
     return <div data-testid="rich-editor" />;
   },
 }));
@@ -74,6 +79,7 @@ function renderInput() {
       session={null}
       claudeSessionId={null}
       agentName="tester"
+      composerId="test-composer"
       editorRef={{ current: null }}
       onInputChange={() => {}}
       onSelectSlash={onSelectSlash}
@@ -91,6 +97,8 @@ beforeEach(() => {
   editorOnChange = null;
   editorOnEnter = null;
   editorOnComplete = null;
+  editorOnPasteText = null;
+  useToonStore.setState({ attachments: {}, editingId: null });
   insertSlashCommand.mockReset();
   insertMention.mockReset();
   focus.mockReset();
@@ -152,5 +160,43 @@ describe('AgentChatInput — Tab completes a slash command (no launch)', () => {
     expect(editorOnComplete?.()).toBe(false);
     expect(insertSlashCommand).not.toHaveBeenCalled();
     expect(insertMention).not.toHaveBeenCalled();
+  });
+});
+
+describe('AgentChatInput — paste-to-TOON interception', () => {
+  const substantialJson = JSON.stringify(
+    Array.from({ length: 8 }, (_, i) => ({ id: i, name: `row-${i}`, active: i % 2 === 0 })),
+    null,
+    2,
+  );
+
+  it('claims a substantial-JSON paste, staging a TOON attachment for this composer', () => {
+    renderInput();
+    let claimed: boolean | undefined;
+    act(() => {
+      claimed = editorOnPasteText?.(substantialJson);
+    });
+
+    // The paste was consumed (true) so the raw blob never lands in the editor.
+    expect(claimed).toBe(true);
+    const staged = byComposer(useToonStore.getState().attachments, 'test-composer');
+    expect(staged).toHaveLength(1);
+    expect(staged[0].composerId).toBe('test-composer');
+  });
+
+  it('lets a non-JSON paste fall through (returns false, no attachment)', () => {
+    renderInput();
+    const claimed = editorOnPasteText?.('just some prose the user pasted');
+
+    expect(claimed).toBe(false);
+    expect(byComposer(useToonStore.getState().attachments, 'test-composer')).toHaveLength(0);
+  });
+
+  it('lets a tiny (non-substantial) JSON snippet fall through', () => {
+    renderInput();
+    const claimed = editorOnPasteText?.('{"a":1}');
+
+    expect(claimed).toBe(false);
+    expect(byComposer(useToonStore.getState().attachments, 'test-composer')).toHaveLength(0);
   });
 });

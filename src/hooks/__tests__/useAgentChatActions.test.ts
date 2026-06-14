@@ -28,6 +28,7 @@ function makeParams(overrides: Partial<Parameters<typeof useAgentChatActions>[0]
     agentName: 'tester',
     projectPath: '/p',
     claudeSessionId: 'claude-1',
+    composerId: 'test-composer',
     model: undefined as string | undefined,
     openModelPicker: vi.fn(),
     openView: vi.fn(),

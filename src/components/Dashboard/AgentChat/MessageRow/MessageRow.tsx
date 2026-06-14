@@ -13,6 +13,7 @@ import { decideUserContent } from '../userContent';
 import { CopyButton } from './CopyButton';
 import { OpenInPanelButton } from './OpenInPanelButton';
 import { SlashCommandMessage } from './SlashCommandMessage/SlashCommandMessage';
+import { ToonMessageChip } from './ToonMessageChip/ToonMessageChip';
 
 export type MessageRowProps = {
   msg: ChatMessage;
@@ -30,7 +31,7 @@ export function MessageRow({ msg, isLast, onAnswer }: MessageRowProps) {
     const decision = decideUserContent(msg.content);
     // Pure plumbing / harness noise: the whole row disappears (no empty "you" header).
     if (decision.kind === 'hidden') return null;
-    const copyText = decision.kind === 'text' ? decision.text : msg.content;
+    const copyText = decision.kind === 'text' || decision.kind === 'toon' ? decision.text : msg.content;
     return (
       <div className="group relative">
         <Inline gap={2} className="mb-0.5">
@@ -40,6 +41,13 @@ export function MessageRow({ msg, isLast, onAnswer }: MessageRowProps) {
         </Inline>
         {decision.kind === 'slash' ? (
           <SlashCommandMessage parsed={decision.message} />
+        ) : decision.kind === 'toon' ? (
+          <div className="ml-5 flex flex-col gap-1">
+            {decision.text ? (
+              <pre className="text-sm text-accent whitespace-pre-wrap font-mono leading-relaxed">{renderContentWithImages(decision.text)}</pre>
+            ) : null}
+            <ToonMessageChip info={decision.info} />
+          </div>
         ) : (
           <pre className="text-sm text-accent whitespace-pre-wrap font-mono ml-5 leading-relaxed">{renderContentWithImages(decision.text)}</pre>
         )}

@@ -2,6 +2,7 @@ import { Bot, ChevronRight } from "lucide-react";
 
 import { Inline } from "@/components/_ui/Inline";
 import { SlashCommandMessage } from "@/components/Dashboard/AgentChat/MessageRow/SlashCommandMessage/SlashCommandMessage";
+import { ToonMessageChip } from "@/components/Dashboard/AgentChat/MessageRow/ToonMessageChip/ToonMessageChip";
 import { decideUserContent } from "@/components/Dashboard/AgentChat/userContent";
 import { ResponseBody } from "@/components/Dashboard/ResponseBody/ResponseBody";
 import type { SessionMessage } from "@/hooks/useSessions";
@@ -45,6 +46,18 @@ export function SessionMessageRow({ msg }: SessionMessageRowProps) {
         </Inline>
         {decision.kind === "slash" ? (
           <SlashCommandMessage parsed={decision.message} />
+        ) : decision.kind === "toon" ? (
+          <div className="ml-5 flex flex-col gap-1">
+            {decision.text ? (
+              <pre
+                className="text-sm whitespace-pre-wrap leading-relaxed"
+                style={{ color: "var(--color-accent)", fontFamily: "var(--font-mono)" }}
+              >
+                {decision.text}
+              </pre>
+            ) : null}
+            <ToonMessageChip info={decision.info} />
+          </div>
         ) : (
           <pre
             className="text-sm whitespace-pre-wrap ml-5 leading-relaxed"

@@ -6,6 +6,7 @@ import { AgentTab } from './AgentTab/AgentTab';
 import { CodeTab } from './CodeTab/CodeTab';
 import { TableTab } from './TableTab/TableTab';
 import { TextTab } from './TextTab/TextTab';
+import { ToonTab } from './ToonTab/ToonTab';
 import { WorkflowTab } from './WorkflowView/WorkflowTab';
 
 /** kind → body component. Add a PanelTabKind value + an entry here to extend the panel. */
@@ -15,4 +16,5 @@ export const TAB_BODY: Record<PanelTabKind, ComponentType<{ tab: PanelTab }>> = 
   [PanelTabKind.Text]: TextTab,
   [PanelTabKind.Agent]: AgentTab,
   [PanelTabKind.Workflow]: WorkflowTab,
+  [PanelTabKind.Toon]: ToonTab,
 };
