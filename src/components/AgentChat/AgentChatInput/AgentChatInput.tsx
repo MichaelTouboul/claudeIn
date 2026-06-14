@@ -182,6 +182,7 @@ export function AgentChatInput({
           groups={menus.groups}
           activeIndex={menus.activeIndex}
           mono={menus.kind === 'slash'}
+          ariaLabel={menus.kind === 'slash' ? 'Slash commands' : 'Mentions'}
           onSelect={handleSelect}
         />
       ) : null}

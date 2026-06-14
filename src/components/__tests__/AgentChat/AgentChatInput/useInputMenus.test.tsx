@@ -47,7 +47,7 @@ function Harness({ onSelect, modelPickerOpen = false }: { onSelect: (id: string)
             aria-label="enter"
             onClick={() => menus.activeId && onSelect(menus.activeId)}
           />
-          <InputMenu groups={menus.groups} activeIndex={menus.activeIndex} onSelect={onSelect} />
+          <InputMenu groups={menus.groups} activeIndex={menus.activeIndex} ariaLabel="Slash commands" onSelect={onSelect} />
         </div>
       ) : null}
     </div>

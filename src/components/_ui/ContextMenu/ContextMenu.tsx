@@ -17,22 +17,27 @@ export type ContextMenuProps = {
   items: ContextMenuItem[];
   trigger?: ReactNode;
   align?: 'start' | 'center' | 'end';
+  /** Accessible name for the default icon-only trigger. */
+  triggerLabel?: string;
 };
 
 const toneClasses: Record<ContextMenuTone, string> = {
   default: 'text-fg-muted data-[highlighted]:text-fg',
   danger: 'text-danger',
   accent: 'text-accent',
-  warning: 'text-[#facc15]',
+  warning: 'text-[var(--color-warning)]',
 };
 
-const defaultTrigger = (
-  <button className="p-1 rounded text-fg-subtle hover:text-fg hover:bg-surface-2 transition-colors">
-    <MoreHorizontal size={14} />
-  </button>
-);
+export function ContextMenu({ items, trigger, align = 'end', triggerLabel = 'More actions' }: ContextMenuProps) {
+  const defaultTrigger = (
+    <button
+      aria-label={triggerLabel}
+      className="p-1 rounded text-fg-subtle hover:text-fg hover:bg-surface-2 transition-colors"
+    >
+      <MoreHorizontal size={14} />
+    </button>
+  );
 
-export function ContextMenu({ items, trigger, align = 'end' }: ContextMenuProps) {
   const [open, setOpen] = useState(false);
 
   // Radix closes a modal DropdownMenu on item-select and the originating

@@ -14,13 +14,22 @@ export function WorkspaceBar() {
 
   if (dashboards.length === 0) return null;
 
+  const moveActive = (dir: 1 | -1) => {
+    const i = dashboards.findIndex((d) => d.id === activeId);
+    if (i === -1) return;
+    const next = dashboards[(i + dir + dashboards.length) % dashboards.length];
+    setActive(next.id);
+  };
+
   return (
     <div
+      role="tablist"
       className="flex items-center gap-1 px-2 py-1 shrink-0 overflow-x-auto"
       style={{ background: 'var(--color-surface-0)', borderBottom: '1px solid var(--color-border)' }}
     >
       {dashboards.map((d) => {
         const isActive = d.id === activeId;
+        const label = dashboardLabel(d);
         return (
           <div
             key={d.id}
@@ -31,14 +40,21 @@ export function WorkspaceBar() {
             }}
           >
             <button
+              role="tab"
+              aria-selected={isActive}
               onClick={() => setActive(d.id)}
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowRight') { e.preventDefault(); moveActive(1); }
+                if (e.key === 'ArrowLeft') { e.preventDefault(); moveActive(-1); }
+              }}
               className="text-xs truncate max-w-[160px] text-left cursor-pointer"
               style={{ color: isActive ? 'var(--color-text-primary)' : 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}
             >
-              {dashboardLabel(d)}
+              {label}
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); closeDashboard(d.id); }}
+              aria-label={`Close ${label}`}
               title="Close"
               className="flex items-center justify-center w-4 h-4 rounded transition-opacity opacity-50 hover:opacity-100"
               style={{ color: 'var(--color-text-muted)' }}
