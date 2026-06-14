@@ -28,8 +28,14 @@ describe("UserProfileView (read mode)", () => {
     expect(screen.getByText("babysitter")).toBeInTheDocument();
     expect(screen.getByText(/A tidy setup\./)).toBeInTheDocument();
     expect(screen.getByText("TDD")).toBeInTheDocument();
-    // capability counts are rendered
+    // identity name is shown prominently
     expect(screen.getByText("Ada")).toBeInTheDocument();
+    expect(screen.getByText("Engineer")).toBeInTheDocument();
+    // capability counts render as stat chips (count + label in one badge)
+    expect(screen.getByText("agents")).toBeInTheDocument();
+    expect(screen.getByText("MCP")).toBeInTheDocument();
+    // domain tags render as pills
+    expect(screen.getByText("backend")).toBeInTheDocument();
   });
 
   it("renders a first-run empty state when profile is null", () => {

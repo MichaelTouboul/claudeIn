@@ -1,17 +1,22 @@
 import type { ReactNode } from "react";
 
+import { Badge } from "@/components/_ui/Badge";
+import { Inline } from "@/components/_ui/Inline";
 import { Stack } from "@/components/_ui/Stack";
 
-type ProfileRowProps = {
+type ProfileSectionProps = {
   label: string;
   children: ReactNode;
 };
 
-/** A labelled read-only profile row (label column + value). */
-export function ProfileRow({ label, children }: ProfileRowProps) {
+/** A labelled read-only section: an uppercase mono heading above its content. */
+export function ProfileSection({ label, children }: ProfileSectionProps) {
   return (
-    <Stack gap={1}>
-      <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
+    <Stack gap={1.5}>
+      <span
+        className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle"
+        style={{ fontFamily: "var(--font-mono)" }}
+      >
         {label}
       </span>
       <div className="text-sm text-fg" style={{ fontFamily: "var(--font-sans)" }}>
@@ -26,22 +31,18 @@ type TagListProps = {
   empty: string;
 };
 
-/** A wrapped list of tag chips, with an empty-state fallback. */
+/** A wrapped list of tag pills, with an empty-state fallback. */
 export function TagList({ items, empty }: TagListProps) {
   if (items.length === 0) {
     return <span className="text-fg-subtle">{empty}</span>;
   }
   return (
-    <div className="flex flex-wrap gap-1.5">
+    <Inline gap={1.5} className="flex-wrap">
       {items.map((item) => (
-        <span
-          key={item}
-          className="rounded bg-surface-2 px-2 py-0.5 text-xs text-fg-muted"
-          style={{ fontFamily: "var(--font-mono)" }}
-        >
+        <Badge key={item} variant="gray" shape="pill">
           {item}
-        </span>
+        </Badge>
       ))}
-    </div>
+    </Inline>
   );
 }
