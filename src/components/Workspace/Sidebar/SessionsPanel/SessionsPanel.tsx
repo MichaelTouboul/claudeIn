@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
+import { useProject } from "@/contexts/ProjectContext";
 import type { SessionSummary } from "@/hooks/useSessions";
-import { useProject } from "@/store/ProjectContext";
 import { useConversationTitlesStore } from "@/store/useConversationTitlesStore";
 import { useEventsStore } from "@/store/useEventsStore";
 import { effectivePinned, usePinnedStore } from "@/store/usePinnedStore";

@@ -1,5 +1,5 @@
+import { ProjectProvider } from '@/contexts/ProjectContext';
 import type { Project } from '@/lib/types';
-import { ProjectProvider } from '@/store/ProjectContext';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
 import { DashboardArea } from './DashboardArea/DashboardArea';

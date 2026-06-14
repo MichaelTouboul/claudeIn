@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 
+import { useProject } from '@/contexts/ProjectContext';
 import { useResizableSidebar } from '@/hooks/useResizableSidebar';
 import { useSessions } from '@/hooks/useSessions';
-import { useProject } from '@/store/ProjectContext';
 import { useDashboardStore } from '@/store/useDashboardStore';
 import { useDashboardUIStore } from '@/store/useDashboardUIStore';
 import { useFavoritesStore, useInitFavorites } from '@/store/useFavoritesStore';

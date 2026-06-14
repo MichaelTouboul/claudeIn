@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { Badge } from '@/components/_ui/Badge';
 import { AgentChat } from '@/components/AgentChat/AgentChat';
 import type { SkillTab } from '@/components/Workspace/types';
+import { useProject } from '@/contexts/ProjectContext';
 import type { SkillFile } from '@/hooks/useProjects';
-import { useProject } from '@/store/ProjectContext';
 import { useFavoritesStore } from '@/store/useFavoritesStore';
 
 import { SkillFiles } from './SkillFiles';
