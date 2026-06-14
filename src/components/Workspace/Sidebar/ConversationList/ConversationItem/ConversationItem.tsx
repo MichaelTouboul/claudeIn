@@ -4,8 +4,8 @@ import { ContextMenu } from '@/components/_ui/ContextMenu';
 import { StatusDot } from '@/components/_ui/StatusDot';
 import { RenameDialog } from '@/components/Workspace/Sidebar/SessionsPanel/SessionRowMenu/RenameDialog';
 import { buildSessionMenuItems } from '@/components/Workspace/Sidebar/SessionsPanel/SessionRowMenu/sessionMenuItems';
-import { type ConversationStatus,STATUS_DOT } from '@/store/useConversationStatusStore';
-import { useConversationTitlesStore } from '@/store/useConversationTitlesStore';
+import { type ConversationStatus,STATUS_DOT } from '@/store/dashboard/useConversationStatusStore';
+import { useConversationTitlesStore } from '@/store/dashboard/useConversationTitlesStore';
 
 // A normalized view of one ACTIVITY row — produced from either an open tab or a
 // pinned session by ConversationList. The item itself stays presentation-only.

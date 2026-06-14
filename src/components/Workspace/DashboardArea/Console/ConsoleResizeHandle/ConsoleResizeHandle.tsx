@@ -1,6 +1,6 @@
 import { type PointerEvent as ReactPointerEvent, useState } from 'react';
 
-import { useConsoleStore } from '@/store/useConsoleStore';
+import { useConsoleStore } from '@/store/dashboard/useConsoleStore';
 
 /**
  * Thin drag strip along the TOP edge of the Console. Dragging UP grows the

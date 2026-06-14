@@ -1,7 +1,7 @@
 import { ThemeProvider } from '@mui/material/styles';
 import { DataGrid, type GridColDef } from '@mui/x-data-grid';
 
-import { PanelTabKind, tableTabId, usePanelStore } from '@/store/usePanelStore';
+import { PanelTabKind, tableTabId, usePanelStore } from '@/store/dashboard/usePanelStore';
 
 import { BlockShell } from '../../BlockShell/BlockShell';
 import type { BlockAction } from '../../responseBody.types';

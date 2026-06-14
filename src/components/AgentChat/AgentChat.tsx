@@ -4,12 +4,12 @@ import { useAgentChatActions } from '@/hooks/useAgentChatActions';
 import { useChatDropzone } from '@/hooks/useChatDropzone';
 import { useCompactOnResume } from '@/hooks/useCompactOnResume';
 import type { ChatMessage,SpawnSession } from '@/lib/types';
+import { ConversationStatus, useConversationStatusStore } from '@/store/dashboard/useConversationStatusStore';
+import { useConversationTitlesStore } from '@/store/dashboard/useConversationTitlesStore';
+import { useDashboardUIStore } from '@/store/dashboard/useDashboardUIStore';
+import { MODELS, useModelStore } from '@/store/dashboard/useModelStore';
 import { useAppStore } from '@/store/useAppStore';
-import { ConversationStatus, useConversationStatusStore } from '@/store/useConversationStatusStore';
-import { useConversationTitlesStore } from '@/store/useConversationTitlesStore';
-import { useDashboardUIStore } from '@/store/useDashboardUIStore';
 import { useImproveModalStore } from '@/store/useImproveModalStore';
-import { MODELS, useModelStore } from '@/store/useModelStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
 import { AgentChatHeader } from './AgentChatHeader/AgentChatHeader';

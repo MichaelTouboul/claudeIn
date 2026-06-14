@@ -2,7 +2,7 @@ import { X } from 'lucide-react';
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 
 import { Flex } from '@/components/_ui/Flex';
-import { maxPanelWidth, MIN_PANEL_WIDTH, usePanelStore } from '@/store/usePanelStore';
+import { maxPanelWidth, MIN_PANEL_WIDTH, usePanelStore } from '@/store/dashboard/usePanelStore';
 
 import { PanelResizeHandle } from './PanelResizeHandle';
 import { TAB_BODY } from './panelTabBody';

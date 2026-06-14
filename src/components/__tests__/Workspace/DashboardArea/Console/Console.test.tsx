@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Console } from '@/components/Workspace/DashboardArea/Console/Console';
-import { useConsoleStore } from '@/store/useConsoleStore';
+import { useConsoleStore } from '@/store/dashboard/useConsoleStore';
 
 // xterm needs a real terminal host; mock the body components so the Console
 // test stays a pure UI test of the open/closed shell.

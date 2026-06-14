@@ -6,8 +6,8 @@ import { AgentChat } from '@/components/AgentChat/AgentChat';
 import { useProject } from '@/contexts/ProjectContext';
 import type { AgentFile, AgentFrontmatter } from '@/lib/types';
 import { api } from '@/services/api';
-import { useDashboardUIStore } from '@/store/useDashboardUIStore';
-import { useFavoritesStore } from '@/store/useFavoritesStore';
+import { useDashboardUIStore } from '@/store/dashboard/useDashboardUIStore';
+import { useFavoritesStore } from '@/store/dashboard/useFavoritesStore';
 
 import { DetailHeader } from '../DetailHeader/DetailHeader';
 import { FrontmatterTable } from '../FrontmatterTable/FrontmatterTable';

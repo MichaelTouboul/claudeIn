@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AgentChat } from '@/components/AgentChat/AgentChat';
 import type { RichEditorHandle } from '@/components/AgentChat/RichEditor/RichEditor';
 import type { SpawnSession } from '@/lib/types';
-import { useModelStore } from '@/store/useModelStore';
+import { useModelStore } from '@/store/dashboard/useModelStore';
 
 // Focus is now driven by the structured `cam-ask` prompt in the last agent
 // message (the deterministic "input needed" signal `claude --print` never

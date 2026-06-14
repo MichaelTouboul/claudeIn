@@ -2,7 +2,7 @@ import { Plug, Sparkles } from "lucide-react";
 import type { KeyboardEvent, ReactNode } from "react";
 
 import { Stack } from "@/components/_ui/Stack";
-import { CustomizeSection } from "@/store/useCustomizeStore";
+import { CustomizeSection } from "@/store/customize/useCustomizeStore";
 
 export type CustomizeNavProps = {
   active: CustomizeSection;

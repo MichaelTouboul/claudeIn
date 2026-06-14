@@ -9,7 +9,7 @@ import {
   buildXlsxBytes,
   triggerXlsx,
 } from '@/components/Workspace/DashboardArea/Dashboard/UtilityPanel/TableTab/exporters';
-import type { TablePayload } from '@/store/usePanelStore';
+import type { TablePayload } from '@/store/dashboard/usePanelStore';
 
 const payload: TablePayload = {
   columns: [

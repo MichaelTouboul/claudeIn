@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { useDashboardStore } from '@/store/useDashboardStore';
-import { MODELS } from '@/store/useModelStore';
+import { useDashboardStore } from '@/store/dashboard/useDashboardStore';
+import { MODELS } from '@/store/dashboard/useModelStore';
 
 import { matchMentionQuery, matchSlashQuery } from '../RichEditor/serialize';
 import { SLASH_COMMANDS } from '../slashRegistry';

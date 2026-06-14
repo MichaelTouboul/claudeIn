@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TabBody } from '@/components/Workspace/DashboardArea/Dashboard/DashboardSurface/TabBody';
 import type { AgentSummary } from '@/lib/types';
-import { useDashboardStore } from '@/store/useDashboardStore';
+import { useDashboardStore } from '@/store/dashboard/useDashboardStore';
 import type { InternalTab } from '@/store/useWorkspaceStore';
 
 // The chat/agent/skill/session bodies are heavy (IPC, child processes). This

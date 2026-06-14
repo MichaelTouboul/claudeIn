@@ -3,7 +3,7 @@ import { Settings } from 'lucide-react';
 import { ItemContextMenu } from '@/components/ItemContextMenu/ItemContextMenu';
 import { useProject } from '@/contexts/ProjectContext';
 import type { HookConfig } from '@/hooks/useProjects';
-import { useFavoritesStore } from '@/store/useFavoritesStore';
+import { useFavoritesStore } from '@/store/dashboard/useFavoritesStore';
 
 export type HookRowProps = {
   hook: HookConfig;

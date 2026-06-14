@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/_ui/Button";
 import { Dialog } from "@/components/_ui/Dialog";
 import { Input } from "@/components/_ui/Input";
-import { useConversationTitlesStore } from "@/store/useConversationTitlesStore";
+import { useConversationTitlesStore } from "@/store/dashboard/useConversationTitlesStore";
 
 export type RenameDialogProps = {
   open: boolean;

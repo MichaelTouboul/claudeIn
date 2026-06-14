@@ -1,6 +1,6 @@
 import { type ComponentType } from 'react';
 
-import { type PanelTab, PanelTabKind } from '@/store/usePanelStore';
+import { type PanelTab, PanelTabKind } from '@/store/dashboard/usePanelStore';
 
 import { AgentTab } from './AgentTab/AgentTab';
 import { CodeTab } from './CodeTab/CodeTab';

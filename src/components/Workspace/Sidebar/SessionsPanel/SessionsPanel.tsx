@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from "react";
 
 import { useProject } from "@/contexts/ProjectContext";
 import type { SessionSummary } from "@/hooks/useSessions";
-import { useConversationTitlesStore } from "@/store/useConversationTitlesStore";
-import { useEventsStore } from "@/store/useEventsStore";
-import { effectivePinned, usePinnedStore } from "@/store/usePinnedStore";
+import { useConversationTitlesStore } from "@/store/dashboard/useConversationTitlesStore";
+import { useEventsStore } from "@/store/dashboard/useEventsStore";
+import { effectivePinned, usePinnedStore } from "@/store/dashboard/usePinnedStore";
 import { useWorkspaceStore } from "@/store/useWorkspaceStore";
 
 import { LiveSessionRow } from "./LiveSessionRow/LiveSessionRow";

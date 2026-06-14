@@ -7,8 +7,8 @@ import { CustomizeTopBar } from "@/components/CustomizePage/CustomizeTopBar";
 import { useCustomizeManage } from "@/hooks/useCustomizeManage";
 import { useCustomizeMcp } from "@/hooks/useCustomizeMcp";
 import { useFavoriteRepos } from "@/hooks/useFavoriteRepos";
+import { useCustomizeStore } from "@/store/customize/useCustomizeStore";
 import { AppPage, useAppStore } from "@/store/useAppStore";
-import { useCustomizeStore } from "@/store/useCustomizeStore";
 
 // The Customize page: top bar + sidebar (repo scope, section nav, scoped MCP
 // server lists) + content (hero / connector detail / skills placeholder). Owns

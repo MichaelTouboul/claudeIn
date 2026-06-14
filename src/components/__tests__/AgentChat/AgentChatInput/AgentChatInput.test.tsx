@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AgentChatInput } from '@/components/AgentChat/AgentChatInput/AgentChatInput';
 import type { RichEditorHandle } from '@/components/AgentChat/RichEditor/RichEditor';
 import type { AgentSummary } from '@/lib/types';
-import { useDashboardStore } from '@/store/useDashboardStore';
+import { useDashboardStore } from '@/store/dashboard/useDashboardStore';
 
 // Capture the RichEditor wiring so a test can simulate the user pressing Tab (onComplete)
 // or Enter (onEnter) while a suggestion menu is open, and observe the imperative-handle

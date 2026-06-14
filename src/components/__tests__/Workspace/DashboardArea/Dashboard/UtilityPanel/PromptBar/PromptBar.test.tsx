@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { PromptBar } from '@/components/Workspace/DashboardArea/Dashboard/UtilityPanel/PromptBar/PromptBar';
-import { PanelTabKind } from '@/store/usePanelStore';
+import { PanelTabKind } from '@/store/dashboard/usePanelStore';
 
 const transformMock = vi.fn<(input: unknown) => Promise<string>>();
 

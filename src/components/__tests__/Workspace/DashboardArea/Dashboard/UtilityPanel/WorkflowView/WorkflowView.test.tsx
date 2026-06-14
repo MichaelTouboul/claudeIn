@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { WorkflowView } from '@/components/Workspace/DashboardArea/Dashboard/UtilityPanel/WorkflowView/WorkflowView';
 import type { LiveEvent } from '@/lib/types';
-import { useEventsStore } from '@/store/useEventsStore';
-import { useWorkflowViewStore, WorkflowViewKind } from '@/store/useWorkflowViewStore';
+import { useEventsStore } from '@/store/dashboard/useEventsStore';
+import { useWorkflowViewStore, WorkflowViewKind } from '@/store/dashboard/useWorkflowViewStore';
 
 function liveEvent(over: Partial<LiveEvent>): LiveEvent {
   return {

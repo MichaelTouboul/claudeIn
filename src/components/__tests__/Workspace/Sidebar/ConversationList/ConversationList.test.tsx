@@ -4,9 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ConversationList } from "@/components/Workspace/Sidebar/ConversationList/ConversationList";
 import type { SessionStatus, SessionSummary } from "@/hooks/useSessions";
 import type { Project } from "@/lib/types";
-import { ConversationStatus, useConversationStatusStore } from "@/store/useConversationStatusStore";
-import { useConversationTitlesStore } from "@/store/useConversationTitlesStore";
-import { usePinnedStore } from "@/store/usePinnedStore";
+import { ConversationStatus, useConversationStatusStore } from "@/store/dashboard/useConversationStatusStore";
+import { useConversationTitlesStore } from "@/store/dashboard/useConversationTitlesStore";
+import { usePinnedStore } from "@/store/dashboard/usePinnedStore";
 import { useWorkspaceStore } from "@/store/useWorkspaceStore";
 
 const ipc = {

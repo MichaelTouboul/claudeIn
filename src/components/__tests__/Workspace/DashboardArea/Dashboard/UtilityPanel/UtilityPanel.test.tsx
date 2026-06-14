@@ -2,8 +2,8 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { UtilityPanel } from '@/components/Workspace/DashboardArea/Dashboard/UtilityPanel/UtilityPanel';
-import { useEventsStore } from '@/store/useEventsStore';
-import { agentTabId, type PanelTab, PanelTabKind, usePanelStore } from '@/store/usePanelStore';
+import { useEventsStore } from '@/store/dashboard/useEventsStore';
+import { agentTabId, type PanelTab, PanelTabKind, usePanelStore } from '@/store/dashboard/usePanelStore';
 
 const tableObject: PanelTab = {
   id: 't1',

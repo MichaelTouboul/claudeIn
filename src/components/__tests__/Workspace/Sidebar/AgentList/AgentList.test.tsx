@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AgentList } from "@/components/Workspace/Sidebar/AgentList/AgentList";
 import type { AgentSummary } from "@/lib/types";
-import { useEventsStore } from "@/store/useEventsStore";
-import { useFavoritesStore } from "@/store/useFavoritesStore";
+import { useEventsStore } from "@/store/dashboard/useEventsStore";
+import { useFavoritesStore } from "@/store/dashboard/useFavoritesStore";
 
 // AgentRow reads the project via context; the list itself does not. Stub the
 // hook so we can render rows without an enclosing ProjectProvider.

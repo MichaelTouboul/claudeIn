@@ -3,10 +3,10 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { AgentTabs } from "@/components/AgentChat/AgentChatInput/AgentTabs/AgentTabs";
 import type { LiveEvent } from "@/lib/types";
-import { useAgentDismissStore } from "@/store/useAgentDismissStore";
-import { useDashboardStore } from "@/store/useDashboardStore";
-import { useEventsStore } from "@/store/useEventsStore";
-import { agentTabId, PanelTabKind, usePanelStore, workflowTabId } from "@/store/usePanelStore";
+import { useAgentDismissStore } from "@/store/dashboard/useAgentDismissStore";
+import { useDashboardStore } from "@/store/dashboard/useDashboardStore";
+import { useEventsStore } from "@/store/dashboard/useEventsStore";
+import { agentTabId, PanelTabKind, usePanelStore, workflowTabId } from "@/store/dashboard/usePanelStore";
 
 function liveEvent(over: Partial<LiveEvent>): LiveEvent {
   return {

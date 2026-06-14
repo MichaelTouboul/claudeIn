@@ -2,9 +2,9 @@ import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import type { AgentSummary, LiveEvent  } from "@/lib/types";
-import { useAgentDismissStore } from "@/store/useAgentDismissStore";
-import { useDashboardStore } from "@/store/useDashboardStore";
-import { AgentPresenceStatus, useEventsStore } from "@/store/useEventsStore";
+import { useAgentDismissStore } from "@/store/dashboard/useAgentDismissStore";
+import { useDashboardStore } from "@/store/dashboard/useDashboardStore";
+import { AgentPresenceStatus, useEventsStore } from "@/store/dashboard/useEventsStore";
 
 import {
   CONVERSATION_AGENT_DOT,

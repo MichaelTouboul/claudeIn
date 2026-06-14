@@ -2,7 +2,7 @@ import { Clipboard, FileSpreadsheet, FileText } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/_ui/Button';
-import type { TablePayload } from '@/store/usePanelStore';
+import type { TablePayload } from '@/store/dashboard/usePanelStore';
 
 import { copyMarkdown, triggerPdf, triggerXlsx } from '../exporters';
 

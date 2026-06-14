@@ -7,7 +7,7 @@ import { jsPDF } from 'jspdf';
 import { autoTable } from 'jspdf-autotable';
 import { utils, write } from 'xlsx';
 
-import type { TablePayload } from '@/store/usePanelStore';
+import type { TablePayload } from '@/store/dashboard/usePanelStore';
 
 /** Stringify one cell value (the grid stores `number | string`). */
 function cell(value: number | string | undefined): string {

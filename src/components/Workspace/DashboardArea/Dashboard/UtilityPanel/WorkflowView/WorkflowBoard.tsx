@@ -2,7 +2,7 @@ import { Inline } from '@/components/_ui/Inline';
 import { Stack } from '@/components/_ui/Stack';
 import { StatusDot } from '@/components/_ui/StatusDot';
 import type { WorkflowAgent } from '@/hooks/useSessionWorkflow';
-import { AgentPresenceStatus } from '@/store/useEventsStore';
+import { AgentPresenceStatus } from '@/store/dashboard/useEventsStore';
 
 import { AGENT_PRESENTATION } from './agentPresentation';
 import type { WorkflowViewProps } from './types';

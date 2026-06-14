@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { AgentTab } from "@/components/Workspace/DashboardArea/Dashboard/UtilityPanel/AgentTab/AgentTab";
 import type { LiveEvent } from "@/lib/types";
-import { useEventsStore } from "@/store/useEventsStore";
-import { type PanelTab, PanelTabKind } from "@/store/usePanelStore";
+import { useEventsStore } from "@/store/dashboard/useEventsStore";
+import { type PanelTab, PanelTabKind } from "@/store/dashboard/usePanelStore";
 
 function liveEvent(over: Partial<LiveEvent>): LiveEvent {
   return {

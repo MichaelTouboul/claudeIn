@@ -6,8 +6,8 @@ import { SessionsPanel } from "@/components/Workspace/Sidebar/SessionsPanel/Sess
 import { ProjectProvider } from "@/contexts/ProjectContext";
 import type { SessionStatus, SessionSummary } from "@/hooks/useSessions";
 import type { Project } from "@/lib/types";
-import { useEventsStore } from "@/store/useEventsStore";
-import { usePinnedStore } from "@/store/usePinnedStore";
+import { useEventsStore } from "@/store/dashboard/useEventsStore";
+import { usePinnedStore } from "@/store/dashboard/usePinnedStore";
 import { useWorkspaceStore } from "@/store/useWorkspaceStore";
 
 type EventCb = (data: unknown) => void;

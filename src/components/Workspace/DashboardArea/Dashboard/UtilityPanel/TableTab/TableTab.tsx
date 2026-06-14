@@ -9,7 +9,7 @@ import {
   type TablePayload,
   type TableRow,
   usePanelStore,
-} from '@/store/usePanelStore';
+} from '@/store/dashboard/usePanelStore';
 
 import { PromptBar } from '../PromptBar/PromptBar';
 import { buildMarkdown } from './exporters';

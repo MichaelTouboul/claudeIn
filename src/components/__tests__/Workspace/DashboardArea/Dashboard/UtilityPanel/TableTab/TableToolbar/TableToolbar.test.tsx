@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { TableToolbar } from '@/components/Workspace/DashboardArea/Dashboard/UtilityPanel/TableTab/TableToolbar/TableToolbar';
-import type { TablePayload } from '@/store/usePanelStore';
+import type { TablePayload } from '@/store/dashboard/usePanelStore';
 
 const payload: TablePayload = {
   columns: [{ field: 'name', headerName: 'Name' }],

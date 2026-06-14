@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { FavoriteRepo,McpServerEntry, McpSnapshot  } from "@/lib/types";
 import { CustomizePage } from "@/pages/CustomizePage/CustomizePage";
+import { CustomizeSection, useCustomizeStore } from "@/store/customize/useCustomizeStore";
 import { AppPage, useAppStore } from "@/store/useAppStore";
-import { CustomizeSection, useCustomizeStore } from "@/store/useCustomizeStore";
 
 const PROJECT = "/code/alpha";
 

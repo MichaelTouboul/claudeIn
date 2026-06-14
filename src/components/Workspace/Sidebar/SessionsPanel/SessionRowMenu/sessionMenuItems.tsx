@@ -1,7 +1,7 @@
 import { Archive, ArchiveRestore, Clipboard, Eraser, Minimize2, Pencil, Pin, PinOff, Trash2 } from 'lucide-react';
 
 import type { ContextMenuItem } from '@/components/_ui/ContextMenu';
-import { usePinnedStore } from '@/store/usePinnedStore';
+import { usePinnedStore } from '@/store/dashboard/usePinnedStore';
 
 // The single source of truth for a conversation/session row's context menu.
 // Both the full SessionsPanel row menu and the Activity-list ConversationItem

@@ -6,13 +6,13 @@ import {
   CONVERSATION_AGENT_DOT,
   useConversationAgents,
 } from "@/hooks/useConversationAgents";
-import { useAgentDismissStore } from "@/store/useAgentDismissStore";
+import { useAgentDismissStore } from "@/store/dashboard/useAgentDismissStore";
 import {
   agentTabId,
   PanelTabKind,
   usePanelStore,
   workflowTabId,
-} from "@/store/usePanelStore";
+} from "@/store/dashboard/usePanelStore";
 
 export type AgentTabsProps = {
   // The conversation this input belongs to. Sub-agent presence is scoped to it.

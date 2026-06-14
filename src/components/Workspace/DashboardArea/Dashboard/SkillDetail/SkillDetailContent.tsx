@@ -6,7 +6,7 @@ import { AgentChat } from '@/components/AgentChat/AgentChat';
 import type { SkillTab } from '@/components/Workspace/types';
 import { useProject } from '@/contexts/ProjectContext';
 import type { SkillFile } from '@/hooks/useProjects';
-import { useFavoritesStore } from '@/store/useFavoritesStore';
+import { useFavoritesStore } from '@/store/dashboard/useFavoritesStore';
 
 import { SkillFiles } from './SkillFiles';
 import { SkillOverview } from './SkillOverview';

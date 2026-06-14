@@ -3,9 +3,9 @@ import { useEffect } from 'react';
 import { useProject } from '@/contexts/ProjectContext';
 import { useResizableSidebar } from '@/hooks/useResizableSidebar';
 import { useSessions } from '@/hooks/useSessions';
-import { useDashboardStore } from '@/store/useDashboardStore';
-import { useDashboardUIStore } from '@/store/useDashboardUIStore';
-import { useFavoritesStore, useInitFavorites } from '@/store/useFavoritesStore';
+import { useDashboardStore } from '@/store/dashboard/useDashboardStore';
+import { useDashboardUIStore } from '@/store/dashboard/useDashboardUIStore';
+import { useFavoritesStore, useInitFavorites } from '@/store/dashboard/useFavoritesStore';
 
 import { ConversationList } from './ConversationList/ConversationList';
 import { PanelsArea } from './PanelsArea/PanelsArea';

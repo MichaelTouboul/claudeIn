@@ -4,8 +4,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Workspace } from '@/components/Workspace/Workspace';
 import type { Project } from '@/lib/types';
+import { useDashboardStore } from '@/store/dashboard/useDashboardStore';
 import { useAppStore } from '@/store/useAppStore';
-import { useDashboardStore } from '@/store/useDashboardStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
 // The bug: Workspace unmounts the whole DashboardArea subtree when the global

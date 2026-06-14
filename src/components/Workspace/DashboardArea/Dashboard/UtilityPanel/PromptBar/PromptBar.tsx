@@ -2,7 +2,7 @@ import { Loader2, Sparkles } from 'lucide-react';
 import { type FormEvent, type KeyboardEvent, useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/_ui/Button';
-import type { PanelTabKind } from '@/store/usePanelStore';
+import type { PanelTabKind } from '@/store/dashboard/usePanelStore';
 
 type PromptBarProps = {
   /** The tab kind — forwarded to the transform so the model knows the output contract. */

@@ -8,10 +8,10 @@ import { Accordion } from '@/components/_ui/Accordion';
 import { useProject } from '@/contexts/ProjectContext';
 import type { SessionSummary } from '@/hooks/useSessions';
 import type { AgentSummary, SkillSummary  } from '@/lib/types';
-import { useDashboardStore } from '@/store/useDashboardStore';
-import { useDashboardUIStore } from '@/store/useDashboardUIStore';
-import { useEventsStore } from '@/store/useEventsStore';
-import { EMPTY, useFavoritesStore } from '@/store/useFavoritesStore';
+import { useDashboardStore } from '@/store/dashboard/useDashboardStore';
+import { useDashboardUIStore } from '@/store/dashboard/useDashboardUIStore';
+import { useEventsStore } from '@/store/dashboard/useEventsStore';
+import { EMPTY, useFavoritesStore } from '@/store/dashboard/useFavoritesStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
 import { AgentList } from '../AgentList/AgentList';

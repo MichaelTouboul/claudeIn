@@ -2,9 +2,9 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ConversationItem, type ConversationItemProps } from "@/components/Workspace/Sidebar/ConversationList/ConversationItem/ConversationItem";
-import { ConversationStatus } from "@/store/useConversationStatusStore";
-import { useConversationTitlesStore } from "@/store/useConversationTitlesStore";
-import { usePinnedStore } from "@/store/usePinnedStore";
+import { ConversationStatus } from "@/store/dashboard/useConversationStatusStore";
+import { useConversationTitlesStore } from "@/store/dashboard/useConversationTitlesStore";
+import { usePinnedStore } from "@/store/dashboard/usePinnedStore";
 
 const ipc = {
   pinConversation: vi.fn().mockResolvedValue(undefined),

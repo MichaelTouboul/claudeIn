@@ -1,5 +1,5 @@
 import { AgentDetail } from '@/components/AgentDetail/AgentDetail';
-import { useDashboardStore } from '@/store/useDashboardStore';
+import { useDashboardStore } from '@/store/dashboard/useDashboardStore';
 import type { InternalTab } from '@/store/useWorkspaceStore';
 
 import { ChatTab } from '../ChatTab/ChatTab';

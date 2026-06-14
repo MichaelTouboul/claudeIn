@@ -1,4 +1,4 @@
-import type { TableColumn, TablePayload, TableRow } from '@/store/usePanelStore';
+import type { TableColumn, TablePayload, TableRow } from '@/store/dashboard/usePanelStore';
 
 /**
  * Pure parser: a raw GitHub-Flavored-Markdown table STRING → DataGrid columns +

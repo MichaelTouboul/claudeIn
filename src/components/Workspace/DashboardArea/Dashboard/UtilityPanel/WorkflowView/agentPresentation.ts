@@ -1,4 +1,4 @@
-import { AgentPresenceStatus } from '@/store/useEventsStore';
+import { AgentPresenceStatus } from '@/store/dashboard/useEventsStore';
 
 /**
  * How one presence status looks in the workflow views: its human label, whether

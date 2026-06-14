@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { CodeTab } from '@/components/Workspace/DashboardArea/Dashboard/UtilityPanel/CodeTab/CodeTab';
-import { type PanelTab, PanelTabKind } from '@/store/usePanelStore';
+import { type PanelTab, PanelTabKind } from '@/store/dashboard/usePanelStore';
 
 function codeTab(src: string, lang: string | null): PanelTab {
   return { id: 'c1', kind: PanelTabKind.Code, title: 'Code', payload: { lang, src } };

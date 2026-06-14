@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { WorkflowViewSwitcher } from '@/components/Workspace/DashboardArea/Dashboard/UtilityPanel/WorkflowView/WorkflowViewSwitcher';
-import { useWorkflowViewStore, WorkflowViewKind } from '@/store/useWorkflowViewStore';
+import { useWorkflowViewStore, WorkflowViewKind } from '@/store/dashboard/useWorkflowViewStore';
 
 beforeEach(() => {
   useWorkflowViewStore.setState({ view: WorkflowViewKind.Timeline });

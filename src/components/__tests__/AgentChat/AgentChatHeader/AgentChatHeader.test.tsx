@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { AgentChatHeader } from '@/components/AgentChat/AgentChatHeader/AgentChatHeader';
 import type { AgentContext } from '@/lib/types';
-import { useEventsStore } from '@/store/useEventsStore';
+import { useEventsStore } from '@/store/dashboard/useEventsStore';
 
 const ctx = (over: Partial<AgentContext> = {}): AgentContext => ({
   tokensIn: 1000, tokensOut: 500, costUsd: 0.0123, percent: 42, ...over,

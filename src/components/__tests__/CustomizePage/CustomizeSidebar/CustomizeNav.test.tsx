@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { CustomizeNav } from "@/components/CustomizePage/CustomizeSidebar/CustomizeNav";
-import { CustomizeSection } from "@/store/useCustomizeStore";
+import { CustomizeSection } from "@/store/customize/useCustomizeStore";
 
 describe("CustomizeNav", () => {
   it("exposes a tablist with one tab per section and marks the active one selected", () => {

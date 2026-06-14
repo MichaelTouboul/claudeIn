@@ -1,7 +1,7 @@
 import { PanelRightOpen } from 'lucide-react';
 import { useState } from 'react';
 
-import { PanelTabKind, textTabId, usePanelStore } from '@/store/usePanelStore';
+import { PanelTabKind, textTabId, usePanelStore } from '@/store/dashboard/usePanelStore';
 
 export type OpenInPanelButtonProps = {
   /** The message prose to open as a rendered-markdown Text tab. */

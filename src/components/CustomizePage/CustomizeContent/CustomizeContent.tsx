@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 
 import { ConnectorDetail } from "@/components/CustomizePage/Connectors/ConnectorDetail";
 import type { UseMcpManage } from "@/components/CustomizePage/Connectors/useMcpManage";
-import { CustomizeSection, useCustomizeStore } from "@/store/useCustomizeStore";
+import { CustomizeSection, useCustomizeStore } from "@/store/customize/useCustomizeStore";
 
 import { CustomizeHero } from "./CustomizeHero";
 import { SkillsPlaceholder } from "./SkillsPlaceholder";

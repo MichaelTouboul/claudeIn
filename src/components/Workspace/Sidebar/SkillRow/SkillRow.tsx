@@ -3,7 +3,7 @@ import { Wrench } from 'lucide-react';
 import { ItemContextMenu } from '@/components/ItemContextMenu/ItemContextMenu';
 import { useProject } from '@/contexts/ProjectContext';
 import type { SkillSummary } from '@/lib/types';
-import { useFavoritesStore } from '@/store/useFavoritesStore';
+import { useFavoritesStore } from '@/store/dashboard/useFavoritesStore';
 
 export type SkillRowProps = {
   skill: SkillSummary;

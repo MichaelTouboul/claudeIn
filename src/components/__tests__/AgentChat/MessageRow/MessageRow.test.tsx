@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MessageRow } from '@/components/AgentChat/MessageRow/MessageRow';
 import type { ChatMessage } from '@/lib/types';
-import { PanelTabKind, textTabId, usePanelStore } from '@/store/usePanelStore';
+import { PanelTabKind, textTabId, usePanelStore } from '@/store/dashboard/usePanelStore';
 
 beforeEach(() => {
   usePanelStore.setState({ isOpen: false, current: null });

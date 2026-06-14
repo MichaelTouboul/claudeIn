@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { CodeBlock } from '@/components/ResponseBody/blocks/CodeBlock/CodeBlock';
-import { codeTabId, PanelTabKind, usePanelStore } from '@/store/usePanelStore';
+import { codeTabId, PanelTabKind, usePanelStore } from '@/store/dashboard/usePanelStore';
 
 beforeEach(() => {
   usePanelStore.setState({ isOpen: false, current: null });

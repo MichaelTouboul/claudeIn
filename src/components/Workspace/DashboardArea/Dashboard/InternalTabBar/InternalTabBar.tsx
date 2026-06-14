@@ -2,7 +2,7 @@ import { Menu } from 'lucide-react';
 
 import { Flex } from '@/components/_ui/Flex';
 import { type TabItem,Tabs } from '@/components/_ui/Tabs';
-import { useConversationTitlesStore } from '@/store/useConversationTitlesStore';
+import { useConversationTitlesStore } from '@/store/dashboard/useConversationTitlesStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
 import { AddTabMenu } from './AddTabMenu';

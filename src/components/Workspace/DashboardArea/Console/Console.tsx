@@ -3,10 +3,10 @@ import { type ReactNode, useMemo, useState } from 'react';
 
 import { Button } from '@/components/_ui/Button';
 import { EventConsole } from '@/components/EventConsole/EventConsole';
+import { useConsoleStore } from '@/store/dashboard/useConsoleStore';
+import { useDashboardStore } from '@/store/dashboard/useDashboardStore';
+import { useEventsStore } from '@/store/dashboard/useEventsStore';
 import { useAppStore } from '@/store/useAppStore';
-import { useConsoleStore } from '@/store/useConsoleStore';
-import { useDashboardStore } from '@/store/useDashboardStore';
-import { useEventsStore } from '@/store/useEventsStore';
 
 import { ConsoleResizeHandle } from './ConsoleResizeHandle/ConsoleResizeHandle';
 import { TerminalView } from './TerminalView/TerminalView';

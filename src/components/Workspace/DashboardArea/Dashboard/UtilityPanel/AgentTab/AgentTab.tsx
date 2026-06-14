@@ -5,8 +5,8 @@ import { StatusDot } from "@/components/_ui/StatusDot";
 import { EventConsole } from "@/components/EventConsole/EventConsole";
 import { colorMap } from "@/components/Workspace/utils";
 import { paletteColor } from "@/hooks/useConversationAgents";
-import { AgentPresenceStatus, useEventsStore } from "@/store/useEventsStore";
-import { type PanelTab, PanelTabKind } from "@/store/usePanelStore";
+import { AgentPresenceStatus, useEventsStore } from "@/store/dashboard/useEventsStore";
+import { type PanelTab, PanelTabKind } from "@/store/dashboard/usePanelStore";
 
 // Value → header dot behavior, defined ONCE (CLAUDE.md: enum + behavior map, not
 // a fallback chain). `active` pulses; the colored idle/waiting dot is static. The

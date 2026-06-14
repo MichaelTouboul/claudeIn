@@ -1,5 +1,5 @@
 import { type TabItem,Tabs } from '@/components/_ui/Tabs';
-import { useWorkflowViewStore, WorkflowViewKind } from '@/store/useWorkflowViewStore';
+import { useWorkflowViewStore, WorkflowViewKind } from '@/store/dashboard/useWorkflowViewStore';
 
 // Value → switcher label, defined ONCE (CLAUDE.md: enum + behavior map). The
 // order here is the rendered order of the segmented control.

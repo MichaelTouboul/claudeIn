@@ -2,8 +2,8 @@ import { GitBranch, MessageSquare, Pin } from "lucide-react";
 
 import { Inline } from "@/components/_ui/Inline";
 import type { SessionSummary } from "@/hooks/useSessions";
-import { useConversationTitlesStore } from "@/store/useConversationTitlesStore";
-import { usePinnedStore } from "@/store/usePinnedStore";
+import { useConversationTitlesStore } from "@/store/dashboard/useConversationTitlesStore";
+import { usePinnedStore } from "@/store/dashboard/usePinnedStore";
 
 import { SessionRowMenu } from "../SessionRowMenu/SessionRowMenu";
 import { shortModel } from "../utils";

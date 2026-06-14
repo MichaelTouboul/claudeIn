@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 
-import { PanelTabKind } from '@/store/usePanelStore';
+import { PanelTabKind } from '@/store/dashboard/usePanelStore';
 
 import { buildAskContext } from './askContext';
 import type { DiffLine } from './diff.types';

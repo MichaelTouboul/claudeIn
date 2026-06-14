@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { InputMenu } from '@/components/AgentChat/AgentChatInput/InputMenu';
 import { useInputMenus } from '@/components/AgentChat/AgentChatInput/useInputMenus';
 import type { AgentSummary, SkillSummary  } from '@/lib/types';
-import { useDashboardStore } from '@/store/useDashboardStore';
+import { useDashboardStore } from '@/store/dashboard/useDashboardStore';
 
 function makeAgent(name: string): AgentSummary {
   return {

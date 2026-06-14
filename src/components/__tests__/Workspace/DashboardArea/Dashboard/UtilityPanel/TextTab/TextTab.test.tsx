@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { TextTab } from '@/components/Workspace/DashboardArea/Dashboard/UtilityPanel/TextTab/TextTab';
-import { type PanelTab, PanelTabKind } from '@/store/usePanelStore';
+import { type PanelTab, PanelTabKind } from '@/store/dashboard/usePanelStore';
 
 function textTab(text: string): PanelTab {
   return { id: 't1', kind: PanelTabKind.Text, title: 'Text', payload: { text } };

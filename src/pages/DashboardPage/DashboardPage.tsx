@@ -6,9 +6,9 @@ import { Header } from "@/components/Header/Header";
 import { Workspace } from "@/components/Workspace/Workspace";
 import { useInitChatTitles } from "@/hooks/useInitChatTitles";
 import { useProjects } from "@/hooks/useProjects";
+import { useDashboardStore } from "@/store/dashboard/useDashboardStore";
+import { useEventsStore, useInitEvents } from "@/store/dashboard/useEventsStore";
 import { AppPage, useAppStore } from "@/store/useAppStore";
-import { useDashboardStore } from "@/store/useDashboardStore";
-import { useEventsStore, useInitEvents } from "@/store/useEventsStore";
 import { useWorkspaceStore } from "@/store/useWorkspaceStore";
 
 /**

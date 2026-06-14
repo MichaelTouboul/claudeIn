@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 
 import { ResponseBody } from '@/components/ResponseBody/ResponseBody';
-import { type PanelTab, PanelTabKind, usePanelStore } from '@/store/usePanelStore';
+import { type PanelTab, PanelTabKind, usePanelStore } from '@/store/dashboard/usePanelStore';
 
 import { PromptBar } from '../PromptBar/PromptBar';
 

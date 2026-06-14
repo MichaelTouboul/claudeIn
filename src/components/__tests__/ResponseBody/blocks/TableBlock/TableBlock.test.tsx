@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { TableBlock } from '@/components/ResponseBody/blocks/TableBlock/TableBlock';
-import { usePanelStore } from '@/store/usePanelStore';
+import { usePanelStore } from '@/store/dashboard/usePanelStore';
 
 /** Minimal hast table: one header "Name", one row "Alice". */
 const node = {

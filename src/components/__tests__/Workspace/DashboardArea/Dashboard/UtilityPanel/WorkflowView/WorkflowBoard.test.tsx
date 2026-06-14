@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { WorkflowBoard } from '@/components/Workspace/DashboardArea/Dashboard/UtilityPanel/WorkflowView/WorkflowBoard';
 import type { WorkflowAgent } from '@/hooks/useSessionWorkflow';
-import { AgentPresenceStatus } from '@/store/useEventsStore';
+import { AgentPresenceStatus } from '@/store/dashboard/useEventsStore';
 
 function workflowAgent(over: Partial<WorkflowAgent> & { agentName: string }): WorkflowAgent {
   return {

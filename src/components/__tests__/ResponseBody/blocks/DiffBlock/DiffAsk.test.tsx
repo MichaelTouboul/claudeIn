@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { LineKind } from '@/components/ResponseBody/blocks/DiffBlock/diff.types';
 import { DiffBlock } from '@/components/ResponseBody/blocks/DiffBlock/DiffBlock';
-import { PanelTabKind } from '@/store/usePanelStore';
+import { PanelTabKind } from '@/store/dashboard/usePanelStore';
 
 const transformMock = vi.fn<(input: unknown) => Promise<string>>();
 window.api = { transform: transformMock } as unknown as typeof window.api;

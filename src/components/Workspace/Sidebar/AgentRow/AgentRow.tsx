@@ -3,8 +3,8 @@ import { StatusDot } from '@/components/_ui/StatusDot';
 import { AgentContextMenu } from '@/components/AgentContextMenu/AgentContextMenu';
 import { useProject } from '@/contexts/ProjectContext';
 import type { AgentSummary } from '@/lib/types';
-import { useEventsStore } from '@/store/useEventsStore';
-import { useFavoritesStore } from '@/store/useFavoritesStore';
+import { useEventsStore } from '@/store/dashboard/useEventsStore';
+import { useFavoritesStore } from '@/store/dashboard/useFavoritesStore';
 
 import { colorMap } from '../../utils';
 

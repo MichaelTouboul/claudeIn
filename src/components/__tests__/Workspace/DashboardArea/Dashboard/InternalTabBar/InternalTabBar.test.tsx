@@ -2,7 +2,7 @@ import { render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { InternalTabBar } from '@/components/Workspace/DashboardArea/Dashboard/InternalTabBar/InternalTabBar';
-import { useConversationTitlesStore } from '@/store/useConversationTitlesStore';
+import { useConversationTitlesStore } from '@/store/dashboard/useConversationTitlesStore';
 import type { Dashboard, InternalTab } from '@/store/useWorkspaceStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 

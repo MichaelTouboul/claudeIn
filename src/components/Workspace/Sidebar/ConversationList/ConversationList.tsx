@@ -1,7 +1,7 @@
 import type { SessionSummary } from '@/hooks/useSessions';
-import { ConversationStatus, useConversationStatusStore } from '@/store/useConversationStatusStore';
-import { useConversationTitlesStore } from '@/store/useConversationTitlesStore';
-import { effectivePinned, usePinnedStore } from '@/store/usePinnedStore';
+import { ConversationStatus, useConversationStatusStore } from '@/store/dashboard/useConversationStatusStore';
+import { useConversationTitlesStore } from '@/store/dashboard/useConversationTitlesStore';
+import { effectivePinned, usePinnedStore } from '@/store/dashboard/usePinnedStore';
 import { type InternalTab, useWorkspaceStore } from '@/store/useWorkspaceStore';
 
 import { ConversationItem } from './ConversationItem/ConversationItem';

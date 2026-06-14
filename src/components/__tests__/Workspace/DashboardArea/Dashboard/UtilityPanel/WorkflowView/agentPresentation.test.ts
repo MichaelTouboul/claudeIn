@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { AGENT_PRESENTATION } from '@/components/Workspace/DashboardArea/Dashboard/UtilityPanel/WorkflowView/agentPresentation';
-import { AgentPresenceStatus } from '@/store/useEventsStore';
+import { AgentPresenceStatus } from '@/store/dashboard/useEventsStore';
 
 describe('AGENT_PRESENTATION', () => {
   it('has an entry for EVERY AgentPresenceStatus value (no fallback chain)', () => {

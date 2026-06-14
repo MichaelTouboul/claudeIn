@@ -1,4 +1,4 @@
-import { agentTabId, type PanelTab, PanelTabKind, usePanelStore } from '@/store/usePanelStore';
+import { agentTabId, type PanelTab, PanelTabKind, usePanelStore } from '@/store/dashboard/usePanelStore';
 
 import { WorkflowView } from './WorkflowView';
 

@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { WorkflowTimeline } from '@/components/Workspace/DashboardArea/Dashboard/UtilityPanel/WorkflowView/WorkflowTimeline';
 import type { WorkflowAgent, WorkflowSegment } from '@/hooks/useSessionWorkflow';
-import { AgentPresenceStatus } from '@/store/useEventsStore';
+import { AgentPresenceStatus } from '@/store/dashboard/useEventsStore';
 
 const seg = (startMs: number, endMs: number, tool: string | null = 'Read'): WorkflowSegment => ({
   tool,

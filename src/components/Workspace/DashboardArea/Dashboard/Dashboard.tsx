@@ -1,4 +1,4 @@
-import { usePanelStore } from '@/store/usePanelStore';
+import { usePanelStore } from '@/store/dashboard/usePanelStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
 import { DashboardSurface } from './DashboardSurface/DashboardSurface';

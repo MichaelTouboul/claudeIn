@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TableTab } from '@/components/Workspace/DashboardArea/Dashboard/UtilityPanel/TableTab/TableTab';
-import { type PanelTab, PanelTabKind, usePanelStore } from '@/store/usePanelStore';
+import { type PanelTab, PanelTabKind, usePanelStore } from '@/store/dashboard/usePanelStore';
 
 const tab: PanelTab = {
   id: 'table:1',

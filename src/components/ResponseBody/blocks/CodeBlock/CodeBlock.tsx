@@ -1,4 +1,4 @@
-import { codeTabId, PanelTabKind, usePanelStore } from '@/store/usePanelStore';
+import { codeTabId, PanelTabKind, usePanelStore } from '@/store/dashboard/usePanelStore';
 
 import { BlockShell } from '../../BlockShell/BlockShell';
 import type { BlockAction } from '../../responseBody.types';

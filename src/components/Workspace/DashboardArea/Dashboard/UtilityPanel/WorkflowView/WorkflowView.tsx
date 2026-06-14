@@ -1,7 +1,7 @@
 import { type ComponentType } from 'react';
 
 import { useSessionWorkflow } from '@/hooks/useSessionWorkflow';
-import { useWorkflowViewStore, WorkflowViewKind } from '@/store/useWorkflowViewStore';
+import { useWorkflowViewStore, WorkflowViewKind } from '@/store/dashboard/useWorkflowViewStore';
 
 import type { WorkflowViewProps } from './types';
 import { WorkflowBoard } from './WorkflowBoard';

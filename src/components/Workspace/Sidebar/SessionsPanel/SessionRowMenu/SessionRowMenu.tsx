@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { ContextMenu } from "@/components/_ui/ContextMenu";
 import type { SessionSummary } from "@/hooks/useSessions";
-import { usePinnedStore } from "@/store/usePinnedStore";
+import { usePinnedStore } from "@/store/dashboard/usePinnedStore";
 
 import { RenameDialog } from "./RenameDialog";
 import { buildSessionMenuItems } from "./sessionMenuItems";

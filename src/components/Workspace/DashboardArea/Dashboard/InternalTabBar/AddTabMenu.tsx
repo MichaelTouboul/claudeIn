@@ -2,7 +2,7 @@ import { Plus } from 'lucide-react';
 
 import { Button } from '@/components/_ui/Button';
 import { Popover, PopoverClose } from '@/components/_ui/Popover';
-import { useDashboardStore } from '@/store/useDashboardStore';
+import { useDashboardStore } from '@/store/dashboard/useDashboardStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
 export function AddTabMenu() {

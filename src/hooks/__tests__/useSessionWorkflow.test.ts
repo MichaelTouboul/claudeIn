@@ -2,7 +2,7 @@ import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import type { LiveEvent } from "@/lib/types";
-import { AgentPresenceStatus, useEventsStore } from "@/store/useEventsStore";
+import { AgentPresenceStatus, useEventsStore } from "@/store/dashboard/useEventsStore";
 
 import { useSessionWorkflow } from "../useSessionWorkflow";
 
