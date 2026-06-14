@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import type { ImproveContextTarget } from '@/types/improve.types';
+import type { ImproveContextTarget } from '@/lib/types';
 
 /**
  * Self-Improve loop — open-modal state (I3).

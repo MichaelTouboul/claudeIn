@@ -3,7 +3,7 @@ import type {
   McpManageScope,
   McpServerRaw,
   McpTransportInput,
-} from "@/types/mcp-manage.types";
+} from "@/lib/types";
 
 const manageScopes: McpManageScope[] = ["user", "project", "local"];
 const transportInputs: McpTransportInput[] = ["stdio", "http", "sse"];

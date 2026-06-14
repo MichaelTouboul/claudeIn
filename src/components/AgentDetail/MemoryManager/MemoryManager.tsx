@@ -5,9 +5,9 @@ ChevronDown, ChevronRight,
 import { useState } from "react";
 
 import { Button } from "@/components/_ui/Button";
+import type { AgentFile, MemoryFile } from "@/lib/types";
 import { api } from "@/services/api";
 import { useProject } from "@/store/ProjectContext";
-import type { AgentFile, MemoryFile } from "@/types/agent.types";
 
 const MAX_LINES = 200;
 const MAX_BYTES = 25 * 1024;

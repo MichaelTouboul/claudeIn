@@ -6,9 +6,9 @@ import { UserProfileView } from "@/components/UserProfileView/UserProfileView";
 import { useFavoriteRepos } from "@/hooks/useFavoriteRepos";
 import { useProjects } from "@/hooks/useProjects";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import type { FavoriteRepo } from "@/lib/types";
 import { AppPage, useAppStore } from "@/store/useAppStore";
 import { useWorkspaceStore } from "@/store/useWorkspaceStore";
-import type { FavoriteRepo } from "@/types/user.types";
 
 import { FavoriteReposGrid } from "./FavoriteReposGrid/FavoriteReposGrid";
 import { HomeActions } from "./HomeActions/HomeActions";

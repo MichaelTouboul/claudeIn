@@ -1,4 +1,4 @@
-import type { LiveEvent } from "@/types/events.types";
+import type { LiveEvent } from "@/lib/types";
 
 import type { WorkflowSegment } from "./useSessionWorkflow";
 

@@ -2,9 +2,9 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { AgentTab } from "@/components/Workspace/DashboardArea/Dashboard/UtilityPanel/AgentTab/AgentTab";
+import type { LiveEvent } from "@/lib/types";
 import { useEventsStore } from "@/store/useEventsStore";
 import { type PanelTab, PanelTabKind } from "@/store/usePanelStore";
-import type { LiveEvent } from "@/types/events.types";
 
 function liveEvent(over: Partial<LiveEvent>): LiveEvent {
   return {

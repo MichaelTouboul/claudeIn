@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import type { McpServerEntry } from "@/types/mcp-mirror.types";
+import type { McpServerEntry } from "@/lib/types";
 
 export type UseCustomizeMcp = {
   /** Project-scope servers for the active repo (empty when no repo selected). */

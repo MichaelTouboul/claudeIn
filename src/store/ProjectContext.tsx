@@ -1,6 +1,6 @@
 import { createContext, type ReactNode, useContext, useMemo } from "react";
 
-import type { Project } from "@/types/dashboard.types";
+import type { Project } from "@/lib/types";
 
 import { useDashboardStore } from "./useDashboardStore";
 

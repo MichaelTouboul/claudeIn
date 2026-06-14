@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import type { RepoCandidate } from "@/types/user.types";
+import type { RepoCandidate } from "@/lib/types";
 
 export type UseReposPick = {
   repos: RepoCandidate[];

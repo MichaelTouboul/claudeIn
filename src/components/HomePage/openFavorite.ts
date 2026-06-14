@@ -1,5 +1,4 @@
-import type { Project } from "@/types/dashboard.types";
-import type { FavoriteRepo } from "@/types/user.types";
+import type { FavoriteRepo,Project  } from "@/lib/types";
 
 /** Browser-safe base64url, matching the back's `Buffer.from(path).toString("base64url")`. */
 function base64url(value: string): string {

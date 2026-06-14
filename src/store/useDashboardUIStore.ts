@@ -1,7 +1,6 @@
 import { create } from "zustand";
 
-import type { AgentSummary } from "@/types/agents-mirror.types";
-import type { SkillSummary } from "@/types/skills-mirror.types";
+import type { AgentSummary, SkillSummary  } from "@/lib/types";
 
 type DashboardUIState = {
   selectedAgent: AgentSummary | null;

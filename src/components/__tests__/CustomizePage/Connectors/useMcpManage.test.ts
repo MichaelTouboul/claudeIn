@@ -2,7 +2,7 @@ import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useMcpManage } from "@/components/CustomizePage/Connectors/useMcpManage";
-import type { McpAddInput, McpServerRaw } from "@/types/mcp-manage.types";
+import type { McpAddInput, McpServerRaw } from "@/lib/types";
 
 function makeRaw(name: string): McpServerRaw {
   return { name, transport: "stdio", scope: "project", command: "npx", args: ["-y", name] };

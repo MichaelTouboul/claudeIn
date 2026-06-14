@@ -1,9 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { AgentsSnapshot, AgentSummary } from '@/types/agents-mirror.types';
-import type { Project } from '@/types/dashboard.types';
-import type { McpServerEntry, McpSnapshot } from '@/types/mcp-mirror.types';
-import type { SkillsSnapshot, SkillSummary } from '@/types/skills-mirror.types';
+import type { AgentsSnapshot, AgentSummary, McpServerEntry, McpSnapshot , Project , SkillsSnapshot, SkillSummary  } from '@/lib/types';
 
 import { useDashboardStore } from '../useDashboardStore';
 

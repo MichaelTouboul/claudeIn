@@ -1,7 +1,7 @@
 import { ChevronRight, Loader2, Terminal } from 'lucide-react';
 import { type RefObject } from 'react';
 
-import type { ChatMessage, SpawnSession } from '@/types/spawn.types';
+import type { ChatMessage, SpawnSession } from '@/lib/types';
 
 import { MessageRow } from '../MessageRow/MessageRow';
 import type { QueueItem } from '../types';

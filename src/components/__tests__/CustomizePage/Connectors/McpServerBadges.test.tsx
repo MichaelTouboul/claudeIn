@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { McpServerBadges } from '@/components/CustomizePage/Connectors/McpServerBadges';
-import type { McpServerEntry } from '@/types/mcp-mirror.types';
+import type { McpServerEntry } from '@/lib/types';
 
 function entry(overrides: Partial<McpServerEntry> = {}): McpServerEntry {
   return {

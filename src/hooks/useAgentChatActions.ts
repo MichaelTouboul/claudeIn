@@ -3,9 +3,8 @@ import { type RefObject, useCallback } from 'react';
 import type { RichEditorHandle } from '@/components/AgentChat/RichEditor/RichEditor';
 import { dispatchSlashCommand, type LocalSlashHandlers, type SlashViewTarget } from '@/components/AgentChat/slashRegistry';
 import type { QueueItem } from '@/components/AgentChat/types';
-import { FilePickerKind } from '@/types/attachment.types';
-import type { ImproveContextTarget } from '@/types/improve.types';
-import type { ChatMessage, SpawnSession } from '@/types/spawn.types';
+import type { ChatMessage, ImproveContextTarget, SpawnSession  } from '@/lib/types';
+import { FilePickerKind } from '@/lib/types';
 
 type SetState<T> = React.Dispatch<React.SetStateAction<T>>;
 type AttachedFile = { path: string; dataUrl: string | null };

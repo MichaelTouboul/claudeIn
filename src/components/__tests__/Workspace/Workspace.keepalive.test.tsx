@@ -3,10 +3,10 @@ import { useRef } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Workspace } from '@/components/Workspace/Workspace';
+import type { Project } from '@/lib/types';
 import { useAppStore } from '@/store/useAppStore';
 import { useDashboardStore } from '@/store/useDashboardStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
-import type { Project } from '@/types/dashboard.types';
 
 // The bug: Workspace unmounts the whole DashboardArea subtree when the global
 // selectedProject becomes null (e.g. openLauncher()). That destroys every

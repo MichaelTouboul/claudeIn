@@ -1,4 +1,4 @@
-import type { ImproveRequestInput, ImproveTranscriptTurn } from '@/types/improve.types';
+import type { ImproveRequestInput, ImproveTranscriptTurn } from '@/lib/types';
 
 import type { BuildImproveRequestArgs, ChatMessage } from './types';
 

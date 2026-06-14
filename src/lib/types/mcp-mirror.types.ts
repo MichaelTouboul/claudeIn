@@ -4,4 +4,4 @@ export type {
   McpSnapshot,
   McpSource,
   McpTransport,
-} from "../../electron/types/mcp-mirror.types";
+} from "../../../electron/types/mcp-mirror.types";

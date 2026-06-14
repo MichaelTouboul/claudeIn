@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 
-import type { AgentFile } from "@/types/agent.types";
-import type { HookConfig, Project, SkillFile } from "@/types/dashboard.types";
+import type { AgentFile, HookConfig, Project, SkillFile  } from "@/lib/types";
 
-export type { HookConfig, Project, SkillAnnexFile, SkillFile, SkillMetadata } from "@/types/dashboard.types";
+export type { HookConfig, Project, SkillAnnexFile, SkillFile, SkillMetadata } from "@/lib/types";
 
 export type Dashboard = {
   project: Project;

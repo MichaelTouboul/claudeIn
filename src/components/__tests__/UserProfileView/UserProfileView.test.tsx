@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { UserProfileView } from "@/components/UserProfileView/UserProfileView";
-import type { UserProfile } from "@/types/user.types";
+import type { UserProfile } from "@/lib/types";
 
 function makeProfile(overrides: Partial<UserProfile> = {}): UserProfile {
   return {

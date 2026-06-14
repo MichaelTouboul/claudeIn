@@ -1,4 +1,4 @@
-import type { AgentSummary } from '@/types/agents-mirror.types';
+import type { AgentSummary } from '@/lib/types';
 
 import { AgentRow } from '../AgentRow/AgentRow';
 

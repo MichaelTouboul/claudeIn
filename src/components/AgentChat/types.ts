@@ -1,4 +1,4 @@
-import type { ChatMessage, SpawnSession } from '@/types/spawn.types';
+import type { ChatMessage, SpawnSession } from '@/lib/types';
 
 /** A user message pending in the send queue. The `id` is stable across re-renders so React
  *  diffs work correctly when items are added/removed.

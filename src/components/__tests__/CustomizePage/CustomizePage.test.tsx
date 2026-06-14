@@ -2,10 +2,9 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CustomizePage } from "@/components/CustomizePage/CustomizePage";
+import type { FavoriteRepo,McpServerEntry, McpSnapshot  } from "@/lib/types";
 import { AppPage, useAppStore } from "@/store/useAppStore";
 import { CustomizeSection, useCustomizeStore } from "@/store/useCustomizeStore";
-import type { McpServerEntry, McpSnapshot } from "@/types/mcp-mirror.types";
-import type { FavoriteRepo } from "@/types/user.types";
 
 const PROJECT = "/code/alpha";
 

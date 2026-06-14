@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { buildImproveRequest } from '@/components/ImproveModal/recap';
 import type { ChatMessage } from '@/components/ImproveModal/types';
-import { ImproveType } from '@/types/improve.types';
+import { ImproveType } from '@/lib/types';
 
 const user = (text: string): ChatMessage => ({ id: text, role: 'user', text });
 const assistant = (text: string): ChatMessage => ({ id: `a:${text}`, role: 'assistant', text });

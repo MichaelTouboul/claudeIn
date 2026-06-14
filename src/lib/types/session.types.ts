@@ -3,4 +3,4 @@ export type {
   SessionMessage,
   SessionStatus,
   SessionSummary,
-} from "../../electron/types/session.types";
+} from "../../../electron/types/session.types";

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import type { McpServerEntry } from "@/types/mcp-mirror.types";
+import type { McpServerEntry } from "@/lib/types";
 
 import { CustomizeSection, useCustomizeStore } from "../useCustomizeStore";
 

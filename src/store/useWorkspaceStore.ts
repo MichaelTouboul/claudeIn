@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import type { Project } from '@/types/dashboard.types';
+import type { Project } from '@/lib/types';
 
 import { useAppStore } from './useAppStore';
 

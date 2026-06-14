@@ -1,9 +1,9 @@
 import { ContextBar } from '@/components/_ui/ContextBar';
 import { AgentContextMenu } from '@/components/AgentContextMenu/AgentContextMenu';
+import type { AgentSummary } from '@/lib/types';
 import { useProject } from '@/store/ProjectContext';
 import { useEventsStore } from '@/store/useEventsStore';
 import { useFavoritesStore } from '@/store/useFavoritesStore';
-import type { AgentSummary } from '@/types/agents-mirror.types';
 
 import { colorMap } from '../../utils';
 

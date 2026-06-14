@@ -3,9 +3,9 @@ import { useState } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { DashboardSurface } from '@/components/Workspace/DashboardArea/Dashboard/DashboardSurface/DashboardSurface';
+import type { Project } from '@/lib/types';
 import { useAppStore } from '@/store/useAppStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
-import type { Project } from '@/types/dashboard.types';
 
 // Mock TabBody with a stateful component. Each instance owns local useState;
 // if the host keeps it mounted across a dashboard switch, the typed value

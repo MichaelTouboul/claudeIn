@@ -2,8 +2,8 @@ import { Square, Terminal } from 'lucide-react';
 
 import { Button } from '@/components/_ui/Button';
 import { ContextBar } from '@/components/_ui/ContextBar';
+import type { SpawnSession } from '@/lib/types';
 import { useEventsStore } from '@/store/useEventsStore';
-import type { SpawnSession } from '@/types/spawn.types';
 
 export type AgentChatHeaderProps = {
   agentName: string;

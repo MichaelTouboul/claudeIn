@@ -1,5 +1,5 @@
 import { Button } from "@/components/_ui/Button";
-import type { FavoriteRepo } from "@/types/user.types";
+import type { FavoriteRepo } from "@/lib/types";
 
 import { repoLabel } from "../openFavorite";
 

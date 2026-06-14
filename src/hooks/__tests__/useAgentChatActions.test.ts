@@ -2,7 +2,7 @@ import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { RichEditorHandle } from '@/components/AgentChat/RichEditor/RichEditor';
-import type { SpawnSession } from '@/types/spawn.types';
+import type { SpawnSession } from '@/lib/types';
 
 import { useAgentChatActions } from '../useAgentChatActions';
 

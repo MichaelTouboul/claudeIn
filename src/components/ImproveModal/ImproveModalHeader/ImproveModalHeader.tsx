@@ -1,4 +1,4 @@
-import type { ImproveContextTarget, ImproveType } from '@/types/improve.types';
+import type { ImproveContextTarget, ImproveType } from '@/lib/types';
 
 import { IMPROVE_TYPE_OPTIONS } from '../typeLabels';
 

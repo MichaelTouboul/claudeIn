@@ -2,8 +2,7 @@ import { ChevronRight, Loader2, Paperclip, Send, X } from 'lucide-react';
 import { type RefObject, useState } from 'react';
 
 import { Button } from '@/components/_ui/Button';
-import type { FilePickerKind } from '@/types/attachment.types';
-import type { SpawnSession } from '@/types/spawn.types';
+import type { FilePickerKind, SpawnSession  } from '@/lib/types';
 
 import { RichEditor, type RichEditorHandle } from '../RichEditor/RichEditor';
 import { AgentTabs } from './AgentTabs/AgentTabs';

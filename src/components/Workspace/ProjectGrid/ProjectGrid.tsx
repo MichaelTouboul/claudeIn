@@ -1,7 +1,7 @@
 import { Bot } from 'lucide-react';
 
+import type { Project } from '@/lib/types';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
-import type { Project } from '@/types/dashboard.types';
 
 export type ProjectGridProps = { projects: Project[] };
 

@@ -1,7 +1,7 @@
 import { type ReactElement, useCallback, useState } from "react";
 
+import type { UserProfile } from "@/lib/types";
 import { AppPage, useAppStore } from "@/store/useAppStore";
-import type { UserProfile } from "@/types/user.types";
 
 import { ConsentReposStep } from "./ConsentReposStep/ConsentReposStep";
 import { ConsentUserStep } from "./ConsentUserStep/ConsentUserStep";

@@ -2,9 +2,9 @@ import { Pin } from "lucide-react";
 
 import { ContextBar } from "@/components/_ui/ContextBar";
 import type { SessionSummary } from "@/hooks/useSessions";
+import type { AgentContext } from "@/lib/types";
 import { useConversationTitlesStore } from "@/store/useConversationTitlesStore";
 import { usePinnedStore } from "@/store/usePinnedStore";
-import type { AgentContext } from "@/types/events.types";
 
 import { SessionRowMenu } from "../SessionRowMenu/SessionRowMenu";
 

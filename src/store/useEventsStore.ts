@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { create } from "zustand";
 
-import type { AgentContext, LiveEvent } from "@/types/events.types";
+import type { AgentContext, LiveEvent } from "@/lib/types";
 
 const DEFAULT_LIMIT = 200_000;
 const ACTIVE_TIMEOUT_MS = 5000;

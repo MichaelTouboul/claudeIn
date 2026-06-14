@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { SOURCE_PRESENTATION, TRANSPORT_PRESENTATION } from '@/components/CustomizePage/Connectors/mcpPresentation';
-import type { McpSource, McpTransport } from '@/types/mcp-mirror.types';
+import type { McpSource, McpTransport } from '@/lib/types';
 
 const ALL_TRANSPORTS: McpTransport[] = ['stdio', 'http', 'sse', 'unknown'];
 const ALL_SOURCES: McpSource[] = ['user-settings', 'user-global', 'project-mcp-json', 'project-settings'];

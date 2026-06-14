@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
-import type { ImproveRequest } from "@/types/improve.types";
-import { ImproveStatus } from "@/types/improve.types";
+import type { ImproveRequest } from "@/lib/types";
+import { ImproveStatus } from "@/lib/types";
 
 /**
  * Self-Improve loop — notification state (I5).

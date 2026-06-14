@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import type { ImproveRequest } from "@/types/improve.types";
-import { ImproveStatus, ImproveType } from "@/types/improve.types";
+import type { ImproveRequest } from "@/lib/types";
+import { ImproveStatus, ImproveType } from "@/lib/types";
 
 import {
   ACKNOWLEDGED_STORAGE_KEY,

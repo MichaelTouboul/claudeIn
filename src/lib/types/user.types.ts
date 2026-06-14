@@ -3,4 +3,4 @@ export type {
   FavoriteRepo,
   RepoCandidate,
   UserProfile,
-} from "../../electron/types";
+} from "../../../electron/types";

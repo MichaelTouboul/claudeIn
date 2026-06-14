@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-import type { McpServerEntry } from "@/types/mcp-mirror.types";
+import type { McpServerEntry } from "@/lib/types";
 
 /**
  * The two Customize-page sections. Single source of truth for which nav item is

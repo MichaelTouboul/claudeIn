@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { AttachMenu } from '@/components/AgentChat/AgentChatInput/AttachMenu/AttachMenu';
-import { FilePickerKind } from '@/types/attachment.types';
+import { FilePickerKind } from '@/lib/types';
 
 // Radix DropdownMenu uses pointer capture (absent in jsdom). Open via the
 // keyboard path: focus the trigger and press Enter (mirrors ContextMenu tests).

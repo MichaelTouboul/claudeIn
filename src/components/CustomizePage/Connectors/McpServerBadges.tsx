@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 
-import type { McpServerEntry } from '@/types/mcp-mirror.types';
+import type { McpServerEntry } from '@/lib/types';
 
 import { SOURCE_PRESENTATION, TRANSPORT_PRESENTATION } from './mcpPresentation';
 

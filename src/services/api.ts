@@ -1,10 +1,6 @@
-import type { AgentFile } from "../types/agent.types";
-import type { SkillFile } from "../types/dashboard.types";
-import type {
-  ImproveChatInput,
+import type { AgentFile,   ImproveChatInput,
   ImproveRequest,
-  ImproveRequestInput,
-} from "../types/improve.types";
+  ImproveRequestInput,SkillFile  } from "@/lib/types";
 
 export const api = {
   getAgents: (): Promise<AgentFile[]> => window.api.getAgents(),

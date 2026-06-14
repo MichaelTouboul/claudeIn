@@ -1,4 +1,4 @@
-import type { SessionConversation } from "@/types/session.types";
+import type { SessionConversation } from "@/lib/types";
 
 /** Effective Claude context window, in tokens. */
 export const CONTEXT_WINDOW_TOKENS = 200_000;

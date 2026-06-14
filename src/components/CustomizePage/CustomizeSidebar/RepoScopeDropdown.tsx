@@ -1,5 +1,5 @@
 import { repoLabel } from "@/components/HomePage/openFavorite";
-import type { FavoriteRepo } from "@/types/user.types";
+import type { FavoriteRepo } from "@/lib/types";
 
 export type RepoScopeDropdownProps = {
   repos: FavoriteRepo[];

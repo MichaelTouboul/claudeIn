@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import type { UserProfile } from "@/types/user.types";
+import type { UserProfile } from "@/lib/types";
 
 export type UseUserProfile = {
   /** The persisted profile, or null on first run / before load resolves. */

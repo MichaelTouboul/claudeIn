@@ -2,11 +2,11 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { AgentTabs } from "@/components/AgentChat/AgentChatInput/AgentTabs/AgentTabs";
+import type { LiveEvent } from "@/lib/types";
 import { useAgentDismissStore } from "@/store/useAgentDismissStore";
 import { useDashboardStore } from "@/store/useDashboardStore";
 import { useEventsStore } from "@/store/useEventsStore";
 import { agentTabId, PanelTabKind, usePanelStore, workflowTabId } from "@/store/usePanelStore";
-import type { LiveEvent } from "@/types/events.types";
 
 function liveEvent(over: Partial<LiveEvent>): LiveEvent {
   return {

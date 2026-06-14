@@ -1,4 +1,4 @@
-import type { McpAddInput, McpManageScope, McpTransportInput } from "@/types/mcp-manage.types";
+import type { McpAddInput, McpManageScope, McpTransportInput } from "@/lib/types";
 
 import { mcpFormFields } from "./mcpFormFields";
 

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import type { McpServerRaw } from "@/types/mcp-manage.types";
+import type { McpServerRaw } from "@/lib/types";
 
 export type McpRawConfigProps = {
   raw: McpServerRaw;

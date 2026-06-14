@@ -1,5 +1,5 @@
 import { useProjects } from '@/hooks/useProjects';
-import type { Project } from '@/types/dashboard.types';
+import type { Project } from '@/lib/types';
 
 export type ProjectListProps = {
   onSelect: (project: Project) => void;

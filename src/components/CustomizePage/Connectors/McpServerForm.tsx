@@ -5,7 +5,7 @@ import type {
   McpManageScope,
   McpMutationResult,
   McpTransportInput,
-} from "@/types/mcp-manage.types";
+} from "@/lib/types";
 
 import {
   buildMcpAddInput,

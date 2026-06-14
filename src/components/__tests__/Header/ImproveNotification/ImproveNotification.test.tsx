@@ -2,12 +2,12 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ImproveNotification } from "@/components/Header/ImproveNotification/ImproveNotification";
+import type { ImproveRequest } from "@/lib/types";
+import { ImproveStatus, ImproveType } from "@/lib/types";
 import {
   ACKNOWLEDGED_STORAGE_KEY,
   useImproveStore,
 } from "@/store/useImproveStore";
-import type { ImproveRequest } from "@/types/improve.types";
-import { ImproveStatus, ImproveType } from "@/types/improve.types";
 
 function makeRequest(overrides: Partial<ImproveRequest> = {}): ImproveRequest {
   return {

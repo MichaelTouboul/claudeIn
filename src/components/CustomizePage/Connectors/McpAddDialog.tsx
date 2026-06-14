@@ -1,5 +1,5 @@
 import { Dialog } from "@/components/_ui/Dialog";
-import type { McpAddInput, McpMutationResult } from "@/types/mcp-manage.types";
+import type { McpAddInput, McpMutationResult } from "@/lib/types";
 
 import { type McpFormMode,McpServerForm } from "./McpServerForm";
 
