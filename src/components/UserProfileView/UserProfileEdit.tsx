@@ -1,6 +1,8 @@
 import { useState } from "react";
 
 import { Button } from "@/components/_ui/Button";
+import { Input } from "@/components/_ui/Input";
+import { Textarea } from "@/components/_ui/Textarea";
 import type { UserProfile } from "@/lib/types";
 
 type UserProfileEditProps = {
@@ -43,9 +45,6 @@ function applyDraft(p: UserProfile, d: Draft): UserProfile {
   };
 }
 
-const fieldClass =
-  "w-full rounded border border-border bg-surface-0 px-2 py-1.5 text-sm text-fg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent";
-
 /** Inline edit form for the narrative + identity fields of the user profile. */
 export function UserProfileEdit({ profile, onSave, onCancel }: UserProfileEditProps) {
   const [draft, setDraft] = useState<Draft>(() => toDraft(profile));
@@ -70,31 +69,31 @@ export function UserProfileEdit({ profile, onSave, onCancel }: UserProfileEditPr
         <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
           Name
         </span>
-        <input className={fieldClass} value={draft.name} onChange={set("name")} />
+        <Input className="bg-surface-0" value={draft.name} onChange={set("name")} />
       </label>
       <label className="flex flex-col gap-1 text-sm">
         <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
           Role
         </span>
-        <input className={fieldClass} value={draft.role} onChange={set("role")} />
+        <Input className="bg-surface-0" value={draft.role} onChange={set("role")} />
       </label>
       <label className="flex flex-col gap-1 text-sm">
         <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
           Summary
         </span>
-        <textarea className={fieldClass} rows={3} value={draft.summary} onChange={set("summary")} />
+        <Textarea className="bg-surface-0" rows={3} value={draft.summary} onChange={set("summary")} />
       </label>
       <label className="flex flex-col gap-1 text-sm">
         <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
           Domains (comma-separated)
         </span>
-        <input className={fieldClass} value={draft.domains} onChange={set("domains")} />
+        <Input className="bg-surface-0" value={draft.domains} onChange={set("domains")} />
       </label>
       <label className="flex flex-col gap-1 text-sm">
         <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
           Workflow
         </span>
-        <textarea className={fieldClass} rows={2} value={draft.workflow} onChange={set("workflow")} />
+        <Textarea className="bg-surface-0" rows={2} value={draft.workflow} onChange={set("workflow")} />
       </label>
       <div className="flex items-center gap-2">
         <Button type="submit" intent="primary" size="md" disabled={saving}>

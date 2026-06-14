@@ -1,5 +1,6 @@
 import { Square, Terminal } from 'lucide-react';
 
+import { Badge } from '@/components/_ui/Badge';
 import { Button } from '@/components/_ui/Button';
 import { ContextBar } from '@/components/_ui/ContextBar';
 import type { SpawnSession } from '@/lib/types';
@@ -31,22 +32,18 @@ export function AgentChatHeader({ agentName, session, isRunning, waitingInput, o
           {session ? `${agentName} — session` : agentName}
         </span>
         {session ? (
-          <span
-            className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
-              isRunning
-                ? "bg-active/20 text-active animate-pulse"
-                : session.status === "done"
-                  ? "bg-surface-3 text-fg-muted"
-                  : "bg-danger/20 text-danger"
-            }`}
+          <Badge
+            shape="pill"
+            variant={isRunning ? "green" : session.status === "done" ? "gray" : "red"}
+            className={`text-[10px] ${isRunning ? "animate-pulse" : ""}`}
           >
             {session.status}
-          </span>
+          </Badge>
         ) : null}
         {waitingInput ? (
-          <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium bg-yellow-500/20 text-yellow-400 animate-pulse">
+          <Badge shape="pill" variant="yellow" className="text-[10px] animate-pulse">
             awaiting response
-          </span>
+          </Badge>
         ) : null}
       </div>
       {isRunning ? (

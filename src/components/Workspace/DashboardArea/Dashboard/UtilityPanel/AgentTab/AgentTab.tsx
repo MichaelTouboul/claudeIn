@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 
 import { ContextBar } from "@/components/_ui/ContextBar";
+import { StatusDot } from "@/components/_ui/StatusDot";
 import { EventConsole } from "@/components/EventConsole/EventConsole";
 import { colorMap } from "@/components/Workspace/utils";
 import { paletteColor } from "@/hooks/useConversationAgents";
@@ -58,7 +59,7 @@ export function AgentTab({ tab }: { tab: PanelTab }) {
 
   const dot = AGENT_HEADER_DOT[status ?? AgentPresenceStatus.Idle];
   const color = paletteColor(agentName);
-  const dotClass = dot.pulse ? "bg-active animate-pulse" : colorMap[color] || "bg-surface-3";
+  const dotClass = dot.pulse ? "bg-active" : colorMap[color] || "bg-surface-3";
   const colorByName = new Map<string, string>([[agentName, color]]);
 
   return (
@@ -78,9 +79,11 @@ export function AgentTab({ tab }: { tab: PanelTab }) {
             costUsd={context.costUsd}
           />
         ) : null}
-        <span
+        <StatusDot
           data-testid="agent-tab-panel-dot"
-          className={`relative w-2 h-2 rounded-full shrink-0 ${dotClass}`}
+          size="sm"
+          pulse={dot.pulse}
+          className={`relative ${dotClass}`}
         />
         <span
           className="relative truncate text-xs font-medium"

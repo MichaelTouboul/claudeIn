@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 
+import { Button } from "@/components/_ui/Button";
 import { Dialog } from "@/components/_ui/Dialog";
+import { Input } from "@/components/_ui/Input";
 import { useConversationTitlesStore } from "@/store/useConversationTitlesStore";
 
 export type RenameDialogProps = {
@@ -49,37 +51,23 @@ export function RenameDialog({ open, onOpenChange, claudeSessionId, currentTitle
           <p className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
             Set a custom title. Leave it empty to fall back to the AI-generated title.
           </p>
-          <input
+          <Input
             autoFocus
             value={value}
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") void save();
             }}
-            className="mt-1 w-full rounded-lg px-3 py-2 text-sm outline-none"
-            style={{
-              color: "var(--color-text-primary)",
-              background: "var(--color-surface-2)",
-              border: "1px solid var(--color-border)",
-              fontFamily: "var(--font-sans)",
-            }}
+            className="mt-1"
           />
         </div>
         <div className="flex justify-end gap-2 px-4 py-3 mt-3" style={{ borderTop: "1px solid var(--color-border-subtle)" }}>
-          <button
-            onClick={() => onOpenChange(false)}
-            className="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors"
-            style={{ color: "var(--color-text-secondary)", background: "var(--color-surface-2)" }}
-          >
+          <Button intent="outline" size="sm" onClick={() => onOpenChange(false)}>
             Cancel
-          </button>
-          <button
-            onClick={() => void save()}
-            className="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors"
-            style={{ color: "#fff", background: "var(--color-accent)" }}
-          >
+          </Button>
+          <Button intent="primary" size="sm" onClick={() => void save()}>
             Save
-          </button>
+          </Button>
         </div>
       </div>
     </Dialog>

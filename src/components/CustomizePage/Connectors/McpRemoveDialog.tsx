@@ -1,3 +1,4 @@
+import { Button } from "@/components/_ui/Button";
 import { Dialog } from "@/components/_ui/Dialog";
 import type { McpMutationResult } from "@/lib/types";
 
@@ -44,22 +45,12 @@ export function McpRemoveDialog({ open, onOpenChange, serverName, onConfirm }: M
           className="flex justify-end gap-2 px-4 py-3 mt-3"
           style={{ borderTop: "1px solid var(--color-border-subtle)" }}
         >
-          <button
-            type="button"
-            onClick={() => onOpenChange(false)}
-            className="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors"
-            style={{ color: "var(--color-text-secondary)", background: "var(--color-surface-2)" }}
-          >
+          <Button type="button" intent="outline" size="sm" onClick={() => onOpenChange(false)}>
             Cancel
-          </button>
-          <button
-            type="button"
-            onClick={() => void confirm()}
-            className="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors"
-            style={{ color: "#fff", background: "var(--color-danger)" }}
-          >
+          </Button>
+          <Button type="button" intent="danger-solid" size="sm" onClick={() => void confirm()}>
             Remove
-          </button>
+          </Button>
         </div>
       </div>
     </Dialog>

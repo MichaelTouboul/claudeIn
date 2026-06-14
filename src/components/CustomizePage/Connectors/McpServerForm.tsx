@@ -1,5 +1,8 @@
 import { type CSSProperties, type FormEvent,useState } from "react";
 
+import { Button } from "@/components/_ui/Button";
+import { Input } from "@/components/_ui/Input";
+import { Select } from "@/components/_ui/Select";
 import type {
   McpAddInput,
   McpManageScope,
@@ -31,12 +34,6 @@ const submitLabel: Record<McpFormMode, string> = { add: "Add", edit: "Save" };
 const labelStyle: CSSProperties = {
   color: "var(--color-text-muted)",
   fontFamily: "var(--font-sans)",
-};
-const controlStyle: CSSProperties = {
-  color: "var(--color-text-primary)",
-  backgroundColor: "var(--color-surface-2)",
-  border: "1px solid var(--color-border)",
-  fontFamily: "var(--font-mono)",
 };
 
 // Shared Add/Edit form. The chosen transport drives which fields render and
@@ -70,64 +67,54 @@ export function McpServerForm({ mode, onSubmit, initialValues }: McpServerFormPr
     <form className="flex flex-col gap-3 px-4 py-4" onSubmit={(e) => void submit(e)} noValidate>
       <label className="flex flex-col gap-1 text-xs" style={labelStyle}>
         Name
-        <input
+        <Input
           type="text"
+          size="sm"
+          font="mono"
           value={state.name}
           onChange={(e) => patch({ name: e.target.value })}
-          className="rounded px-2 py-1 text-xs"
-          style={controlStyle}
         />
       </label>
       <label className="flex flex-col gap-1 text-xs" style={labelStyle}>
         Scope
-        <select
+        <Select
+          size="sm"
+          font="mono"
           value={state.scope}
           onChange={(e) => patch({ scope: e.target.value as McpManageScope })}
-          className="rounded px-2 py-1 text-xs"
-          style={controlStyle}
         >
           {scopes.map((scope) => (
             <option key={scope} value={scope}>
               {scope}
             </option>
           ))}
-        </select>
+        </Select>
       </label>
       <label className="flex flex-col gap-1 text-xs" style={labelStyle}>
         Transport
-        <select
+        <Select
+          size="sm"
+          font="mono"
           value={state.transport}
           onChange={(e) => patch({ transport: e.target.value as McpTransportInput })}
-          className="rounded px-2 py-1 text-xs"
-          style={controlStyle}
         >
           {transports.map((transport) => (
             <option key={transport} value={transport}>
               {transport}
             </option>
           ))}
-        </select>
+        </Select>
       </label>
-      <McpFormTransportFields
-        state={state}
-        patch={patch}
-        labelStyle={labelStyle}
-        controlStyle={controlStyle}
-      />
+      <McpFormTransportFields state={state} patch={patch} labelStyle={labelStyle} />
       {error !== null ? (
         <p role="alert" className="text-xs" style={{ color: "var(--color-danger)", fontFamily: "var(--font-mono)" }}>
           {error}
         </p>
       ) : null}
       <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={submitting}
-          className="px-3 py-1.5 text-xs font-semibold rounded-lg"
-          style={{ color: "#fff", background: "var(--color-accent)" }}
-        >
+        <Button type="submit" intent="primary" size="sm" disabled={submitting}>
           {submitLabel[mode]}
-        </button>
+        </Button>
       </div>
     </form>
   );

@@ -1,6 +1,7 @@
 import { type FormEvent,useState } from 'react';
 
 import { Button } from '@/components/_ui/Button/Button';
+import { Input } from '@/components/_ui/Input';
 
 import type { ChatMessage } from '../types';
 
@@ -64,18 +65,13 @@ export function ImproveChat({ messages, loading, onSend }: ImproveChatProps) {
         className="flex items-center gap-2 px-4 py-3 border-t"
         style={{ borderColor: 'var(--color-border)' }}
       >
-        <input
+        <Input
           aria-label="Message"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           disabled={loading}
           placeholder="Type a message…"
-          className="flex-1 h-8 rounded px-3 text-sm outline-none focus-visible:ring-1 disabled:opacity-50"
-          style={{
-            background: 'var(--color-surface-3)',
-            color: 'var(--color-text-primary)',
-            border: '1px solid var(--color-border)',
-          }}
+          className="flex-1 bg-surface-3"
         />
         <Button type="submit" intent="outline" disabled={loading || draft.trim() === ''}>
           Send

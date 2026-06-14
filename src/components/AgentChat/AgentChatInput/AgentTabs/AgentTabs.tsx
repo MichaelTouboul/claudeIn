@@ -1,5 +1,6 @@
 import { Network, X } from "lucide-react";
 
+import { StatusDot } from "@/components/_ui/StatusDot";
 import { colorMap } from "@/components/Workspace/utils";
 import {
   CONVERSATION_AGENT_DOT,
@@ -58,7 +59,7 @@ export function AgentTabs({ claudeSessionId, orchestratorName }: AgentTabsProps)
       {agents.map((agent) => {
         const pulse = CONVERSATION_AGENT_DOT[agent.status].pulse;
         const dotClass = pulse
-          ? "bg-active animate-pulse"
+          ? "bg-active"
           : colorMap[agent.color] || "bg-surface-3";
         return (
           <div
@@ -82,9 +83,11 @@ export function AgentTabs({ claudeSessionId, orchestratorName }: AgentTabsProps)
               }
               className="flex items-center gap-1.5 cursor-pointer hover:text-fg transition-colors"
             >
-              <span
+              <StatusDot
                 data-testid={`agent-tab-dot-${agent.name}`}
-                className={`w-2 h-2 rounded-full shrink-0 ${dotClass}`}
+                size="sm"
+                pulse={pulse}
+                className={dotClass}
               />
               <span className="truncate max-w-[140px] font-medium">{agent.name}</span>
             </button>

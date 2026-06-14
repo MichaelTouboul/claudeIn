@@ -1,5 +1,7 @@
 import { ArrowLeft, User } from "lucide-react";
 
+import { Button } from "@/components/_ui/Button";
+
 export type CustomizeTopBarProps = {
   onBack: () => void;
 };
@@ -12,16 +14,10 @@ export function CustomizeTopBar({ onBack }: CustomizeTopBarProps) {
       className="flex items-center gap-3 px-4 py-3 shrink-0"
       style={{ background: "var(--color-surface-1)", borderBottom: "1px solid var(--color-border)" }}
     >
-      <button
-        type="button"
-        aria-label="Back to home"
-        onClick={onBack}
-        className="flex items-center gap-1.5 rounded-md px-2 py-1 text-sm transition-colors hover:bg-surface-2 hover:text-fg focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
-        style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-sans)" }}
-      >
+      <Button type="button" intent="ghost" size="sm" aria-label="Back to home" onClick={onBack}>
         <ArrowLeft size={16} />
         Customize
-      </button>
+      </Button>
       <h1
         className="text-sm font-semibold"
         style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-sans)" }}

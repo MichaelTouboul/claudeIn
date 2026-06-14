@@ -33,12 +33,21 @@ export function toBadgeVariant(v: string): BadgeVariant {
   return isBadgeVariant(v) ? v : 'gray';
 }
 
+export type BadgeShape = 'rounded' | 'pill';
+
+const SHAPE_CLASS: Record<BadgeShape, string> = {
+  rounded: 'rounded',
+  pill: 'rounded-full',
+};
+
 export type BadgeProps = ComponentProps<'span'> & {
   variant?: BadgeVariant;
+  shape?: BadgeShape;
 };
 
 export function Badge({
   variant = 'gray',
+  shape = 'rounded',
   className,
   style,
   children,
@@ -48,7 +57,7 @@ export function Badge({
   return (
     <span
       {...props}
-      className={cn('px-2 py-0.5 rounded text-xs font-medium font-mono', className)}
+      className={cn('px-2 py-0.5 text-xs font-medium font-mono', SHAPE_CLASS[shape], className)}
       style={{
         background: c.bg,
         color: c.text,

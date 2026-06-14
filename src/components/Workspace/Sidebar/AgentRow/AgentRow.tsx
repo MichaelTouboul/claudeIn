@@ -1,4 +1,5 @@
 import { ContextBar } from '@/components/_ui/ContextBar';
+import { StatusDot } from '@/components/_ui/StatusDot';
 import { AgentContextMenu } from '@/components/AgentContextMenu/AgentContextMenu';
 import type { AgentSummary } from '@/lib/types';
 import { useProject } from '@/store/ProjectContext';
@@ -35,7 +36,11 @@ export function AgentRow({
         }`}
       >
         {active && context && context.percent > 0 ? <ContextBar percent={context.percent} tokensIn={context.tokensIn} tokensOut={context.tokensOut} costUsd={context.costUsd} /> : null}
-        <span className={`relative w-2 h-2 rounded-full shrink-0 ${active ? "bg-active animate-pulse" : (colorMap[agent.frontmatter.color || ""] || "bg-surface-3")}`} />
+        <StatusDot
+          size="sm"
+          pulse={active}
+          className={`relative ${active ? "bg-active" : (colorMap[agent.frontmatter.color || ""] || "bg-surface-3")}`}
+        />
         <span className="relative truncate text-sm font-medium">{agent.id}</span>
       </button>
       <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">

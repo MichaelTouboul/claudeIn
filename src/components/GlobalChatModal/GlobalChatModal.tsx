@@ -3,6 +3,8 @@ import { useState } from "react";
 
 import { Button } from '@/components/_ui/Button';
 import { Dialog } from '@/components/_ui/Dialog';
+import { Input } from '@/components/_ui/Input';
+import { StatusDot } from '@/components/_ui/StatusDot';
 import { AgentChat } from '@/components/AgentChat/AgentChat';
 
 export type GlobalChatModalProps = {
@@ -37,7 +39,7 @@ export function GlobalChatModal({
       >
         <MessageSquare size={14} style={{ color: 'var(--color-accent)' }} />
         <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>{title}</span>
-        <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: 'rgba(6,182,212,0.5)' }} />
+        <StatusDot size="xs" pulse style={{ background: 'rgba(6,182,212,0.5)' }} />
       </button>
     );
   }
@@ -59,18 +61,14 @@ export function GlobalChatModal({
           <div className="flex items-center gap-2.5">
             <MessageSquare size={15} style={{ color: 'var(--color-accent)' }} />
             {editingTitle ? (
-              <input
+              <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 onBlur={() => setEditingTitle(false)}
                 onKeyDown={(e) => e.key === "Enter" && setEditingTitle(false)}
-                className="rounded px-2 py-0.5 text-sm focus:outline-none focus:ring-1 w-48"
-                style={{
-                  background: 'var(--color-surface-2)',
-                  border: '1px solid rgba(6,182,212,0.3)',
-                  color: 'var(--color-text-primary)',
-                  fontFamily: 'var(--font-mono)',
-                }}
+                size="sm"
+                font="mono"
+                className="w-48"
                 autoFocus
               />
             ) : (

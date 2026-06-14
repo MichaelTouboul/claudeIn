@@ -1,6 +1,7 @@
 import { Star, Terminal, Wrench } from 'lucide-react';
 import { useState } from 'react';
 
+import { Badge } from '@/components/_ui/Badge';
 import { AgentChat } from '@/components/AgentChat/AgentChat';
 import type { SkillTab } from '@/components/Workspace/types';
 import type { SkillFile } from '@/hooks/useProjects';
@@ -46,11 +47,9 @@ export function SkillDetailContent({ skill }: SkillDetailContentProps) {
           >
             <Star size={16} className={isFavorite ? "text-yellow-400 fill-yellow-400" : "text-fg-subtle hover:text-yellow-400"} />
           </button>
-          <span className={`text-xs px-2 py-0.5 rounded-full ${
-            skill.scope === "user" ? "bg-yellow-500/15 text-yellow-400" : "bg-accent/15 text-accent"
-          }`}>
+          <Badge shape="pill" variant={skill.scope === "user" ? "yellow" : "cyan"}>
             {skill.scope}
-          </span>
+          </Badge>
         </div>
       </div>
 

@@ -4,7 +4,11 @@ ChevronDown, ChevronRight,
   Clock, FileText, Plus,   Save, Trash2, X, } from "lucide-react";
 import { useState } from "react";
 
+import { Badge } from "@/components/_ui/Badge";
 import { Button } from "@/components/_ui/Button";
+import { Input } from "@/components/_ui/Input";
+import { Progress } from "@/components/_ui/Progress";
+import { Textarea } from "@/components/_ui/Textarea";
 import type { AgentFile, MemoryFile } from "@/lib/types";
 import { api } from "@/services/api";
 import { useProject } from "@/store/ProjectContext";
@@ -13,11 +17,12 @@ const MAX_LINES = 200;
 const MAX_BYTES = 25 * 1024;
 
 function SizeGauge({ label, current, max, unit }: { label: string; current: number; max: number; unit: string }) {
-  const percent = Math.min((current / max) * 100, 100);
-  const barColor =
-    percent >= 90 ? "bg-danger" :
-    percent >= 70 ? "bg-yellow-500" :
-    "bg-accent";
+  const ratio = Math.min(current / max, 1);
+  const percent = ratio * 100;
+  const fillColor =
+    percent >= 90 ? "var(--color-danger)" :
+    percent >= 70 ? "#fde047" :
+    "var(--color-accent)";
   const textColor =
     percent >= 90 ? "text-danger" :
     percent >= 70 ? "text-yellow-400" :
@@ -26,12 +31,7 @@ function SizeGauge({ label, current, max, unit }: { label: string; current: numb
   return (
     <div className="flex items-center gap-3">
       <span className="text-[10px] text-fg-muted w-10 font-medium">{label}</span>
-      <div className="flex-1 h-[5px] bg-surface-2/80 rounded-full overflow-hidden">
-        <div
-          className={`h-full rounded-full transition-all duration-500 ${barColor}`}
-          style={{ width: `${percent}%` }}
-        />
-      </div>
+      <Progress value={ratio} fillColor={fillColor} trackClassName="flex-1 h-[5px]" />
       <span className={`text-[10px] font-mono tabular-nums ${textColor}`}>
         {current}/{max} {unit}
       </span>
@@ -145,11 +145,13 @@ function MemoryFileCard({
           </div>
 
           {editing ? (
-            <textarea
+            <Textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
               aria-label={`Edit ${file.name}`}
-              className="w-full h-56 bg-surface-1/80 text-fg text-xs font-mono p-3 rounded-lg border border-border/60 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/20 resize-y leading-relaxed"
+              size="sm"
+              font="mono"
+              className="h-56 p-3 bg-surface-1/80 resize-y leading-relaxed"
             />
           ) : (
             <pre className="text-xs text-fg-muted whitespace-pre-wrap font-mono max-h-56 overflow-y-auto bg-surface-1/40 rounded-lg p-3 leading-relaxed">
@@ -211,9 +213,9 @@ export function MemoryManager({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm text-fg-muted">
           <span>Scope:</span>
-          <span className="px-2 py-0.5 bg-active/15 text-active rounded-full text-xs font-medium">
+          <Badge shape="pill" variant="green">
             {agent.frontmatter.memory}
-          </span>
+          </Badge>
           <span className="text-fg-subtle text-xs font-mono tabular-nums">
             {agent.memoryFiles.length} files
           </span>
@@ -226,12 +228,13 @@ export function MemoryManager({
 
       {creating ? <div className="border border-accent/25 rounded-lg p-4 bg-accent/[0.03]">
           <div className="flex items-center gap-2 mb-2">
-            <input
+            <Input
               value={newFileName}
               onChange={(e) => setNewFileName(e.target.value)}
               placeholder="topic-name.md"
               aria-label="New topic file name"
-              className="flex-1 bg-surface-1/80 border border-border/60 text-fg text-sm rounded px-3 py-1.5 focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/20 font-mono"
+              font="mono"
+              className="flex-1 bg-surface-1/80"
               autoFocus
             />
             <Button
@@ -246,13 +249,15 @@ export function MemoryManager({
               <X size={14} />
             </Button>
           </div>
-          <textarea
+          <Textarea
             value={newContent}
             onChange={(e) => setNewContent(e.target.value)}
             placeholder="Initial content (optional)"
             aria-label="New topic content"
             rows={4}
-            className="w-full bg-surface-1/80 border border-border/60 text-fg text-xs font-mono p-3 rounded-lg focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/20 resize-y leading-relaxed"
+            size="sm"
+            font="mono"
+            className="p-3 bg-surface-1/80 resize-y leading-relaxed"
           />
         </div> : null}
 
