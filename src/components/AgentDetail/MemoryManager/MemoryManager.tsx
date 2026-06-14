@@ -11,9 +11,9 @@ import { Inline } from "@/components/_ui/Inline";
 import { Input } from "@/components/_ui/Input";
 import { Progress } from "@/components/_ui/Progress";
 import { Textarea } from "@/components/_ui/Textarea";
+import { useProject } from "@/contexts/ProjectContext";
 import type { AgentFile, MemoryFile } from "@/lib/types";
 import { api } from "@/services/api";
-import { useProject } from "@/store/ProjectContext";
 
 const MAX_LINES = 200;
 const MAX_BYTES = 25 * 1024;

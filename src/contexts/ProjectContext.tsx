@@ -1,8 +1,7 @@
 import { createContext, type ReactNode, useContext, useMemo } from "react";
 
 import type { Project } from "@/lib/types";
-
-import { useDashboardStore } from "./useDashboardStore";
+import { useDashboardStore } from "@/store/useDashboardStore";
 
 type ProjectContextValue = {
   project: Project | null;

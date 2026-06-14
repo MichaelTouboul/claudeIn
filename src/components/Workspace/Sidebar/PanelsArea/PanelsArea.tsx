@@ -5,9 +5,9 @@ Wrench, } from "lucide-react";
 import { type ReactNode } from "react";
 
 import { Accordion } from '@/components/_ui/Accordion';
+import { useProject } from '@/contexts/ProjectContext';
 import type { SessionSummary } from '@/hooks/useSessions';
 import type { AgentSummary, SkillSummary  } from '@/lib/types';
-import { useProject } from '@/store/ProjectContext';
 import { useDashboardStore } from '@/store/useDashboardStore';
 import { useDashboardUIStore } from '@/store/useDashboardUIStore';
 import { useEventsStore } from '@/store/useEventsStore';

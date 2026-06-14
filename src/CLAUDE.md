@@ -10,7 +10,8 @@ This is the **sandboxed** side: Chromium + React 19, the UI. It has **no Node ac
 - **`components/`** — feature components at the root; generic primitives in **`components/_ui/`**.
 - **`hooks/`** — `useIPC.ts`, `useSessions.ts`, `useProjects.ts`, `useFavorites.ts`, …
 - **`services/api.ts`** — thin wrapper over `window.api`. **All** back communication goes through here.
-- **`store/useAppStore.ts`** — global state (zustand).
+- **`store/useAppStore.ts`** — global state (zustand only — no React contexts here).
+- **`contexts/`** — React contexts (e.g. `ProjectContext`), the home for `createContext` providers/hooks. Distinct from `store/` (zustand).
 - **`pages/`** — top-level views.
 - **`env.d.ts`** — TypeScript declaration of `window.api` (the IPC contract the front sees).
 - **`lib/`** — framework-agnostic helpers, split into **`lib/utils/`** (functions) and **`lib/types/`** (shared types), each with an `index.ts` barrel. See "lib structure" below.
@@ -159,7 +160,7 @@ Every new or moved piece of state MUST have a deliberately chosen home. Default 
 **Decision tree — stop at the first YES:**
 1. Used only inside one component? → **`useState`/`useReducer`** (local).
 2. Needed by 1–2 direct children of its owner? → **props** (one hop down).
-3. Needed across a subtree, the only problem is prop-drilling, AND it changes *rarely* (user, theme, locale, permissions, feature flags, app config)? → **React context** at the common ancestor.
+3. Needed across a subtree, the only problem is prop-drilling, AND it changes *rarely* (user, theme, locale, permissions, feature flags, app config)? → **React context** (lives in `src/contexts/`, not `store/`) at the common ancestor.
 4. Changes *often*, has *many actions*, read by *independent subtrees*, or must survive unmount (filters, open panels/modals, editor/workflow state, selected project, anything app-global)? → **zustand** (`store/useAppStore.ts`).
 
 **Hard rules:**

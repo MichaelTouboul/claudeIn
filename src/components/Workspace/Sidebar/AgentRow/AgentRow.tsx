@@ -1,8 +1,8 @@
 import { ContextBar } from '@/components/_ui/ContextBar';
 import { StatusDot } from '@/components/_ui/StatusDot';
 import { AgentContextMenu } from '@/components/AgentContextMenu/AgentContextMenu';
+import { useProject } from '@/contexts/ProjectContext';
 import type { AgentSummary } from '@/lib/types';
-import { useProject } from '@/store/ProjectContext';
 import { useEventsStore } from '@/store/useEventsStore';
 import { useFavoritesStore } from '@/store/useFavoritesStore';
 

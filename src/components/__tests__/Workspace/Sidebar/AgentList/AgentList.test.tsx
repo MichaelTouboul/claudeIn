@@ -8,7 +8,7 @@ import { useFavoritesStore } from "@/store/useFavoritesStore";
 
 // AgentRow reads the project via context; the list itself does not. Stub the
 // hook so we can render rows without an enclosing ProjectProvider.
-vi.mock("@/store/ProjectContext", () => ({
+vi.mock("@/contexts/ProjectContext", () => ({
   useProject: () => ({
     projectId: "p1",
     projectName: "p1",

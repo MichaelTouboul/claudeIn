@@ -1,8 +1,8 @@
 import { Wrench } from 'lucide-react';
 
 import { ItemContextMenu } from '@/components/ItemContextMenu/ItemContextMenu';
+import { useProject } from '@/contexts/ProjectContext';
 import type { SkillSummary } from '@/lib/types';
-import { useProject } from '@/store/ProjectContext';
 import { useFavoritesStore } from '@/store/useFavoritesStore';
 
 export type SkillRowProps = {

@@ -3,9 +3,9 @@ import { type ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SessionsPanel } from "@/components/Workspace/Sidebar/SessionsPanel/SessionsPanel";
+import { ProjectProvider } from "@/contexts/ProjectContext";
 import type { SessionStatus, SessionSummary } from "@/hooks/useSessions";
 import type { Project } from "@/lib/types";
-import { ProjectProvider } from "@/store/ProjectContext";
 import { useEventsStore } from "@/store/useEventsStore";
 import { usePinnedStore } from "@/store/usePinnedStore";
 import { useWorkspaceStore } from "@/store/useWorkspaceStore";
