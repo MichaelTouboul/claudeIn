@@ -67,10 +67,10 @@ export function OnboardingPage() {
       role="dialog"
       aria-modal="true"
       aria-label="Onboarding"
-      className="h-full overflow-y-auto surface-grain flex items-center justify-center p-8"
+      className="h-full overflow-y-auto surface-grain p-8"
       style={{ background: "var(--color-surface-0)", color: "var(--color-text-primary)" }}
     >
-      {view[step]()}
+      <div className="min-h-full flex items-center justify-center">{view[step]()}</div>
     </div>
   );
 }
