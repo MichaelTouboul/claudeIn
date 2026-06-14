@@ -48,4 +48,32 @@ describe('decideUserContent', () => {
       message: { kind: 'invocation', name: '/compact' },
     });
   });
+
+  it('detects a ```toon fence and collapses the blob to a toon render', () => {
+    const content = 'Analyze this data:\n\n```toon\n[2]{id,name}:\n  1,a\n  2,b\n```';
+    const decision = decideUserContent(content);
+    expect(decision.kind).toBe('toon');
+    if (decision.kind === 'toon') {
+      expect(decision.text).toBe('Analyze this data:');
+      expect(decision.info.format).toBe('toon');
+      expect(decision.info.tokens).toBeGreaterThan(0);
+    }
+  });
+
+  it('detects a ```json fence (TOON was not smaller / encoding failed)', () => {
+    const content = '```json\n{\n  "a": 1\n}\n```';
+    const decision = decideUserContent(content);
+    expect(decision.kind).toBe('toon');
+    if (decision.kind === 'toon') {
+      expect(decision.text).toBe('');
+      expect(decision.info.format).toBe('json');
+    }
+  });
+
+  it('does not treat a non-toon/json code fence as an attachment', () => {
+    expect(decideUserContent('```ts\nconst x = 1;\n```')).toEqual({
+      kind: 'text',
+      text: '```ts\nconst x = 1;\n```',
+    });
+  });
 });
