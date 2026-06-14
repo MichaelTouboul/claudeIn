@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 
-import { cn } from '@/lib/cn';
+import { cn } from '@/lib/utils';
 
 /** One selectable row. `id` is the value passed back on select; `flatIndex` is its
  *  position in the flattened item list (used for keyboard highlight). */
