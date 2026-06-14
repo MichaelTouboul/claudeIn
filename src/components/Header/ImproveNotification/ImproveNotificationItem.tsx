@@ -2,6 +2,8 @@ import { RefreshCw, X } from "lucide-react";
 
 import { Badge, type BadgeVariant } from "@/components/_ui/Badge";
 import { Button } from "@/components/_ui/Button";
+import { Flex } from "@/components/_ui/Flex";
+import { Inline } from "@/components/_ui/Inline";
 import type { ImproveRequest } from "@/lib/types";
 import { ImproveType } from "@/lib/types";
 
@@ -33,7 +35,7 @@ export function ImproveNotificationItem({
       className="flex flex-col gap-2 px-3 py-2.5"
       style={{ borderTop: "1px solid var(--color-border-subtle)" }}
     >
-      <div className="flex items-start gap-2">
+      <Inline gap={2} align="start">
         <Badge variant={badge.variant}>{badge.label}</Badge>
         <span className="flex-1 text-[13px] font-medium leading-snug text-fg">
           {request.title}
@@ -47,11 +49,11 @@ export function ImproveNotificationItem({
         >
           <X size={13} />
         </Button>
-      </div>
+      </Inline>
       {request.summary ? (
         <p className="text-xs leading-snug text-fg-muted">{request.summary}</p>
       ) : null}
-      <div className="flex justify-end">
+      <Flex justify="end">
         <Button
           intent="outline"
           size="sm"
@@ -68,7 +70,7 @@ export function ImproveNotificationItem({
             </span>
           ) : null}
         </Button>
-      </div>
+      </Flex>
     </li>
   );
 }

@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { Button } from "@/components/_ui/Button";
+import { Flex } from "@/components/_ui/Flex";
 
 import { OnbShell } from "../OnbShell/OnbShell";
 
@@ -23,7 +24,7 @@ export function DoneStep({ onFinish }: DoneStepProps) {
         You can find and edit your profile and favorite repositories at any time from the home
         screen.
       </p>
-      <div className="flex justify-end">
+      <Flex justify="end">
         <Button
           intent="primary"
           size="md"
@@ -36,7 +37,7 @@ export function DoneStep({ onFinish }: DoneStepProps) {
         >
           {finishing ? "Finishing…" : "Finish"}
         </Button>
-      </div>
+      </Flex>
     </OnbShell>
   );
 }

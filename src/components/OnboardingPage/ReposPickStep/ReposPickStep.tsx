@@ -1,4 +1,5 @@
 import { Button } from "@/components/_ui/Button";
+import { Flex } from "@/components/_ui/Flex";
 
 import { OnbShell } from "../OnbShell/OnbShell";
 import { RepoRow } from "./RepoRow";
@@ -40,14 +41,14 @@ export function ReposPickStep({ onNext }: ReposPickStepProps) {
           )}
         </div>
       )}
-      <div className="flex items-center justify-between">
+      <Flex align="center" justify="between">
         <Button intent="outline" size="md" onClick={() => void addFolder()}>
           Add a folder
         </Button>
         <Button intent="primary" size="md" onClick={onNext}>
           Continue
         </Button>
-      </div>
+      </Flex>
     </OnbShell>
   );
 }

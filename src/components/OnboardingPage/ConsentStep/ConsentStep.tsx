@@ -1,4 +1,5 @@
 import { Button } from "@/components/_ui/Button";
+import { Flex } from "@/components/_ui/Flex";
 
 import { OnbShell } from "../OnbShell/OnbShell";
 
@@ -19,11 +20,11 @@ export function ConsentStep({ title, explanation, onAuthorize }: ConsentStepProp
   return (
     <OnbShell title={title}>
       <p className="text-sm text-fg-muted">{explanation}</p>
-      <div className="flex justify-end">
+      <Flex justify="end">
         <Button intent="primary" size="md" onClick={onAuthorize}>
           Authorize
         </Button>
-      </div>
+      </Flex>
     </OnbShell>
   );
 }

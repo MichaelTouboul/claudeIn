@@ -1,6 +1,7 @@
 import { type ReactElement, useCallback } from "react";
 
 import { Button } from "@/components/_ui/Button";
+import { Flex } from "@/components/_ui/Flex";
 import { Progress } from "@/components/_ui/Progress";
 import type { UserProfile } from "@/lib/types";
 
@@ -39,21 +40,21 @@ export function SearchUserStep({ onProfile }: SearchUserStepProps) {
         <p className="text-sm text-fg-muted">
           Couldn't find your .claude folder. Point us to it to continue.
         </p>
-        <div className="flex justify-end">
+        <Flex justify="end">
           <Button intent="primary" size="md" onClick={() => void pickFolder()}>
             Choose the .claude folder
           </Button>
-        </div>
+        </Flex>
       </>
     ),
     [SearchPhase.Error]: () => (
       <>
         <p className="text-sm text-danger">The analysis failed. Please try again.</p>
-        <div className="flex justify-end">
+        <Flex justify="end">
           <Button intent="primary" size="md" onClick={() => void retry()}>
             Retry
           </Button>
-        </div>
+        </Flex>
       </>
     ),
   };

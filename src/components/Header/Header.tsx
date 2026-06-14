@@ -1,6 +1,7 @@
 import { Home, MessageSquare } from 'lucide-react';
 
 import { Button } from '@/components/_ui/Button';
+import { Inline } from '@/components/_ui/Inline';
 import { Logo } from '@/components/Logo/Logo';
 import { StatsBar } from '@/components/StatsBar/StatsBar';
 import { cn, isMac  } from '@/lib/utils';
@@ -19,10 +20,10 @@ export function Header({ activeCount, connected, onOpenChat, onGoHome }: HeaderP
   // floating bell never sits on top of the Chat button.
   return (
     <div className={cn('titlebar-drag flex items-center gap-4 pr-16 py-2 shrink-0', isMac ? 'pl-20' : 'pl-4')} style={{ background: 'var(--color-surface-1)', borderBottom: '1px solid var(--color-border)' }}>
-      <div className="flex items-center gap-2.5">
+      <Inline gap={2.5}>
         <Logo size={18} />
         <span className="text-[13px] font-semibold tracking-[0.02em]" style={{ fontFamily: 'var(--font-mono)' }}>ClaudeIn</span>
-      </div>
+      </Inline>
       {onGoHome ? (
         <Button intent="ghost" size="sm" onClick={onGoHome} className="text-fg-muted" style={{ fontFamily: 'var(--font-mono)' }}>
           <Home size={12} />

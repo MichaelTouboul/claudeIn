@@ -1,4 +1,5 @@
 import { Button } from "@/components/_ui/Button";
+import { Stack } from "@/components/_ui/Stack";
 
 type HomeActionsProps = {
   onOpenUserAgent: () => void;
@@ -12,7 +13,7 @@ type HomeActionsProps = {
  */
 export function HomeActions({ onOpenUserAgent, onCustomize }: HomeActionsProps) {
   return (
-    <section aria-label="Actions" className="flex flex-col gap-3">
+    <Stack as="section" gap={3} aria-label="Actions">
       <h2 className="text-xs uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
         Actions
       </h2>
@@ -27,6 +28,6 @@ export function HomeActions({ onOpenUserAgent, onCustomize }: HomeActionsProps) 
           Task <span className="text-fg-subtle">· soon</span>
         </Button>
       </div>
-    </section>
+    </Stack>
   );
 }

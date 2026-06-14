@@ -1,5 +1,6 @@
 import { Bot, ChevronRight } from "lucide-react";
 
+import { Inline } from "@/components/_ui/Inline";
 import { SlashCommandMessage } from "@/components/AgentChat/MessageRow/SlashCommandMessage/SlashCommandMessage";
 import { decideUserContent } from "@/components/AgentChat/userContent";
 import { ResponseBody } from "@/components/ResponseBody/ResponseBody";
@@ -31,7 +32,7 @@ export function SessionMessageRow({ msg }: SessionMessageRowProps) {
     if (decision.kind === "hidden") return null;
     return (
       <div className="group">
-        <div className="flex items-center gap-2 mb-0.5">
+        <Inline gap={2} className="mb-0.5">
           <ChevronRight size={12} style={{ color: "var(--color-accent)" }} />
           <span className="text-xs font-medium" style={{ color: "var(--color-accent)" }}>
             you
@@ -41,7 +42,7 @@ export function SessionMessageRow({ msg }: SessionMessageRowProps) {
               {time}
             </span>
           ) : null}
-        </div>
+        </Inline>
         {decision.kind === "slash" ? (
           <SlashCommandMessage parsed={decision.message} />
         ) : (
@@ -58,7 +59,7 @@ export function SessionMessageRow({ msg }: SessionMessageRowProps) {
 
   return (
     <div className="group">
-      <div className="flex items-center gap-2 mb-0.5">
+      <Inline gap={2} className="mb-0.5">
         <Bot size={12} style={{ color: "var(--color-text-muted)" }} />
         <span className="text-xs font-medium" style={{ color: "var(--color-text-muted)" }}>
           agent
@@ -68,7 +69,7 @@ export function SessionMessageRow({ msg }: SessionMessageRowProps) {
             {time}
           </span>
         ) : null}
-      </div>
+      </Inline>
       <div className="ml-5">
         <ResponseBody content={msg.content} />
       </div>

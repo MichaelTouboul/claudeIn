@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 
 import { Input } from "@/components/_ui/Input";
+import { Stack } from "@/components/_ui/Stack";
 import { Textarea } from "@/components/_ui/Textarea";
 import type { McpTransportInput } from "@/lib/types";
 
@@ -19,7 +20,7 @@ const fieldsByTransport: Record<McpTransportInput, (props: McpFormTransportField
   {
     stdio: ({ state, patch, labelStyle }) => (
       <>
-        <label className="flex flex-col gap-1 text-xs" style={labelStyle}>
+        <Stack as="label" gap={1} className="text-xs" style={labelStyle}>
           Command
           <Input
             type="text"
@@ -28,8 +29,8 @@ const fieldsByTransport: Record<McpTransportInput, (props: McpFormTransportField
             value={state.command}
             onChange={(e) => patch({ command: e.target.value })}
           />
-        </label>
-        <label className="flex flex-col gap-1 text-xs" style={labelStyle}>
+        </Stack>
+        <Stack as="label" gap={1} className="text-xs" style={labelStyle}>
           Args
           <Input
             type="text"
@@ -39,8 +40,8 @@ const fieldsByTransport: Record<McpTransportInput, (props: McpFormTransportField
             onChange={(e) => patch({ argsText: e.target.value })}
             placeholder="-y @scope/pkg"
           />
-        </label>
-        <label className="flex flex-col gap-1 text-xs" style={labelStyle}>
+        </Stack>
+        <Stack as="label" gap={1} className="text-xs" style={labelStyle}>
           Env
           <Textarea
             size="sm"
@@ -50,7 +51,7 @@ const fieldsByTransport: Record<McpTransportInput, (props: McpFormTransportField
             placeholder="KEY=value"
             rows={2}
           />
-        </label>
+        </Stack>
       </>
     ),
     http: (props) => <HttpFields {...props} />,
@@ -60,7 +61,7 @@ const fieldsByTransport: Record<McpTransportInput, (props: McpFormTransportField
 function HttpFields({ state, patch, labelStyle }: McpFormTransportFieldsProps): ReactNode {
   return (
     <>
-      <label className="flex flex-col gap-1 text-xs" style={labelStyle}>
+      <Stack as="label" gap={1} className="text-xs" style={labelStyle}>
         URL
         <Input
           type="text"
@@ -70,8 +71,8 @@ function HttpFields({ state, patch, labelStyle }: McpFormTransportFieldsProps): 
           onChange={(e) => patch({ url: e.target.value })}
           placeholder="https://host/mcp"
         />
-      </label>
-      <label className="flex flex-col gap-1 text-xs" style={labelStyle}>
+      </Stack>
+      <Stack as="label" gap={1} className="text-xs" style={labelStyle}>
         Headers
         <Textarea
           size="sm"
@@ -81,7 +82,7 @@ function HttpFields({ state, patch, labelStyle }: McpFormTransportFieldsProps): 
           placeholder="Authorization=Bearer token"
           rows={2}
         />
-      </label>
+      </Stack>
     </>
   );
 }

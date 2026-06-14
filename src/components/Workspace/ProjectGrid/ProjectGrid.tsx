@@ -1,5 +1,6 @@
 import { Bot } from 'lucide-react';
 
+import { Grid } from '@/components/_ui/Grid';
 import type { Project } from '@/lib/types';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
@@ -21,7 +22,7 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
         <p className="text-sm mb-8" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
           {projects.length} projects detected
         </p>
-        <div className="grid grid-cols-3 gap-2.5">
+        <Grid cols={3} gap={2.5}>
           {projects.slice(0, 9).map((p) => (
             <button
               key={p.id}
@@ -45,7 +46,7 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
               </div>
             </button>
           ))}
-        </div>
+        </Grid>
       </div>
     </div>
   );

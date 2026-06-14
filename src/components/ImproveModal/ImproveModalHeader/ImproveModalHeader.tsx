@@ -1,4 +1,6 @@
+import { Inline } from '@/components/_ui/Inline';
 import { Select } from '@/components/_ui/Select';
+import { Stack } from '@/components/_ui/Stack';
 import type { ImproveContextTarget, ImproveType } from '@/lib/types';
 
 import { IMPROVE_TYPE_OPTIONS } from '../typeLabels';
@@ -19,11 +21,13 @@ export function ImproveModalHeader({
 }: ImproveModalHeaderProps) {
   const hasTarget = Boolean(target?.component || target?.sourcePath);
   return (
-    <div
-      className="flex items-center justify-between gap-3 px-4 py-3 border-b"
+    <Inline
+      gap={3}
+      justify="between"
+      className="px-4 py-3 border-b"
       style={{ borderColor: 'var(--color-border)' }}
     >
-      <div className="flex flex-col gap-0.5 min-w-0">
+      <Stack gap={0.5} className="min-w-0">
         <span
           className="text-xs uppercase tracking-wide"
           style={{ color: 'var(--color-text-muted)' }}
@@ -37,9 +41,9 @@ export function ImproveModalHeader({
         >
           {hasTarget ? (target?.component ?? target?.sourcePath) : 'General request'}
         </span>
-      </div>
+      </Stack>
 
-      <label className="flex items-center gap-2 shrink-0">
+      <Inline as="label" gap={2} className="shrink-0">
         <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
           Type
         </span>
@@ -56,7 +60,7 @@ export function ImproveModalHeader({
             </option>
           ))}
         </Select>
-      </label>
-    </div>
+      </Inline>
+    </Inline>
   );
 }

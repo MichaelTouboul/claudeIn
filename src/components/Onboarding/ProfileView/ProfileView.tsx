@@ -1,7 +1,9 @@
 import { useState } from "react";
 
 import { Button } from "@/components/_ui/Button";
+import { Inline } from "@/components/_ui/Inline";
 import { MarkdownBody } from "@/components/_ui/MarkdownBody";
+import { Stack } from "@/components/_ui/Stack";
 import type { ScopeProfile } from "@/lib/types";
 
 type ProfileViewProps = {
@@ -24,9 +26,9 @@ export function ProfileView({ scopePath, profile }: ProfileViewProps) {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <header className="flex items-center justify-between gap-3">
-        <div className="flex flex-col gap-0.5 min-w-0">
+    <Stack gap={4}>
+      <Inline as="header" gap={3} justify="between">
+        <Stack gap={0.5} className="min-w-0">
           <h2
             className="text-base font-sans font-semibold"
             style={{ color: "var(--color-text-primary)" }}
@@ -40,7 +42,7 @@ export function ProfileView({ scopePath, profile }: ProfileViewProps) {
           >
             {scopePath}
           </span>
-        </div>
+        </Stack>
         <Button
           intent="outline"
           size="sm"
@@ -50,7 +52,7 @@ export function ProfileView({ scopePath, profile }: ProfileViewProps) {
         >
           {refreshing ? "Refreshing…" : "Refresh"}
         </Button>
-      </header>
+      </Inline>
 
       {current ? (
         <MarkdownBody content={current.profileMd} />
@@ -67,6 +69,6 @@ export function ProfileView({ scopePath, profile }: ProfileViewProps) {
           <code className="font-mono">.claude</code> and build one.
         </div>
       )}
-    </div>
+    </Stack>
   );
 }

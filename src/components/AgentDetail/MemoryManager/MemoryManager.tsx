@@ -6,6 +6,8 @@ import { useState } from "react";
 
 import { Badge } from "@/components/_ui/Badge";
 import { Button } from "@/components/_ui/Button";
+import { Flex } from "@/components/_ui/Flex";
+import { Inline } from "@/components/_ui/Inline";
 import { Input } from "@/components/_ui/Input";
 import { Progress } from "@/components/_ui/Progress";
 import { Textarea } from "@/components/_ui/Textarea";
@@ -210,8 +212,8 @@ export function MemoryManager({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-sm text-fg-muted">
+      <Flex align="center" justify="between">
+        <Inline gap={2} className="text-sm text-fg-muted">
           <span>Scope:</span>
           <Badge shape="pill" variant="green">
             {agent.frontmatter.memory}
@@ -219,15 +221,15 @@ export function MemoryManager({
           <span className="text-fg-subtle text-xs font-mono tabular-nums">
             {agent.memoryFiles.length} files
           </span>
-        </div>
+        </Inline>
         <Button intent="ghost" size="sm" onClick={() => setCreating(true)}>
           <Plus size={12} />
           New topic
         </Button>
-      </div>
+      </Flex>
 
       {creating ? <div className="border border-accent/25 rounded-lg p-4 bg-accent/[0.03]">
-          <div className="flex items-center gap-2 mb-2">
+          <Inline gap={2} className="mb-2">
             <Input
               value={newFileName}
               onChange={(e) => setNewFileName(e.target.value)}
@@ -248,7 +250,7 @@ export function MemoryManager({
             <Button intent="ghost" size="icon" onClick={() => setCreating(false)} title="Cancel">
               <X size={14} />
             </Button>
-          </div>
+          </Inline>
           <Textarea
             value={newContent}
             onChange={(e) => setNewContent(e.target.value)}

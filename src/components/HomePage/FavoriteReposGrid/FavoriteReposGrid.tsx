@@ -1,3 +1,4 @@
+import { Stack } from "@/components/_ui/Stack";
 import type { FavoriteRepo } from "@/lib/types";
 
 import { AddRepoCard } from "./AddRepoCard";
@@ -14,7 +15,7 @@ type FavoriteReposGridProps = {
 /** Stacked-layout section: a grid of favorite-repo cards + the "+ add" card. */
 export function FavoriteReposGrid({ repos, loading, onOpen, onRemove, onAdd }: FavoriteReposGridProps) {
   return (
-    <section aria-label="Favorite repositories" className="flex flex-col gap-3">
+    <Stack as="section" gap={3} aria-label="Favorite repositories">
       <h2 className="text-xs uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
         Favorite repositories
       </h2>
@@ -37,6 +38,6 @@ export function FavoriteReposGrid({ repos, loading, onOpen, onRemove, onAdd }: F
           </div>
         </>
       )}
-    </section>
+    </Stack>
   );
 }

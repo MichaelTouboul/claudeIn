@@ -1,4 +1,5 @@
 import { Select } from "@/components/_ui/Select";
+import { Stack } from "@/components/_ui/Stack";
 import { repoLabel } from "@/components/HomePage/openFavorite";
 import type { FavoriteRepo } from "@/lib/types";
 
@@ -20,7 +21,7 @@ export function RepoScopeDropdown({ repos, value, onChange }: RepoScopeDropdownP
   const empty = repos.length === 0;
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <Stack gap={1.5}>
       <Select
         aria-label="Repository scope"
         disabled={empty}
@@ -39,6 +40,6 @@ export function RepoScopeDropdown({ repos, value, onChange }: RepoScopeDropdownP
           Pin a repo on Home to scope connectors to it. Personal connectors are always shown below.
         </p>
       ) : null}
-    </div>
+    </Stack>
   );
 }

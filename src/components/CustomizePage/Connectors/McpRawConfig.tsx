@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { Stack } from "@/components/_ui/Stack";
 import type { McpServerRaw } from "@/lib/types";
 
 export type McpRawConfigProps = {
@@ -18,14 +19,14 @@ const valueStyle = {
 
 function Field({ label, value }: { label: string; value: string }): ReactNode {
   return (
-    <div className="flex flex-col gap-0.5">
+    <Stack gap={0.5}>
       <span className="text-[11px] uppercase tracking-wide" style={labelStyle}>
         {label}
       </span>
       <code className="text-xs break-all" style={valueStyle}>
         {value}
       </code>
-    </div>
+    </Stack>
   );
 }
 
@@ -34,11 +35,11 @@ function KeyValueList({ label, entries }: { label: string; entries: [string, str
     return null;
   }
   return (
-    <div className="flex flex-col gap-1">
+    <Stack gap={1}>
       <span className="text-[11px] uppercase tracking-wide" style={labelStyle}>
         {label}
       </span>
-      <ul className="flex flex-col gap-0.5">
+      <Stack as="ul" gap={0.5}>
         {entries.map(([key, val]) => (
           <li key={key} className="flex gap-2 text-xs">
             <code style={{ ...valueStyle, color: "var(--color-text-primary)" }}>{key}</code>
@@ -47,8 +48,8 @@ function KeyValueList({ label, entries }: { label: string; entries: [string, str
             </code>
           </li>
         ))}
-      </ul>
-    </div>
+      </Stack>
+    </Stack>
   );
 }
 
@@ -86,12 +87,13 @@ function isKnownTransport(t: string): t is "stdio" | "http" | "sse" {
 export function McpRawConfig({ raw }: McpRawConfigProps) {
   const render = isKnownTransport(raw.transport) ? sectionsByTransport[raw.transport] : null;
   return (
-    <div
+    <Stack
+      gap={2}
       data-testid="mcp-raw-config"
-      className="flex flex-col gap-2 rounded px-3 py-2"
+      className="rounded px-3 py-2"
       style={{ backgroundColor: "var(--color-surface-1)", border: "1px solid var(--color-border-subtle)" }}
     >
       {render !== null ? render(raw) : null}
-    </div>
+    </Stack>
   );
 }
