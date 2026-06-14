@@ -9,7 +9,7 @@ type FavoriteRepoCardProps = {
   onRemove: (repo: FavoriteRepo) => void;
 };
 
-/** One favorite repo: a label + path, an "open" action and a discreet "remove". */
+/** One favorite repo: a label + path, an "Open" action and a discreet "Remove". */
 export function FavoriteRepoCard({ repo, onOpen, onRemove }: FavoriteRepoCardProps) {
   const label = repoLabel(repo);
   return (
@@ -26,11 +26,11 @@ export function FavoriteRepoCard({ repo, onOpen, onRemove }: FavoriteRepoCardPro
         </p>
       </div>
       <div className="flex items-center gap-2">
-        <Button intent="primary" size="sm" onClick={() => onOpen(repo)} aria-label={`Ouvrir ${label}`}>
-          Ouvrir
+        <Button intent="primary" size="sm" onClick={() => onOpen(repo)} aria-label={`Open ${label}`}>
+          Open
         </Button>
-        <Button intent="ghost" size="sm" onClick={() => onRemove(repo)} aria-label={`Retirer ${label}`}>
-          Retirer
+        <Button intent="ghost" size="sm" onClick={() => onRemove(repo)} aria-label={`Remove ${label}`}>
+          Remove
         </Button>
       </div>
     </div>

@@ -50,7 +50,7 @@ describe("SearchUserStep", () => {
     const onProfile = vi.fn();
     render(<SearchUserStep onProfile={onProfile} />);
 
-    const pick = await screen.findByRole("button", { name: /choisir le dossier/i });
+    const pick = await screen.findByRole("button", { name: /choose the .claude folder/i });
     await act(async () => {
       fireEvent.click(pick);
     });
@@ -65,7 +65,7 @@ describe("SearchUserStep", () => {
     const onProfile = vi.fn();
     render(<SearchUserStep onProfile={onProfile} />);
 
-    const pick = await screen.findByRole("button", { name: /choisir le dossier/i });
+    const pick = await screen.findByRole("button", { name: /choose the .claude folder/i });
     await act(async () => {
       fireEvent.click(pick);
     });
@@ -79,7 +79,7 @@ describe("SearchUserStep", () => {
     const onProfile = vi.fn();
     render(<SearchUserStep onProfile={onProfile} />);
 
-    const retry = await screen.findByRole("button", { name: /réessayer/i });
+    const retry = await screen.findByRole("button", { name: /retry/i });
     await act(async () => {
       fireEvent.click(retry);
     });

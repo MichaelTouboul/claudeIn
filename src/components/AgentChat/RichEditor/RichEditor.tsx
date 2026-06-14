@@ -21,13 +21,18 @@ export type RichEditorHandle = {
   focus: () => void;
   /** Replace the trailing `@token` at the caret with `@name ` (mention insertion). */
   insertMention: (name: string) => void;
+  /** Replace the leading `/token` with `/cmd ` — completes the command text WITHOUT
+   *  launching it, leaving the caret after the trailing space for args. */
+  insertSlashCommand: (cmd: string) => void;
 };
 
 export type RichEditorProps = {
   onChange: (markdown: string, plainText: string) => void;
   onSubmit: () => void;
-  /** Returns true if Enter was consumed by the slash/mention menu. */
+  /** Returns true if Enter was consumed by the slash/mention menu (select + submit). */
   onEnter: () => boolean;
+  /** Returns true if Tab was consumed by an open menu (complete the text only). */
+  onComplete: () => boolean;
   /** Returns true if an ↑/↓/Esc key was consumed by an open menu. */
   onNavKey: (key: string) => boolean;
   handleRef: Ref<RichEditorHandle>;
@@ -72,13 +77,27 @@ function HandlePlugin({ handleRef }: { handleRef: Ref<RichEditorHandle> }) {
           selection.setTextNodeRange(node, at, node, offset);
           selection.insertText(`@${name} `);
         }),
+      insertSlashCommand: (cmd: string) =>
+        editor.update(() => {
+          const selection = $getSelection();
+          if (!$isRangeSelection(selection) || !selection.isCollapsed()) return;
+          const node = selection.anchor.getNode();
+          if (!$isTextNode(node)) return;
+          const text = node.getTextContent();
+          // The slash token is the whole bare `/word` (see `matchSlashQuery`); replace
+          // it in place with `/cmd ` so the caret lands after the space, ready for args.
+          const at = text.indexOf('/');
+          if (at < 0) return;
+          selection.setTextNodeRange(node, at, node, text.length);
+          selection.insertText(`${cmd} `);
+        }),
     }),
     [editor]
   );
   return null;
 }
 
-export function RichEditor({ onChange, onSubmit, onEnter, onNavKey, handleRef, placeholder }: RichEditorProps) {
+export function RichEditor({ onChange, onSubmit, onEnter, onComplete, onNavKey, handleRef, placeholder }: RichEditorProps) {
   return (
     <LexicalComposer
       initialConfig={{
@@ -115,7 +134,7 @@ export function RichEditor({ onChange, onSubmit, onEnter, onNavKey, handleRef, p
         <ListPlugin />
         <HistoryPlugin />
         <MarkdownShortcutPlugin transformers={CHAT_TRANSFORMERS} />
-        <SubmitPlugin onEnter={onEnter} onNavKey={onNavKey} />
+        <SubmitPlugin onEnter={onEnter} onComplete={onComplete} onNavKey={onNavKey} />
         <SubmitBridge onSubmit={onSubmit} />
         <HandlePlugin handleRef={handleRef} />
         <OnChangePlugin

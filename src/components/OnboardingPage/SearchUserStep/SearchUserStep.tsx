@@ -30,33 +30,33 @@ export function SearchUserStep({ onProfile }: SearchUserStepProps) {
   const view: Record<SearchPhase, () => ReactElement> = {
     [SearchPhase.Working]: () => (
       <>
-        <p className="text-sm text-fg-muted">Analyse de votre configuration en cours…</p>
+        <p className="text-sm text-fg-muted">Analyzing your setup…</p>
         <Progress value={0.6} fillColor="var(--color-accent)" className="h-1.5 w-full" />
       </>
     ),
     [SearchPhase.LocateFailed]: () => (
       <>
         <p className="text-sm text-fg-muted">
-          Dossier .claude introuvable. Indiquez son emplacement pour continuer.
+          Couldn't find your .claude folder. Point us to it to continue.
         </p>
         <div className="flex justify-end">
           <Button intent="primary" size="md" onClick={() => void pickFolder()}>
-            Choisir le dossier .claude
+            Choose the .claude folder
           </Button>
         </div>
       </>
     ),
     [SearchPhase.Error]: () => (
       <>
-        <p className="text-sm text-danger">L’analyse a échoué. Réessayez.</p>
+        <p className="text-sm text-danger">The analysis failed. Please try again.</p>
         <div className="flex justify-end">
           <Button intent="primary" size="md" onClick={() => void retry()}>
-            Réessayer
+            Retry
           </Button>
         </div>
       </>
     ),
   };
 
-  return <OnbShell title="Analyse de votre profil">{view[phase]()}</OnbShell>;
+  return <OnbShell title="Analyzing your profile">{view[phase]()}</OnbShell>;
 }

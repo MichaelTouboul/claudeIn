@@ -20,13 +20,13 @@ type ProfileReviewStepProps = {
 export function ProfileReviewStep({ profile, onSave, onConfirm }: ProfileReviewStepProps) {
   return (
     <OnbShell
-      title="Votre profil"
-      subtitle="Vérifiez et ajustez les informations avant de continuer."
+      title="Your profile"
+      subtitle="Review and adjust the details before continuing."
     >
       <UserProfileView profile={profile} onSave={onSave} />
       <div className="flex justify-end">
         <Button intent="primary" size="md" onClick={onConfirm}>
-          Confirmer
+          Confirm
         </Button>
       </div>
     </OnbShell>

@@ -67,25 +67,25 @@ export function UserProfileEdit({ profile, onSave, onCancel }: UserProfileEditPr
     <form className="flex flex-col gap-4" onSubmit={submit}>
       <label className="flex flex-col gap-1 text-sm">
         <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
-          Nom
+          Name
         </span>
         <Input className="bg-surface-0" value={draft.name} onChange={set("name")} />
       </label>
       <label className="flex flex-col gap-1 text-sm">
         <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
-          Rôle
+          Role
         </span>
         <Input className="bg-surface-0" value={draft.role} onChange={set("role")} />
       </label>
       <label className="flex flex-col gap-1 text-sm">
         <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
-          Résumé
+          Summary
         </span>
         <Textarea className="bg-surface-0" rows={3} value={draft.summary} onChange={set("summary")} />
       </label>
       <label className="flex flex-col gap-1 text-sm">
         <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
-          Domaines (séparés par des virgules)
+          Domains (comma-separated)
         </span>
         <Input className="bg-surface-0" value={draft.domains} onChange={set("domains")} />
       </label>
@@ -97,10 +97,10 @@ export function UserProfileEdit({ profile, onSave, onCancel }: UserProfileEditPr
       </label>
       <div className="flex items-center gap-2">
         <Button type="submit" intent="primary" size="md" disabled={saving}>
-          Enregistrer
+          Save
         </Button>
         <Button type="button" intent="ghost" size="md" onClick={onCancel} disabled={saving}>
-          Annuler
+          Cancel
         </Button>
       </div>
     </form>
