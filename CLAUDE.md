@@ -51,7 +51,7 @@ Two process boundaries in Electron:
 - **`src/store/useAppStore.ts`** — global state with zustand
 - **`src/env.d.ts`** — TypeScript declaration of `window.api` (the IPC contract)
 - **`src/index.css`** — design system CSS custom properties
-- **`src/lib/cn.ts`** — `cn()` utility (`clsx` + `tailwind-merge`)
+- **`src/lib/`** — framework-agnostic helpers split into `lib/utils/` + `lib/types/` (each with a barrel); `cn()` lives at `src/lib/utils/cn.ts`
 
 ### IPC contract
 
