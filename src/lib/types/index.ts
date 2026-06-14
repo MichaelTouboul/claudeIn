@@ -13,4 +13,5 @@ export * from './session.types';
 export * from './settings.types';
 export * from './skills-mirror.types';
 export * from './spawn.types';
+export * from './toon.types';
 export * from './user.types';
