@@ -131,6 +131,21 @@ export function Button({ intent, size, className, ...props }: ButtonProps) { /* 
 
 Feature-component prop types stay next to the component (same file), not exported unless reused.
 
+### Layout primitives
+
+`_ui/` ships four homegrown layout primitives — **prefer them over raw `flex`/`grid` className for leaf layout**. They are `cva`-backed, polymorphic (`as`), and merge a passthrough `className` *after* the variants (so callers keep non-layout classes like padding/bg/`shrink-0`).
+
+- **`Flex`** — a flex box. Axes: `direction` (`row`|`col`), `align` (`start`|`center`|`end`|`stretch`|`baseline`), `justify` (`start`|`center`|`end`|`between`|`around`), `gap`, `wrap`. Use for justify boxes / footers (`<Flex justify="end">`).
+- **`Stack`** — vertical shorthand (= `Flex direction="col"`): `gap`, `align?`, `as?`.
+- **`Inline`** — horizontal shorthand (= `Flex direction="row"` + `align="center"` by default): `gap`, `justify?`, `as?`.
+- **`Grid`** — a grid box: `cols` (1–12), `rows?` (1–6), `gap`, `as?`.
+
+**`gap` scale (Tailwind's spacing scale, half-steps included):** `0 | 0.5 | 1 | 1.5 | 2 | 2.5 | 3 | 4 | 6 | 8` → `gap-0 … gap-8`. Pass numerically: `<Inline gap={2.5}>`.
+
+Polymorphic `as` is fully typed: `<Stack as="form" noValidate onSubmit={…}>`, `<Inline as="label">`, `<Stack as="section">`. Because the element type drives the props, an inline event handler on an `as`-element may need an explicit param type (e.g. `onSubmit={(e: FormEvent) => …}`).
+
+**Stay raw (do NOT wrap)** for app-shell sizing and divergent one-offs: anything with `flex-1`/`grow`/`min-h-0`/`overflow-*`/`h-full`, responsive `md:`/`sm:`, arbitrary `grid-cols-[…]`, split `gap-x`/`gap-y`, `self-*`/`place-*`, `inline-flex`, or dynamic `cn(…)` layout. When unsure, leave raw.
+
 ## State management (mandatory)
 
 Every new or moved piece of state MUST have a deliberately chosen home. Default to the **narrowest** scope that works; widen only when a concrete need forces it.
