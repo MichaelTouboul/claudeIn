@@ -1,6 +1,6 @@
 import { ipcMain } from "electron";
-import * as sessionService from "../services/session.service";
-import { unwatchConversation, watchConversation } from "../services/conversation.tail";
+import * as sessionService from "../services/session/session.service";
+import { unwatchConversation, watchConversation } from "../services/conversation/conversation.tail";
 
 export function registerSessionHandlers(): void {
   ipcMain.handle("sessions:list", (_e, projectPath: string) =>

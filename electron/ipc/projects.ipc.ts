@@ -1,5 +1,5 @@
 import { ipcMain } from "electron";
-import * as projectService from "../services/project.service";
+import * as projectService from "../services/projects/project.service";
 
 export function registerProjectHandlers(): void {
   ipcMain.handle("projects:list", (_e, forceRefresh?: boolean) =>

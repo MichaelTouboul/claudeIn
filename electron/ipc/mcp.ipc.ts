@@ -1,7 +1,7 @@
 import { ipcMain } from "electron";
 
-import * as mcpManage from "../services/mcp.manage";
-import * as mcpMirror from "../services/mcp.mirror";
+import * as mcpManage from "../services/mcp/mcp.manage";
+import * as mcpMirror from "../services/mcp/mcp.mirror";
 import type { McpAddInput, McpManageScope } from "../types/mcp-manage.types";
 
 export function registerMcpHandlers(): void {

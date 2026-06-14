@@ -2,7 +2,7 @@
 import type { IpcMainInvokeEvent } from "electron";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
-import type { TransformInput } from "../services/transform.prompt";
+import type { TransformInput } from "../services/transform/transform.prompt";
 
 // Capture the handler registered via `ipcMain.handle` (electron is unavailable
 // in plain node/vitest), so the test can invoke the real handler.
@@ -22,7 +22,7 @@ vi.mock("electron", () => ({
 const transformMock = vi.fn<(input: TransformInput) => Promise<string>>(
   async () => "| a |\n|---|\n| 1 |",
 );
-vi.mock("../services/transform.service", () => ({
+vi.mock("../services/transform/transform.service", () => ({
   transform: (input: TransformInput) => transformMock(input),
 }));
 

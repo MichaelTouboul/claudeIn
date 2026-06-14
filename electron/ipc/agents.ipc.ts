@@ -1,6 +1,6 @@
 import { ipcMain } from "electron";
-import * as agentService from "../services/agent.service";
-import * as agentsMirror from "../services/agents.mirror";
+import * as agentService from "../services/agents/agent.service";
+import * as agentsMirror from "../services/agents/agents.mirror";
 
 export function registerAgentHandlers(): void {
   ipcMain.handle("agents:list", () => agentService.getAllAgents());

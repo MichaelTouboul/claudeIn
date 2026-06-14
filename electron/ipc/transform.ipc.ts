@@ -1,7 +1,7 @@
 import { ipcMain } from "electron";
 
-import { transform } from "../services/transform.service";
-import { TransformKind, type TransformInput } from "../services/transform.prompt";
+import { transform } from "../services/transform/transform.service";
+import { TransformKind, type TransformInput } from "../services/transform/transform.prompt";
 
 /**
  * Runtime guard at the IPC boundary: TypeScript types are erased, so the

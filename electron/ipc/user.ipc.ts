@@ -1,14 +1,14 @@
 import { ipcMain } from "electron";
 
-import { fillUserProfile, locateClaudeUser } from "../services/user-search.service";
+import { fillUserProfile, locateClaudeUser } from "../services/search/user-search.service";
 import {
   completeOnboarding,
   getUserProfile,
   resetUser,
   saveUserProfile,
-} from "../services/user-profile.service";
-import { scanRepos } from "../services/repos.service";
-import { add, list, remove } from "../services/favorite-repos.service";
+} from "../services/profile/user-profile.service";
+import { scanRepos } from "../services/projects/repos.service";
+import { add, list, remove } from "../services/projects/favorite-repos.service";
 import type { UserProfile } from "../types/user.interface";
 
 /**

@@ -1,12 +1,12 @@
 import { ipcMain } from "electron";
 
-import { scanCandidates } from "../services/onboarding.service";
+import { scanCandidates } from "../services/system/onboarding.service";
 import {
   getProfile,
   ingestScope,
   listProfiles,
   refreshProfile,
-} from "../services/profile.service";
+} from "../services/profile/profile.service";
 import type { ScopeProfile } from "../types/onboarding.types";
 
 /**

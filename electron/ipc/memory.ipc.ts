@@ -1,7 +1,7 @@
 import { ipcMain } from "electron";
-import * as memoryService from "../services/memory.service";
-import * as memoryMirror from "../services/memory.mirror";
-import * as projectService from "../services/project.service";
+import * as memoryService from "../services/memory/memory.service";
+import * as memoryMirror from "../services/memory/memory.mirror";
+import * as projectService from "../services/projects/project.service";
 
 export function registerMemoryHandlers(): void {
   // Memory mirror (additive): live CLAUDE.md hierarchy + auto-memory snapshot.

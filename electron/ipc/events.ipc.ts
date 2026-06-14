@@ -1,5 +1,5 @@
 import { ipcMain } from "electron";
-import * as eventsService from "../services/events.service";
+import * as eventsService from "../services/session/events.service";
 
 export function registerEventHandlers(): void {
   ipcMain.handle("events:recent", (_e, limit?: number) => eventsService.getRecentEvents(limit));
