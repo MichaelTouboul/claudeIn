@@ -35,6 +35,7 @@ vi.mock('@/components/AgentChat/RichEditor/RichEditor', () => ({
       focus: focusSpy,
       clear: vi.fn(),
       insertMention: vi.fn(),
+      insertSlashCommand: vi.fn(),
     }));
     editorOnChange = onChange;
     editorOnSubmit = onSubmit;

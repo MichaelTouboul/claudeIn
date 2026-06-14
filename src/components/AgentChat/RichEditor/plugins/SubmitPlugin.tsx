@@ -19,11 +19,13 @@ export const SUBMIT_INTENT: LexicalCommand<void> = createCommand('SUBMIT_INTENT'
 export type SubmitPluginProps = {
   /** Return true if Enter was consumed by the slash/mention menu (then do not submit). */
   onEnter: () => boolean;
+  /** Return true if Tab was consumed by an open menu (complete the text only, no submit). */
+  onComplete: () => boolean;
   /** Return true if the key was consumed by an open menu (↑/↓/Esc navigation). */
   onNavKey: (key: string) => boolean;
 };
 
-export function SubmitPlugin({ onEnter, onNavKey }: SubmitPluginProps) {
+export function SubmitPlugin({ onEnter, onComplete, onNavKey }: SubmitPluginProps) {
   const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
@@ -54,10 +56,11 @@ export function SubmitPlugin({ onEnter, onNavKey }: SubmitPluginProps) {
       editor.registerCommand<KeyboardEvent | null>(
         KEY_TAB_COMMAND,
         (event) => {
-          // Tab confirms the highlighted suggestion — identical to Enter — but ONLY
-          // while a slash/mention menu is open and consumes it. When no menu is open
-          // `onEnter()` returns false, so we leave Tab's default focus behavior intact.
-          if (!onEnter()) return false;
+          // Tab COMPLETES the highlighted suggestion into the input (text only) — it does
+          // NOT launch/submit it (that's Enter's job). Only while a slash/mention menu is
+          // open and consumes it; when no menu is open `onComplete()` returns false, so we
+          // leave Tab's default focus behavior intact.
+          if (!onComplete()) return false;
           event?.preventDefault();
           return true;
         },
@@ -79,7 +82,7 @@ export function SubmitPlugin({ onEnter, onNavKey }: SubmitPluginProps) {
         COMMAND_PRIORITY_HIGH
       )
     );
-  }, [editor, onEnter, onNavKey]);
+  }, [editor, onEnter, onComplete, onNavKey]);
 
   return null;
 }

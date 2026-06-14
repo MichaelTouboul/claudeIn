@@ -16,7 +16,7 @@ const editorClear = vi.fn();
 const editorFocus = vi.fn();
 
 function makeParams(overrides: Partial<Parameters<typeof useAgentChatActions>[0]> = {}) {
-  const editorRef = { current: { clear: editorClear, focus: editorFocus, insertMention: vi.fn() } as RichEditorHandle };
+  const editorRef = { current: { clear: editorClear, focus: editorFocus, insertMention: vi.fn(), insertSlashCommand: vi.fn() } as RichEditorHandle };
   const pendingUserMsgs = { current: new Set<string>() };
   return {
     input: '',
