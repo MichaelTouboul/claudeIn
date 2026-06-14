@@ -1,5 +1,6 @@
 import { Plus } from "lucide-react";
 
+import { Button } from "@/components/_ui/Button";
 import type { McpServerEntry } from "@/lib/types";
 
 export type ConnectorServerListProps = {
@@ -39,15 +40,16 @@ export function ConnectorServerList({
         >
           {label}
         </span>
-        <button
+        <Button
           type="button"
+          intent="ghost"
+          size="icon"
           aria-label={`Add ${label} MCP server`}
           onClick={onAdd}
-          className="flex items-center justify-center rounded p-0.5 transition-colors hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
-          style={{ color: "var(--color-accent)" }}
+          className="h-auto w-auto p-0.5 text-accent hover:text-accent"
         >
           <Plus size={14} />
-        </button>
+        </Button>
       </div>
       {servers.length === 0 ? (
         <p

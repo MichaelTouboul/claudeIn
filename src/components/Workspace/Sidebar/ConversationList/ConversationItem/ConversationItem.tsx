@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { ContextMenu } from '@/components/_ui/ContextMenu';
+import { StatusDot } from '@/components/_ui/StatusDot';
 import { RenameDialog } from '@/components/Workspace/Sidebar/SessionsPanel/SessionRowMenu/RenameDialog';
 import { buildSessionMenuItems } from '@/components/Workspace/Sidebar/SessionsPanel/SessionRowMenu/sessionMenuItems';
 import { type ConversationStatus,STATUS_DOT } from '@/store/useConversationStatusStore';
@@ -63,11 +64,7 @@ export function ConversationItem({ convId, title, isActive, status, pinned, onAc
         onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-surface-2)')}
         onMouseLeave={(e) => (e.currentTarget.style.background = isActive ? 'var(--color-surface-2)' : 'transparent')}
       >
-        <span
-          className="w-1.5 h-1.5 rounded-full shrink-0"
-          style={{ backgroundColor: dot.color, animation: dot.pulse ? 'pulse 1s ease-in-out infinite' : undefined }}
-          title={status}
-        />
+        <StatusDot size="xs" pulse={dot.pulse} style={{ backgroundColor: dot.color }} title={status} />
         <span className="text-xs truncate" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>
           {label}
         </span>

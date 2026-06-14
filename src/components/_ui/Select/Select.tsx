@@ -3,7 +3,7 @@ import { type ComponentProps } from 'react';
 import { field, type FieldVariantProps } from '@/components/_ui/Input';
 import { cn } from '@/lib/utils';
 
-export type SelectProps = ComponentProps<'select'> & FieldVariantProps;
+export type SelectProps = Omit<ComponentProps<'select'>, 'size'> & FieldVariantProps;
 
 /** Native `<select>` (intentional — native a11y), styled with the shared field chrome. */
 export function Select({ size, font, variant, className, children, ...props }: SelectProps) {

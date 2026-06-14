@@ -1,3 +1,7 @@
+import { Input } from '@/components/_ui/Input';
+import { Select } from '@/components/_ui/Select';
+import { Textarea } from '@/components/_ui/Textarea';
+
 import type { FieldDef } from '../fields';
 
 export type EditFieldProps = {
@@ -7,42 +11,29 @@ export type EditFieldProps = {
 };
 
 export function EditField({ field, value, onChange }: EditFieldProps) {
-  const base = "w-full rounded px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1";
-  const fieldStyle: React.CSSProperties = {
-    background: 'var(--color-surface-2)',
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderColor: 'rgba(6,182,212,0.25)',
-    color: 'var(--color-text-primary)',
-    fontFamily: 'var(--font-mono)',
-    fontSize: '13px',
-  };
-
   if (field.type === "dropdown") {
     return (
-      <select
+      <Select
+        font="mono"
         value={String(value ?? "")}
         onChange={(e) => onChange(e.target.value || undefined)}
         aria-label={field.label}
-        className={base}
-        style={fieldStyle}
       >
         {field.options!.map((opt) => (
           <option key={opt} value={opt}>{opt || "— inherit —"}</option>
         ))}
-      </select>
+      </Select>
     );
   }
 
   if (field.type === "number") {
     return (
-      <input
+      <Input
         type="number"
+        font="mono"
         value={value !== undefined && value !== null ? String(value) : ""}
         onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
         aria-label={field.label}
-        className={base}
-        style={fieldStyle}
         placeholder="—"
       />
     );
@@ -50,41 +41,39 @@ export function EditField({ field, value, onChange }: EditFieldProps) {
 
   if (field.type === "textarea") {
     return (
-      <textarea
+      <Textarea
+        font="mono"
         value={String(value ?? "")}
         onChange={(e) => onChange(e.target.value)}
         aria-label={field.label}
         rows={3}
-        className={`${base} resize-y`}
-        style={fieldStyle}
+        className="resize-y"
       />
     );
   }
 
   if (field.type === "boolean") {
     return (
-      <select
+      <Select
+        font="mono"
         value={value ? "true" : "false"}
         onChange={(e) => onChange(e.target.value === "true")}
         aria-label={field.label}
-        className={base}
-        style={fieldStyle}
       >
         <option value="false">no</option>
         <option value="true">yes</option>
-      </select>
+      </Select>
     );
   }
 
   const strVal = Array.isArray(value) ? value.join(", ") : String(value ?? "");
   return (
-    <input
+    <Input
       type="text"
+      font="mono"
       value={strVal}
       onChange={(e) => onChange(e.target.value)}
       aria-label={field.label}
-      className={base}
-      style={fieldStyle}
       placeholder="—"
     />
   );

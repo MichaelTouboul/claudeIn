@@ -1,3 +1,4 @@
+import { StatusDot } from '@/components/_ui/StatusDot';
 import type { WorkflowAgent } from '@/hooks/useSessionWorkflow';
 
 import { AGENT_PRESENTATION } from './agentPresentation';
@@ -25,8 +26,9 @@ function TreeAgentNode({
         className="flex w-full items-center gap-2 rounded-md border px-2 py-1.5 text-left text-xs transition-colors hover:bg-surface-2"
         style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
       >
-        <span
-          className="h-2 w-2 shrink-0 rounded-full"
+        <StatusDot
+          size="sm"
+          pulse={presentation.dot}
           style={{ background: presentation.colorVar }}
         />
         <span className="truncate font-medium">{agent.agentName}</span>
@@ -54,10 +56,7 @@ export function WorkflowTree({ agents, onSelectAgent }: WorkflowViewProps) {
             className="flex items-center gap-2 rounded-md px-2 py-1.5 text-xs font-semibold"
             style={{ background: 'var(--color-surface-2)', color: 'var(--color-text-primary)' }}
           >
-            <span
-              className="h-2 w-2 shrink-0 rounded-full"
-              style={{ background: 'var(--color-accent)' }}
-            />
+            <StatusDot size="sm" style={{ background: 'var(--color-accent)' }} />
             Session
           </div>
           <ul

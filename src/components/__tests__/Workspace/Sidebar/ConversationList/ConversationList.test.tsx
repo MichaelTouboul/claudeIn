@@ -207,10 +207,11 @@ describe("ConversationList", () => {
     const idleDot = within(idleRow).getByTitle("idle");
 
     // Only running pulses (green); waiting is steady yellow; absent id → muted idle.
+    // The StatusDot primitive applies the pulse via the `animate-pulse` class.
     expect(runDot).toHaveStyle({ backgroundColor: "#22c55e" });
-    expect(runDot.style.animation).toContain("pulse");
+    expect(runDot).toHaveClass("animate-pulse");
     expect(waitDot).toHaveStyle({ backgroundColor: "#eab308" });
-    expect(waitDot.style.animation).toBe("");
-    expect(idleDot.style.animation).toBe("");
+    expect(waitDot).not.toHaveClass("animate-pulse");
+    expect(idleDot).not.toHaveClass("animate-pulse");
   });
 });

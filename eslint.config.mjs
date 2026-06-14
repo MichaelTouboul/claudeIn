@@ -173,7 +173,13 @@ export default tseslint.config(
         'error',
         { tags: [], roles: ['tabpanel', 'separator'] },
       ],
-      'jsx-a11y/label-has-associated-control': 'warn',
+      // The _ui form primitives (Input/Select/Textarea/Checkbox) each render a
+      // real native control, so a <label> wrapping one IS properly associated —
+      // declare them as control components so the rule doesn't flag the wrapper.
+      'jsx-a11y/label-has-associated-control': [
+        'warn',
+        { controlComponents: ['Input', 'Select', 'Textarea', 'Checkbox'] },
+      ],
       // autoFocus on the chat textarea is a deliberate UX choice in an
       // Electron app — keep this one off so it doesn't spawn false noise.
       'jsx-a11y/no-autofocus': 'off',

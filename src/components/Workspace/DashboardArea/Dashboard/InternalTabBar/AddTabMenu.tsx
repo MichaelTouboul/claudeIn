@@ -1,5 +1,6 @@
 import { Plus } from 'lucide-react';
 
+import { Button } from '@/components/_ui/Button';
 import { Popover, PopoverClose } from '@/components/_ui/Popover';
 import { useDashboardStore } from '@/store/useDashboardStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
@@ -9,16 +10,9 @@ export function AddTabMenu() {
   const addTab = useWorkspaceStore((s) => s.addTab);
 
   const trigger = (
-    <button
-      title="New tab"
-      aria-label="New tab"
-      className="flex items-center justify-center w-7 h-7 rounded-md"
-      style={{ color: 'var(--color-text-muted)' }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-surface-2)')}
-      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-    >
+    <Button intent="ghost" size="icon" title="New tab" aria-label="New tab" className="w-7 h-7">
       <Plus size={15} />
-    </button>
+    </Button>
   );
 
   return (

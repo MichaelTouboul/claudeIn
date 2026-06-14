@@ -1,6 +1,7 @@
 import { Activity, ChevronDown, ChevronUp, Terminal as TerminalIcon } from 'lucide-react';
 import { type ReactNode, useMemo, useState } from 'react';
 
+import { Button } from '@/components/_ui/Button';
 import { EventConsole } from '@/components/EventConsole/EventConsole';
 import { useAppStore } from '@/store/useAppStore';
 import { useConsoleStore } from '@/store/useConsoleStore';
@@ -65,14 +66,15 @@ export function Console() {
       <div className="flex items-center" style={{ background: 'var(--color-surface-1)' }}>
         {tabBtn('terminal', 'Terminal', <TerminalIcon size={12} />)}
         {tabBtn('events', `Events (${events.length})`, <Activity size={12} />)}
-        <button
+        <Button
+          intent="ghost"
+          size="icon"
           onClick={() => toggle()}
-          className="ml-auto px-3 py-2"
-          style={{ color: 'var(--color-text-muted)' }}
+          className="ml-auto h-auto w-auto px-3 py-2"
           title={open ? 'Close' : 'Open'}
         >
           {open ? <ChevronDown size={12} /> : <ChevronUp size={12} />}
-        </button>
+        </Button>
       </div>
       {open ? (
         <div style={{ height: `calc(100% - ${BAR_HEIGHT + HANDLE_HEIGHT}px)` }}>

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
+import { Input } from '@/components/_ui/Input';
 import type { AgentFile } from '@/lib/types';
 import { api } from '@/services/api';
 
@@ -27,19 +28,14 @@ export function AgentSearch({ onSelect }: AgentSearchProps) {
 
   return (
     <div className="flex flex-col gap-2">
-      <input
+      <Input
         autoFocus
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search agents…"
         aria-label="Search agents"
-        className="w-full px-3 py-1.5 rounded-md text-[13px] outline-none"
-        style={{
-          background: 'var(--color-surface-1)',
-          border: '1px solid var(--color-border)',
-          color: 'var(--color-text-primary)',
-          fontFamily: 'var(--font-mono)',
-        }}
+        font="mono"
+        className="bg-surface-1"
       />
       <div className="max-h-52 overflow-y-auto rounded-md" style={{ border: '1px solid var(--color-border-subtle)' }}>
         {filtered.length === 0 ? (

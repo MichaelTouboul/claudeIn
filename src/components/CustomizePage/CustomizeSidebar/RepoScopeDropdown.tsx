@@ -1,3 +1,4 @@
+import { Select } from "@/components/_ui/Select";
 import { repoLabel } from "@/components/HomePage/openFavorite";
 import type { FavoriteRepo } from "@/lib/types";
 
@@ -20,18 +21,11 @@ export function RepoScopeDropdown({ repos, value, onChange }: RepoScopeDropdownP
 
   return (
     <div className="flex flex-col gap-1.5">
-      <select
+      <Select
         aria-label="Repository scope"
         disabled={empty}
         value={value ?? NONE}
         onChange={(e) => onChange(e.target.value === NONE ? null : e.target.value)}
-        className="w-full rounded-lg px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent disabled:opacity-60"
-        style={{
-          background: "var(--color-surface-2)",
-          border: "1px solid var(--color-border)",
-          color: "var(--color-text-primary)",
-          fontFamily: "var(--font-sans)",
-        }}
       >
         <option value={NONE}>{empty ? "No favorite repos yet" : "No repository"}</option>
         {repos.map((repo) => (
@@ -39,7 +33,7 @@ export function RepoScopeDropdown({ repos, value, onChange }: RepoScopeDropdownP
             {repoLabel(repo)}
           </option>
         ))}
-      </select>
+      </Select>
       {empty ? (
         <p className="px-1 text-xs leading-relaxed" style={{ color: "var(--color-text-muted)" }}>
           Pin a repo on Home to scope connectors to it. Personal connectors are always shown below.

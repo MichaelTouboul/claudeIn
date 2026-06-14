@@ -1,3 +1,4 @@
+import { StatusDot } from '@/components/_ui/StatusDot';
 import type { WorkflowAgent } from '@/hooks/useSessionWorkflow';
 import { AgentPresenceStatus } from '@/store/useEventsStore';
 
@@ -26,8 +27,9 @@ function TimelineLane({
       style={{ color: 'var(--color-text-primary)' }}
     >
       <span className="flex w-24 shrink-0 items-center gap-1.5">
-        <span
-          className="h-2 w-2 shrink-0 rounded-full"
+        <StatusDot
+          size="sm"
+          pulse={presentation.dot}
           style={{ background: presentation.colorVar }}
         />
         <span className="truncate font-medium">{agent.agentName}</span>

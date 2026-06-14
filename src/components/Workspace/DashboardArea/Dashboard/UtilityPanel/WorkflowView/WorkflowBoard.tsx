@@ -1,3 +1,4 @@
+import { StatusDot } from '@/components/_ui/StatusDot';
 import type { WorkflowAgent } from '@/hooks/useSessionWorkflow';
 import { AgentPresenceStatus } from '@/store/useEventsStore';
 
@@ -30,8 +31,9 @@ function BoardCard({ agent, onSelectAgent }: { agent: WorkflowAgent; onSelectAge
       style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
     >
       <span className="flex items-center gap-2">
-        <span
-          className="h-2 w-2 shrink-0 rounded-full"
+        <StatusDot
+          size="sm"
+          pulse={presentation.dot}
           style={{ background: presentation.colorVar }}
         />
         <span className="truncate font-medium">{agent.agentName}</span>

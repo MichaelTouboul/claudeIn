@@ -1,5 +1,7 @@
 import { Activity } from "lucide-react";
 
+import { StatusDot } from "@/components/_ui/StatusDot";
+
 export type StatsBarProps = {
   activeCount: number;
   connected: boolean;
@@ -11,8 +13,9 @@ export function StatsBar({ activeCount, connected }: StatsBarProps) {
   return (
     <div className="flex items-center gap-4 text-xs" style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
       <div className="flex items-center gap-1.5" aria-label={`Connection: ${liveLabel}`}>
-        <span
-          className={`w-1.5 h-1.5 rounded-full ${connected ? "animate-pulse" : ""}`}
+        <StatusDot
+          size="xs"
+          pulse={connected}
           style={{ background: connected ? 'var(--color-active)' : 'var(--color-danger)' }}
         />
         <span style={{ color: 'var(--color-text-muted)', fontSize: '11px' }}>{liveLabel}</span>

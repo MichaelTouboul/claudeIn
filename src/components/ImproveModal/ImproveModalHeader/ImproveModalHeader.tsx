@@ -1,3 +1,4 @@
+import { Select } from '@/components/_ui/Select';
 import type { ImproveContextTarget, ImproveType } from '@/lib/types';
 
 import { IMPROVE_TYPE_OPTIONS } from '../typeLabels';
@@ -42,24 +43,19 @@ export function ImproveModalHeader({
         <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
           Type
         </span>
-        <select
+        <Select
           aria-label="Improvement type"
           value={type}
           disabled={disabled}
           onChange={(e) => onTypeChange(e.target.value as ImproveType)}
-          className="h-8 rounded px-2 text-sm outline-none focus-visible:ring-1 disabled:opacity-50"
-          style={{
-            background: 'var(--color-surface-3)',
-            color: 'var(--color-text-primary)',
-            border: '1px solid var(--color-border)',
-          }}
+          className="bg-surface-3"
         >
           {IMPROVE_TYPE_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}
             </option>
           ))}
-        </select>
+        </Select>
       </label>
     </div>
   );
