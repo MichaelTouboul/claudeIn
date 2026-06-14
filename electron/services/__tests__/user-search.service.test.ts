@@ -89,6 +89,8 @@ describe("fillUserProfile", () => {
     search.setUserSearchRunner(async ({ cwd, prompt }) => {
       calls.push({ cwd, prompt });
       return JSON.stringify({
+        name: "Ada Lovelace",
+        role: "Backend engineer at Tastewise",
         summary: "A focused backend setup.",
         domains: ["backend", "infra"],
         workflow: "tdd",
@@ -98,6 +100,8 @@ describe("fillUserProfile", () => {
     const profile = await search.fillUserProfile(claudePath);
 
     expect(profile.claudeUserPath).toBe(claudePath);
+    expect(profile.name).toBe("Ada Lovelace");
+    expect(profile.role).toBe("Backend engineer at Tastewise");
     expect(profile.capabilities).toEqual({
       agents: { count: 2, names: ["alpha", "beta"] },
       skills: 3,
@@ -112,6 +116,9 @@ describe("fillUserProfile", () => {
     expect(calls).toHaveLength(1);
     expect(calls[0].cwd).toBe(claudePath);
     expect(calls[0].prompt).toContain(".claude");
+    // the prompt now asks for identity fields too
+    expect(calls[0].prompt).toContain("name");
+    expect(calls[0].prompt).toContain("role");
   });
 
   it("tolerates non-JSON narrative output (summary = raw text, empty domains)", async () => {
@@ -132,6 +139,8 @@ describe("fillUserProfile", () => {
 
     const profile = await search.fillUserProfile(claudePath);
     expect(profile.summary).toBe("just a plain narrative");
+    expect(profile.name).toBeNull();
+    expect(profile.role).toBeNull();
     expect(profile.domains).toEqual([]);
     expect(profile.workflow).toBeNull();
     expect(profile.capabilities.hooks).toBe(0);

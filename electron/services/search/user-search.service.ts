@@ -86,6 +86,8 @@ export async function fillUserProfile(claudePath: string): Promise<UserProfile> 
   return {
     ...defaultUserProfile(),
     claudeUserPath: claudePath,
+    name: narrative.name,
+    role: narrative.role,
     capabilities,
     summary: narrative.summary,
     domains: narrative.domains,
