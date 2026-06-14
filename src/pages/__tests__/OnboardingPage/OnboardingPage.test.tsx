@@ -1,8 +1,8 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { OnboardingPage } from "@/components/OnboardingPage/OnboardingPage";
 import type { RepoCandidate, UserProfile } from "@/lib/types";
+import { OnboardingPage } from "@/pages/OnboardingPage/OnboardingPage";
 import { AppPage, useAppStore } from "@/store/useAppStore";
 
 function makeProfile(overrides: Partial<UserProfile> = {}): UserProfile {

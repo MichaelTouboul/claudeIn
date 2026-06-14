@@ -1,15 +1,14 @@
 import { useEffect } from "react";
 
 import { McpRestartBanner } from "@/components/CustomizePage/Connectors/McpRestartBanner";
+import { CustomizeContent } from "@/components/CustomizePage/CustomizeContent/CustomizeContent";
+import { CustomizeSidebar } from "@/components/CustomizePage/CustomizeSidebar/CustomizeSidebar";
+import { CustomizeTopBar } from "@/components/CustomizePage/CustomizeTopBar";
 import { useCustomizeManage } from "@/hooks/useCustomizeManage";
 import { useCustomizeMcp } from "@/hooks/useCustomizeMcp";
 import { useFavoriteRepos } from "@/hooks/useFavoriteRepos";
 import { AppPage, useAppStore } from "@/store/useAppStore";
 import { useCustomizeStore } from "@/store/useCustomizeStore";
-
-import { CustomizeContent } from "./CustomizeContent/CustomizeContent";
-import { CustomizeSidebar } from "./CustomizeSidebar/CustomizeSidebar";
-import { CustomizeTopBar } from "./CustomizeTopBar";
 
 // The Customize page: top bar + sidebar (repo scope, section nav, scoped MCP
 // server lists) + content (hero / connector detail / skills placeholder). Owns

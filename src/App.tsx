@@ -1,14 +1,14 @@
 import { type ReactElement } from "react";
 
-import { CustomizePage } from "@/components/CustomizePage/CustomizePage";
-import { DashboardPage } from "@/components/DashboardPage/DashboardPage";
 import { ImproveNotification } from "@/components/Header/ImproveNotification/ImproveNotification";
-import { HomePage } from "@/components/HomePage/HomePage";
 import { ImproveModal } from "@/components/ImproveModal/ImproveModal";
-import { OnboardingPage } from "@/components/OnboardingPage/OnboardingPage";
 import { useBootPage } from "@/hooks/useBootPage";
 import { useImproveContextMenu } from "@/hooks/useImproveContextMenu";
 import { useInitImprove } from "@/hooks/useInitImprove";
+import { CustomizePage } from "@/pages/CustomizePage/CustomizePage";
+import { DashboardPage } from "@/pages/DashboardPage/DashboardPage";
+import { HomePage } from "@/pages/HomePage/HomePage";
+import { OnboardingPage } from "@/pages/OnboardingPage/OnboardingPage";
 import { AppPage } from "@/store/useAppStore";
 
 /** Value→render map: each page maps to its component (no fallback chains). */

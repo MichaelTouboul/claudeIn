@@ -1,8 +1,8 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { CustomizePage } from "@/components/CustomizePage/CustomizePage";
 import type { FavoriteRepo,McpServerEntry, McpSnapshot  } from "@/lib/types";
+import { CustomizePage } from "@/pages/CustomizePage/CustomizePage";
 import { AppPage, useAppStore } from "@/store/useAppStore";
 import { CustomizeSection, useCustomizeStore } from "@/store/useCustomizeStore";
 

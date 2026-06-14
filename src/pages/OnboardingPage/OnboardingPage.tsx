@@ -1,16 +1,15 @@
 import { type ReactElement, useCallback, useState } from "react";
 
+import { ConsentReposStep } from "@/components/OnboardingPage/ConsentReposStep/ConsentReposStep";
+import { ConsentUserStep } from "@/components/OnboardingPage/ConsentUserStep/ConsentUserStep";
+import { DoneStep } from "@/components/OnboardingPage/DoneStep/DoneStep";
+import { OnbStep } from "@/components/OnboardingPage/onbStep";
+import { ProfileReviewStep } from "@/components/OnboardingPage/ProfileReviewStep/ProfileReviewStep";
+import { ReposPickStep } from "@/components/OnboardingPage/ReposPickStep/ReposPickStep";
+import { SearchUserStep } from "@/components/OnboardingPage/SearchUserStep/SearchUserStep";
+import { WelcomeStep } from "@/components/OnboardingPage/WelcomeStep/WelcomeStep";
 import type { UserProfile } from "@/lib/types";
 import { AppPage, useAppStore } from "@/store/useAppStore";
-
-import { ConsentReposStep } from "./ConsentReposStep/ConsentReposStep";
-import { ConsentUserStep } from "./ConsentUserStep/ConsentUserStep";
-import { DoneStep } from "./DoneStep/DoneStep";
-import { OnbStep } from "./onbStep";
-import { ProfileReviewStep } from "./ProfileReviewStep/ProfileReviewStep";
-import { ReposPickStep } from "./ReposPickStep/ReposPickStep";
-import { SearchUserStep } from "./SearchUserStep/SearchUserStep";
-import { WelcomeStep } from "./WelcomeStep/WelcomeStep";
 
 /**
  * First-run onboarding as a linear state machine. `OnbStep` is the single source

@@ -2,6 +2,9 @@ import { useCallback, useState } from "react";
 
 import { Dialog } from "@/components/_ui/Dialog";
 import { DevReset } from "@/components/DevReset/DevReset";
+import { FavoriteReposGrid } from "@/components/HomePage/FavoriteReposGrid/FavoriteReposGrid";
+import { HomeActions } from "@/components/HomePage/HomeActions/HomeActions";
+import { HomeGreeting } from "@/components/HomePage/HomeGreeting/HomeGreeting";
 import { UserProfileView } from "@/components/UserProfileView/UserProfileView";
 import { useFavoriteRepos } from "@/hooks/useFavoriteRepos";
 import { useProjects } from "@/hooks/useProjects";
@@ -10,10 +13,6 @@ import type { FavoriteRepo } from "@/lib/types";
 import { projectForFavorite } from "@/lib/utils";
 import { AppPage, useAppStore } from "@/store/useAppStore";
 import { useWorkspaceStore } from "@/store/useWorkspaceStore";
-
-import { FavoriteReposGrid } from "./FavoriteReposGrid/FavoriteReposGrid";
-import { HomeActions } from "./HomeActions/HomeActions";
-import { HomeGreeting } from "./HomeGreeting/HomeGreeting";
 
 /**
  * Home page (layout A — stacked sections): greeting + profile link, a favorite-

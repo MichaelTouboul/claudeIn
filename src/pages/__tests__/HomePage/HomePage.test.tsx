@@ -1,8 +1,8 @@
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { HomePage } from "@/components/HomePage/HomePage";
 import type { FavoriteRepo, UserProfile } from "@/lib/types";
+import { HomePage } from "@/pages/HomePage/HomePage";
 import { AppPage, useAppStore } from "@/store/useAppStore";
 import { useWorkspaceStore } from "@/store/useWorkspaceStore";
 
