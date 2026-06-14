@@ -18,10 +18,14 @@
 
   --color-border: #1e2636;
   --color-border-subtle: #151b26;
+  /* 3:1 vs surfaces — for control/input outlines where the border is the only
+     affordance (WCAG 1.4.11). Decorative hairlines keep --color-border. */
+  --color-border-strong: #5a6a8c;
 
   --color-fg: #e2e8f0;
   --color-fg-muted: #8892a4;
-  --color-fg-subtle: #4a5568;
+  /* WCAG AA: #4a5568 failed 4.5:1 on every surface; #717c90 clears it. */
+  --color-fg-subtle: #717c90;
 
   --color-accent: #06b6d4;
   --color-accent-dim: rgba(6, 182, 212, 0.12);
