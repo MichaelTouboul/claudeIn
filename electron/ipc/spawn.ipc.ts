@@ -1,5 +1,5 @@
 import { ipcMain } from "electron";
-import * as spawnService from "../services/spawn.service";
+import * as spawnService from "../services/spawn/spawn.service";
 
 export function registerSpawnHandlers(): void {
   ipcMain.handle("spawn:list", () => spawnService.getAllSessions());

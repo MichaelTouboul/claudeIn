@@ -22,7 +22,7 @@ vi.mock("electron", () => ({
 }));
 
 // Read mirror service — present so registration doesn't blow up; not exercised.
-vi.mock("../services/mcp.mirror", () => ({
+vi.mock("../services/mcp/mcp.mirror", () => ({
   getMcp: vi.fn(),
   watchMcp: vi.fn(),
   unwatchMcp: vi.fn(),
@@ -38,7 +38,7 @@ const editServerMock =
 const removeServerMock =
   vi.fn<(name: string, scope: McpManageScope, projectPath?: string) => Promise<{ ok: true } | { ok: false; error: string }>>();
 
-vi.mock("../services/mcp.manage", () => ({
+vi.mock("../services/mcp/mcp.manage", () => ({
   getServerRaw: (name: string, scope?: McpManageScope, projectPath?: string) =>
     getServerRawMock(name, scope, projectPath),
   addServer: (input: McpAddInput) => addServerMock(input),

@@ -2,7 +2,7 @@
 import type { IpcMainInvokeEvent } from "electron";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
-import type { ImproveChatInput } from "../services/improve-chat.service";
+import type { ImproveChatInput } from "../services/improve/improve-chat.service";
 
 // Capture the handlers registered via `ipcMain.handle` (electron is unavailable
 // in plain node/vitest), so the test can invoke the real handler.
@@ -21,11 +21,11 @@ vi.mock("electron", () => ({
 const improveChatMock = vi.fn<(input: ImproveChatInput) => Promise<string>>(
   async () => "What exactly is slow?",
 );
-vi.mock("../services/improve-chat.service", () => ({
+vi.mock("../services/improve/improve-chat.service", () => ({
   improveChat: (input: ImproveChatInput) => improveChatMock(input),
 }));
 // The inbox service is also imported by improve.ipc; stub it to avoid disk/db.
-vi.mock("../services/improve-inbox.service", () => ({
+vi.mock("../services/improve/improve-inbox.service", () => ({
   submitRequest: vi.fn(),
   listRequests: vi.fn(),
   getRequest: vi.fn(),

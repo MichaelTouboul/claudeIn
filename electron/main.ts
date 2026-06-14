@@ -1,9 +1,9 @@
 import { app, BrowserWindow } from "electron";
 import path from "path";
-import { initDb } from "./services/db";
+import { initDb } from "./services/core/db";
 import { registerAllHandlers } from "./ipc";
-import { registerContextMenu } from "./services/context-menu.service";
-import { killAll } from "./services/pty.service";
+import { registerContextMenu } from "./services/system/context-menu.service";
+import { killAll } from "./services/system/pty.service";
 
 let mainWindow: BrowserWindow | null = null;
 

@@ -20,7 +20,7 @@ vi.mock("electron", () => ({
 // Mock ONLY the service boundary so no fs scan / `claude` spawn / DB runs. The
 // handlers must forward their args verbatim and return the service result.
 const scanCandidatesMock = vi.fn<(root?: string) => Promise<Candidate[]>>();
-vi.mock("../services/onboarding.service", () => ({
+vi.mock("../services/system/onboarding.service", () => ({
   scanCandidates: (root?: string) => scanCandidatesMock(root),
 }));
 
@@ -29,7 +29,7 @@ const ingestScopeMock =
 const getProfileMock = vi.fn<(scopePath: string) => ScopeProfile | null>();
 const listProfilesMock = vi.fn<() => ScopeProfile[]>();
 const refreshProfileMock = vi.fn<(scopePath: string) => Promise<ScopeProfile>>();
-vi.mock("../services/profile.service", () => ({
+vi.mock("../services/profile/profile.service", () => ({
   ingestScope: (scopePath: string, scope: ScopeProfile["scope"], plugins: string[]) =>
     ingestScopeMock(scopePath, scope, plugins),
   getProfile: (scopePath: string) => getProfileMock(scopePath),

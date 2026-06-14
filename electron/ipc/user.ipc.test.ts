@@ -17,7 +17,7 @@ vi.mock("electron", () => ({
 
 const locateClaudeUserMock = vi.fn<() => string | null>();
 const fillUserProfileMock = vi.fn<(p: string) => Promise<UserProfile>>();
-vi.mock("../services/user-search.service", () => ({
+vi.mock("../services/search/user-search.service", () => ({
   locateClaudeUser: () => locateClaudeUserMock(),
   fillUserProfile: (p: string) => fillUserProfileMock(p),
 }));
@@ -26,7 +26,7 @@ const getUserProfileMock = vi.fn<() => UserProfile | null>();
 const saveUserProfileMock = vi.fn<(p: UserProfile) => UserProfile>();
 const completeOnboardingMock = vi.fn<() => UserProfile>();
 const resetUserMock = vi.fn<() => void>();
-vi.mock("../services/user-profile.service", () => ({
+vi.mock("../services/profile/user-profile.service", () => ({
   getUserProfile: () => getUserProfileMock(),
   saveUserProfile: (p: UserProfile) => saveUserProfileMock(p),
   completeOnboarding: () => completeOnboardingMock(),
@@ -34,14 +34,14 @@ vi.mock("../services/user-profile.service", () => ({
 }));
 
 const scanReposMock = vi.fn<(root?: string) => Promise<RepoCandidate[]>>();
-vi.mock("../services/repos.service", () => ({
+vi.mock("../services/projects/repos.service", () => ({
   scanRepos: (root?: string) => scanReposMock(root),
 }));
 
 const listMock = vi.fn<() => FavoriteRepo[]>();
 const addMock = vi.fn<(path: string, label?: string) => FavoriteRepo>();
 const removeMock = vi.fn<(path: string) => void>();
-vi.mock("../services/favorite-repos.service", () => ({
+vi.mock("../services/projects/favorite-repos.service", () => ({
   list: () => listMock(),
   add: (path: string, label?: string) => addMock(path, label),
   remove: (path: string) => removeMock(path),

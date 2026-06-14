@@ -1,6 +1,6 @@
 import { ipcMain } from "electron";
-import * as projectService from "../services/project.service";
-import * as skillsMirror from "../services/skills.mirror";
+import * as projectService from "../services/projects/project.service";
+import * as skillsMirror from "../services/skills/skills.mirror";
 
 export function registerSkillHandlers(): void {
   // Single skill, full content (body + annex files) — on-demand for detail views.

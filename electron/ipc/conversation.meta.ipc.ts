@@ -1,5 +1,5 @@
 import { ipcMain } from "electron";
-import * as meta from "../services/conversation.meta";
+import * as meta from "../services/conversation/conversation.meta";
 
 // App-owned conversation annotations (pin/archive/soft-delete). RAM/DB only —
 // never touches ~/.claude. All annotations are reversible; there is no

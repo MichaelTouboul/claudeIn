@@ -230,7 +230,7 @@ contextBridge.exposeInMainWorld("api", {
     });
   },
 
-  improveChat: (input: import("./services/improve-chat.service").ImproveChatInput) =>
+  improveChat: (input: import("./services/improve/improve-chat.service").ImproveChatInput) =>
     ipcRenderer.invoke("improve:chat", input),
   submitImproveRequest: (input: import("./types/improve.types").ImproveRequestInput) =>
     ipcRenderer.invoke("improve:submit", input),

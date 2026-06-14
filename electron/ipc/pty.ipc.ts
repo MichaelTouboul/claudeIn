@@ -1,6 +1,6 @@
 import { ipcMain } from "electron";
 
-import * as ptyService from "../services/pty.service";
+import * as ptyService from "../services/system/pty.service";
 
 export function registerPtyHandlers(): void {
   ipcMain.handle("pty:create", (_e, projectPath: string, cwd: string, cols: number, rows: number) => {

@@ -1,5 +1,5 @@
 import { ipcMain } from "electron";
-import * as favoritesService from "../services/favorites.service";
+import * as favoritesService from "../services/projects/favorites.service";
 
 export function registerFavoriteHandlers(): void {
   ipcMain.handle("favorites:list", (_e, projectId: string) => favoritesService.getFavorites(projectId));

@@ -1,13 +1,13 @@
 import { ipcMain } from "electron";
 
-import { improveChat, type ImproveChatInput } from "../services/improve-chat.service";
+import { improveChat, type ImproveChatInput } from "../services/improve/improve-chat.service";
 import {
   getRequest,
   listRequests,
   submitRequest,
   unwatchInbox,
   watchInbox,
-} from "../services/improve-inbox.service";
+} from "../services/improve/improve-inbox.service";
 import type { ImproveRequestInput } from "../types/improve.types";
 
 /**

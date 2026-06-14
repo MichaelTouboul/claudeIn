@@ -26,9 +26,9 @@ vi.mock("electron", () => ({
   },
 }));
 
-const { initDb } = await import("../services/db");
-const meta = await import("../services/conversation.meta");
-const { loadConversation } = await import("../services/session.service");
+const { initDb } = await import("../services/core/db");
+const meta = await import("../services/conversation/conversation.meta");
+const { loadConversation } = await import("../services/session/session.service");
 const { registerConversationMetaHandlers } = await import("./conversation.meta.ipc");
 
 // Stand-in for the Electron-provided event; the handler ignores it (`_e`), so a
