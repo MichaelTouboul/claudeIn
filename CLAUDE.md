@@ -30,6 +30,23 @@ npm run typecheck  # tsc --noEmit -p tsconfig.web.json
 
 Build check used in agent verification: `npx electron-vite build`
 
+## Versioning — land on `main` via `land.sh`, never merge by hand
+
+**Every** landing on `main` bumps `package.json` `"version"`, regardless of source
+(Self-Improve watcher, autonomous dev-loop, manual merge). There is exactly one way to
+land work:
+
+```bash
+.claude/hooks/land.sh <branch> [patch|minor]   # level defaults to patch; prints the new version
+```
+
+It owns `bump → merge --no-ff → gate → push` and is cwd-drift-immune (resolves the main
+worktree itself, asserts `HEAD == main`). A tracked `pre-push` hook
+(`.claude/githooks/`, wired by `npm run hooks:install`, also run on `postinstall`)
+**rejects any push to `main` that doesn't bump the version** — so a hand merge that skips
+the bump fails at push. `feature` → `minor`, everything else → `patch`. Design:
+`docs/superpowers/specs/2026-06-15-universal-versioning-design.md`.
+
 ## Architecture
 
 Two process boundaries in Electron:

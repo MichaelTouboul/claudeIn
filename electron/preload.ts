@@ -109,11 +109,11 @@ contextBridge.exposeInMainWorld("api", {
   getHooks: (projectPath?: string) => ipcRenderer.invoke("hooks:list", projectPath),
   setHookEnabled: (hookId: string, enabled: boolean, projectPath?: string) =>
     ipcRenderer.invoke("hooks:set-enabled", hookId, enabled, projectPath),
-  onSettingsChanged: (cb: (snapshot: import("../src/types/settings.types").SettingsSnapshot) => void) => {
+  onSettingsChanged: (cb: (snapshot: import("./types/settings.types").SettingsSnapshot) => void) => {
     return pushBus.subscribe((raw) => {
       const data = raw as { type?: string; snapshot?: unknown };
       if (data?.type === "settings_changed" && data.snapshot) {
-        cb(data.snapshot as import("../src/types/settings.types").SettingsSnapshot);
+        cb(data.snapshot as import("./types/settings.types").SettingsSnapshot);
       }
     });
   },
@@ -121,11 +121,11 @@ contextBridge.exposeInMainWorld("api", {
   getAgentsMirror: (projectPath?: string) => ipcRenderer.invoke("agents:mirror:get", projectPath),
   watchAgents: (projectPath?: string) => ipcRenderer.invoke("agents:mirror:watch", projectPath),
   unwatchAgents: () => ipcRenderer.invoke("agents:mirror:unwatch"),
-  onAgentsChanged: (cb: (snapshot: import("../src/types/agents-mirror.types").AgentsSnapshot) => void) => {
+  onAgentsChanged: (cb: (snapshot: import("./types/agents-mirror.types").AgentsSnapshot) => void) => {
     return pushBus.subscribe((raw) => {
       const data = raw as { type?: string; snapshot?: unknown };
       if (data?.type === "agents_changed" && data.snapshot) {
-        cb(data.snapshot as import("../src/types/agents-mirror.types").AgentsSnapshot);
+        cb(data.snapshot as import("./types/agents-mirror.types").AgentsSnapshot);
       }
     });
   },
@@ -134,11 +134,11 @@ contextBridge.exposeInMainWorld("api", {
   getSkillsMirror: (projectPath?: string) => ipcRenderer.invoke("skills:mirror:get", projectPath),
   watchSkills: (projectPath?: string) => ipcRenderer.invoke("skills:mirror:watch", projectPath),
   unwatchSkills: () => ipcRenderer.invoke("skills:mirror:unwatch"),
-  onSkillsChanged: (cb: (snapshot: import("../src/types/skills-mirror.types").SkillsSnapshot) => void) => {
+  onSkillsChanged: (cb: (snapshot: import("./types/skills-mirror.types").SkillsSnapshot) => void) => {
     return pushBus.subscribe((raw) => {
       const data = raw as { type?: string; snapshot?: unknown };
       if (data?.type === "skills_changed" && data.snapshot) {
-        cb(data.snapshot as import("../src/types/skills-mirror.types").SkillsSnapshot);
+        cb(data.snapshot as import("./types/skills-mirror.types").SkillsSnapshot);
       }
     });
   },
@@ -146,27 +146,27 @@ contextBridge.exposeInMainWorld("api", {
   getMcp: (projectPath?: string) => ipcRenderer.invoke("mcp:mirror:get", projectPath),
   watchMcp: (projectPath?: string) => ipcRenderer.invoke("mcp:mirror:watch", projectPath),
   unwatchMcp: () => ipcRenderer.invoke("mcp:mirror:unwatch"),
-  onMcpChanged: (cb: (snapshot: import("../src/types/mcp-mirror.types").McpSnapshot) => void) => {
+  onMcpChanged: (cb: (snapshot: import("./types/mcp-mirror.types").McpSnapshot) => void) => {
     return pushBus.subscribe((raw) => {
       const data = raw as { type?: string; snapshot?: unknown };
       if (data?.type === "mcp_changed" && data.snapshot) {
-        cb(data.snapshot as import("../src/types/mcp-mirror.types").McpSnapshot);
+        cb(data.snapshot as import("./types/mcp-mirror.types").McpSnapshot);
       }
     });
   },
 
   getMcpRaw: (
     name: string,
-    scope?: import("../src/types/mcp-manage.types").McpManageScope,
+    scope?: import("./types/mcp-manage.types").McpManageScope,
     projectPath?: string,
   ) => ipcRenderer.invoke("mcp:get-raw", name, scope, projectPath),
-  addMcpServer: (input: import("../src/types/mcp-manage.types").McpAddInput) =>
+  addMcpServer: (input: import("./types/mcp-manage.types").McpAddInput) =>
     ipcRenderer.invoke("mcp:add", input),
-  editMcpServer: (name: string, input: import("../src/types/mcp-manage.types").McpAddInput) =>
+  editMcpServer: (name: string, input: import("./types/mcp-manage.types").McpAddInput) =>
     ipcRenderer.invoke("mcp:edit", name, input),
   removeMcpServer: (
     name: string,
-    scope: import("../src/types/mcp-manage.types").McpManageScope,
+    scope: import("./types/mcp-manage.types").McpManageScope,
     projectPath?: string,
   ) => ipcRenderer.invoke("mcp:remove", name, scope, projectPath),
 
@@ -177,11 +177,11 @@ contextBridge.exposeInMainWorld("api", {
     ipcRenderer.invoke("memory:read-file", filePath, projectPath),
   writeMemoryFile: (filePath: string, content: string, projectPath?: string) =>
     ipcRenderer.invoke("memory:write-file", filePath, content, projectPath),
-  onMemoryChanged: (cb: (snapshot: import("../src/types/memory-mirror.types").MemorySnapshot) => void) => {
+  onMemoryChanged: (cb: (snapshot: import("./types/memory-mirror.types").MemorySnapshot) => void) => {
     return pushBus.subscribe((raw) => {
       const data = raw as { type?: string; snapshot?: unknown };
       if (data?.type === "memory_changed" && data.snapshot) {
-        cb(data.snapshot as import("../src/types/memory-mirror.types").MemorySnapshot);
+        cb(data.snapshot as import("./types/memory-mirror.types").MemorySnapshot);
       }
     });
   },
@@ -189,7 +189,7 @@ contextBridge.exposeInMainWorld("api", {
   locateClaudeUser: () => ipcRenderer.invoke("user:locate"),
   buildUserProfile: (claudePath: string) => ipcRenderer.invoke("user:buildProfile", claudePath),
   getUserProfile: () => ipcRenderer.invoke("user:getProfile"),
-  saveUserProfile: (profile: import("../src/types/user.types").UserProfile) =>
+  saveUserProfile: (profile: import("../src/lib/types/user.types").UserProfile) =>
     ipcRenderer.invoke("user:saveProfile", profile),
   completeOnboarding: () => ipcRenderer.invoke("user:complete"),
   resetUser: () => ipcRenderer.invoke("user:reset"),

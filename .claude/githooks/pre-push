@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Universal versioning guardrail.
+#
+# Rejects any push that advances `main` WITHOUT bumping package.json "version" vs
+# origin/main. Enforces the outcome ("main never advances un-versioned") regardless
+# of who produced the commit — land work via .claude/hooks/land.sh.
+# See docs/superpowers/specs/2026-06-15-universal-versioning-design.md.
+#
+# Non-main refs (worktree branches) push freely. `git push --no-verify` is the
+# explicit, visible emergency override.
+#
+# stdin (per git): <local-ref> <local-sha> <remote-ref> <remote-sha>
+set -uo pipefail
+
+ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+version_at() { git -C "$ROOT" show "$1:package.json" 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{process.stdout.write(JSON.parse(s).version||'')}catch{process.stdout.write('')}})"; }
+
+ZERO="0000000000000000000000000000000000000000"
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  # Only guard pushes to the main branch.
+  case "$remote_ref" in refs/heads/main) ;; *) continue ;; esac
+  # Branch deletion (local sha all-zero) — nothing to version.
+  [ "$local_sha" = "$ZERO" ] && continue
+
+  new_version=$(version_at "$local_sha")
+  if [ "$remote_sha" = "$ZERO" ]; then
+    # Creating main on the remote — just require a version to exist.
+    [ -n "$new_version" ] || { echo "✗ pre-push: package.json has no version" >&2; exit 1; }
+    continue
+  fi
+
+  old_version=$(version_at "$remote_sha")
+  if [ "$new_version" = "$old_version" ]; then
+    echo "✗ pre-push: main push rejected — version not bumped (still $new_version)." >&2
+    echo "  Land via .claude/hooks/land.sh <branch> [patch|minor] (or --no-verify to override)." >&2
+    exit 1
+  fi
+done
+
+exit 0

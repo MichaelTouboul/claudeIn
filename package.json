@@ -1,6 +1,6 @@
 {
   "name": "claude-agent-manager",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "main": "out/main/main.js",
   "scripts": {
@@ -14,7 +14,9 @@
     "typecheck:electron": "tsc --noEmit -p tsconfig.node.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "postinstall": "electron-rebuild -f -w node-pty"
+    "hooks:install": "git config core.hooksPath .claude/githooks",
+    "land": "bash .claude/hooks/land.sh",
+    "postinstall": "npm run hooks:install && electron-rebuild -f -w node-pty"
   },
   "build": {
     "npmRebuild": true,
