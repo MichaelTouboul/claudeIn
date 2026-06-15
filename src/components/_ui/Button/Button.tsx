@@ -1,6 +1,6 @@
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { type ComponentProps } from 'react';
+import { type ComponentProps, type ReactNode } from 'react';
 
 import { cn } from '@/lib/utils';
 
@@ -11,6 +11,8 @@ const button = cva(
       intent: {
         primary:
           'bg-[var(--color-accent-solid)] text-white border border-transparent hover:brightness-110',
+        secondary:
+          'bg-surface-2 border border-border-strong text-fg hover:bg-surface-3',
         outline:
           'bg-transparent border border-border-strong text-fg hover:bg-surface-2',
         ghost:
@@ -36,9 +38,28 @@ const button = cva(
 export type ButtonProps = ComponentProps<'button'> &
   VariantProps<typeof button> & {
     asChild?: boolean;
+    /** Glyph rendered before the label. */
+    leftIcon?: ReactNode;
+    /** Glyph rendered after the label. */
+    rightIcon?: ReactNode;
   };
 
-export function Button({ intent, size, asChild, className, ...props }: ButtonProps) {
+export function Button({ intent, size, asChild, leftIcon, rightIcon, className, children, ...props }: ButtonProps) {
   const Comp = asChild ? Slot : 'button';
-  return <Comp className={cn(button({ intent, size }), className)} {...props} />;
+  // `asChild` forwards to a single child element (Slot) — adornments would break
+  // that contract, so they only apply to the plain-button path.
+  if (asChild) {
+    return (
+      <Comp className={cn(button({ intent, size }), className)} {...props}>
+        {children}
+      </Comp>
+    );
+  }
+  return (
+    <Comp className={cn(button({ intent, size }), className)} {...props}>
+      {leftIcon}
+      {children}
+      {rightIcon}
+    </Comp>
+  );
 }

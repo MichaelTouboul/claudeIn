@@ -147,14 +147,39 @@ describe("HomePage", () => {
     expect(useAppStore.getState().currentPage).toBe(AppPage.Customize);
   });
 
-  it("opens the profile view from the 'view my profile' affordance", async () => {
+  it("opens the profile drawer from the topbar avatar button", async () => {
     render(<HomePage />);
-    const link = await screen.findByRole("button", { name: /view my profile/i });
+    const trigger = await screen.findByRole("button", { name: /open profile/i });
 
     await act(async () => {
-      fireEvent.click(link);
+      fireEvent.click(trigger);
     });
 
     expect(await screen.findByText("backend")).toBeInTheDocument();
+  });
+
+  it("filters the favorite repos grid by the topbar search", async () => {
+    listFavoriteRepos.mockResolvedValue([repo("/code/alpha"), repo("/code/beta", "Beta")]);
+    render(<HomePage />);
+    await screen.findByText("alpha");
+
+    const search = screen.getByRole("textbox", { name: /search projects/i });
+    await act(async () => {
+      fireEvent.change(search, { target: { value: "beta" } });
+    });
+
+    expect(screen.getByText("Beta")).toBeInTheDocument();
+    expect(screen.queryByText("alpha")).not.toBeInTheDocument();
+  });
+
+  it("starts a user-scope session from the topbar 'New session' action", async () => {
+    render(<HomePage />);
+    const newSession = await screen.findByRole("button", { name: /new session/i });
+
+    await act(async () => {
+      fireEvent.click(newSession);
+    });
+
+    expect(useAppStore.getState().currentPage).toBe(AppPage.Dashboard);
   });
 });

@@ -43,11 +43,14 @@ const SHAPE_CLASS: Record<BadgeShape, string> = {
 export type BadgeProps = ComponentProps<'span'> & {
   variant?: BadgeVariant;
   shape?: BadgeShape;
+  /** Render a leading status dot in the badge's foreground hue. */
+  dot?: boolean;
 };
 
 export function Badge({
   variant = 'gray',
   shape = 'rounded',
+  dot = false,
   className,
   style,
   children,
@@ -57,7 +60,11 @@ export function Badge({
   return (
     <span
       {...props}
-      className={cn('px-2 py-0.5 text-xs font-medium font-mono', SHAPE_CLASS[shape], className)}
+      className={cn(
+        'inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium font-mono',
+        SHAPE_CLASS[shape],
+        className,
+      )}
       style={{
         background: c.bg,
         color: c.text,
@@ -66,6 +73,13 @@ export function Badge({
         ...style,
       }}
     >
+      {dot ? (
+        <span
+          aria-hidden="true"
+          className="h-1.5 w-1.5 shrink-0 rounded-full"
+          style={{ background: c.text }}
+        />
+      ) : null}
       {children}
     </span>
   );
