@@ -3,8 +3,13 @@ import type { SessionConversation } from "@/lib/types";
 /** Effective Claude context window, in tokens. */
 export const CONTEXT_WINDOW_TOKENS = 200_000;
 
-/** A conversation is "heavy" once its estimate reaches this fraction of the window. */
-export const HEAVY_CONTEXT_RATIO = 0.5;
+/**
+ * A conversation is "heavy" once its estimate reaches this fraction of the
+ * window. Mirrors terminal Claude Code's auto-compact, which only compacts when
+ * the context is genuinely near the window limit — keeping a reserve rather than
+ * compacting aggressively — so we trigger near the limit (≈85% of the window).
+ */
+export const HEAVY_CONTEXT_RATIO = 0.85;
 
 /** Rough chars-per-token ratio for transcript content (Claude tokenizer ≈ 4 chars/token). */
 const CHARS_PER_TOKEN = 4;
@@ -24,10 +29,11 @@ export function estimateContextTokens(conversation: SessionConversation): number
 }
 
 /**
- * Recommend `compact` only when the conversation is heavy (estimate ≥ 50% of the
- * window); otherwise `continue` is the safe, non-destructive default. Mirrors
- * terminal Claude Code, which does not auto-suggest compaction. When no
- * conversation is loaded yet, default to `continue`.
+ * Recommend `compact` only when the conversation is heavy (estimate ≥
+ * `HEAVY_CONTEXT_RATIO` of the window); otherwise `continue` is the safe,
+ * non-destructive default. The threshold mirrors terminal Claude Code's
+ * auto-compact, which only compacts near the window limit. When no conversation
+ * is loaded yet, default to `continue`.
  */
 export function recommendResumeOption(conversation: SessionConversation | null): ResumeRecommendation {
   if (!conversation) return "continue";

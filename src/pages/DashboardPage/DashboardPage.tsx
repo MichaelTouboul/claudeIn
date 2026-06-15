@@ -13,7 +13,7 @@ import { useWorkspaceStore } from "@/store/useWorkspaceStore";
 
 /**
  * The multi-project tabbed workspace: today's `Header + Workspace + Footer`,
- * extracted verbatim from the old `App.tsx`. The "⌂ Accueil" control in the
+ * extracted verbatim from the old `App.tsx`. The "⌂ Home" control in the
  * header returns to the Home page via `navigate('home')`.
  */
 export function DashboardPage() {

@@ -15,6 +15,18 @@ vi.mock('@/hooks/useProjects', () => ({
   useProjects: () => ({ projects: [proj('alpha'), proj('beta')], loading: false }),
 }));
 
+// ProjectList now lists the user's favorite repos (not all scanned projects).
+// 'alpha' is both a favorite and a scanned project, so it resolves to /p/alpha.
+vi.mock('@/hooks/useFavoriteRepos', () => ({
+  useFavoriteRepos: () => ({
+    repos: [{ path: '/p/alpha', label: 'alpha', addedAt: '2026-01-01T00:00:00Z' }],
+    loading: false,
+    refresh: vi.fn(),
+    add: vi.fn(),
+    remove: vi.fn(),
+  }),
+}));
+
 const agent = (id: string): AgentFile => ({
   id, filePath: `/a/${id}.md`, relativePath: `${id}.md`, folder: '',
   frontmatter: { name: id, description: '' }, body: '', status: 'created',

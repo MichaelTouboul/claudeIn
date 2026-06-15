@@ -35,15 +35,26 @@ function CenteredNote({ label }: { label: string }) {
  */
 export function SessionViewer({ filePath, sessionId, title, cwd }: SessionViewerProps) {
   const { messages, meta, state } = useConversationTail(filePath);
-  // Recommend compact only for heavy conversations (≥50% of the context window),
-  // mirroring terminal Claude Code. While unloaded (meta null), the safe
-  // non-destructive default ('continue') applies.
+  // Recommend compact only for heavy conversations (near the window limit),
+  // mirroring terminal Claude Code's auto-compact. While unloaded (meta null),
+  // the safe non-destructive default ('continue') applies.
   const recommended = recommendResumeOption(meta ? { ...meta, messages } : null);
-  // null = read-only viewer; 'continue' = plain resume; 'compact' = resume and
-  // run an automatic /compact turn first (compact-on-resume). Both modes render
-  // the SAME live AgentChat seeded with the prior transcript — 'compact' just
-  // adds the `compactOnResume` flag.
+  // null = undecided; 'continue' = plain resume; 'compact' = resume and run an
+  // automatic /compact turn first (compact-on-resume). Both modes render the
+  // SAME live AgentChat seeded with the prior transcript — 'compact' just adds
+  // the `compactOnResume` flag.
   const [resumeMode, setResumeMode] = useState<null | "continue" | "compact">(null);
+
+  // Skip the Compact/Continue prompt when there's no reason to compact: once the
+  // conversation is loaded and the recommendation is 'continue', drop straight
+  // into the (non-destructive) chat. We only ever surface ResumeChoice when the
+  // recommendation is 'compact'. Auto-deciding before paint keeps a light
+  // conversation from flashing the choice screen.
+  useEffect(() => {
+    if (resumeMode !== null) return;
+    if (state !== "loaded") return;
+    if (recommended === "continue") setResumeMode("continue");
+  }, [resumeMode, state, recommended]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   // Track whether the user is pinned to the bottom; only auto-scroll when so.
@@ -98,6 +109,12 @@ export function SessionViewer({ filePath, sessionId, title, cwd }: SessionViewer
   }
   if (state === "not-found") {
     return <CenteredNote label="Conversation not found on disk." />;
+  }
+  // Loaded but recommendation is 'continue': the effect above is about to enter
+  // continue mode. Render the placeholder (not the choice screen) for this one
+  // frame so a light conversation never flashes the Compact/Continue prompt.
+  if (recommended !== "compact") {
+    return <CenteredNote label="Loading conversation…" />;
   }
 
   return (
