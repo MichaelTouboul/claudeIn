@@ -90,10 +90,8 @@ describe("fillUserProfile", () => {
       calls.push({ cwd, prompt });
       return JSON.stringify({
         name: "Ada Lovelace",
-        role: "Backend engineer at Tastewise",
-        summary: "A focused backend setup.",
+        role: "TypeScript + Node, with PostgreSQL",
         domains: ["backend", "infra"],
-        workflow: "tdd",
       });
     });
 
@@ -101,16 +99,14 @@ describe("fillUserProfile", () => {
 
     expect(profile.claudeUserPath).toBe(claudePath);
     expect(profile.name).toBe("Ada Lovelace");
-    expect(profile.role).toBe("Backend engineer at Tastewise");
+    expect(profile.role).toBe("TypeScript + Node, with PostgreSQL");
     expect(profile.capabilities).toEqual({
       agents: { count: 2, names: ["alpha", "beta"] },
       skills: 3,
       mcp: 1,
       hooks: 2,
     });
-    expect(profile.summary).toBe("A focused backend setup.");
     expect(profile.domains).toEqual(["backend", "infra"]);
-    expect(profile.workflow).toBe("tdd");
     expect(profile.generatedAt).toBeTruthy();
 
     expect(calls).toHaveLength(1);
@@ -121,7 +117,7 @@ describe("fillUserProfile", () => {
     expect(calls[0].prompt).toContain("role");
   });
 
-  it("tolerates non-JSON narrative output (summary = raw text, empty domains)", async () => {
+  it("tolerates non-JSON narrative output (empty identity + domains)", async () => {
     const claudePath = path.join(tmp, ".claude");
     fs.mkdirSync(claudePath, { recursive: true });
 
@@ -138,11 +134,9 @@ describe("fillUserProfile", () => {
     search.setUserSearchRunner(async () => "just a plain narrative");
 
     const profile = await search.fillUserProfile(claudePath);
-    expect(profile.summary).toBe("just a plain narrative");
     expect(profile.name).toBeNull();
     expect(profile.role).toBeNull();
     expect(profile.domains).toEqual([]);
-    expect(profile.workflow).toBeNull();
     expect(profile.capabilities.hooks).toBe(0);
   });
 });

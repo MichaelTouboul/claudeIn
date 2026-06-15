@@ -1,15 +1,17 @@
 import { spawn } from "node:child_process";
 
 import { scanCandidates } from "../system/onboarding.service";
+import { detectRepoLogo } from "./repo-logo";
 import type { Candidate } from "../../types/onboarding.types";
 import type { RepoCandidate } from "../../types/user.type";
 
 /**
  * Repo discovery for the Home page: reuse the bounded FS scan
- * (`onboarding.service.scanCandidates`), keep only `scope = project` repos, and
- * attach a short per-repo LLM label via the runner seam. The seam is stubbed in
- * tests so no real `claude` / network is invoked; a runner failure degrades to a
- * `null` label rather than failing the whole scan.
+ * (`onboarding.service.scanCandidates`), keep only `scope = project` repos,
+ * deterministically detect a per-repo logo (`detectRepoLogo`, no LLM), and attach
+ * a short per-repo LLM label via the runner seam. The seam is stubbed in tests so
+ * no real `claude` / network is invoked; a runner failure degrades to a `null`
+ * label rather than failing the whole scan.
  */
 
 type ReposRunnerArgs = { command: string; cwd: string; prompt: string };
@@ -49,15 +51,16 @@ function labelPrompt(): string {
 }
 
 async function labelFor(candidate: Candidate): Promise<RepoCandidate> {
+  const logoDataUrl = detectRepoLogo(candidate.path);
   try {
     const label = await runner({
       command: REPOS_COMMAND,
       cwd: candidate.path,
       prompt: labelPrompt(),
     });
-    return { ...candidate, label: label.length > 0 ? label : null };
+    return { ...candidate, label: label.length > 0 ? label : null, logoDataUrl };
   } catch {
-    return { ...candidate, label: null };
+    return { ...candidate, label: null, logoDataUrl };
   }
 }
 

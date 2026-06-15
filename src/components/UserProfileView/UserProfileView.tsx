@@ -16,10 +16,9 @@ type UserProfileViewProps = {
 
 /**
  * Read + inline-edit view of the user profile. A header identity block (name,
- * role, path, capability chips, plugins) sits above readable narrative sections
- * (Summary / Domains / Workflow). Deterministic fields are read-only; narrative +
- * identity fields are editable via `UserProfileEdit`. Reused on Home and the
- * onboarding ProfileReview.
+ * role, path, capability chips, plugins) sits above a readable Domains section.
+ * Deterministic fields are read-only; narrative + identity fields are editable
+ * via `UserProfileEdit`. Reused on Home and the onboarding ProfileReview.
  */
 export function UserProfileView({ profile, onSave }: UserProfileViewProps) {
   const [editing, setEditing] = useState(false);
@@ -56,14 +55,8 @@ export function UserProfileView({ profile, onSave }: UserProfileViewProps) {
       <ProfileHeader profile={profile} />
 
       <Stack gap={4} className="border-t border-border-subtle pt-4">
-        <ProfileSection label="Summary">
-          <p className="max-w-prose leading-relaxed text-fg-muted">{profile.summary ?? "—"}</p>
-        </ProfileSection>
         <ProfileSection label="Domains">
           <TagList items={profile.domains} empty="—" />
-        </ProfileSection>
-        <ProfileSection label="Workflow">
-          <p className="max-w-prose leading-relaxed text-fg-muted">{profile.workflow ?? "—"}</p>
         </ProfileSection>
       </Stack>
     </Stack>

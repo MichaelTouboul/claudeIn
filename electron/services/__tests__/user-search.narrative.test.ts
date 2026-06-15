@@ -7,18 +7,14 @@ describe("parseNarrative", () => {
   it("parses a clean JSON object (happy path)", () => {
     const raw = JSON.stringify({
       name: "Ada Lovelace",
-      role: "Backend engineer at Tastewise",
-      summary: "A focused backend setup.",
+      role: "TypeScript + Node, with PostgreSQL",
       domains: ["backend", "infra"],
-      workflow: "tdd",
     });
 
     expect(parseNarrative(raw)).toEqual({
       name: "Ada Lovelace",
-      role: "Backend engineer at Tastewise",
-      summary: "A focused backend setup.",
+      role: "TypeScript + Node, with PostgreSQL",
       domains: ["backend", "infra"],
-      workflow: "tdd",
     });
   });
 
@@ -27,20 +23,16 @@ describe("parseNarrative", () => {
       "I have enough to infer the setup. ```json",
       JSON.stringify({
         name: "Michael Touboul",
-        role: "Full-stack engineer",
-        summary: "Heavy CLI + agent user.",
+        role: "TypeScript + React + Electron",
         domains: ["frontend", "backend", "tooling"],
-        workflow: "autonomous dev loops",
       }),
       "```",
     ].join("\n");
 
     expect(parseNarrative(raw)).toEqual({
       name: "Michael Touboul",
-      role: "Full-stack engineer",
-      summary: "Heavy CLI + agent user.",
+      role: "TypeScript + React + Electron",
       domains: ["frontend", "backend", "tooling"],
-      workflow: "autonomous dev loops",
     });
   });
 
@@ -48,53 +40,44 @@ describe("parseNarrative", () => {
     const raw = `Here is what I found about the user:
 ${JSON.stringify({
       name: "Grace Hopper",
-      role: "Compiler engineer",
-      summary: "Nested object below should be ignored by balance scan.",
+      role: "C++ and compiler toolchains",
       domains: ["compilers"],
-      workflow: "iterative",
     })}
 Thanks!`;
 
     expect(parseNarrative(raw)).toEqual({
       name: "Grace Hopper",
-      role: "Compiler engineer",
-      summary: "Nested object below should be ignored by balance scan.",
+      role: "C++ and compiler toolchains",
       domains: ["compilers"],
-      workflow: "iterative",
     });
   });
 
-  it("handles a fenced object whose summary contains braces and quotes", () => {
-    const raw = '```json\n{"name": "Nested", "role": null, "summary": "uses {a: 1} and \\"quotes\\"", "domains": [], "workflow": null}\n```';
+  it("handles a fenced object whose role contains braces and quotes", () => {
+    const raw =
+      '```json\n{"name": "Nested", "role": "uses {a: 1} and \\"quotes\\"", "domains": []}\n```';
 
     expect(parseNarrative(raw)).toEqual({
       name: "Nested",
-      role: null,
-      summary: 'uses {a: 1} and "quotes"',
+      role: 'uses {a: 1} and "quotes"',
       domains: [],
-      workflow: null,
     });
   });
 
-  it("falls back to summary-only on total garbage (name/role null)", () => {
+  it("falls back to an empty narrative on total garbage", () => {
     const raw = "I could not figure anything out, sorry — no JSON here.";
 
     expect(parseNarrative(raw)).toEqual({
       name: null,
       role: null,
-      summary: "I could not figure anything out, sorry — no JSON here.",
       domains: [],
-      workflow: null,
     });
   });
 
-  it("returns a null summary on empty output", () => {
+  it("returns an empty narrative on empty output", () => {
     expect(parseNarrative("   ")).toEqual({
       name: null,
       role: null,
-      summary: null,
       domains: [],
-      workflow: null,
     });
   });
 });
@@ -104,5 +87,13 @@ describe("buildUserPrompt", () => {
     const prompt = buildUserPrompt([]);
     expect(prompt).toContain("Output ONLY the raw JSON object");
     expect(prompt).toContain("no markdown code fences");
+  });
+
+  it("asks role to describe technologies, not employer or monorepo", () => {
+    const prompt = buildUserPrompt([]);
+    expect(prompt).toContain("technologies");
+    expect(prompt).toContain("NOT their employer");
+    expect(prompt).not.toContain('"summary"');
+    expect(prompt).not.toContain('"workflow"');
   });
 });

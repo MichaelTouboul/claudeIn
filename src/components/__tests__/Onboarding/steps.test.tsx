@@ -15,9 +15,7 @@ function makeProfile(): UserProfile {
     role: null,
     plugins: [],
     capabilities: { agents: { count: 0, names: [] }, skills: 0, mcp: 0, hooks: 0 },
-    summary: "A tidy setup.",
-    domains: [],
-    workflow: null,
+    domains: ["backend"],
     onboardingCompletedAt: null,
     generatedAt: null,
     updatedAt: null,
@@ -63,7 +61,7 @@ describe("ProfileReviewStep", () => {
         onConfirm={onConfirm}
       />,
     );
-    expect(screen.getByText(/A tidy setup\./)).toBeInTheDocument();
+    expect(screen.getByText("backend")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /confirm/i }));
     expect(onConfirm).toHaveBeenCalledTimes(1);
   });
