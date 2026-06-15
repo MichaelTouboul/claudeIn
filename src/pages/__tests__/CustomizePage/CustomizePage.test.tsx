@@ -43,8 +43,16 @@ beforeEach(() => {
     addMcpServer: vi.fn(async () => ({ ok: true as const })),
     editMcpServer: vi.fn(async () => ({ ok: true as const })),
     removeMcpServer: vi.fn(async () => ({ ok: true as const })),
+    getUserProfile: vi.fn(async () => null),
+    saveUserProfile: vi.fn(async (p: unknown) => p),
   } as unknown as Window["api"];
 });
+
+// Profile is the default section now; the Connectors sidebar/content only shows
+// once that tab is active. Connector-focused tests navigate there first.
+async function gotoConnectors() {
+  fireEvent.click(await screen.findByRole("tab", { name: /connectors/i }));
+}
 
 async function selectRepo() {
   fireEvent.change(await screen.findByLabelText(/repository scope/i), { target: { value: PROJECT } });
@@ -60,6 +68,7 @@ describe("CustomizePage", () => {
 
   it("shows the Personal group and the hero when no repo is selected", async () => {
     render(<CustomizePage />);
+    await gotoConnectors();
     expect(await screen.findByTestId("customize-hero")).toBeInTheDocument();
     expect(await screen.findByText("home-srv")).toBeInTheDocument();
     expect(screen.queryByText("proj-srv")).not.toBeInTheDocument();
@@ -67,6 +76,7 @@ describe("CustomizePage", () => {
 
   it("selecting a repo switches scope and lists project-scope servers", async () => {
     render(<CustomizePage />);
+    await gotoConnectors();
     await selectRepo();
     expect(window.api.getMcp).toHaveBeenCalledWith(PROJECT);
     expect(useCustomizeStore.getState().repoScope).toBe(PROJECT);
@@ -76,6 +86,7 @@ describe("CustomizePage", () => {
 
   it("selecting a server opens its detail in the content pane and focuses its heading", async () => {
     render(<CustomizePage />);
+    await gotoConnectors();
     fireEvent.click(await screen.findByText("home-srv"));
     const detail = await screen.findByTestId("connector-detail");
     expect(detail).toHaveTextContent("home-srv");
@@ -93,6 +104,7 @@ describe("CustomizePage", () => {
 
   it("removing a server confirms, calls removeMcpServer and shows the restart banner", async () => {
     render(<CustomizePage />);
+    await gotoConnectors();
     fireEvent.click(await screen.findByText("home-srv"));
     fireEvent.click(await screen.findByRole("button", { name: /remove home-srv/i }));
     fireEvent.click(await screen.findByRole("button", { name: /^remove$/i }));
@@ -102,6 +114,7 @@ describe("CustomizePage", () => {
 
   it("editing a server prefills from getMcpRaw and submits editMcpServer", async () => {
     render(<CustomizePage />);
+    await gotoConnectors();
     fireEvent.click(await screen.findByText("home-srv"));
     fireEvent.click(await screen.findByRole("button", { name: /edit home-srv/i }));
     await waitFor(() => expect(window.api.getMcpRaw).toHaveBeenCalledWith("home-srv", "user", undefined));
@@ -117,6 +130,7 @@ describe("CustomizePage", () => {
 
   it("the Personal + button adds a user-scope server", async () => {
     render(<CustomizePage />);
+    await gotoConnectors();
     fireEvent.click(await screen.findByRole("button", { name: /add personal mcp server/i }));
     fireEvent.change(screen.getByLabelText(/name/i), { target: { value: "new-srv" } });
     fireEvent.change(screen.getByLabelText(/command/i), { target: { value: "npx" } });
@@ -130,6 +144,7 @@ describe("CustomizePage", () => {
 
   it("viewing raw config fetches and displays the server raw", async () => {
     render(<CustomizePage />);
+    await gotoConnectors();
     fireEvent.click(await screen.findByText("home-srv"));
     fireEvent.click(await screen.findByRole("button", { name: /show raw config for home-srv/i }));
     await waitFor(() => expect(window.api.getMcpRaw).toHaveBeenCalledWith("home-srv", "user", undefined));
@@ -137,6 +152,7 @@ describe("CustomizePage", () => {
 
   it("the add dialog from the project group defaults to project scope", async () => {
     render(<CustomizePage />);
+    await gotoConnectors();
     await selectRepo();
     fireEvent.click(screen.getByRole("button", { name: /add this repo mcp server/i }));
     fireEvent.change(screen.getByLabelText(/name/i), { target: { value: "proj-new" } });
@@ -149,9 +165,9 @@ describe("CustomizePage", () => {
     );
   });
 
-  it("the section state defaults to Connectors", async () => {
+  it("the section state defaults to Profile", async () => {
     render(<CustomizePage />);
-    await screen.findByTestId("customize-hero");
-    expect(useCustomizeStore.getState().section).toBe(CustomizeSection.Connectors);
+    expect(await screen.findByRole("tab", { name: /profile/i, selected: true })).toBeInTheDocument();
+    expect(useCustomizeStore.getState().section).toBe(CustomizeSection.Profile);
   });
 });
