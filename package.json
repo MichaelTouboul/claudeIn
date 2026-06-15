@@ -14,7 +14,9 @@
     "typecheck:electron": "tsc --noEmit -p tsconfig.node.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "postinstall": "electron-rebuild -f -w node-pty"
+    "hooks:install": "git config core.hooksPath .claude/githooks",
+    "land": "bash .claude/hooks/land.sh",
+    "postinstall": "npm run hooks:install && electron-rebuild -f -w node-pty"
   },
   "build": {
     "npmRebuild": true,

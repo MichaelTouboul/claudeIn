@@ -110,9 +110,9 @@ watcher (returns to polling after each claim):
          implement; `title` + `description` are the spec, `sourcePath` /
          `component` scope where to look
       3. run the quality gate (bash .claude/hooks/gate.sh) until green   ← parallel
-      4. enter the SERIALIZED merge lane (one at a time):                ← funnel
-           bump package.json (feature→minor, else patch) → merge to main
-             (bumped package.json included) → re-run gate on the merge → push
+      4. enter the SERIALIZED merge lane (one at a time) — call the universal       ← funnel
+         landing script, which owns bump+merge+gate+push (see "Versioning" below):
+           version = .claude/hooks/land.sh <branch> <level>   # level = feature?minor:patch
     on success:
       write back { ...request, status: "merged", commit: <sha>, summary: <text>, version: <new> }
     on failure (ambiguous spec, gate can't go green, merge conflict, ...):
@@ -126,23 +126,27 @@ Every merged improvement bumps the app's **semver** version (`package.json`
 `"version"`), and the resulting version is written back into the request file so
 the app can show the user exactly which release shipped their request.
 
+**The watcher does NOT version by hand.** Versioning is universal — *every* landing
+on `main`, from any source (this watcher, the autonomous dev-loop, a manual merge),
+goes through one script: **`.claude/hooks/land.sh <branch> [patch|minor]`**. It owns
+the whole `bump → merge --no-ff → gate → push` sequence and prints the new version as
+its last stdout line. A `pre-push` git hook rejects any push to `main` that does not
+bump the version, so the invariant holds regardless of who lands the work. See
+`docs/superpowers/specs/2026-06-15-universal-versioning-design.md`.
+
 - **Baseline:** `0.1.0`. Pre-1.0, everything stays in the `0.x` range.
-- **Bump rule — by request `type`:**
-  - `feature` → **minor** bump (`0.X.0`): `npm version minor --no-git-tag-version`.
+- **Bump level — by request `type`** (the watcher maps type → level, then passes it):
+  - `feature` → **minor** bump (`0.X.0`): `land.sh <branch> minor`.
   - `bug` / `performance` / `design` / `copy` → **patch** bump (`0.0.X`):
-    `npm version patch --no-git-tag-version`.
+    `land.sh <branch> patch` (patch is also `land.sh`'s default).
 
-  (`--no-git-tag-version` edits `package.json` in place without creating a git
-  tag or commit, so the bump folds into the request's own merge commit.)
-
-- **Where it happens — inside the SERIALIZED merge lane.** The bump runs as part
-  of finalizing the merge, *before* the merge is committed: the runner bumps
-  `package.json`, **includes the bumped `package.json` in the merge/commit**, and
-  then records the result. Because the bump is performed in the single merge lane
-  (at most one merge at a time — see rule 3 above), versions **never race**: two
-  concurrently-built worktrees can be gated in parallel, but they are versioned
-  one after another as each enters the lane, so the sequence of versions is
-  strictly monotonic and there are no duplicate or skipped versions.
+- **Where it happens — inside the SERIALIZED merge lane.** `land.sh` is the single
+  merge path, so it *is* the serialization point: the bump runs as part of finalizing
+  the merge, with the bumped `package.json` folded into the merge commit. Because at
+  most one `land.sh` runs at a time (see rule 3 above), versions **never race**: two
+  concurrently-built worktrees can be gated in parallel, but they are versioned one
+  after another as each enters the lane, so the sequence of versions is strictly
+  monotonic and there are no duplicate or skipped versions.
 
 - **Recording it.** On success the runner writes the bumped version into the
   request file alongside the rest of the terminal write:
