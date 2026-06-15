@@ -27,6 +27,7 @@ export function ReposPickStep({ stepIndex, onNext }: ReposPickStepProps) {
   if (loading) {
     return (
       <OnbShell
+        wide
         stepIndex={stepIndex}
         title="Choose your repositories"
         subtitle="Finding projects with Claude Code set up — you can change this anytime."
@@ -38,6 +39,7 @@ export function ReposPickStep({ stepIndex, onNext }: ReposPickStepProps) {
 
   return (
     <OnbShell
+      wide
       stepIndex={stepIndex}
       title="Choose your repositories"
       subtitle="Pick the ones to keep as favorites on your home screen — you can change this anytime."
@@ -57,7 +59,7 @@ export function ReposPickStep({ stepIndex, onNext }: ReposPickStepProps) {
         </>
       }
     >
-      <div className="grid max-h-[220px] grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2">
+      <div className="grid max-h-[420px] grid-cols-1 gap-2.5 overflow-y-auto sm:grid-cols-2">
         {repos.length === 0 ? (
           <p className="text-sm text-fg-subtle">No repositories found.</p>
         ) : (

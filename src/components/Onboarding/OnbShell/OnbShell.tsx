@@ -20,6 +20,8 @@ type OnbShellProps = {
   footer?: ReactNode;
   /** Center the body content + heading (used by the welcome / done screens). */
   centered?: boolean;
+  /** Wider card — for steps with a multi-column grid (e.g. the repo picker). */
+  wide?: boolean;
 };
 
 /**
@@ -37,11 +39,16 @@ export function OnbShell({
   children,
   footer,
   centered = false,
+  wide = false,
 }: OnbShellProps) {
   return (
     <section
       aria-label={title}
-      className="w-full max-w-[560px] overflow-hidden rounded-xl border border-border"
+      className={
+        wide
+          ? "w-full max-w-[720px] overflow-hidden rounded-xl border border-border"
+          : "w-full max-w-[560px] overflow-hidden rounded-xl border border-border"
+      }
       style={{ background: "var(--color-surface-1)", boxShadow: "var(--shadow-lg)" }}
     >
       <OnbSteps stepIndex={stepIndex} />
