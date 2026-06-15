@@ -1,4 +1,5 @@
 import { Badge } from "@/components/_ui/Badge";
+import { Checkbox } from "@/components/_ui/Checkbox";
 import { Inline } from "@/components/_ui/Inline";
 import { Stack } from "@/components/_ui/Stack";
 import type { RepoCandidate } from "@/lib/types";
@@ -19,7 +20,7 @@ function RepoAvatar({ name, logoDataUrl }: { name: string; logoDataUrl: string |
       <img
         src={logoDataUrl}
         alt={`${name} logo`}
-        className="h-9 w-9 shrink-0 rounded object-cover"
+        className="h-8 w-8 shrink-0 rounded-md object-cover"
         style={{ background: "var(--color-surface-3)" }}
       />
     );
@@ -27,8 +28,9 @@ function RepoAvatar({ name, logoDataUrl }: { name: string; logoDataUrl: string |
   return (
     <Badge
       variant={avatarVariant(name)}
+      shape="rounded"
       aria-hidden
-      className="flex h-9 w-9 shrink-0 items-center justify-center !px-0 text-sm font-semibold"
+      className="flex h-8 w-8 shrink-0 items-center justify-center !px-0 text-sm font-semibold"
     >
       {avatarLetter(name)}
     </Badge>
@@ -36,23 +38,27 @@ function RepoAvatar({ name, logoDataUrl }: { name: string; logoDataUrl: string |
 }
 
 /**
- * One scanned repo as a card: a detected logo (or a deterministic colored letter
- * avatar fallback), the repo name, a truncated label/description, and the
- * favorite toggle. The whole card is a `<label>` so clicking it flips the
- * checkbox (preserving the row toggle behavior).
+ * One scanned repo as a selectable card matching the design-system onboarding
+ * kit's repo row: a detected logo (or a deterministic colored letter avatar
+ * fallback), the repo name, a truncated mono label/description, and the favorite
+ * toggle. The whole card is a `<label>` so clicking it flips the checkbox; a
+ * selected card swaps to the accent border + subtle accent fill.
  */
 export function RepoCard({ repo, checked, onToggle }: RepoCardProps) {
   const name = repoBasename(repo.path);
   return (
     <label
-      className="flex cursor-pointer items-center gap-3 rounded border border-border bg-surface-2 p-3"
-      style={{ fontFamily: "var(--font-sans)" }}
+      className="flex cursor-pointer items-center gap-3 rounded-md border p-3 transition-[background-color,border-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)]"
+      style={{
+        fontFamily: "var(--font-sans)",
+        borderColor: checked ? "var(--color-accent)" : "var(--color-border)",
+        background: checked ? "var(--color-accent-dim)" : "var(--color-surface-2)",
+      }}
     >
-      <input
-        type="checkbox"
+      <Checkbox
         checked={checked}
-        onChange={() => onToggle(repo.path)}
-        className="shrink-0 accent-[var(--color-accent)]"
+        onCheckedChange={() => onToggle(repo.path)}
+        className="shrink-0"
         aria-label={`Favorite ${name}`}
       />
       <RepoAvatar name={name} logoDataUrl={repo.logoDataUrl} />

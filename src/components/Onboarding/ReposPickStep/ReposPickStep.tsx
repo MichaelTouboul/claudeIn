@@ -1,5 +1,6 @@
+import { FolderPlus } from "lucide-react";
+
 import { Button } from "@/components/_ui/Button";
-import { Flex } from "@/components/_ui/Flex";
 
 import { OnbShell } from "../OnbShell/OnbShell";
 import { RepoCard } from "./RepoCard";
@@ -7,6 +8,8 @@ import { ReposWorkingView } from "./ReposWorkingView";
 import { useReposPick } from "./useReposPick";
 
 type ReposPickStepProps = {
+  /** Position in the flow (drives the progress header). */
+  stepIndex: number;
   /** Advance to the final Done screen. */
   onNext: () => void;
 };
@@ -14,18 +17,19 @@ type ReposPickStepProps = {
 /**
  * Step 6 — list scanned repos (with detected logos + LLM labels) as favorite
  * cards, plus an "Add a folder" picker. While the scan runs the body shows an
- * indeterminate progress bar with cycling status messages and the action buttons
+ * indeterminate progress bar with cycling status messages and the footer actions
  * are hidden, so the user can't continue mid-search. Favorites persist
  * immediately via the favoriteRepos IPC (see `useReposPick`); "Continue" advances.
  */
-export function ReposPickStep({ onNext }: ReposPickStepProps) {
+export function ReposPickStep({ stepIndex, onNext }: ReposPickStepProps) {
   const { repos, loading, favorites, toggle, addFolder } = useReposPick();
 
   if (loading) {
     return (
       <OnbShell
-        title="Your favorite repositories"
-        subtitle="Choose the repositories to pin on your home screen."
+        stepIndex={stepIndex}
+        title="Choose your repositories"
+        subtitle="Finding projects with Claude Code set up — you can change this anytime."
       >
         <ReposWorkingView />
       </OnbShell>
@@ -34,10 +38,26 @@ export function ReposPickStep({ onNext }: ReposPickStepProps) {
 
   return (
     <OnbShell
-      title="Your favorite repositories"
-      subtitle="Choose the repositories to pin on your home screen."
+      stepIndex={stepIndex}
+      title="Choose your repositories"
+      subtitle="Pick the ones to keep as favorites on your home screen — you can change this anytime."
+      footer={
+        <>
+          <Button
+            intent="outline"
+            size="md"
+            leftIcon={<FolderPlus size={15} aria-hidden="true" />}
+            onClick={() => void addFolder()}
+          >
+            Add a folder
+          </Button>
+          <Button intent="primary" size="md" onClick={onNext}>
+            Continue
+          </Button>
+        </>
+      }
     >
-      <div className="grid max-h-64 grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2">
+      <div className="grid max-h-[220px] grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2">
         {repos.length === 0 ? (
           <p className="text-sm text-fg-subtle">No repositories found.</p>
         ) : (
@@ -51,14 +71,6 @@ export function ReposPickStep({ onNext }: ReposPickStepProps) {
           ))
         )}
       </div>
-      <Flex align="center" justify="between">
-        <Button intent="outline" size="md" onClick={() => void addFolder()}>
-          Add a folder
-        </Button>
-        <Button intent="primary" size="md" onClick={onNext}>
-          Continue
-        </Button>
-      </Flex>
     </OnbShell>
   );
 }

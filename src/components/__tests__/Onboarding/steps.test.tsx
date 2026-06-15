@@ -25,7 +25,7 @@ function makeProfile(): UserProfile {
 describe("WelcomeStep", () => {
   it("renders and advances via 'Get started'", () => {
     const onNext = vi.fn();
-    render(<WelcomeStep onNext={onNext} />);
+    render(<WelcomeStep stepIndex={0} onNext={onNext} />);
     fireEvent.click(screen.getByRole("button", { name: /get started/i }));
     expect(onNext).toHaveBeenCalledTimes(1);
   });
@@ -34,17 +34,24 @@ describe("WelcomeStep", () => {
 describe("ConsentUserStep", () => {
   it("authorizes with no skip affordance", () => {
     const onAuthorize = vi.fn();
-    render(<ConsentUserStep onAuthorize={onAuthorize} />);
+    render(<ConsentUserStep stepIndex={1} onBack={vi.fn()} onAuthorize={onAuthorize} />);
     expect(screen.queryByRole("button", { name: /passer|ignorer|skip/i })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: /authorize/i }));
     expect(onAuthorize).toHaveBeenCalledTimes(1);
+  });
+
+  it("steps back via 'Back'", () => {
+    const onBack = vi.fn();
+    render(<ConsentUserStep stepIndex={1} onBack={onBack} onAuthorize={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /back/i }));
+    expect(onBack).toHaveBeenCalledTimes(1);
   });
 });
 
 describe("ConsentReposStep", () => {
   it("authorizes with no skip affordance", () => {
     const onAuthorize = vi.fn();
-    render(<ConsentReposStep onAuthorize={onAuthorize} />);
+    render(<ConsentReposStep stepIndex={4} onBack={vi.fn()} onAuthorize={onAuthorize} />);
     expect(screen.queryByRole("button", { name: /passer|ignorer|skip/i })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: /authorize/i }));
     expect(onAuthorize).toHaveBeenCalledTimes(1);
@@ -56,6 +63,7 @@ describe("ProfileReviewStep", () => {
     const onConfirm = vi.fn();
     render(
       <ProfileReviewStep
+        stepIndex={3}
         profile={makeProfile()}
         onSave={(p) => Promise.resolve(p)}
         onConfirm={onConfirm}
@@ -70,16 +78,16 @@ describe("ProfileReviewStep", () => {
 describe("DoneStep", () => {
   it("renders and finishes", () => {
     const onFinish = vi.fn();
-    render(<DoneStep onFinish={onFinish} />);
+    render(<DoneStep stepIndex={6} onFinish={onFinish} />);
     expect(screen.getByText(/all set/i)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /finish/i }));
+    fireEvent.click(screen.getByRole("button", { name: /open claudein/i }));
     expect(onFinish).toHaveBeenCalledTimes(1);
   });
 
   it("disables the button while finishing so completion can't be double-fired", () => {
     const onFinish = vi.fn();
-    render(<DoneStep onFinish={onFinish} />);
-    const btn = screen.getByRole("button", { name: /finish/i });
+    render(<DoneStep stepIndex={6} onFinish={onFinish} />);
+    const btn = screen.getByRole("button", { name: /open claudein/i });
     fireEvent.click(btn);
     expect(btn).toBeDisabled();
     expect(btn).toHaveAttribute("aria-busy", "true");

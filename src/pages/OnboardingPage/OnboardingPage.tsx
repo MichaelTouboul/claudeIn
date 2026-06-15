@@ -3,7 +3,7 @@ import { type ReactElement, useCallback, useState } from "react";
 import { ConsentReposStep } from "@/components/Onboarding/ConsentReposStep/ConsentReposStep";
 import { ConsentUserStep } from "@/components/Onboarding/ConsentUserStep/ConsentUserStep";
 import { DoneStep } from "@/components/Onboarding/DoneStep/DoneStep";
-import { OnbStep } from "@/components/Onboarding/onbStep";
+import { OnbStep, stepIndexOf } from "@/components/Onboarding/onbStep";
 import { ProfileReviewStep } from "@/components/Onboarding/ProfileReviewStep/ProfileReviewStep";
 import { ReposPickStep } from "@/components/Onboarding/ReposPickStep/ReposPickStep";
 import { SearchUserStep } from "@/components/Onboarding/SearchUserStep/SearchUserStep";
@@ -47,23 +47,40 @@ export function OnboardingPage() {
   }, [navigate]);
 
   const view: Record<OnbStep, () => ReactElement> = {
-    [OnbStep.Welcome]: () => <WelcomeStep onNext={() => setStep(OnbStep.ConsentUser)} />,
-    [OnbStep.ConsentUser]: () => (
-      <ConsentUserStep onAuthorize={() => setStep(OnbStep.SearchUser)} />
+    [OnbStep.Welcome]: () => (
+      <WelcomeStep stepIndex={stepIndexOf(OnbStep.Welcome)} onNext={() => setStep(OnbStep.ConsentUser)} />
     ),
-    [OnbStep.SearchUser]: () => <SearchUserStep onProfile={onProfile} />,
+    [OnbStep.ConsentUser]: () => (
+      <ConsentUserStep
+        stepIndex={stepIndexOf(OnbStep.ConsentUser)}
+        onBack={() => setStep(OnbStep.Welcome)}
+        onAuthorize={() => setStep(OnbStep.SearchUser)}
+      />
+    ),
+    [OnbStep.SearchUser]: () => (
+      <SearchUserStep stepIndex={stepIndexOf(OnbStep.SearchUser)} onProfile={onProfile} />
+    ),
     [OnbStep.ProfileReview]: () => (
       <ProfileReviewStep
+        stepIndex={stepIndexOf(OnbStep.ProfileReview)}
         profile={profile}
         onSave={saveProfile}
         onConfirm={() => setStep(OnbStep.ConsentRepos)}
       />
     ),
     [OnbStep.ConsentRepos]: () => (
-      <ConsentReposStep onAuthorize={() => setStep(OnbStep.ReposPick)} />
+      <ConsentReposStep
+        stepIndex={stepIndexOf(OnbStep.ConsentRepos)}
+        onBack={() => setStep(OnbStep.ProfileReview)}
+        onAuthorize={() => setStep(OnbStep.ReposPick)}
+      />
     ),
-    [OnbStep.ReposPick]: () => <ReposPickStep onNext={() => setStep(OnbStep.Done)} />,
-    [OnbStep.Done]: () => <DoneStep onFinish={() => void finish()} />,
+    [OnbStep.ReposPick]: () => (
+      <ReposPickStep stepIndex={stepIndexOf(OnbStep.ReposPick)} onNext={() => setStep(OnbStep.Done)} />
+    ),
+    [OnbStep.Done]: () => (
+      <DoneStep stepIndex={stepIndexOf(OnbStep.Done)} onFinish={() => void finish()} />
+    ),
   };
 
   return (
@@ -71,7 +88,7 @@ export function OnboardingPage() {
       role="dialog"
       aria-modal="true"
       aria-label="Onboarding"
-      className="h-full overflow-y-auto surface-grain p-8"
+      className="h-full overflow-y-auto p-8"
       style={{ background: "var(--color-surface-0)", color: "var(--color-text-primary)" }}
     >
       <div className="min-h-full flex items-center justify-center">{view[step]()}</div>

@@ -14,3 +14,11 @@ export const OnbStep = {
   Done: "done",
 } as const;
 export type OnbStep = (typeof OnbStep)[keyof typeof OnbStep];
+
+/** The flow's linear order — a step's index also drives the progress header. */
+const ORDER = Object.values(OnbStep);
+
+/** Zero-based position of a step in the linear flow (for the progress header). */
+export function stepIndexOf(step: OnbStep): number {
+  return ORDER.indexOf(step);
+}

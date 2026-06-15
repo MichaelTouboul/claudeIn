@@ -98,7 +98,7 @@ describe("first-run path", () => {
     await clickButton(/confirm/i);
     await clickButton(/authorize/i); // consent repos
     await clickButton(/continue/i);
-    await clickButton(/finish/i);
+    await clickButton(/open claudein/i);
 
     // Done → completeOnboarding → home.
     await waitFor(() => expect(completeOnboarding).toHaveBeenCalledTimes(1));

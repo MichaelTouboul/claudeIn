@@ -1,11 +1,12 @@
 import { Button } from "@/components/_ui/Button";
-import { Flex } from "@/components/_ui/Flex";
 import { UserProfileView } from "@/components/UserProfileView/UserProfileView";
 import type { UserProfile } from "@/lib/types";
 
 import { OnbShell } from "../OnbShell/OnbShell";
 
 type ProfileReviewStepProps = {
+  /** Position in the flow (drives the progress header). */
+  stepIndex: number;
   profile: UserProfile | null;
   /** Persist edits made in the embedded `UserProfileView`. */
   onSave: (next: UserProfile) => Promise<UserProfile>;
@@ -18,18 +19,27 @@ type ProfileReviewStepProps = {
  * and confirm. Identity/narrative fields are editable; deterministic fields are
  * read-only (enforced inside `UserProfileView`).
  */
-export function ProfileReviewStep({ profile, onSave, onConfirm }: ProfileReviewStepProps) {
+export function ProfileReviewStep({
+  stepIndex,
+  profile,
+  onSave,
+  onConfirm,
+}: ProfileReviewStepProps) {
   return (
     <OnbShell
+      stepIndex={stepIndex}
       title="Your profile"
       subtitle="Review and adjust the details before continuing."
+      footer={
+        <>
+          <span />
+          <Button intent="primary" size="md" onClick={onConfirm}>
+            Confirm
+          </Button>
+        </>
+      }
     >
       <UserProfileView profile={profile} onSave={onSave} />
-      <Flex justify="end">
-        <Button intent="primary" size="md" onClick={onConfirm}>
-          Confirm
-        </Button>
-      </Flex>
     </OnbShell>
   );
 }
