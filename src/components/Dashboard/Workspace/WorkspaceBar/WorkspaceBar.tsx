@@ -47,8 +47,8 @@ export function WorkspaceBar() {
                 if (e.key === 'ArrowRight') { e.preventDefault(); moveActive(1); }
                 if (e.key === 'ArrowLeft') { e.preventDefault(); moveActive(-1); }
               }}
-              className="text-xs truncate max-w-[160px] text-left cursor-pointer"
-              style={{ color: isActive ? 'var(--color-text-primary)' : 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}
+              className="text-sm truncate max-w-[160px] text-left cursor-pointer outline-none rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+              style={{ color: isActive ? 'var(--color-text-primary)' : 'var(--color-text-muted)' }}
             >
               {label}
             </button>
@@ -56,7 +56,7 @@ export function WorkspaceBar() {
               onClick={(e) => { e.stopPropagation(); closeDashboard(d.id); }}
               aria-label={`Close ${label}`}
               title="Close"
-              className="flex items-center justify-center w-4 h-4 rounded transition-opacity opacity-50 hover:opacity-100"
+              className="flex items-center justify-center w-4 h-4 rounded transition-opacity opacity-50 hover:opacity-100 outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--focus-ring)] focus-visible:opacity-100"
               style={{ color: 'var(--color-text-muted)' }}
             >
               <X size={11} />

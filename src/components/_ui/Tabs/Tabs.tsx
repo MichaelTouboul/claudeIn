@@ -44,12 +44,8 @@ export function Tabs({ tabs, active, onChange, className }: TabsProps) {
                 move(-1);
               }
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md min-w-0 outline-none transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md min-w-0 text-sm font-medium outline-none transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
             style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '11px',
-              fontWeight: 500,
-              letterSpacing: '0.02em',
               ...(isActive
                 ? {
                     background: 'var(--color-surface-3)',

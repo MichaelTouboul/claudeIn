@@ -28,8 +28,8 @@ if (typeof document !== "undefined" && !document.getElementById("chat-animations
 function ZoneHeader({ label }: { label: string }) {
   return (
     <div
-      className="px-3 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-widest"
-      style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}
+      className="px-3.5 pt-4 pb-1.5 text-2xs font-semibold uppercase"
+      style={{ color: 'var(--color-text-muted)', letterSpacing: 'var(--tracking-caps)' }}
     >
       {label}
     </div>

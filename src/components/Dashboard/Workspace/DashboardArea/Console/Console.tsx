@@ -42,11 +42,10 @@ export function Console() {
         setTab(id);
         setOpen(true);
       }}
-      className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium"
+      className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium"
       style={{
         color: tab === id ? 'var(--color-accent)' : 'var(--color-text-muted)',
         borderBottom: tab === id ? '2px solid var(--color-accent)' : '2px solid transparent',
-        fontFamily: 'var(--font-mono)',
       }}
     >
       {icon}

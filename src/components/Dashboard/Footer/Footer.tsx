@@ -18,12 +18,12 @@ export function Footer() {
 
   return (
     <div
-      className="shrink-0 flex items-center justify-between px-3"
-      style={{ height: '22px', background: 'var(--color-surface-1)', borderTop: '1px solid var(--color-border)' }}
+      className="shrink-0 flex items-center justify-between px-3.5"
+      style={{ height: '26px', background: 'var(--color-surface-1)', borderTop: '1px solid var(--color-border)' }}
     >
       {version ? (
         <span
-          className="text-[10px] tabular-nums"
+          className="text-2xs tabular-nums"
           style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-muted)' }}
         >
           v{version}

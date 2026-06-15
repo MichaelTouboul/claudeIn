@@ -59,15 +59,20 @@ export function ConversationItem({ convId, title, isActive, status, pinned, onAc
       ) : null}
       <button
         onClick={onActivate}
-        className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors text-left"
-        style={{ background: isActive ? 'var(--color-surface-2)' : 'transparent' }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-surface-2)')}
-        onMouseLeave={(e) => (e.currentTarget.style.background = isActive ? 'var(--color-surface-2)' : 'transparent')}
+        className="w-full flex items-center gap-2 px-2.5 py-2 rounded-md transition-colors text-left"
+        style={{
+          background: isActive ? 'var(--color-accent-dim)' : 'transparent',
+          color: isActive ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+        }}
+        onMouseEnter={(e) => {
+          if (!isActive) e.currentTarget.style.background = 'var(--color-surface-2)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = isActive ? 'var(--color-accent-dim)' : 'transparent';
+        }}
       >
         <StatusDot size="xs" pulse={dot.pulse} style={{ backgroundColor: dot.color }} title={status} />
-        <span className="text-xs truncate" style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-mono)' }}>
-          {label}
-        </span>
+        <span className="text-sm truncate">{label}</span>
       </button>
       {convId ? (
         <RenameDialog
