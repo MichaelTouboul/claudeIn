@@ -44,7 +44,7 @@ export function Tabs({ tabs, active, onChange, className }: TabsProps) {
                 move(-1);
               }
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all duration-200 min-w-0"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md min-w-0 outline-none transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
             style={{
               fontFamily: 'var(--font-mono)',
               fontSize: '11px',
@@ -54,7 +54,6 @@ export function Tabs({ tabs, active, onChange, className }: TabsProps) {
                 ? {
                     background: 'var(--color-surface-3)',
                     color: 'var(--color-text-primary)',
-                    boxShadow: '0 0 8px rgba(129, 140, 248, 0.06)',
                   }
                 : { color: 'var(--color-text-muted)' }),
             }}

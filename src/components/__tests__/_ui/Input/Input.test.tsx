@@ -7,14 +7,15 @@ describe('Input', () => {
   it('defaults to the filled md sans field chrome', () => {
     render(<Input placeholder="name" />);
     const el = screen.getByPlaceholderText('name');
-    expect(el).toHaveClass('text-sm', 'font-sans', 'border', 'bg-surface-2');
+    // filled chrome now fills with the inset surface (skill --surface-inset) and uses the md radius
+    expect(el).toHaveClass('text-sm', 'font-sans', 'border', 'rounded-md', 'bg-[var(--color-surface-inset)]');
   });
 
   it('applies the sm + mono + bare variants', () => {
     render(<Input placeholder="bare" size="sm" font="mono" variant="bare" />);
     const el = screen.getByPlaceholderText('bare');
     expect(el).toHaveClass('text-xs', 'font-mono', 'bg-transparent', 'border-0');
-    expect(el).not.toHaveClass('border', 'bg-surface-2');
+    expect(el).not.toHaveClass('border', 'bg-[var(--color-surface-inset)]');
   });
 
   it('forwards native input props', () => {

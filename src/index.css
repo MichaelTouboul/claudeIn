@@ -28,6 +28,8 @@
   --color-surface-1: #1d2027;   /* panels          (was #0a0e14) */
   --color-surface-2: #23272f;   /* cards / hover   (was #111620) */
   --color-surface-3: #2b2f39;   /* elevated        (was #181e2a) */
+  --color-surface-inset: #0f1115; /* code wells, input/control fills (skill --surface-inset) */
+  --color-surface-overlay: rgba(8, 9, 12, 0.66); /* modal scrim (skill --surface-overlay) */
 
   /* Borders */
   --color-border: #2b2f39;          /* default      (was #1e2636) */
@@ -46,6 +48,12 @@
   --color-accent-dim: rgba(129, 140, 248, 0.14);
   --color-accent-solid: #4f5dd9;              /* solid fill for the primary button (white text) */
 
+  /* Focus ring — single source of truth (indigo-300, AA on dark). Every _ui
+     primitive points its :focus-visible ring here instead of the bare accent.
+     Offset = the app canvas so the ring reads as a detached halo. */
+  --color-focus-ring: #a3adff;
+  --color-focus-ring-offset: var(--color-surface-0);
+
   /* Status hues — tuned for legibility on dark */
   --color-active: #45d483;      /* was #4ade80 */
   --color-danger: #ff8585;      /* was #f87171 */
@@ -57,6 +65,7 @@
   --color-neutral-fg: #8b93a3;
   --color-neutral-bg: #2b2f39;
   --color-neutral-fg-strong: #d7dce4;
+  --color-neutral-500: #4d5564; /* input/control hover border (skill --neutral-500) */
 
   /* Fonts — self-hosted Geist (UI) + Geist Mono (code/data).
    * Family names are the EXACT ones @fontsource-variable registers
@@ -72,6 +81,10 @@
     --color-text-primary: var(--color-fg);
     --color-text-secondary: var(--color-fg-muted);
     --color-text-muted: var(--color-fg-subtle);
+
+    /* Focus ring — skill-named aliases (match tokens/colors.css naming) */
+    --focus-ring: var(--color-focus-ring);
+    --focus-ring-offset: var(--color-focus-ring-offset);
   }
 
   * {
