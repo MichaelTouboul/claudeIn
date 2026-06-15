@@ -1,11 +1,14 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 
-import { buildTransformPrompt, TransformKind } from "../transform/transform.prompt";
+import { panelTransformPrompt } from "../prompts/panel-transform.prompt";
+import { TransformKind } from "../transform/transform.types";
 
-describe("buildTransformPrompt", () => {
+const build = panelTransformPrompt.build;
+
+describe("panelTransformPrompt", () => {
   it("embeds both the instruction and the source content", () => {
-    const prompt = buildTransformPrompt({
+    const prompt = build({
       kind: TransformKind.Text,
       instruction: "make it formal",
       content: "yo what's up",
@@ -17,7 +20,7 @@ describe("buildTransformPrompt", () => {
   });
 
   it("instructs the model to return a markdown table for the table kind", () => {
-    const prompt = buildTransformPrompt({
+    const prompt = build({
       kind: TransformKind.Table,
       instruction: "add a total column",
       content: "| a | b |\n|---|---|\n| 1 | 2 |",
@@ -26,7 +29,7 @@ describe("buildTransformPrompt", () => {
   });
 
   it("forbids code fences for the code kind", () => {
-    const prompt = buildTransformPrompt({
+    const prompt = build({
       kind: TransformKind.Code,
       instruction: "rename foo to bar",
       content: "const foo = 1;",
@@ -36,11 +39,11 @@ describe("buildTransformPrompt", () => {
 
   it("is deterministic — same input yields the same string", () => {
     const input = { kind: TransformKind.Text, instruction: "x", content: "y" } as const;
-    expect(buildTransformPrompt(input)).toBe(buildTransformPrompt(input));
+    expect(build(input)).toBe(build(input));
   });
 
   it("trims surrounding whitespace from the instruction", () => {
-    const prompt = buildTransformPrompt({
+    const prompt = build({
       kind: TransformKind.Text,
       instruction: "  spaced  ",
       content: "c",

@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import os from "node:os";
 
-import { buildImproveChatPrompt } from "./improve-chat.prompt";
+import { renderPrompt, improveChatPrompt } from "../prompts";
 import type { ImproveChatInput } from "../../types/improve.types";
 
 /**
@@ -72,6 +72,6 @@ export function setImproveChatRunner(next: ImproveChatRunner): void {
  * the `claude --print` seam.
  */
 export async function improveChat(input: ImproveChatInput): Promise<string> {
-  const prompt = buildImproveChatPrompt(input);
+  const prompt = renderPrompt(improveChatPrompt, input);
   return runner({ command: CHAT_COMMAND, cwd: os.tmpdir(), prompt });
 }

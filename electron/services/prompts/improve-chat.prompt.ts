@@ -1,5 +1,6 @@
 import fs from "fs";
 
+import { definePrompt, PromptId } from "./prompt.types";
 import {
   ImproveType,
   type ImproveChatInput,
@@ -7,11 +8,9 @@ import {
 } from "../../types/improve.types";
 
 /**
- * Self-Improve loop — scoping-chat prompt builder (I4).
- *
- * Split out of `improve-chat.service` to keep both files under the 300-line
- * limit. Pure string assembly + a bounded disk read; the service owns the spawn
- * seam and persistence concerns.
+ * Self-Improve loop — scoping-chat prompt. Moved verbatim from
+ * `improve/improve-chat.prompt.buildImproveChatPrompt`. Pure string assembly +
+ * a bounded disk read; the service owns the spawn seam and persistence.
  */
 
 /** Max bytes of source file content embedded in the prompt (keeps it bounded). */
@@ -44,15 +43,12 @@ function readSource(sourcePath: string): string {
   }
 }
 
-/** Inputs the prompt builder needs (the service's `improveChat` arg). */
-export type ImproveChatPromptInput = ImproveChatInput;
-
 function renderTranscript(transcript: ImproveTranscriptTurn[]): string {
   if (transcript.length === 0) return "(no messages yet)";
   return transcript.map((t) => `${t.role}: ${t.text}`).join("\n");
 }
 
-function renderContext(input: ImproveChatPromptInput): string {
+function renderContext(input: ImproveChatInput): string {
   if (!input.component && !input.sourcePath) {
     return "Target: a general request (no specific component captured).";
   }
@@ -84,31 +80,34 @@ const RECAP_BLOCK_SPEC = [
 ].join("\n");
 
 /**
- * Build the single `claude --print` prompt for one scoping turn. The assistant
- * runs a SHORT clarifying dialogue (1–3 targeted questions); once it has enough,
- * it ENDS its message with the exact fenced ```recap block above so the app can
- * parse it deterministically. Discussion only — explicitly no tool use / edits.
+ * The single `claude --print` prompt for one scoping turn. The assistant runs a
+ * SHORT clarifying dialogue (1–3 targeted questions); once it has enough, it ENDS
+ * its message with the exact fenced ```recap block above so the app can parse it
+ * deterministically. Discussion only — explicitly no tool use / edits.
  */
-export function buildImproveChatPrompt(input: ImproveChatPromptInput): string {
-  return [
-    "You are scoping a single self-improvement request for a desktop app.",
-    `Request type: ${input.type} — ${TYPE_GUIDANCE[input.type]}.`,
-    "",
-    renderContext(input),
-    "",
-    "Conversation so far:",
-    renderTranscript(input.transcript),
-    "",
-    "Your job is a SHORT scoping dialogue. If the request is still unclear, ask",
-    "1–3 targeted clarifying questions (one short message). Discussion only — do",
-    "NOT use tools, do NOT edit files.",
-    "",
-    "Once you have enough information, you may chat conversationally first, then",
-    "END your message with EXACTLY this fenced block (no other fenced blocks):",
-    "",
-    RECAP_BLOCK_SPEC,
-    "",
-    "Write TITLE / DESCRIPTION / ACCEPTANCE in the SAME LANGUAGE as the user.",
-    "Reply with just your next message to the user.",
-  ].join("\n");
-}
+export const improveChatPrompt = definePrompt<ImproveChatInput>({
+  id: PromptId.ImproveChat,
+  version: 1,
+  build: (input) =>
+    [
+      "You are scoping a single self-improvement request for a desktop app.",
+      `Request type: ${input.type} — ${TYPE_GUIDANCE[input.type]}.`,
+      "",
+      renderContext(input),
+      "",
+      "Conversation so far:",
+      renderTranscript(input.transcript),
+      "",
+      "Your job is a SHORT scoping dialogue. If the request is still unclear, ask",
+      "1–3 targeted clarifying questions (one short message). Discussion only — do",
+      "NOT use tools, do NOT edit files.",
+      "",
+      "Once you have enough information, you may chat conversationally first, then",
+      "END your message with EXACTLY this fenced block (no other fenced blocks):",
+      "",
+      RECAP_BLOCK_SPEC,
+      "",
+      "Write TITLE / DESCRIPTION / ACCEPTANCE in the SAME LANGUAGE as the user.",
+      "Reply with just your next message to the user.",
+    ].join("\n"),
+});

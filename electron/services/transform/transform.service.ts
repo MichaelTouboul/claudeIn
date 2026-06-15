@@ -1,7 +1,8 @@
 import { exec } from "node:child_process";
 import os from "node:os";
 
-import { buildTransformPrompt, type TransformInput } from "./transform.prompt";
+import { renderPrompt, panelTransformPrompt } from "../prompts";
+import type { TransformInput } from "./transform.types";
 
 // One-shot transform timeout. Generous (transforms can be larger than a title)
 // but bounded so a hung `claude` never leaves the renderer spinning forever.
@@ -24,12 +25,12 @@ const MAX_PROMPT_BYTES = 2 * 1024 * 1024;
  * - Nothing is persisted (no DB write, no broadcast). The result is returned to
  *   the caller and lands in place in the panel tab — that is the only effect.
  *
- * The prompt is built by the pure {@link buildTransformPrompt} helper and fed via
+ * The prompt is built by the centralized {@link panelTransformPrompt} and fed via
  * stdin (avoids shell-escaping the content). Resolves to the trimmed stdout, or
  * an empty string on failure so the renderer can simply no-op.
  */
 export function transform(input: TransformInput): Promise<string> {
-  const prompt = buildTransformPrompt(input);
+  const prompt = renderPrompt(panelTransformPrompt, input);
   if (prompt.length > MAX_PROMPT_BYTES) return Promise.resolve("");
   return new Promise<string>((resolve) => {
     const proc = exec(

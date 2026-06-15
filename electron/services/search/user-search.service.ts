@@ -6,8 +6,9 @@ import { getAgents } from "../agents/agents.mirror";
 import { getSkillsMirror } from "../skills/skills.mirror";
 import { getMcp } from "../mcp/mcp.mirror";
 import { getSettings } from "../settings/settings.service";
-import { buildUserPrompt, parseNarrative } from "./user-search.narrative";
+import { parseNarrative } from "./user-search.narrative";
 import { USER_SEARCH_COMMAND, runUserSearch } from "./user-search.runner";
+import { renderPrompt, userProfilePrompt } from "../prompts";
 import { defaultUserProfile } from "../profile/user-profile.map";
 import type { Capabilities, UserProfile } from "../../types/user.interface";
 
@@ -77,7 +78,7 @@ export async function fillUserProfile(claudePath: string): Promise<UserProfile> 
   const raw = await runUserSearch({
     command: USER_SEARCH_COMMAND,
     cwd: claudePath,
-    prompt: buildUserPrompt([]),
+    prompt: renderPrompt(userProfilePrompt, []),
   });
   const narrative = parseNarrative(raw);
   const now = new Date().toISOString();

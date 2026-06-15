@@ -1,6 +1,8 @@
 import { exec } from "node:child_process";
 import os from "node:os";
 
+import { renderPrompt, conversationTitlePrompt } from "../prompts";
+
 function cleanTitle(raw: string): string {
   // Take the first non-empty line only.
   let title = raw
@@ -22,14 +24,7 @@ function cleanTitle(raw: string): string {
 }
 
 export function generateConversationTitle(userMessage: string, assistantMessage: string): Promise<string> {
-  const prompt = `You are labeling a conversation. Output ONLY a short topic label of 3-6 words. It is a label, not a sentence. No quotes, no trailing punctuation, no "Title:" prefix, no explanation — just the label text.
-
-<conversation>
-User: ${userMessage.slice(0, 300)}
-Assistant: ${assistantMessage.slice(0, 300)}
-</conversation>
-
-Title:`;
+  const prompt = renderPrompt(conversationTitlePrompt, { userMessage, assistantMessage });
   return new Promise<string>((resolve) => {
     // The title call must not create a session transcript inside a scanned
     // project, so it runs in a throwaway tmp cwd the app never scans.
