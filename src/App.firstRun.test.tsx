@@ -13,9 +13,7 @@ function makeProfile(overrides: Partial<UserProfile> = {}): UserProfile {
     role: "Engineer",
     plugins: ["babysitter"],
     capabilities: { agents: { count: 2, names: ["a", "b"] }, skills: 1, mcp: 0, hooks: 3 },
-    summary: "A tidy setup.",
     domains: ["backend"],
-    workflow: "TDD",
     onboardingCompletedAt: null,
     generatedAt: null,
     updatedAt: null,
@@ -96,7 +94,7 @@ describe("first-run path", () => {
     // Full consent-gated flow with no skip.
     await clickButton(/get started/i);
     await clickButton(/authorize/i); // consent user
-    await screen.findByText(/A tidy setup\./);
+    await screen.findByText("backend");
     await clickButton(/confirm/i);
     await clickButton(/authorize/i); // consent repos
     await clickButton(/continue/i);

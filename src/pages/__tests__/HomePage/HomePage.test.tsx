@@ -13,9 +13,7 @@ function makeProfile(overrides: Partial<UserProfile> = {}): UserProfile {
     role: "Engineer",
     plugins: ["babysitter"],
     capabilities: { agents: { count: 2, names: ["a", "b"] }, skills: 1, mcp: 0, hooks: 3 },
-    summary: "A tidy setup.",
     domains: ["backend"],
-    workflow: "TDD",
     onboardingCompletedAt: "x",
     generatedAt: null,
     updatedAt: null,
@@ -157,6 +155,6 @@ describe("HomePage", () => {
       fireEvent.click(link);
     });
 
-    expect(await screen.findByText(/A tidy setup\./)).toBeInTheDocument();
+    expect(await screen.findByText("backend")).toBeInTheDocument();
   });
 });

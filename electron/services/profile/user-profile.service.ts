@@ -12,21 +12,22 @@ import type { UserProfile } from "../../types/user.interface";
  * columns (`plugins`, `capabilities`, `domains`) are serialized on the way in and
  * parsed on the way out by `user-profile.map`. sql.js is synchronous; all calls
  * are guarded by the DB wrapper, never `.then()`/`.catch()`.
+ *
+ * The legacy `summary` / `workflow` columns still exist in the table but are no
+ * longer read or written — they are simply left untouched (no migration needed).
  */
 
 const UPSERT_SQL = `INSERT INTO user_profile (
-    id, claude_user_path, name, role, plugins, capabilities, summary, domains,
-    workflow, onboarding_completed_at, generated_at, updated_at
-  ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    id, claude_user_path, name, role, plugins, capabilities, domains,
+    onboarding_completed_at, generated_at, updated_at
+  ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   ON CONFLICT(id) DO UPDATE SET
     claude_user_path = excluded.claude_user_path,
     name = excluded.name,
     role = excluded.role,
     plugins = excluded.plugins,
     capabilities = excluded.capabilities,
-    summary = excluded.summary,
     domains = excluded.domains,
-    workflow = excluded.workflow,
     onboarding_completed_at = excluded.onboarding_completed_at,
     generated_at = excluded.generated_at,
     updated_at = excluded.updated_at`;

@@ -1,10 +1,8 @@
-/** The LLM-narrated subset of the profile (identity + summary/domains/workflow). */
+/** The LLM-narrated subset of the profile (identity + domains). */
 export interface Narrative {
   name: string | null;
   role: string | null;
-  summary: string | null;
   domains: string[];
-  workflow: string | null;
 }
 
 function isStringArray(value: unknown): value is string[] {
@@ -61,9 +59,7 @@ function narrativeFromObject(obj: Record<string, unknown>): Narrative {
   return {
     name: asStringOrNull(obj.name),
     role: asStringOrNull(obj.role),
-    summary: asStringOrNull(obj.summary),
     domains: isStringArray(obj.domains) ? obj.domains : [],
-    workflow: asStringOrNull(obj.workflow),
   };
 }
 
@@ -84,8 +80,7 @@ function tryParseObject(candidate: string): Record<string, unknown> | null {
  * object, or prose wrapped around a ```json fenced (or bare) object. Tries, in
  * order: (1) strict parse of the trimmed output, (2) parse a code-fenced or first
  * balanced `{ … }` substring extracted from the text; only when none yields an
- * object does it fall back to treating the whole output as the summary (no
- * identity, domains, or workflow).
+ * object does it fall back to an empty narrative (no identity or domains).
  */
 export function parseNarrative(raw: string): Narrative {
   const trimmed = raw.trim();
@@ -101,9 +96,7 @@ export function parseNarrative(raw: string): Narrative {
   return {
     name: null,
     role: null,
-    summary: trimmed.length > 0 ? trimmed : null,
     domains: [],
-    workflow: null,
   };
 }
 
@@ -118,7 +111,7 @@ export function buildUserPrompt(plugins: string[]): string {
   return `Explore the user-scope \`.claude\` directory at this root — its agents, skills, MCP servers, hooks, and memory/CLAUDE.md. ${pluginsLine}
 
 Infer the user's setup and return ONLY a JSON object with these keys:
-{"name": "<the user's real name, inferred from memory files / CLAUDE.md / git config / email; null if you genuinely cannot infer it>", "role": "<the user's job or role, e.g. \\"Backend engineer at Tastewise\\"; null if you genuinely cannot infer it>", "summary": "<one-paragraph narrative of the setup>", "domains": ["<tag>", ...], "workflow": "<inferred preferred workflow>"}
+{"name": "<the user's real name, inferred from memory files / CLAUDE.md / git config / email; null if you genuinely cannot infer it>", "role": "<a concise phrase naming the developer's main technologies / stack — the languages, frameworks, and tools they clearly use, e.g. \\"TypeScript + React + Node, with Electron and SQLite\\". Describe their TECH, NOT their employer, company name, or which monorepo they work in. null if you genuinely cannot infer it>", "domains": ["<tag>", ...]}
 
 Output ONLY the raw JSON object — no preamble, no explanation, and no markdown code fences.`;
 }

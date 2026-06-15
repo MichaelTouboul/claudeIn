@@ -16,9 +16,8 @@ export { setUserSearchRunner } from "./user-search.runner";
 /**
  * User-scope discovery: deterministically locate the user `.claude` dir, then
  * fill a `UserProfile` from the existing mirror services (counts) plus a
- * `claude --print` narrative (summary/domains/workflow) via the runner seam.
- * Persistence lives in `user-profile.service`; this module only builds the
- * profile object.
+ * `claude --print` narrative (role/domains) via the runner seam. Persistence
+ * lives in `user-profile.service`; this module only builds the profile object.
  */
 
 function home(): string {
@@ -89,9 +88,7 @@ export async function fillUserProfile(claudePath: string): Promise<UserProfile> 
     name: narrative.name,
     role: narrative.role,
     capabilities,
-    summary: narrative.summary,
     domains: narrative.domains,
-    workflow: narrative.workflow,
     generatedAt: now,
     updatedAt: now,
   };

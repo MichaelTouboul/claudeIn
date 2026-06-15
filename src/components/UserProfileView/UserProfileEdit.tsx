@@ -4,7 +4,6 @@ import { Button } from "@/components/_ui/Button";
 import { Inline } from "@/components/_ui/Inline";
 import { Input } from "@/components/_ui/Input";
 import { Stack } from "@/components/_ui/Stack";
-import { Textarea } from "@/components/_ui/Textarea";
 import type { UserProfile } from "@/lib/types";
 
 type UserProfileEditProps = {
@@ -17,8 +16,6 @@ type UserProfileEditProps = {
 type Draft = {
   name: string;
   role: string;
-  summary: string;
-  workflow: string;
   domains: string;
 };
 
@@ -26,8 +23,6 @@ function toDraft(p: UserProfile): Draft {
   return {
     name: p.name ?? "",
     role: p.role ?? "",
-    summary: p.summary ?? "",
-    workflow: p.workflow ?? "",
     domains: p.domains.join(", "),
   };
 }
@@ -38,8 +33,6 @@ function applyDraft(p: UserProfile, d: Draft): UserProfile {
     ...p,
     name: blank(d.name),
     role: blank(d.role),
-    summary: blank(d.summary),
-    workflow: blank(d.workflow),
     domains: d.domains
       .split(",")
       .map((s) => s.trim())
@@ -81,21 +74,9 @@ export function UserProfileEdit({ profile, onSave, onCancel }: UserProfileEditPr
       </Stack>
       <Stack as="label" gap={1} className="text-sm">
         <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
-          Summary
-        </span>
-        <Textarea className="bg-surface-0" rows={3} value={draft.summary} onChange={set("summary")} />
-      </Stack>
-      <Stack as="label" gap={1} className="text-sm">
-        <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
           Domains (comma-separated)
         </span>
         <Input className="bg-surface-0" value={draft.domains} onChange={set("domains")} />
-      </Stack>
-      <Stack as="label" gap={1} className="text-sm">
-        <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
-          Workflow
-        </span>
-        <Textarea className="bg-surface-0" rows={2} value={draft.workflow} onChange={set("workflow")} />
       </Stack>
       <Inline gap={2}>
         <Button type="submit" intent="primary" size="md" disabled={saving}>

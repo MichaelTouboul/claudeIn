@@ -20,9 +20,7 @@ const sample: UserProfile = {
   role: "Engineer",
   plugins: ["babysitter"],
   capabilities: { agents: { count: 2, names: ["a", "b"] }, skills: 3, mcp: 1, hooks: 4 },
-  summary: "A tidy setup.",
   domains: ["backend", "infra"],
-  workflow: "tdd",
   onboardingCompletedAt: null,
   generatedAt: "2026-06-11T00:00:00.000Z",
   updatedAt: "2026-06-11T00:00:00.000Z",
@@ -48,7 +46,6 @@ describe("getUserProfile", () => {
     expect(got).toEqual(stored);
     expect(got?.capabilities.agents.names).toEqual(["a", "b"]);
     expect(got?.domains).toEqual(["backend", "infra"]);
-    expect(got?.summary).toBe("A tidy setup.");
   });
 });
 

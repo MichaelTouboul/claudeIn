@@ -8,4 +8,9 @@ import type { Candidate } from "./onboarding.types";
 export type RepoCandidate = Candidate & {
   /** Short LLM-generated description of the repo, or null when unavailable. */
   label: string | null;
+  /**
+   * A detected repo logo/icon encoded as a `data:` URL (the renderer cannot read
+   * arbitrary FS paths), or null when none was found / it exceeded the size cap.
+   */
+  logoDataUrl: string | null;
 };

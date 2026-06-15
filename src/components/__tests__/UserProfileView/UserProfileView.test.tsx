@@ -11,9 +11,7 @@ function makeProfile(overrides: Partial<UserProfile> = {}): UserProfile {
     role: "Engineer",
     plugins: ["babysitter"],
     capabilities: { agents: { count: 2, names: ["a", "b"] }, skills: 1, mcp: 4, hooks: 3 },
-    summary: "A tidy setup.",
     domains: ["backend", "infra"],
-    workflow: "TDD",
     onboardingCompletedAt: "x",
     generatedAt: null,
     updatedAt: null,
@@ -26,8 +24,6 @@ describe("UserProfileView (read mode)", () => {
     render(<UserProfileView profile={makeProfile()} onSave={vi.fn()} />);
     expect(screen.getByText("/home/u/.claude")).toBeInTheDocument();
     expect(screen.getByText("babysitter")).toBeInTheDocument();
-    expect(screen.getByText(/A tidy setup\./)).toBeInTheDocument();
-    expect(screen.getByText("TDD")).toBeInTheDocument();
     // identity name is shown prominently
     expect(screen.getByText("Ada")).toBeInTheDocument();
     expect(screen.getByText("Engineer")).toBeInTheDocument();
@@ -52,7 +48,7 @@ describe("UserProfileView (edit mode)", () => {
     fireEvent.click(screen.getByRole("button", { name: /edit/i }));
 
     fireEvent.change(screen.getByLabelText(/name/i), { target: { value: "Grace" } });
-    fireEvent.change(screen.getByLabelText(/summary/i), { target: { value: "Updated summary." } });
+    fireEvent.change(screen.getByLabelText(/role/i), { target: { value: "Rustacean" } });
 
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /save/i }));
@@ -61,7 +57,7 @@ describe("UserProfileView (edit mode)", () => {
     expect(onSave).toHaveBeenCalledTimes(1);
     const saved = onSave.mock.calls[0][0];
     expect(saved.name).toBe("Grace");
-    expect(saved.summary).toBe("Updated summary.");
+    expect(saved.role).toBe("Rustacean");
     // deterministic field preserved
     expect(saved.claudeUserPath).toBe("/home/u/.claude");
     expect(saved.plugins).toEqual(["babysitter"]);
