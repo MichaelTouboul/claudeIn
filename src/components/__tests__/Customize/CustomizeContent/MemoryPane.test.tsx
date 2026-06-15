@@ -6,6 +6,8 @@ import type { MemoryEntry, MemorySnapshot } from "@/lib/types";
 
 const getMemoryMirror = vi.fn<(p?: string) => Promise<MemorySnapshot>>();
 const onMemoryChanged = vi.fn(() => () => {});
+const readMemoryFile = vi.fn<(p: string, scope?: string) => Promise<string>>();
+const writeMemoryFile = vi.fn();
 
 function entry(over: Partial<MemoryEntry> = {}): MemoryEntry {
   return {
@@ -22,7 +24,14 @@ function entry(over: Partial<MemoryEntry> = {}): MemoryEntry {
 beforeEach(() => {
   getMemoryMirror.mockReset();
   onMemoryChanged.mockReset().mockReturnValue(() => {});
-  window.api = { getMemoryMirror, onMemoryChanged } as unknown as Window["api"];
+  readMemoryFile.mockReset().mockResolvedValue("# Project memory\n\nfull body");
+  writeMemoryFile.mockReset();
+  window.api = {
+    getMemoryMirror,
+    onMemoryChanged,
+    readMemoryFile,
+    writeMemoryFile,
+  } as unknown as Window["api"];
 });
 
 describe("MemoryPane", () => {
@@ -38,13 +47,33 @@ describe("MemoryPane", () => {
     expect(screen.getByText("~/.claude/CLAUDE.md")).toBeInTheDocument();
   });
 
-  it("opens a read-only preview drawer when a file is clicked", async () => {
+  it("opens an editor drawer that loads the file body by path", async () => {
     getMemoryMirror.mockResolvedValue({ projectPath: null, entries: [entry()] });
     render(<MemoryPane repoScope={null} />);
 
     fireEvent.click(await screen.findByRole("button", { name: /CLAUDE\.md/i }));
-    expect(await screen.findByText(/preview/i)).toBeInTheDocument();
-    expect(screen.getByText("# Project memory")).toBeInTheDocument();
+    await waitFor(() => expect(readMemoryFile).toHaveBeenCalledWith("CLAUDE.md", undefined));
+    const editor = await screen.findByRole("textbox", { name: /edit CLAUDE\.md/i });
+    expect(editor).toHaveValue("# Project memory\n\nfull body");
+    // Save is disabled until the content is dirtied.
+    expect(screen.getByRole("button", { name: /^save$/i })).toBeDisabled();
+  });
+
+  it("saves edited content via writeMemoryFile", async () => {
+    getMemoryMirror.mockResolvedValue({ projectPath: null, entries: [entry()] });
+    writeMemoryFile.mockResolvedValue({ ...entry(), size: 42, firstLine: "# Edited" });
+    render(<MemoryPane repoScope={null} />);
+
+    fireEvent.click(await screen.findByRole("button", { name: /CLAUDE\.md/i }));
+    const editor = await screen.findByRole("textbox", { name: /edit CLAUDE\.md/i });
+    fireEvent.change(editor, { target: { value: "# Edited\nnew text" } });
+
+    const save = screen.getByRole("button", { name: /^save$/i });
+    expect(save).not.toBeDisabled();
+    fireEvent.click(save);
+    await waitFor(() =>
+      expect(writeMemoryFile).toHaveBeenCalledWith("CLAUDE.md", "# Edited\nnew text", undefined),
+    );
   });
 
   it("shows loading then empty states", async () => {

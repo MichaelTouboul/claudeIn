@@ -173,6 +173,10 @@ contextBridge.exposeInMainWorld("api", {
   getMemoryMirror: (projectPath?: string) => ipcRenderer.invoke("memory:mirror:get", projectPath),
   watchMemory: (projectPath?: string) => ipcRenderer.invoke("memory:mirror:watch", projectPath),
   unwatchMemory: () => ipcRenderer.invoke("memory:mirror:unwatch"),
+  readMemoryFile: (filePath: string, projectPath?: string) =>
+    ipcRenderer.invoke("memory:read-file", filePath, projectPath),
+  writeMemoryFile: (filePath: string, content: string, projectPath?: string) =>
+    ipcRenderer.invoke("memory:write-file", filePath, content, projectPath),
   onMemoryChanged: (cb: (snapshot: import("../src/types/memory-mirror.types").MemorySnapshot) => void) => {
     return pushBus.subscribe((raw) => {
       const data = raw as { type?: string; snapshot?: unknown };

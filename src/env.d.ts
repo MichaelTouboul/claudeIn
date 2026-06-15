@@ -114,6 +114,8 @@ interface Window {
     getMemoryMirror: (projectPath?: string) => Promise<import("./types/memory-mirror.types").MemorySnapshot>;
     watchMemory: (projectPath?: string) => Promise<void>;
     unwatchMemory: () => Promise<void>;
+    readMemoryFile: (filePath: string, projectPath?: string) => Promise<string>;
+    writeMemoryFile: (filePath: string, content: string, projectPath?: string) => Promise<import("./types/memory-mirror.types").MemoryEntry>;
     onMemoryChanged: (cb: (snapshot: import("./types/memory-mirror.types").MemorySnapshot) => void) => () => void;
 
     locateClaudeUser: () => Promise<string | null>;
