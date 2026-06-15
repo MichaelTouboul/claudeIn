@@ -2,6 +2,7 @@ import { ArrowLeft, User } from "lucide-react";
 
 import { Button } from "@/components/_ui/Button";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { cn, isMac } from "@/lib/utils";
 import { CustomizeSection, useCustomizeStore } from "@/store/customize/useCustomizeStore";
 
 export type CustomizeTopBarProps = {
@@ -23,7 +24,14 @@ export function CustomizeTopBar({ onBack }: CustomizeTopBarProps) {
 
   return (
     <header
-      className="flex items-center gap-3 px-4 py-3 shrink-0"
+      // `titlebar-drag` + Mac-aware left padding clear the macOS traffic-light
+      // buttons so the back control isn't hidden behind them (mirrors Header.tsx).
+      // The global `.titlebar-drag button { -webkit-app-region: no-drag }` rule
+      // keeps the interactive controls clickable.
+      className={cn(
+        "titlebar-drag flex items-center gap-3 pr-4 py-3 shrink-0",
+        isMac ? "pl-20" : "pl-4",
+      )}
       style={{ background: "var(--color-surface-1)", borderBottom: "1px solid var(--color-border)" }}
     >
       <Button type="button" intent="ghost" size="sm" aria-label="Back to home" onClick={onBack}>
