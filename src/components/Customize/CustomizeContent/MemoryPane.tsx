@@ -66,6 +66,7 @@ export function MemoryPane({ repoScope }: { repoScope: string | null }) {
       {openEntry !== null ? (
         <MemoryDrawer
           entry={openEntry}
+          repoScope={repoScope}
           open
           onOpenChange={(open) => {
             if (!open) setOpenEntry(null);
