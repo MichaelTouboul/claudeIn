@@ -43,8 +43,8 @@ export function DetailHeader({
     <div
       className="border-b px-6 py-4"
       style={{
-        background: editing ? 'rgba(6,182,212,0.04)' : 'var(--color-surface-1)',
-        borderColor: editing ? 'rgba(6,182,212,0.2)' : 'var(--color-border)',
+        background: editing ? 'rgba(129, 140, 248,0.04)' : 'var(--color-surface-1)',
+        borderColor: editing ? 'rgba(129, 140, 248,0.2)' : 'var(--color-border)',
       }}
     >
       <Flex align="center" justify="between">
@@ -74,7 +74,7 @@ export function DetailHeader({
               style={{
                 fontFamily: 'var(--font-mono)',
                 letterSpacing: '0.05em',
-                border: '1px solid rgba(6,182,212,0.15)',
+                border: '1px solid rgba(129, 140, 248,0.15)',
               }}
             >
               EDITING

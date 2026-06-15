@@ -33,8 +33,8 @@ export function GlobalChatModal({
           boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
         }}
         onMouseEnter={(e: MouseEvent<HTMLButtonElement>) => {
-          e.currentTarget.style.borderColor = 'rgba(6,182,212,0.2)';
-          e.currentTarget.style.boxShadow = '0 4px 24px rgba(0,0,0,0.4), 0 0 12px rgba(6,182,212,0.08)';
+          e.currentTarget.style.borderColor = 'rgba(129, 140, 248,0.2)';
+          e.currentTarget.style.boxShadow = '0 4px 24px rgba(0,0,0,0.4), 0 0 12px rgba(129, 140, 248,0.08)';
         }}
         onMouseLeave={(e: MouseEvent<HTMLButtonElement>) => {
           e.currentTarget.style.borderColor = 'var(--color-border)';
@@ -43,7 +43,7 @@ export function GlobalChatModal({
       >
         <MessageSquare size={14} style={{ color: 'var(--color-accent)' }} />
         <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>{title}</span>
-        <StatusDot size="xs" pulse style={{ background: 'rgba(6,182,212,0.5)' }} />
+        <StatusDot size="xs" pulse style={{ background: 'rgba(129, 140, 248,0.5)' }} />
       </Inline>
     );
   }
@@ -55,7 +55,7 @@ export function GlobalChatModal({
         style={{
           background: 'var(--color-surface-2)',
           border: '1px solid var(--color-border)',
-          boxShadow: '0 8px 48px rgba(0,0,0,0.6), 0 0 1px rgba(6,182,212,0.1)',
+          boxShadow: '0 8px 48px rgba(0,0,0,0.6), 0 0 1px rgba(129, 140, 248,0.1)',
         }}
       >
         <Flex

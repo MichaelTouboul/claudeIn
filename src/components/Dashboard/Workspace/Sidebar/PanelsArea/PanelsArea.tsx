@@ -132,7 +132,7 @@ export function PanelsArea({
                 style={scopeTab === "project" ? {
                   background: 'var(--color-accent-dim)',
                   color: 'var(--color-accent)',
-                  boxShadow: 'inset 0 0 8px rgba(6,182,212,0.08)',
+                  boxShadow: 'inset 0 0 8px rgba(129, 140, 248,0.08)',
                 } : {
                   color: 'var(--color-text-muted)',
                 }}

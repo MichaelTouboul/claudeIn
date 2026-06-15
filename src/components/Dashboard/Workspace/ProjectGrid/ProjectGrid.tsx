@@ -14,7 +14,7 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
       <div className="text-center max-w-3xl mx-auto px-8">
         <div
           className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-5"
-          style={{ background: 'var(--color-accent-dim)', border: '1px solid rgba(6, 182, 212, 0.15)' }}
+          style={{ background: 'var(--color-accent-dim)', border: '1px solid rgba(129, 140, 248, 0.15)' }}
         >
           <Bot size={24} className="text-accent" />
         </div>
@@ -30,8 +30,8 @@ export function ProjectGrid({ projects }: ProjectGridProps) {
               className="text-left rounded-lg p-4 transition-all duration-200 hover:translate-y-[-1px] group"
               style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(6, 182, 212, 0.3)';
-                e.currentTarget.style.boxShadow = '0 4px 20px rgba(6, 182, 212, 0.06)';
+                e.currentTarget.style.borderColor = 'rgba(129, 140, 248, 0.3)';
+                e.currentTarget.style.boxShadow = '0 4px 20px rgba(129, 140, 248, 0.06)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.borderColor = 'var(--color-border)';

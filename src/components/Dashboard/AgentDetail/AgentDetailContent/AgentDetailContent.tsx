@@ -104,7 +104,7 @@ export function AgentDetailContent({
   return (
     <div
       className={`flex-1 flex flex-col h-full ${editing ? "ring-inset rounded-lg" : ""}`}
-      style={editing ? { boxShadow: 'inset 0 0 0 2px rgba(6,182,212,0.2)' } : undefined}
+      style={editing ? { boxShadow: 'inset 0 0 0 2px rgba(129, 140, 248,0.2)' } : undefined}
     >
       <button
         onClick={backToProject}
@@ -136,7 +136,7 @@ export function AgentDetailContent({
       <div
         className="border-b px-6 flex items-center gap-1"
         style={{
-          borderColor: editing ? 'rgba(6,182,212,0.2)' : 'var(--color-border)',
+          borderColor: editing ? 'rgba(129, 140, 248,0.2)' : 'var(--color-border)',
           background: 'var(--color-surface-1)',
         }}
       >
@@ -146,7 +146,7 @@ export function AgentDetailContent({
           style={{
             background: tab === "chat" ? 'var(--color-accent)' : 'var(--color-surface-3)',
             color: tab === "chat" ? 'var(--color-surface-0)' : 'var(--color-text-secondary)',
-            boxShadow: tab === "chat" ? '0 0 12px rgba(6,182,212,0.2), 0 1px 3px rgba(0,0,0,0.3)' : 'none',
+            boxShadow: tab === "chat" ? '0 0 12px rgba(129, 140, 248,0.2), 0 1px 3px rgba(0,0,0,0.3)' : 'none',
             border: tab === "chat" ? 'none' : '1px solid var(--color-border-subtle)',
           }}
         >

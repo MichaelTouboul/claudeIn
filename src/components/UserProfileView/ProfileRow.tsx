@@ -9,13 +9,13 @@ type ProfileSectionProps = {
   children: ReactNode;
 };
 
-/** A labelled read-only section: an uppercase mono heading above its content. */
+/** A labelled read-only section: an uppercase sans overline heading above its content. */
 export function ProfileSection({ label, children }: ProfileSectionProps) {
   return (
     <Stack gap={1.5}>
       <span
         className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle"
-        style={{ fontFamily: "var(--font-mono)" }}
+        style={{ fontFamily: "var(--font-sans)" }}
       >
         {label}
       </span>

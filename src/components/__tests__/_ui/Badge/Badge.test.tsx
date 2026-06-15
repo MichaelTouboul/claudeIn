@@ -23,6 +23,6 @@ describe('Badge', () => {
         z
       </Badge>,
     );
-    expect(screen.getByText('z')).toHaveStyle({ color: 'rgb(253, 224, 71)' });
+    expect(screen.getByText('z')).toHaveStyle({ color: 'rgb(244, 213, 137)' });
   });
 });

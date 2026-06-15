@@ -16,7 +16,7 @@ type FavoriteReposGridProps = {
 export function FavoriteReposGrid({ repos, loading, onOpen, onRemove, onAdd }: FavoriteReposGridProps) {
   return (
     <Stack as="section" gap={3} aria-label="Favorite repositories">
-      <h2 className="text-xs uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
+      <h2 className="text-xs uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-sans)" }}>
         Favorite repositories
       </h2>
       {loading ? (

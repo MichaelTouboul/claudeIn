@@ -61,19 +61,19 @@ export function UserProfileEdit({ profile, onSave, onCancel }: UserProfileEditPr
   return (
     <Stack as="form" gap={4} onSubmit={submit}>
       <Stack as="label" gap={1} className="text-sm">
-        <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
+        <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-sans)" }}>
           Name
         </span>
         <Input className="bg-surface-0" value={draft.name} onChange={set("name")} />
       </Stack>
       <Stack as="label" gap={1} className="text-sm">
-        <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
+        <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-sans)" }}>
           Role
         </span>
         <Input className="bg-surface-0" value={draft.role} onChange={set("role")} />
       </Stack>
       <Stack as="label" gap={1} className="text-sm">
-        <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
+        <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-sans)" }}>
           Domains (comma-separated)
         </span>
         <Input className="bg-surface-0" value={draft.domains} onChange={set("domains")} />

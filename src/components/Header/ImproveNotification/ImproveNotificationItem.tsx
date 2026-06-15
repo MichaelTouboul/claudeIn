@@ -60,7 +60,7 @@ export function ImproveNotificationItem({
           aria-label={`Update — apply ${request.title}`}
           onClick={() => onUpdate(request.id)}
           className="text-accent"
-          style={{ border: "1px solid rgba(6, 182, 212, 0.25)" }}
+          style={{ border: "1px solid rgba(129, 140, 248, 0.25)" }}
         >
           <RefreshCw size={11} />
           Update

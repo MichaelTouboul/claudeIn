@@ -23,7 +23,7 @@ export function Popover({ trigger, children, align = 'start', className, sideOff
           style={{
             background: 'var(--color-surface-2)',
             border: '1px solid var(--color-border)',
-            boxShadow: '0 12px 48px rgba(0,0,0,0.5), 0 0 1px rgba(6,182,212,0.1)',
+            boxShadow: '0 12px 48px rgba(0,0,0,0.5), 0 0 1px rgba(129, 140, 248,0.1)',
           }}
         >
           {children}
