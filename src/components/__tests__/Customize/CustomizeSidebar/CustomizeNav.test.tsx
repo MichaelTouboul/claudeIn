@@ -31,14 +31,34 @@ describe("CustomizeNav", () => {
   });
 
   it("moves selection with ArrowDown / ArrowUp", () => {
+    // Order: Profile · Connectors · Skills · Sub-agents · Hooks · Memory.
     const onSelect = vi.fn();
     render(<CustomizeNav active={CustomizeSection.Skills} onSelect={onSelect} />);
     fireEvent.keyDown(screen.getByRole("tab", { name: /skills/i }), { key: "ArrowDown" });
-    expect(onSelect).toHaveBeenCalledWith(CustomizeSection.Connectors);
+    expect(onSelect).toHaveBeenCalledWith(CustomizeSection.Agents);
 
     onSelect.mockClear();
     fireEvent.keyDown(screen.getByRole("tab", { name: /skills/i }), { key: "ArrowUp" });
-    expect(onSelect).toHaveBeenCalledWith(CustomizeSection.Profile);
+    expect(onSelect).toHaveBeenCalledWith(CustomizeSection.Connectors);
+  });
+
+  it("renders the four new ecosystem sections with their counts", () => {
+    render(
+      <CustomizeNav
+        active={CustomizeSection.Profile}
+        onSelect={vi.fn()}
+        counts={{
+          [CustomizeSection.Skills]: 12,
+          [CustomizeSection.Agents]: 6,
+          [CustomizeSection.Hooks]: 3,
+          [CustomizeSection.Memory]: 5,
+        }}
+      />,
+    );
+    expect(screen.getByRole("tab", { name: /sub-agents/i })).toHaveTextContent("6");
+    expect(screen.getByRole("tab", { name: /hooks/i })).toHaveTextContent("3");
+    expect(screen.getByRole("tab", { name: /memory/i })).toHaveTextContent("5");
+    expect(screen.getByRole("tab", { name: /skills/i })).toHaveTextContent("12");
   });
 
   it("the active tab is keyboard-reachable (tabIndex 0) and inactive ones are not", () => {

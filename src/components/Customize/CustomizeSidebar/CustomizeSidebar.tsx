@@ -16,6 +16,8 @@ export type CustomizeSidebarProps = {
   manage: UseMcpManage;
   /** Active repo path for project-scoped adds (undefined → Personal only). */
   projectPath?: string;
+  /** Per-section tallies (skills/agents/hooks/memory) shown in the nav. */
+  counts?: Partial<Record<CustomizeSection, number>>;
 };
 
 // Left rail: repo scope dropdown + section nav + (for Connectors) MCP servers
@@ -28,6 +30,7 @@ export function CustomizeSidebar({
   personalServers,
   manage,
   projectPath,
+  counts,
 }: CustomizeSidebarProps) {
   const section = useCustomizeStore((s) => s.section);
   const setSection = useCustomizeStore((s) => s.setSection);
@@ -53,7 +56,7 @@ export function CustomizeSidebar({
       <CustomizeNav
         active={section}
         onSelect={setSection}
-        counts={{ [CustomizeSection.Connectors]: connectorCount }}
+        counts={{ ...counts, [CustomizeSection.Connectors]: connectorCount }}
       />
 
       {section === CustomizeSection.Connectors ? (

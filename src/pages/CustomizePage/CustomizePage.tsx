@@ -6,6 +6,7 @@ import { CustomizeSidebar } from "@/components/Customize/CustomizeSidebar/Custom
 import { CustomizeTopBar } from "@/components/Customize/CustomizeTopBar";
 import { useCustomizeManage } from "@/hooks/useCustomizeManage";
 import { useCustomizeMcp } from "@/hooks/useCustomizeMcp";
+import { useEcosystemCounts } from "@/hooks/useEcosystemCounts";
 import { useFavoriteRepos } from "@/hooks/useFavoriteRepos";
 import { useCustomizeStore } from "@/store/customize/useCustomizeStore";
 import { AppPage, useAppStore } from "@/store/useAppStore";
@@ -22,6 +23,7 @@ export function CustomizePage() {
 
   const { projectServers, personalServers, refresh } = useCustomizeMcp(repoScope);
   const manage = useCustomizeManage(refresh);
+  const counts = useEcosystemCounts(repoScope);
 
   useEffect(() => reset, [reset]);
 
@@ -43,6 +45,7 @@ export function CustomizePage() {
           personalServers={personalServers}
           manage={manage}
           projectPath={repoScope ?? undefined}
+          counts={counts}
         />
         <CustomizeContent manage={manage} projectPath={repoScope ?? undefined} />
       </div>

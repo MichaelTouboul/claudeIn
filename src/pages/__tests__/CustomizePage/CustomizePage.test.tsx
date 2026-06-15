@@ -45,6 +45,16 @@ beforeEach(() => {
     removeMcpServer: vi.fn(async () => ({ ok: true as const })),
     getUserProfile: vi.fn(async () => null),
     saveUserProfile: vi.fn(async (p: unknown) => p),
+    // Ecosystem mirrors drive the nav counts + the Skills/Agents/Hooks/Memory panes.
+    getSkillsMirror: vi.fn(async () => ({ projectPath: null, skills: [] })),
+    onSkillsChanged: vi.fn(() => () => {}),
+    getAgentsMirror: vi.fn(async () => ({ projectPath: null, agents: [] })),
+    onAgentsChanged: vi.fn(() => () => {}),
+    getMemoryMirror: vi.fn(async () => ({ projectPath: null, entries: [] })),
+    onMemoryChanged: vi.fn(() => () => {}),
+    getHooks: vi.fn(async () => []),
+    setHookEnabled: vi.fn(async () => []),
+    getAgentByPath: vi.fn(async () => null),
   } as unknown as Window["api"];
 });
 
@@ -96,10 +106,11 @@ describe("CustomizePage", () => {
     );
   });
 
-  it("switching to Skills shows the placeholder", async () => {
+  it("switching to Skills shows the skills pane (empty state from the mirror)", async () => {
     render(<CustomizePage />);
     fireEvent.click(await screen.findByRole("tab", { name: /skills/i }));
-    expect(screen.getByTestId("skills-placeholder")).toBeInTheDocument();
+    expect(await screen.findByRole("region", { name: /skills/i })).toBeInTheDocument();
+    expect(await screen.findByText(/no skills in this scope/i)).toBeInTheDocument();
   });
 
   it("removing a server confirms, calls removeMcpServer and shows the restart banner", async () => {
