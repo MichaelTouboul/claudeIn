@@ -27,7 +27,7 @@ export function Header({ activeCount, connected, onOpenChat, onGoHome }: HeaderP
       {onGoHome ? (
         <Button intent="ghost" size="sm" onClick={onGoHome} className="text-fg-muted" style={{ fontFamily: 'var(--font-mono)' }}>
           <Home size={12} />
-          Accueil
+          Home
         </Button>
       ) : null}
       <div className="flex-1" />

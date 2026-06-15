@@ -55,8 +55,8 @@ describe("recommendResumeOption", () => {
   });
 
   it("recommends 'compact' when the estimate reaches the heavy threshold", () => {
-    const heavyTokens = CONTEXT_WINDOW_TOKENS * HEAVY_CONTEXT_RATIO; // 100_000
-    const chars = heavyTokens * 4; // 400_000 chars → exactly 100k tokens
+    const heavyTokens = CONTEXT_WINDOW_TOKENS * HEAVY_CONTEXT_RATIO; // 170_000
+    const chars = heavyTokens * 4; // 680_000 chars → exactly the heavy threshold
     const conv = conversation([msg("x".repeat(chars))]);
     expect(estimateContextTokens(conv)).toBe(heavyTokens);
     expect(recommendResumeOption(conv)).toBe("compact");

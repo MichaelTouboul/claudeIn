@@ -1,6 +1,10 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import {
+  CONTEXT_WINDOW_TOKENS,
+  HEAVY_CONTEXT_RATIO,
+} from "@/components/Dashboard/Workspace/DashboardArea/Dashboard/SessionViewer/ResumeChoice/resumeRecommendation";
 import { SessionViewer } from "@/components/Dashboard/Workspace/DashboardArea/Dashboard/SessionViewer/SessionViewer";
 import type { SessionConversation, SessionMessage } from "@/hooks/useSessions";
 import type { ChatMessage } from "@/lib/types";
@@ -19,6 +23,10 @@ vi.mock("@/components/Dashboard/AgentChat/AgentChat", () => ({
 type AppendCb = (data: { filePath: string; messages: SessionMessage[] }) => void;
 
 const FILE = "/sessions/abc.jsonl";
+
+// A single message whose content estimate crosses the heavy threshold, so the
+// viewer surfaces the Compact/Continue choice instead of auto-continuing.
+const HEAVY_CHARS = CONTEXT_WINDOW_TOKENS * HEAVY_CONTEXT_RATIO * 4;
 
 const { getSessionConversation, watchConversation, unwatchConversation, onConversationAppended, emitAppend } =
   vi.hoisted(() => {
@@ -47,6 +55,11 @@ function conversation(messages: SessionMessage[]): SessionConversation {
   return { sessionId: "abc", messages, totalTokensIn: 0, totalTokensOut: 0, model: null };
 }
 
+/** A conversation heavy enough that compaction is recommended (choice screen shown). */
+function heavyConversation(extra: SessionMessage[] = []): SessionConversation {
+  return conversation([msg("u1", "user", "x".repeat(HEAVY_CHARS)), ...extra]);
+}
+
 beforeEach(() => {
   Object.assign(window, {
     api: { getSessionConversation, watchConversation, unwatchConversation, onConversationAppended },
@@ -64,33 +77,45 @@ function renderViewer() {
 }
 
 describe("SessionViewer", () => {
-  it("renders the initial conversation read-only and starts the tail", async () => {
+  it("auto-continues a light conversation straight into the live chat (no choice screen)", async () => {
     getSessionConversation.mockResolvedValue(conversation([msg("u1", "user", "hello")]));
     renderViewer();
 
-    expect(await screen.findByText("hello")).toBeInTheDocument();
-    expect(screen.getByText("My session")).toBeInTheDocument();
+    expect(await screen.findByTestId("agent-chat")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /continue as is/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /compact/i })).not.toBeInTheDocument();
+    // Continue mode (non-destructive): no compaction flag.
+    expect(agentChatProps).toHaveBeenCalledWith(
+      expect.objectContaining({ resumeSessionId: "abcdef12", cwd: "/Users/x/proj", compactOnResume: false }),
+    );
     expect(watchConversation).toHaveBeenCalledWith(FILE);
   });
 
-  it("appends live messages and dedupes by uuid", async () => {
-    getSessionConversation.mockResolvedValue(conversation([msg("u1", "user", "hello")]));
+  it("renders the read-only transcript and starts the tail for a heavy conversation", async () => {
+    getSessionConversation.mockResolvedValue(heavyConversation());
     renderViewer();
-    await screen.findByText("hello");
+
+    expect(await screen.findByText("My session")).toBeInTheDocument();
+    expect(watchConversation).toHaveBeenCalledWith(FILE);
+  });
+
+  it("appends live messages and dedupes by uuid (heavy conversation, viewer visible)", async () => {
+    getSessionConversation.mockResolvedValue(heavyConversation());
+    renderViewer();
+    await screen.findByText("My session");
 
     emitAppend({ filePath: FILE, messages: [msg("a1", "assistant", "world")] });
     expect(await screen.findByText("world")).toBeInTheDocument();
 
-    // Re-emitting the same uuid (plus the already-loaded one) must not duplicate.
-    emitAppend({ filePath: FILE, messages: [msg("a1", "assistant", "world"), msg("u1", "user", "hello")] });
+    // Re-emitting the same uuid must not duplicate.
+    emitAppend({ filePath: FILE, messages: [msg("a1", "assistant", "world")] });
     await waitFor(() => expect(screen.getAllByText("world")).toHaveLength(1));
-    expect(screen.getAllByText("hello")).toHaveLength(1);
   });
 
   it("ignores appends for a different filePath", async () => {
-    getSessionConversation.mockResolvedValue(conversation([msg("u1", "user", "hello")]));
+    getSessionConversation.mockResolvedValue(heavyConversation());
     renderViewer();
-    await screen.findByText("hello");
+    await screen.findByText("My session");
 
     emitAppend({ filePath: "/sessions/other.jsonl", messages: [msg("x1", "assistant", "stray")] });
     await waitFor(() => expect(screen.queryByText("stray")).not.toBeInTheDocument());
@@ -103,26 +128,26 @@ describe("SessionViewer", () => {
   });
 
   it("unwatches the conversation on unmount", async () => {
-    getSessionConversation.mockResolvedValue(conversation([msg("u1", "user", "hello")]));
+    getSessionConversation.mockResolvedValue(heavyConversation());
     const { unmount } = renderViewer();
-    await screen.findByText("hello");
+    await screen.findByText("My session");
     unmount();
     expect(unwatchConversation).toHaveBeenCalledWith(FILE);
   });
 
-  it("offers the resume choice with both Compact and Continue enabled", async () => {
-    getSessionConversation.mockResolvedValue(conversation([msg("u1", "user", "hello")]));
+  it("offers the resume choice with both Compact and Continue enabled (heavy conversation)", async () => {
+    getSessionConversation.mockResolvedValue(heavyConversation());
     renderViewer();
-    await screen.findByText("hello");
+    await screen.findByText("My session");
 
     expect(screen.getByRole("button", { name: /continue as is/i })).toBeEnabled();
     expect(screen.getByRole("button", { name: /compact/i })).toBeEnabled();
   });
 
   it('"Compact" resumes the same live chat as Continue, plus compactOnResume', async () => {
-    getSessionConversation.mockResolvedValue(conversation([msg("u1", "user", "hello"), msg("a1", "assistant", "world")]));
+    getSessionConversation.mockResolvedValue(heavyConversation([msg("a1", "assistant", "world")]));
     renderViewer();
-    await screen.findByText("hello");
+    await screen.findByText("My session");
 
     fireEvent.click(screen.getByRole("button", { name: /compact/i }));
 
@@ -133,27 +158,22 @@ describe("SessionViewer", () => {
     expect(props).toEqual(
       expect.objectContaining({ resumeSessionId: "abcdef12", cwd: "/Users/x/proj", compactOnResume: true }),
     );
-    // Same transcript seeding as Continue-as-is.
-    expect(props.initialMessages).toEqual([
-      expect.objectContaining({ id: "u1", role: "user", content: "hello" }),
-      expect.objectContaining({ id: "a1", role: "assistant", content: "world" }),
-    ]);
   });
 
-  it('"Continue as is" resumes into a live chat with the session id', async () => {
-    getSessionConversation.mockResolvedValue(conversation([msg("u1", "user", "hello")]));
+  it('"Continue as is" resumes into a live chat with the session id (heavy conversation)', async () => {
+    getSessionConversation.mockResolvedValue(heavyConversation());
     renderViewer();
-    await screen.findByText("hello");
+    await screen.findByText("My session");
 
     fireEvent.click(screen.getByRole("button", { name: /continue as is/i }));
 
     expect(await screen.findByTestId("agent-chat")).toBeInTheDocument();
     expect(agentChatProps).toHaveBeenCalledWith(
-      expect.objectContaining({ resumeSessionId: "abcdef12", cwd: "/Users/x/proj" }),
+      expect.objectContaining({ resumeSessionId: "abcdef12", cwd: "/Users/x/proj", compactOnResume: false }),
     );
   });
 
-  it('"Continue as is" seeds the live chat with the prior transcript history', async () => {
+  it("seeds the auto-continued live chat with the prior transcript history", async () => {
     getSessionConversation.mockResolvedValue(
       // Includes a tool-only row (empty content) that must be filtered out.
       conversation([
@@ -163,9 +183,6 @@ describe("SessionViewer", () => {
       ]),
     );
     renderViewer();
-    await screen.findByText("hello");
-
-    fireEvent.click(screen.getByRole("button", { name: /continue as is/i }));
     await screen.findByTestId("agent-chat");
 
     const props = agentChatProps.mock.calls[0][0] as { initialMessages?: ChatMessage[] };
