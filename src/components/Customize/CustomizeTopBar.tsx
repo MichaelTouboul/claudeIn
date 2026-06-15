@@ -1,14 +1,26 @@
 import { ArrowLeft, User } from "lucide-react";
 
 import { Button } from "@/components/_ui/Button";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { CustomizeSection, useCustomizeStore } from "@/store/customize/useCustomizeStore";
 
 export type CustomizeTopBarProps = {
   onBack: () => void;
 };
 
-// Page top bar: a back control to Home, the page title, and an avatar
-// placeholder. Visual chrome only — no business logic.
+/** First letter of a profile name, uppercased, or null when no usable name. */
+function initialOf(name: string | null): string | null {
+  const trimmed = name?.trim() ?? "";
+  return trimmed.length > 0 ? trimmed[0].toUpperCase() : null;
+}
+
+// Page top bar: a back control to Home, the page title, and a real avatar
+// control that opens the Profile section (shows the user's initial when known).
 export function CustomizeTopBar({ onBack }: CustomizeTopBarProps) {
+  const { profile } = useUserProfile();
+  const setSection = useCustomizeStore((s) => s.setSection);
+  const initial = initialOf(profile?.name ?? null);
+
   return (
     <header
       className="flex items-center gap-3 px-4 py-3 shrink-0"
@@ -24,13 +36,15 @@ export function CustomizeTopBar({ onBack }: CustomizeTopBarProps) {
       >
         Customize Claude
       </h1>
-      <div
-        aria-hidden
-        className="ml-auto flex h-8 w-8 items-center justify-center rounded-full"
+      <button
+        type="button"
+        aria-label="View your profile"
+        onClick={() => setSection(CustomizeSection.Profile)}
+        className="ml-auto flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
         style={{ background: "var(--color-surface-3)", color: "var(--color-text-muted)" }}
       >
-        <User size={16} />
-      </div>
+        {initial ?? <User size={16} />}
+      </button>
     </header>
   );
 }

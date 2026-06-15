@@ -16,6 +16,13 @@ describe("CustomizeNav", () => {
     expect(skills).toHaveAttribute("aria-selected", "false");
   });
 
+  it("renders Profile as the first tab", () => {
+    render(<CustomizeNav active={CustomizeSection.Profile} onSelect={vi.fn()} />);
+    const tabs = screen.getAllByRole("tab");
+    expect(tabs[0]).toHaveAccessibleName(/profile/i);
+    expect(screen.getByRole("tab", { name: /profile/i })).toHaveAttribute("aria-selected", "true");
+  });
+
   it("selects a section on click", () => {
     const onSelect = vi.fn();
     render(<CustomizeNav active={CustomizeSection.Connectors} onSelect={onSelect} />);
@@ -31,7 +38,7 @@ describe("CustomizeNav", () => {
 
     onSelect.mockClear();
     fireEvent.keyDown(screen.getByRole("tab", { name: /skills/i }), { key: "ArrowUp" });
-    expect(onSelect).toHaveBeenCalledWith(CustomizeSection.Connectors);
+    expect(onSelect).toHaveBeenCalledWith(CustomizeSection.Profile);
   });
 
   it("the active tab is keyboard-reachable (tabIndex 0) and inactive ones are not", () => {

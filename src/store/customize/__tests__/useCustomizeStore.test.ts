@@ -20,9 +20,9 @@ beforeEach(() => {
 });
 
 describe("useCustomizeStore", () => {
-  it("defaults to the Connectors section, no repo, no server", () => {
+  it("defaults to the Profile section, no repo, no server", () => {
     const s = useCustomizeStore.getState();
-    expect(s.section).toBe(CustomizeSection.Connectors);
+    expect(s.section).toBe(CustomizeSection.Profile);
     expect(s.repoScope).toBeNull();
     expect(s.selectedServer).toBeNull();
   });
@@ -47,7 +47,7 @@ describe("useCustomizeStore", () => {
     useCustomizeStore.getState().selectServer(entry("a"));
     useCustomizeStore.getState().reset();
     const s = useCustomizeStore.getState();
-    expect(s.section).toBe(CustomizeSection.Connectors);
+    expect(s.section).toBe(CustomizeSection.Profile);
     expect(s.repoScope).toBeNull();
     expect(s.selectedServer).toBeNull();
   });

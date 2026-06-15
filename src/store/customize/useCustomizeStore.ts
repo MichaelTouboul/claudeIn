@@ -3,11 +3,12 @@ import { create } from "zustand";
 import type { McpServerEntry } from "@/lib/types";
 
 /**
- * The two Customize-page sections. Single source of truth for which nav item is
+ * The Customize-page sections. Single source of truth for which nav item is
  * active and which content the right pane renders. Modeled as an `as const` enum
  * so a section→content `Record` maps each value to its pane (no fallback chain).
  */
 export const CustomizeSection = {
+  Profile: "profile",
   Skills: "skills",
   Connectors: "connectors",
 } as const;
@@ -34,7 +35,7 @@ type CustomizeState = {
 };
 
 const INITIAL = {
-  section: CustomizeSection.Connectors,
+  section: CustomizeSection.Profile,
   repoScope: null,
   selectedServer: null,
 } as const;

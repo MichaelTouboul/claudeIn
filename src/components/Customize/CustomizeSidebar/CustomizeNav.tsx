@@ -1,4 +1,4 @@
-import { Plug, Sparkles } from "lucide-react";
+import { Plug, Sparkles, User } from "lucide-react";
 import type { KeyboardEvent, ReactNode } from "react";
 
 import { Stack } from "@/components/_ui/Stack";
@@ -17,6 +17,7 @@ type NavPresentation = {
 // Section→presentation map (no fallback chain): every CustomizeSection has an
 // explicit nav label + icon. `Object.values` drives the rendered order.
 const NAV_PRESENTATION: Record<CustomizeSection, NavPresentation> = {
+  [CustomizeSection.Profile]: { label: "Profile", icon: <User size={14} className="text-fg-muted" /> },
   [CustomizeSection.Skills]: { label: "Skills", icon: <Sparkles size={14} className="text-active" /> },
   [CustomizeSection.Connectors]: { label: "Connectors", icon: <Plug size={14} className="text-accent" /> },
 };
