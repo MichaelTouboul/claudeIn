@@ -36,7 +36,7 @@ export function toBadgeVariant(v: string): BadgeVariant {
 export type BadgeShape = 'rounded' | 'pill';
 
 const SHAPE_CLASS: Record<BadgeShape, string> = {
-  rounded: 'rounded',
+  rounded: 'rounded-sm',
   pill: 'rounded-full',
 };
 

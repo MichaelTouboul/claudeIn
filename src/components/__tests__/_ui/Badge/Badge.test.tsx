@@ -7,7 +7,8 @@ describe('Badge', () => {
   it('defaults to the rounded shape', () => {
     render(<Badge>x</Badge>);
     const el = screen.getByText('x');
-    expect(el).toHaveClass('rounded');
+    // skill Badge uses the --radius-sm (6px) corner, i.e. rounded-sm
+    expect(el).toHaveClass('rounded-sm');
     expect(el).not.toHaveClass('rounded-full');
   });
 

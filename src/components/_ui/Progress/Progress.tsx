@@ -30,7 +30,7 @@ export function Progress({
       value={indeterminate ? null : percent}
       max={100}
       className={cn('relative overflow-hidden rounded-full', trackClassName)}
-      style={{ background: 'var(--color-surface-3)', ...style }}
+      style={{ background: 'var(--color-surface-inset)', ...style }}
       {...props}
     >
       <RadixProgress.Indicator
