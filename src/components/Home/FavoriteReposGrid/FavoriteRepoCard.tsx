@@ -1,7 +1,9 @@
+import { Avatar } from "@/components/_ui/Avatar";
 import { Button } from "@/components/_ui/Button";
-import { Inline } from "@/components/_ui/Inline";
 import type { FavoriteRepo } from "@/lib/types";
 import { repoLabel } from "@/lib/utils";
+
+import { repoHue } from "./utils";
 
 type FavoriteRepoCardProps = {
   repo: FavoriteRepo;
@@ -9,30 +11,34 @@ type FavoriteRepoCardProps = {
   onRemove: (repo: FavoriteRepo) => void;
 };
 
-/** One favorite repo: a label + path, an "Open" action and a discreet "Remove". */
+/**
+ * One favorite repo: a hued identity avatar, the label + mono path, and an
+ * "Open" / "Remove" action pair. Matches the design-system home RepoCard.
+ */
 export function FavoriteRepoCard({ repo, onOpen, onRemove }: FavoriteRepoCardProps) {
   const label = repoLabel(repo);
   return (
     <div
       data-repo-card
-      className="flex flex-col gap-3 rounded border border-border bg-surface-1 p-4"
+      className="flex flex-col gap-3.5 rounded-lg border border-border bg-surface-1 p-4"
     >
-      <div className="min-w-0">
-        <p className="truncate text-sm font-medium text-fg" style={{ fontFamily: "var(--font-sans)" }}>
-          {label}
-        </p>
-        <p className="truncate text-xs text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }} title={repo.path}>
-          {repo.path}
-        </p>
+      <div className="flex items-center gap-3">
+        <Avatar name={label} hue={repoHue(repo.path)} shape="square" size="md" />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold text-fg">{label}</p>
+          <p className="truncate text-xs text-fg-subtle font-mono" title={repo.path}>
+            {repo.path}
+          </p>
+        </div>
       </div>
-      <Inline gap={2}>
+      <div className="flex gap-2">
         <Button intent="primary" size="sm" onClick={() => onOpen(repo)} aria-label={`Open ${label}`}>
           Open
         </Button>
         <Button intent="ghost" size="sm" onClick={() => onRemove(repo)} aria-label={`Remove ${label}`}>
           Remove
         </Button>
-      </Inline>
+      </div>
     </div>
   );
 }

@@ -22,4 +22,19 @@ describe('Input', () => {
     render(<Input placeholder="p" disabled value="x" readOnly />);
     expect(screen.getByPlaceholderText('p')).toBeDisabled();
   });
+
+  it('renders a leading icon and keeps the field interactive', () => {
+    render(
+      <Input
+        placeholder="search"
+        leadingIcon={<span data-testid="lead">i</span>}
+        aria-label="Search"
+      />,
+    );
+    expect(screen.getByTestId('lead')).toBeInTheDocument();
+    const el = screen.getByPlaceholderText('search');
+    // with an adornment the input itself goes bare; the chrome moves to the wrapper
+    expect(el).toHaveClass('bg-transparent', 'border-0');
+    expect(el).toHaveAttribute('aria-label', 'Search');
+  });
 });

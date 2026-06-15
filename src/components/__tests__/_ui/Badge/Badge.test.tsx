@@ -26,4 +26,21 @@ describe('Badge', () => {
     );
     expect(screen.getByText('z')).toHaveStyle({ color: 'rgb(244, 213, 137)' });
   });
+
+  it('renders a leading status dot when dot is set', () => {
+    const { container } = render(
+      <Badge variant="green" shape="pill" dot>
+        live
+      </Badge>,
+    );
+    // the dot is a decorative span before the label
+    const dot = container.querySelector('span[aria-hidden="true"]');
+    expect(dot).not.toBeNull();
+    expect(dot).toHaveClass('rounded-full');
+  });
+
+  it('renders no dot by default', () => {
+    const { container } = render(<Badge>plain</Badge>);
+    expect(container.querySelector('span[aria-hidden="true"]')).toBeNull();
+  });
 });
