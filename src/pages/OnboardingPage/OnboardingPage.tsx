@@ -26,8 +26,12 @@ export function OnboardingPage() {
   const [step, setStep] = useState<OnbStep>(OnbStep.Welcome);
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
-  const onProfile = useCallback((built: UserProfile) => {
-    setProfile(built);
+  const onProfile = useCallback(async (built: UserProfile) => {
+    // Persist the moment the profile is built — not only if the user later edits
+    // it in ProfileReview. `completeOnboarding` merges onto this row, so the
+    // built name/role/domains/capabilities survive the rest of the flow.
+    const saved = await window.api.saveUserProfile(built);
+    setProfile(saved);
     setStep(OnbStep.ProfileReview);
   }, []);
 

@@ -83,6 +83,16 @@ describe("OnboardingPage", () => {
     expect(buildUserProfile).toHaveBeenCalledWith("/home/u/.claude");
   });
 
+  it("persists the built profile when advancing to ProfileReview (not only on edit)", async () => {
+    render(<OnboardingPage />);
+    await click(/get started/i);
+    await click(/authorize/i);
+    await screen.findByText("backend");
+    // The built profile is saved the moment it is built — before any edit — so
+    // the normal confirm/continue path no longer leaves an empty DB row.
+    await waitFor(() => expect(saveUserProfile).toHaveBeenCalledWith(makeProfile()));
+  });
+
   it("runs the full flow to Done, which completes onboarding and navigates home", async () => {
     render(<OnboardingPage />);
     await click(/get started/i);
