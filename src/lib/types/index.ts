@@ -4,6 +4,7 @@ export * from './attachment.types';
 export type { ComponentSource } from './component-source.interface';
 export * from './dashboard.types';
 export * from './events.types';
+export * from './hooks.types';
 export * from './improve.types';
 export * from './mcp-manage.types';
 export * from './mcp-mirror.types';

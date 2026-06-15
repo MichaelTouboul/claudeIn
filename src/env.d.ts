@@ -74,6 +74,9 @@ interface Window {
     unwatchSettings: () => Promise<void>;
     onSettingsChanged: (cb: (snapshot: import("./types/settings.types").SettingsSnapshot) => void) => () => void;
 
+    getHooks: (projectPath?: string) => Promise<import("./lib/types/hooks.types").HookEntry[]>;
+    setHookEnabled: (hookId: string, enabled: boolean, projectPath?: string) => Promise<import("./lib/types/hooks.types").HookEntry[]>;
+
     getAgentsMirror: (projectPath?: string) => Promise<import("./types/agents-mirror.types").AgentsSnapshot>;
     watchAgents: (projectPath?: string) => Promise<void>;
     unwatchAgents: () => Promise<void>;
