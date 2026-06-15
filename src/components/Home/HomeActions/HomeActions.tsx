@@ -14,7 +14,7 @@ type HomeActionsProps = {
 export function HomeActions({ onOpenUserAgent, onCustomize }: HomeActionsProps) {
   return (
     <Stack as="section" gap={3} aria-label="Actions">
-      <h2 className="text-xs uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-mono)" }}>
+      <h2 className="text-xs uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-sans)" }}>
         Actions
       </h2>
       <div className="flex flex-wrap items-center gap-2">

@@ -56,7 +56,7 @@ export function ImproveNotification() {
           className="relative glow-cyan text-accent"
           style={{
             fontFamily: "var(--font-mono)",
-            border: "1px solid rgba(6, 182, 212, 0.25)",
+            border: "1px solid rgba(129, 140, 248, 0.25)",
           }}
         >
           <Sparkles size={12} />

@@ -36,7 +36,7 @@ export function MessageRow({ msg, isLast, onAnswer }: MessageRowProps) {
       <div className="group relative">
         <Inline gap={2} className="mb-0.5">
           <ChevronRight size={12} className="text-accent" />
-          <span className="text-xs text-accent font-medium">you</span>
+          <span className="text-xs text-accent font-medium">You</span>
           <span className="text-xs text-fg-subtle opacity-0 group-hover:opacity-100">{time}</span>
         </Inline>
         {decision.kind === 'slash' ? (
@@ -65,7 +65,7 @@ export function MessageRow({ msg, isLast, onAnswer }: MessageRowProps) {
       <div className="group relative ml-5">
         <Inline gap={2} className="mb-0.5">
           <Wrench size={10} className="text-[var(--color-warning)]" />
-          <span className="text-xs text-[var(--color-warning)] font-mono">{msg.toolName || "tool"}</span>
+          <span className="text-xs text-[var(--color-warning)] font-mono">{msg.toolName || "Tool"}</span>
           <span className="text-xs text-fg-subtle opacity-0 group-hover:opacity-100">{time}</span>
         </Inline>
         {fileDiff && msg.toolName ? (
@@ -92,7 +92,7 @@ export function MessageRow({ msg, isLast, onAnswer }: MessageRowProps) {
           <Bot size={12} className="text-fg-muted" />
         )}
         <span className={`text-xs font-medium ${isAuthorization ? "text-[var(--color-warning)]" : "text-fg-muted"}`}>
-          {isAuthorization ? "authorization" : "agent"}
+          {isAuthorization ? "Authorization" : "Claude"}
         </span>
         <span className="text-xs text-fg-subtle opacity-0 group-hover:opacity-100">{time}</span>
       </Inline>

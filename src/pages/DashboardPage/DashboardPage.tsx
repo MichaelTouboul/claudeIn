@@ -62,7 +62,7 @@ export function DashboardPage() {
       <div className="h-full flex items-center justify-center text-fg-subtle bg-surface-0">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-          <span className="text-xs font-mono tracking-wider uppercase">Scanning projects</span>
+          <span className="text-xs font-sans tracking-wider uppercase">Scanning projects</span>
         </div>
       </div>
     );

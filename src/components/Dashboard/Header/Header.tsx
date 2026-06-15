@@ -40,7 +40,7 @@ export function Header({ activeCount, connected, onOpenChat, onGoHome, onCustomi
         </Button>
       ) : null}
       <StatsBar activeCount={activeCount} connected={connected} />
-      <Button intent="outline" size="sm" onClick={onOpenChat} className="glow-cyan text-accent" style={{ fontFamily: 'var(--font-mono)', border: '1px solid rgba(6, 182, 212, 0.25)' }}>
+      <Button intent="outline" size="sm" onClick={onOpenChat} className="glow-cyan text-accent" style={{ fontFamily: 'var(--font-mono)', border: '1px solid rgba(129, 140, 248, 0.25)' }}>
         <MessageSquare size={12} />
         Chat
       </Button>

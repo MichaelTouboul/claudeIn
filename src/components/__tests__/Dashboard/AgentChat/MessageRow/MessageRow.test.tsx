@@ -31,15 +31,15 @@ const authBlock =
 describe('MessageRow', () => {
   it('shows the authorization header for an accept/deny choice prompt', () => {
     render(<MessageRow msg={assistant(authBlock)} isLast onAnswer={vi.fn()} />);
-    expect(screen.getByText('authorization')).toBeInTheDocument();
-    expect(screen.queryByText('agent')).not.toBeInTheDocument();
+    expect(screen.getByText('Authorization')).toBeInTheDocument();
+    expect(screen.queryByText('Claude')).not.toBeInTheDocument();
     expect(screen.getByRole('listbox')).toBeInTheDocument();
   });
 
   it('shows the agent header and no picker for a plain assistant message', () => {
     render(<MessageRow msg={assistant('All done.')} isLast onAnswer={vi.fn()} />);
-    expect(screen.getByText('agent')).toBeInTheDocument();
-    expect(screen.queryByText('authorization')).not.toBeInTheDocument();
+    expect(screen.getByText('Claude')).toBeInTheDocument();
+    expect(screen.queryByText('Authorization')).not.toBeInTheDocument();
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
   });
 

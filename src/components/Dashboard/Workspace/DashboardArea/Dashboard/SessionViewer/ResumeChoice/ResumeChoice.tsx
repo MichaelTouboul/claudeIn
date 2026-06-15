@@ -25,9 +25,9 @@ export function ResumeChoice({ onContinue, onCompact, recommended }: ResumeChoic
   const recommendedStyle = {
     color: "var(--color-accent)",
     background: "var(--color-accent-dim)",
-    border: "1px solid rgba(6,182,212,0.2)",
+    border: "1px solid rgba(129, 140, 248,0.2)",
   } as const;
-  const recommendedHover = "rgba(6,182,212,0.2)";
+  const recommendedHover = "rgba(129, 140, 248,0.2)";
   const secondaryStyle = {
     color: "var(--color-text-secondary)",
     background: "var(--color-surface-2)",

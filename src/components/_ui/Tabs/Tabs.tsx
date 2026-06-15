@@ -54,7 +54,7 @@ export function Tabs({ tabs, active, onChange, className }: TabsProps) {
                 ? {
                     background: 'var(--color-surface-3)',
                     color: 'var(--color-text-primary)',
-                    boxShadow: '0 0 8px rgba(6, 182, 212, 0.06)',
+                    boxShadow: '0 0 8px rgba(129, 140, 248, 0.06)',
                   }
                 : { color: 'var(--color-text-muted)' }),
             }}

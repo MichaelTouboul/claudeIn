@@ -36,7 +36,7 @@ export function RecentSessionRow({ session, selected, onSelect, onChanged }: Rec
         className="w-full text-left px-3 py-2 rounded-lg transition-all duration-200"
         style={{
           background: selected ? "var(--color-accent-dim)" : undefined,
-          border: selected ? "1px solid rgba(6,182,212,0.2)" : "1px solid transparent",
+          border: selected ? "1px solid rgba(129, 140, 248,0.2)" : "1px solid transparent",
         }}
         onMouseEnter={(e) => {
           if (!selected) e.currentTarget.style.background = "var(--color-surface-2)";

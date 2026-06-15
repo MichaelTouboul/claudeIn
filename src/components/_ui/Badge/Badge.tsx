@@ -14,15 +14,15 @@ export type BadgeVariant =
   | 'red';
 
 const COLOR_MAP: Record<BadgeVariant, { bg: string; text: string; border: string }> = {
-  blue:   { bg: 'rgba(59,130,246,0.12)',  text: '#93c5fd', border: 'rgba(59,130,246,0.2)' },
-  green:  { bg: 'rgba(34,197,94,0.12)',   text: '#86efac', border: 'rgba(34,197,94,0.2)' },
-  yellow: { bg: 'rgba(234,179,8,0.12)',   text: '#fde047', border: 'rgba(234,179,8,0.2)' },
-  orange: { bg: 'rgba(249,115,22,0.12)',  text: '#fdba74', border: 'rgba(249,115,22,0.2)' },
-  cyan:   { bg: 'var(--color-accent-dim)', text: 'var(--color-accent)', border: 'rgba(6,182,212,0.2)' },
-  purple: { bg: 'rgba(168,85,247,0.12)',  text: '#c4b5fd', border: 'rgba(168,85,247,0.2)' },
-  pink:   { bg: 'rgba(236,72,153,0.12)',  text: '#f9a8d4', border: 'rgba(236,72,153,0.2)' },
+  blue:   { bg: 'rgba(109,168,255,0.14)', text: '#a9cdff', border: 'rgba(109,168,255,0.25)' },
+  green:  { bg: 'rgba(69,212,131,0.14)',  text: '#8fe6b4', border: 'rgba(69,212,131,0.25)' },
+  yellow: { bg: 'rgba(240,193,75,0.14)',  text: '#f4d589', border: 'rgba(240,193,75,0.25)' },
+  orange: { bg: 'rgba(255,157,92,0.14)',  text: '#ffc09a', border: 'rgba(255,157,92,0.25)' },
+  cyan:   { bg: 'var(--color-accent-dim)', text: 'var(--color-accent)', border: 'rgba(129,140,248,0.25)' },
+  purple: { bg: 'rgba(183,148,246,0.14)', text: '#cdb6f9', border: 'rgba(183,148,246,0.25)' },
+  pink:   { bg: 'rgba(247,143,194,0.14)', text: '#fab4d7', border: 'rgba(247,143,194,0.25)' },
   gray:   { bg: 'var(--color-surface-3)', text: 'var(--color-text-secondary)', border: 'var(--color-border-subtle)' },
-  red:    { bg: 'rgba(248,113,113,0.12)', text: '#fca5a5', border: 'rgba(248,113,113,0.2)' },
+  red:    { bg: 'rgba(255,133,133,0.14)', text: '#ffb0b0', border: 'rgba(255,133,133,0.25)' },
 };
 
 export function isBadgeVariant(v: string): v is BadgeVariant {

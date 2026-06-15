@@ -9,7 +9,7 @@ const button = cva(
   {
     variants: {
       intent: {
-        primary: 'bg-accent text-surface-0 hover:opacity-90',
+        primary: 'bg-[var(--color-accent-solid)] text-white hover:opacity-90',
         outline:
           'bg-transparent border border-border text-fg-muted hover:bg-surface-3 hover:text-fg',
         ghost:
@@ -21,7 +21,7 @@ const button = cva(
       },
       size: {
         sm: 'h-6 px-2 text-xs',
-        md: 'h-8 px-3 text-sm',
+        md: 'h-9 px-3.5 text-sm',
         icon: 'h-8 w-8 p-0',
       },
     },

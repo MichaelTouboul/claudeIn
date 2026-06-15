@@ -25,7 +25,7 @@ export function TerminalView({ projectPath }: TerminalViewProps) {
         foreground: token('--color-text-primary', '#e2e8f0'),
         cursor: token('--color-accent', '#06b6d4'),
         cursorAccent: token('--color-surface-0', '#06080c'),
-        selectionBackground: token('--color-accent-dim', 'rgba(6,182,212,0.12)'),
+        selectionBackground: token('--color-accent-dim', 'rgba(129, 140, 248,0.14)'),
       },
     });
     const fit = new FitAddon();
