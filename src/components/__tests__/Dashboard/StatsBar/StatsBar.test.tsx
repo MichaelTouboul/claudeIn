@@ -19,7 +19,7 @@ describe('StatsBar (minimal)', () => {
   it('renders the active-agents count', () => {
     render(<StatsBar activeCount={5} connected />);
     expect(screen.getByLabelText(/active agents: 5/i)).not.toBeNull();
-    expect(screen.getByText('5')).not.toBeNull();
+    expect(screen.getByText('5 active')).not.toBeNull();
   });
 
   it('does not render events-today or total-token stats', () => {

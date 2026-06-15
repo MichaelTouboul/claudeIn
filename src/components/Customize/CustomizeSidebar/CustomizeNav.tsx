@@ -7,19 +7,23 @@ import { CustomizeSection } from "@/store/customize/useCustomizeStore";
 export type CustomizeNavProps = {
   active: CustomizeSection;
   onSelect: (section: CustomizeSection) => void;
+  /** Optional per-section item counts shown as a trailing mono tally. */
+  counts?: Partial<Record<CustomizeSection, number>>;
 };
 
 type NavPresentation = {
   label: string;
-  icon: ReactNode;
+  icon: (active: boolean) => ReactNode;
 };
 
 // Section→presentation map (no fallback chain): every CustomizeSection has an
-// explicit nav label + icon. `Object.values` drives the rendered order.
+// explicit nav label + icon. The icon takes the active flag so it tints
+// `--accent-text` when selected and `--text-tertiary` at rest. `Object.values`
+// drives the rendered order.
 const NAV_PRESENTATION: Record<CustomizeSection, NavPresentation> = {
-  [CustomizeSection.Profile]: { label: "Profile", icon: <User size={14} className="text-fg-muted" /> },
-  [CustomizeSection.Skills]: { label: "Skills", icon: <Sparkles size={14} className="text-active" /> },
-  [CustomizeSection.Connectors]: { label: "Connectors", icon: <Plug size={14} className="text-accent" /> },
+  [CustomizeSection.Profile]: { label: "Profile", icon: () => <User size={16} /> },
+  [CustomizeSection.Skills]: { label: "Skills", icon: () => <Sparkles size={16} /> },
+  [CustomizeSection.Connectors]: { label: "Connectors", icon: () => <Plug size={16} /> },
 };
 
 const SECTIONS = Object.values(CustomizeSection);
@@ -27,7 +31,7 @@ const SECTIONS = Object.values(CustomizeSection);
 // Vertical section nav as an ARIA tablist (matches the project's tab pattern):
 // each section is a `role="tab"` with `aria-selected`, a roving tabIndex so only
 // the active tab is in the tab order, and ArrowUp/ArrowDown to move selection.
-export function CustomizeNav({ active, onSelect }: CustomizeNavProps) {
+export function CustomizeNav({ active, onSelect, counts }: CustomizeNavProps) {
   const move = (dir: 1 | -1) => {
     const i = SECTIONS.indexOf(active);
     if (i === -1) return;
@@ -55,6 +59,7 @@ export function CustomizeNav({ active, onSelect }: CustomizeNavProps) {
       {SECTIONS.map((section) => {
         const { label, icon } = NAV_PRESENTATION[section];
         const selected = section === active;
+        const count = counts?.[section];
         return (
           <button
             key={section}
@@ -64,15 +69,31 @@ export function CustomizeNav({ active, onSelect }: CustomizeNavProps) {
             tabIndex={selected ? 0 : -1}
             onClick={() => onSelect(section)}
             onKeyDown={onKeyDown}
-            className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
+            className={`flex h-9 items-center gap-2.5 rounded-md px-2.5 text-sm transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)] ${
+              selected ? "" : "hover:bg-surface-2"
+            }`}
             style={{
               color: selected ? "var(--color-accent)" : "var(--color-text-secondary)",
               background: selected ? "var(--color-accent-dim)" : "transparent",
+              fontWeight: selected ? 500 : 400,
               fontFamily: "var(--font-sans)",
             }}
           >
-            {icon}
+            <span
+              className="flex"
+              style={{ color: selected ? "var(--color-accent)" : "var(--color-text-muted)" }}
+            >
+              {icon(selected)}
+            </span>
             {label}
+            {count !== undefined ? (
+              <span
+                className="ml-auto text-[11px] tabular-nums"
+                style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-mono)" }}
+              >
+                {count}
+              </span>
+            ) : null}
           </button>
         );
       })}

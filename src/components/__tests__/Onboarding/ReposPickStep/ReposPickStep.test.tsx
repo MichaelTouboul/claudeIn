@@ -40,7 +40,7 @@ beforeEach(() => {
 describe("ReposPickStep", () => {
   it("lists scanned repos with their LLM labels", async () => {
     scanRepos.mockResolvedValue([candidate("/code/alpha", "A web app")]);
-    render(<ReposPickStep onNext={vi.fn()} />);
+    render(<ReposPickStep stepIndex={5} onNext={vi.fn()} />);
     expect(await screen.findByText("alpha")).toBeInTheDocument();
     expect(screen.getByText("A web app")).toBeInTheDocument();
   });
@@ -51,7 +51,7 @@ describe("ReposPickStep", () => {
       candidate("/code/alpha", null, dataUrl),
       candidate("/code/beta"),
     ]);
-    render(<ReposPickStep onNext={vi.fn()} />);
+    render(<ReposPickStep stepIndex={5} onNext={vi.fn()} />);
 
     const logo = await screen.findByRole("img");
     expect(logo).toHaveAttribute("src", dataUrl);
@@ -64,7 +64,7 @@ describe("ReposPickStep", () => {
     scanRepos.mockImplementation(
       () => new Promise<RepoCandidate[]>((resolve) => (resolveScan = resolve)),
     );
-    render(<ReposPickStep onNext={vi.fn()} />);
+    render(<ReposPickStep stepIndex={5} onNext={vi.fn()} />);
 
     expect(screen.getByRole("progressbar")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /continue/i })).not.toBeInTheDocument();
@@ -80,7 +80,7 @@ describe("ReposPickStep", () => {
 
   it("checking a repo persists it as a favorite", async () => {
     scanRepos.mockResolvedValue([candidate("/code/alpha")]);
-    render(<ReposPickStep onNext={vi.fn()} />);
+    render(<ReposPickStep stepIndex={5} onNext={vi.fn()} />);
     const box = await screen.findByRole("checkbox", { name: /alpha/i });
 
     await act(async () => {
@@ -93,7 +93,7 @@ describe("ReposPickStep", () => {
   it("unchecking an already-favorite repo removes it", async () => {
     scanRepos.mockResolvedValue([candidate("/code/alpha")]);
     listFavoriteRepos.mockResolvedValue([favorite("/code/alpha")]);
-    render(<ReposPickStep onNext={vi.fn()} />);
+    render(<ReposPickStep stepIndex={5} onNext={vi.fn()} />);
     const box = await screen.findByRole("checkbox", { name: /alpha/i });
     await waitFor(() => expect(box).toBeChecked());
 
@@ -106,7 +106,7 @@ describe("ReposPickStep", () => {
 
   it("'Add a folder' picks a folder and pins it", async () => {
     openDirectoryPicker.mockResolvedValue("/code/manual");
-    render(<ReposPickStep onNext={vi.fn()} />);
+    render(<ReposPickStep stepIndex={5} onNext={vi.fn()} />);
     const add = await screen.findByRole("button", { name: /add a folder/i });
 
     await act(async () => {
@@ -119,7 +119,7 @@ describe("ReposPickStep", () => {
 
   it("'Continue' advances", async () => {
     const onNext = vi.fn();
-    render(<ReposPickStep onNext={onNext} />);
+    render(<ReposPickStep stepIndex={5} onNext={onNext} />);
     const next = await screen.findByRole("button", { name: /continue/i });
 
     await act(async () => {

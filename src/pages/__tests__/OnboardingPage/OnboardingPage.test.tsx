@@ -101,7 +101,7 @@ describe("OnboardingPage", () => {
     await click(/confirm/i);
     await click(/authorize/i);
     await click(/continue/i);
-    await click(/finish/i);
+    await click(/open claudein/i);
 
     await waitFor(() => expect(completeOnboarding).toHaveBeenCalledTimes(1));
     expect(useAppStore.getState().currentPage).toBe(AppPage.Home);

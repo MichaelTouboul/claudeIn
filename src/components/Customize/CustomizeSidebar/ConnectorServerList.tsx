@@ -1,6 +1,6 @@
-import { Plus } from "lucide-react";
+import { Plug, Plus } from "lucide-react";
 
-import { Button } from "@/components/_ui/Button";
+import { IconButton } from "@/components/_ui/IconButton";
 import { Inline } from "@/components/_ui/Inline";
 import { Stack } from "@/components/_ui/Stack";
 import type { McpServerEntry } from "@/lib/types";
@@ -37,21 +37,24 @@ export function ConnectorServerList({
       <Inline gap={2} justify="between" className="px-1">
         <span
           id={labelId}
-          className="text-[11px] uppercase tracking-wide"
-          style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-sans)" }}
+          className="text-[11px] font-semibold uppercase"
+          style={{
+            color: "var(--color-text-muted)",
+            letterSpacing: "0.08em",
+            fontFamily: "var(--font-sans)",
+          }}
         >
           {label}
         </span>
-        <Button
+        <IconButton
           type="button"
           intent="ghost"
-          size="icon"
+          size="sm"
           aria-label={`Add ${label} MCP server`}
           onClick={onAdd}
-          className="h-auto w-auto p-0.5 text-accent hover:text-accent"
         >
-          <Plus size={14} />
-        </Button>
+          <Plus size={15} aria-hidden="true" />
+        </IconButton>
       </Inline>
       {servers.length === 0 ? (
         <p
@@ -75,15 +78,31 @@ export function ConnectorServerList({
                   data-testid="connector-server-item"
                   data-shadowed={server.shadowed ? "true" : "false"}
                   onClick={() => onSelect(server)}
-                  className="w-full text-left rounded px-2 py-1.5 text-sm transition-colors hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
+                  className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)] hover:bg-surface-2"
                   style={{
                     opacity: server.shadowed ? 0.5 : 1,
-                    color: "var(--color-text-primary)",
-                    fontFamily: "var(--font-sans)",
-                    background: selected ? "var(--color-accent-dim)" : "transparent",
+                    background: selected ? "var(--color-surface-2)" : "transparent",
+                    border: selected
+                      ? "1px solid var(--color-accent)"
+                      : "1px solid transparent",
                   }}
                 >
-                  {server.name}
+                  <Plug
+                    size={14}
+                    aria-hidden="true"
+                    style={{
+                      color: selected ? "var(--color-accent)" : "var(--color-text-muted)",
+                    }}
+                  />
+                  <span
+                    className="flex-1 truncate text-xs"
+                    style={{
+                      color: selected ? "var(--color-text-primary)" : "var(--color-text-secondary)",
+                      fontFamily: "var(--font-mono)",
+                    }}
+                  >
+                    {server.name}
+                  </span>
                 </button>
               </li>
             );

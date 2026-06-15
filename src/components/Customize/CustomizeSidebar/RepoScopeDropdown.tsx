@@ -22,6 +22,16 @@ export function RepoScopeDropdown({ repos, value, onChange }: RepoScopeDropdownP
 
   return (
     <Stack gap={1.5}>
+      <span
+        className="px-1 text-[11px] font-semibold uppercase"
+        style={{
+          color: "var(--color-text-muted)",
+          letterSpacing: "0.08em",
+          fontFamily: "var(--font-sans)",
+        }}
+      >
+        Scope
+      </span>
       <Select
         aria-label="Repository scope"
         disabled={empty}

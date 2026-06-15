@@ -1,7 +1,6 @@
 import { type ReactElement, useCallback } from "react";
 
 import { Button } from "@/components/_ui/Button";
-import { Flex } from "@/components/_ui/Flex";
 import type { UserProfile } from "@/lib/types";
 
 import { OnbShell } from "../OnbShell/OnbShell";
@@ -10,8 +9,19 @@ import { useUserSearch } from "./useUserSearch";
 import { WorkingView } from "./WorkingView";
 
 type SearchUserStepProps = {
+  /** Position in the flow (drives the progress header). */
+  stepIndex: number;
   /** Receives the built profile; the page advances to ProfileReview. */
   onProfile: (profile: UserProfile) => void;
+};
+
+type PhaseView = {
+  /** Heading for the card while in this phase. */
+  title: string;
+  /** Body content. */
+  body: ReactElement;
+  /** Footer actions, if any (the live working phase has none). */
+  footer?: ReactElement;
 };
 
 /**
@@ -19,7 +29,7 @@ type SearchUserStepProps = {
  * locate it prompts the user to point to the folder (picker) then retries; a
  * rejection offers a retry. Phase→view via a `Record` (no fallback chains).
  */
-export function SearchUserStep({ onProfile }: SearchUserStepProps) {
+export function SearchUserStep({ stepIndex, onProfile }: SearchUserStepProps) {
   const { phase, buildFrom, retry } = useUserSearch(onProfile);
 
   const pickFolder = useCallback(async () => {
@@ -28,31 +38,45 @@ export function SearchUserStep({ onProfile }: SearchUserStepProps) {
     await buildFrom(dir);
   }, [buildFrom]);
 
-  const view: Record<SearchPhase, () => ReactElement> = {
-    [SearchPhase.Working]: () => <WorkingView />,
-    [SearchPhase.LocateFailed]: () => (
-      <>
+  const view: Record<SearchPhase, () => PhaseView> = {
+    [SearchPhase.Working]: () => ({
+      title: "Analyzing your setup",
+      body: <WorkingView />,
+    }),
+    [SearchPhase.LocateFailed]: () => ({
+      title: "Point us to your .claude folder",
+      body: (
         <p className="text-sm text-fg-muted">
-          Couldn't find your .claude folder. Point us to it to continue.
+          We couldn't find your .claude folder automatically. Choose it to continue.
         </p>
-        <Flex justify="end">
+      ),
+      footer: (
+        <>
+          <span />
           <Button intent="primary" size="md" onClick={() => void pickFolder()}>
             Choose the .claude folder
           </Button>
-        </Flex>
-      </>
-    ),
-    [SearchPhase.Error]: () => (
-      <>
-        <p className="text-sm text-danger">The analysis failed. Please try again.</p>
-        <Flex justify="end">
+        </>
+      ),
+    }),
+    [SearchPhase.Error]: () => ({
+      title: "Analysis failed",
+      body: <p className="text-sm" style={{ color: "var(--color-danger)" }}>The analysis failed. Please try again.</p>,
+      footer: (
+        <>
+          <span />
           <Button intent="primary" size="md" onClick={() => void retry()}>
             Retry
           </Button>
-        </Flex>
-      </>
-    ),
+        </>
+      ),
+    }),
   };
 
-  return <OnbShell title="Analyzing your profile">{view[phase]()}</OnbShell>;
+  const v = view[phase]();
+  return (
+    <OnbShell stepIndex={stepIndex} title={v.title} footer={v.footer}>
+      {v.body}
+    </OnbShell>
+  );
 }

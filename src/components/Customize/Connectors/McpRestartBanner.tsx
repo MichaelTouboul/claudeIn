@@ -1,3 +1,5 @@
+import { RefreshCw } from "lucide-react";
+
 // Shown after a successful MCP mutation: the CLI writes config but live `claude`
 // sessions only re-read MCP servers on (re)start, so there is no live reload.
 export function McpRestartBanner() {
@@ -5,7 +7,7 @@ export function McpRestartBanner() {
     <div
       role="status"
       data-testid="mcp-restart-banner"
-      className="text-xs rounded px-3 py-2"
+      className="flex items-center gap-2 rounded-[var(--radius-md)] px-3 py-2 text-xs"
       style={{
         color: "var(--color-text-primary)",
         backgroundColor: "var(--color-accent-dim)",
@@ -13,7 +15,8 @@ export function McpRestartBanner() {
         fontFamily: "var(--font-sans)",
       }}
     >
-      Restart your Claude sessions to apply
+      <RefreshCw size={14} className="text-accent shrink-0" aria-hidden="true" />
+      Restart your Claude sessions to apply.
     </div>
   );
 }

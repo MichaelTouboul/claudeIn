@@ -26,11 +26,11 @@ export function McpRemoveDialog({ open, onOpenChange, serverName, onConfirm }: M
       contentClassName="w-[min(92vw,420px)]"
     >
       <div
-        className="flex flex-col rounded-xl overflow-hidden"
+        className="flex flex-col rounded-[var(--radius-lg)] overflow-hidden"
         style={{
           background: "var(--color-surface-1)",
           border: "1px solid var(--color-border)",
-          boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
+          boxShadow: "var(--shadow-dialog)",
         }}
       >
         <div className="flex flex-col gap-2 px-4 pt-4">

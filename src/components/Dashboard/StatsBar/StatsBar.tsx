@@ -12,19 +12,19 @@ export function StatsBar({ activeCount, connected }: StatsBarProps) {
   const liveLabel = connected ? "Live" : "Off";
 
   return (
-    <Inline gap={4} className="text-xs" style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
+    <Inline gap={3} className="text-xs" style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>
       <Inline gap={1.5} aria-label={`Connection: ${liveLabel}`}>
         <StatusDot
           size="xs"
           pulse={connected}
           style={{ background: connected ? 'var(--color-active)' : 'var(--color-danger)' }}
         />
-        <span style={{ color: 'var(--color-text-muted)', fontSize: '11px' }}>{liveLabel}</span>
+        <span style={{ color: 'var(--color-text-muted)' }}>{liveLabel}</span>
       </Inline>
 
-      <Inline gap={1} style={{ color: 'var(--color-accent)' }} aria-label={`Active agents: ${activeCount}`}>
-        <span style={{ opacity: 0.7 }}><Activity size={11} /></span>
-        <span className="font-medium" style={{ fontSize: '11px' }}>{activeCount}</span>
+      <Inline gap={1.5} style={{ color: 'var(--color-accent)' }} aria-label={`Active agents: ${activeCount}`}>
+        <Activity size={13} aria-hidden="true" />
+        <span className="font-medium">{activeCount} active</span>
       </Inline>
     </Inline>
   );

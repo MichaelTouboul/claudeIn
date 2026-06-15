@@ -25,6 +25,7 @@ const button = cva(
       size: {
         sm: 'h-[var(--control-sm)] px-2.5 text-xs rounded-sm gap-1.5',
         md: 'h-[var(--control-md)] px-3.5 text-sm',
+        lg: 'h-[var(--control-lg)] px-5 text-sm',
         icon: 'h-8 w-8 p-0',
       },
     },

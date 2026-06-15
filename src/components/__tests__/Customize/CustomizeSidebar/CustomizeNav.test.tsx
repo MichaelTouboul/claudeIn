@@ -46,4 +46,16 @@ describe("CustomizeNav", () => {
     expect(screen.getByRole("tab", { name: /connectors/i })).toHaveAttribute("tabindex", "0");
     expect(screen.getByRole("tab", { name: /skills/i })).toHaveAttribute("tabindex", "-1");
   });
+
+  it("shows a trailing count for a section when one is supplied", () => {
+    render(
+      <CustomizeNav
+        active={CustomizeSection.Profile}
+        onSelect={vi.fn()}
+        counts={{ [CustomizeSection.Connectors]: 4 }}
+      />,
+    );
+    const connectors = screen.getByRole("tab", { name: /connectors/i });
+    expect(connectors).toHaveTextContent("4");
+  });
 });

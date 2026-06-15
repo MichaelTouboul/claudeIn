@@ -21,27 +21,27 @@ export function Header({ activeCount, connected, onOpenChat, onGoHome, onCustomi
   // notification overlay (rendered in App.tsx, outside the Header), so the
   // floating bell never sits on top of the Chat button.
   return (
-    <div className={cn('titlebar-drag flex items-center gap-4 pr-16 py-2 shrink-0', isMac ? 'pl-20' : 'pl-4')} style={{ background: 'var(--color-surface-1)', borderBottom: '1px solid var(--color-border)' }}>
-      <Inline gap={2.5}>
-        <Logo size={18} />
-        <span className="text-[13px] font-semibold tracking-[0.02em]" style={{ fontFamily: 'var(--font-mono)' }}>ClaudeIn</span>
+    <div
+      className={cn('titlebar-drag flex h-[var(--header-height)] items-center gap-3 pr-16 shrink-0', isMac ? 'pl-20' : 'pl-4')}
+      style={{ background: 'var(--color-surface-1)', borderBottom: '1px solid var(--color-border)' }}
+    >
+      <Inline gap={2}>
+        <Logo size={22} />
+        <span className="text-md font-semibold tracking-[-0.01em] text-fg">ClaudeIn</span>
       </Inline>
       {onGoHome ? (
-        <Button intent="ghost" size="sm" onClick={onGoHome} className="text-fg-muted" style={{ fontFamily: 'var(--font-mono)' }}>
-          <Home size={12} />
+        <Button intent="ghost" size="sm" onClick={onGoHome} leftIcon={<Home size={15} aria-hidden="true" />}>
           Home
         </Button>
       ) : null}
       <div className="flex-1" />
       {onCustomize ? (
-        <Button intent="outline" size="sm" onClick={onCustomize} className="text-fg-muted" style={{ fontFamily: 'var(--font-mono)' }}>
-          <Sliders size={12} />
+        <Button intent="outline" size="sm" onClick={onCustomize} leftIcon={<Sliders size={15} aria-hidden="true" />}>
           Customize
         </Button>
       ) : null}
       <StatsBar activeCount={activeCount} connected={connected} />
-      <Button intent="outline" size="sm" onClick={onOpenChat} className="glow-cyan text-accent" style={{ fontFamily: 'var(--font-mono)', border: '1px solid rgba(129, 140, 248, 0.25)' }}>
-        <MessageSquare size={12} />
+      <Button intent="secondary" size="sm" onClick={onOpenChat} leftIcon={<MessageSquare size={15} aria-hidden="true" />}>
         Chat
       </Button>
     </div>

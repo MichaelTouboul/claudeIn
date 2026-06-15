@@ -12,11 +12,12 @@ const STEP_MS = 1400;
 
 /**
  * Cycle through `WORKING_MESSAGES` on a timer while `active`, holding on the last
- * one until the call resolves. The underlying request is a single opaque call —
- * these messages are purely to keep the step feeling alive. Resets to the first
- * message whenever `active` flips back on.
+ * one until the call resolves. Returns the active **index** so callers can render
+ * a staged checklist (done lines vs. the current line). The underlying request is
+ * a single opaque call — these messages are purely to keep the step feeling
+ * alive. Resets to the first message whenever `active` flips back on.
  */
-export function useWorkingMessage(active: boolean): string {
+export function useWorkingMessage(active: boolean): number {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -31,5 +32,5 @@ export function useWorkingMessage(active: boolean): string {
     return () => clearInterval(id);
   }, [active]);
 
-  return WORKING_MESSAGES[index];
+  return index;
 }

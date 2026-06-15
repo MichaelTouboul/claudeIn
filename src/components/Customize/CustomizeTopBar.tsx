@@ -1,6 +1,8 @@
-import { ArrowLeft, User } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
+import { Avatar } from "@/components/_ui/Avatar";
 import { Button } from "@/components/_ui/Button";
+import { IconButton } from "@/components/_ui/IconButton";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { cn, isMac } from "@/lib/utils";
 import { CustomizeSection, useCustomizeStore } from "@/store/customize/useCustomizeStore";
@@ -9,18 +11,12 @@ export type CustomizeTopBarProps = {
   onBack: () => void;
 };
 
-/** First letter of a profile name, uppercased, or null when no usable name. */
-function initialOf(name: string | null): string | null {
-  const trimmed = name?.trim() ?? "";
-  return trimmed.length > 0 ? trimmed[0].toUpperCase() : null;
-}
-
-// Page top bar: a back control to Home, the page title, and a real avatar
-// control that opens the Profile section (shows the user's initial when known).
+// Page top bar (design-system kit): the ClaudeIn brand chevron + a "/ Customize"
+// crumb, a back-to-home control, and a profile avatar that opens the Profile
+// section. The Mac-aware left padding clears the traffic-light buttons.
 export function CustomizeTopBar({ onBack }: CustomizeTopBarProps) {
   const { profile } = useUserProfile();
   const setSection = useCustomizeStore((s) => s.setSection);
-  const initial = initialOf(profile?.name ?? null);
 
   return (
     <header
@@ -29,30 +25,48 @@ export function CustomizeTopBar({ onBack }: CustomizeTopBarProps) {
       // The global `.titlebar-drag button { -webkit-app-region: no-drag }` rule
       // keeps the interactive controls clickable.
       className={cn(
-        "titlebar-drag flex items-center gap-3 pr-4 py-3 shrink-0",
+        "titlebar-drag flex h-[var(--header-height)] items-center gap-3 pr-4 shrink-0 border-b border-border",
         isMac ? "pl-20" : "pl-4",
       )}
-      style={{ background: "var(--color-surface-1)", borderBottom: "1px solid var(--color-border)" }}
+      style={{ background: "var(--color-surface-1)" }}
     >
-      <Button type="button" intent="ghost" size="sm" aria-label="Back to home" onClick={onBack}>
-        <ArrowLeft size={16} />
-        Customize
-      </Button>
-      <h1
-        className="text-sm font-semibold"
-        style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-sans)" }}
-      >
-        Customize Claude
-      </h1>
-      <button
+      <span className="flex items-center gap-2 text-[15px] font-semibold tracking-[-0.01em] text-fg">
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 32 32"
+          fill="none"
+          aria-hidden="true"
+          style={{ color: "var(--color-accent)" }}
+        >
+          <path
+            d="M9 8.5 L17 16 L9 23.5"
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path d="M20.5 23.5 L25 23.5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+        </svg>
+        ClaudeIn
+      </span>
+      <span className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+        / Customize
+      </span>
+      <div className="flex-1" />
+      <Button
         type="button"
-        aria-label="View your profile"
-        onClick={() => setSection(CustomizeSection.Profile)}
-        className="ml-auto flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
-        style={{ background: "var(--color-surface-3)", color: "var(--color-text-muted)" }}
+        intent="ghost"
+        size="sm"
+        aria-label="Back to home"
+        onClick={onBack}
+        leftIcon={<ArrowLeft size={15} aria-hidden="true" />}
       >
-        {initial ?? <User size={16} />}
-      </button>
+        Home
+      </Button>
+      <IconButton aria-label="View your profile" onClick={() => setSection(CustomizeSection.Profile)}>
+        <Avatar name={profile?.name ?? "You"} hue="blue" size="sm" />
+      </IconButton>
     </header>
   );
 }

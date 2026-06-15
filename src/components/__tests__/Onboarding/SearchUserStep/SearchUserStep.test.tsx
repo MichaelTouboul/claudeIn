@@ -37,7 +37,7 @@ describe("SearchUserStep", () => {
   it("locates then builds the profile and hands it back", async () => {
     locateClaudeUser.mockResolvedValue("/home/u/.claude");
     const onProfile = vi.fn();
-    render(<SearchUserStep onProfile={onProfile} />);
+    render(<SearchUserStep stepIndex={2} onProfile={onProfile} />);
     await waitFor(() => expect(onProfile).toHaveBeenCalledTimes(1));
     expect(buildUserProfile).toHaveBeenCalledWith("/home/u/.claude");
   });
@@ -46,7 +46,7 @@ describe("SearchUserStep", () => {
     locateClaudeUser.mockResolvedValue(null);
     openDirectoryPicker.mockResolvedValue("/picked/.claude");
     const onProfile = vi.fn();
-    render(<SearchUserStep onProfile={onProfile} />);
+    render(<SearchUserStep stepIndex={2} onProfile={onProfile} />);
 
     const pick = await screen.findByRole("button", { name: /choose the .claude folder/i });
     await act(async () => {
@@ -61,7 +61,7 @@ describe("SearchUserStep", () => {
     locateClaudeUser.mockResolvedValue(null);
     openDirectoryPicker.mockResolvedValue(null);
     const onProfile = vi.fn();
-    render(<SearchUserStep onProfile={onProfile} />);
+    render(<SearchUserStep stepIndex={2} onProfile={onProfile} />);
 
     const pick = await screen.findByRole("button", { name: /choose the .claude folder/i });
     await act(async () => {
@@ -75,7 +75,7 @@ describe("SearchUserStep", () => {
   it("offers a retry after a failure", async () => {
     locateClaudeUser.mockRejectedValueOnce(new Error("boom")).mockResolvedValueOnce("/home/u/.claude");
     const onProfile = vi.fn();
-    render(<SearchUserStep onProfile={onProfile} />);
+    render(<SearchUserStep stepIndex={2} onProfile={onProfile} />);
 
     const retry = await screen.findByRole("button", { name: /retry/i });
     await act(async () => {

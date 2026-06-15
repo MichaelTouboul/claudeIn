@@ -1,6 +1,5 @@
-import type { CSSProperties } from 'react';
-
-import type { McpServerEntry } from '@/lib/types';
+import { Badge, type BadgeVariant } from '@/components/_ui/Badge';
+import type { McpServerEntry, McpTransport } from '@/lib/types';
 
 import { SOURCE_PRESENTATION, TRANSPORT_PRESENTATION } from './mcpPresentation';
 
@@ -8,35 +7,29 @@ export type McpServerBadgesProps = {
   server: McpServerEntry;
 };
 
-const badgeBase = 'inline-flex items-center rounded px-1.5 py-0.5 text-[11px] leading-none';
+// Transport→Badge-hue map (no fallback chain): every McpTransport, incl.
+// `unknown`, has an explicit variant so the colored chip carries meaning.
+const TRANSPORT_VARIANT: Record<McpTransport, BadgeVariant> = {
+  stdio: 'cyan',
+  http: 'green',
+  sse: 'green',
+  unknown: 'gray',
+};
 
-// Transport + provenance badges. Both labels come from the explicit behavior
-// maps (no fallback chain) — `unknown` transport is a real map entry.
+// Transport + provenance badges, rendered with the shared Badge primitive.
+// Both labels come from the explicit behavior maps.
 export function McpServerBadges({ server }: McpServerBadgesProps) {
   const transport = TRANSPORT_PRESENTATION[server.transport];
   const source = SOURCE_PRESENTATION[server.source];
 
-  const transportStyle: CSSProperties = {
-    fontFamily: 'var(--font-mono)',
-    color: transport.colorVar ? `var(${transport.colorVar})` : 'var(--color-text-secondary)',
-    backgroundColor: 'var(--color-surface-3)',
-    border: '1px solid var(--color-border)',
-  };
-  const sourceStyle: CSSProperties = {
-    fontFamily: 'var(--font-sans)',
-    color: 'var(--color-text-secondary)',
-    backgroundColor: 'var(--color-surface-2)',
-    border: '1px solid var(--color-border-subtle)',
-  };
-
   return (
     <span className="inline-flex items-center gap-1.5">
-      <span className={badgeBase} style={transportStyle} data-testid="mcp-transport-badge">
+      <Badge variant={TRANSPORT_VARIANT[server.transport]} data-testid="mcp-transport-badge">
         {transport.label}
-      </span>
-      <span className={badgeBase} style={sourceStyle} data-testid="mcp-source-badge">
+      </Badge>
+      <Badge variant="gray" className="font-sans" data-testid="mcp-source-badge">
         {source.label}
-      </span>
+      </Badge>
     </span>
   );
 }
