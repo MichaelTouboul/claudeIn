@@ -2,7 +2,7 @@
 import type { IpcMainInvokeEvent } from "electron";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
-import type { TransformInput } from "../services/transform/transform.prompt";
+import type { TransformInput } from "../services/transform/transform.types";
 
 // Capture the handler registered via `ipcMain.handle` (electron is unavailable
 // in plain node/vitest), so the test can invoke the real handler.

@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 
 import { scanCandidates } from "../system/onboarding.service";
 import { detectRepoLogo } from "./repo-logo";
+import { renderPrompt, repoLabelPrompt } from "../prompts";
 import type { Candidate } from "../../types/onboarding.types";
 import type { RepoCandidate } from "../../types/user.type";
 
@@ -46,17 +47,13 @@ export function setReposRunner(next: ReposRunner): void {
   runner = next;
 }
 
-function labelPrompt(): string {
-  return "In one short sentence, describe what this repository is and does, based on its `.claude` setup and top-level files. Output only that sentence.";
-}
-
 async function labelFor(candidate: Candidate): Promise<RepoCandidate> {
   const logoDataUrl = detectRepoLogo(candidate.path);
   try {
     const label = await runner({
       command: REPOS_COMMAND,
       cwd: candidate.path,
-      prompt: labelPrompt(),
+      prompt: renderPrompt(repoLabelPrompt, undefined),
     });
     return { ...candidate, label: label.length > 0 ? label : null, logoDataUrl };
   } catch {

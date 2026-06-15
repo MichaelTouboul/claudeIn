@@ -99,19 +99,3 @@ export function parseNarrative(raw: string): Narrative {
     domains: [],
   };
 }
-
-const PLUGINS_NONE = "No other-plugin data dirs were detected.";
-
-/** Build the exploration prompt; asks the agent for a JSON narrative. */
-export function buildUserPrompt(plugins: string[]): string {
-  const pluginsLine =
-    plugins.length > 0
-      ? `Detected plugin data dirs: ${plugins.join(", ")}.`
-      : PLUGINS_NONE;
-  return `Explore the user-scope \`.claude\` directory at this root — its agents, skills, MCP servers, hooks, and memory/CLAUDE.md. ${pluginsLine}
-
-Infer the user's setup and return ONLY a JSON object with these keys:
-{"name": "<the user's real name, inferred from memory files / CLAUDE.md / git config / email; null if you genuinely cannot infer it>", "role": "<a concise phrase naming the developer's main technologies / stack — the languages, frameworks, and tools they clearly use, e.g. \\"TypeScript + React + Node, with Electron and SQLite\\". Describe their TECH, NOT their employer, company name, or which monorepo they work in. null if you genuinely cannot infer it>", "domains": ["<tag>", ...]}
-
-Output ONLY the raw JSON object — no preamble, no explanation, and no markdown code fences.`;
-}

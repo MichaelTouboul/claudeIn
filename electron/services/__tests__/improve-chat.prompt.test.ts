@@ -1,12 +1,14 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
 
-import { buildImproveChatPrompt } from "../improve/improve-chat.prompt";
+import { improveChatPrompt } from "../prompts/improve-chat.prompt";
 import { ImproveType } from "../../types/improve.types";
 
-describe("buildImproveChatPrompt — machine-parsable recap contract", () => {
+const build = improveChatPrompt.build;
+
+describe("improveChatPrompt — machine-parsable recap contract", () => {
   it("instructs the assistant to END with the exact fenced recap block", () => {
-    const prompt = buildImproveChatPrompt({
+    const prompt = build({
       type: ImproveType.Bug,
       transcript: [{ role: "user", text: "the send button disappears" }],
     });
@@ -21,7 +23,7 @@ describe("buildImproveChatPrompt — machine-parsable recap contract", () => {
   });
 
   it("asks for the same language as the user and keeps discussion-only", () => {
-    const prompt = buildImproveChatPrompt({
+    const prompt = build({
       type: ImproveType.Feature,
       transcript: [{ role: "user", text: "ajoute un raccourci clavier" }],
     });
@@ -33,7 +35,7 @@ describe("buildImproveChatPrompt — machine-parsable recap contract", () => {
   });
 
   it("still embeds the request type and the running transcript", () => {
-    const prompt = buildImproveChatPrompt({
+    const prompt = build({
       type: ImproveType.Performance,
       transcript: [
         { role: "user", text: "the list is laggy" },

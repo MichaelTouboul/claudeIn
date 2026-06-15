@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
 import { getDb } from "../core/db";
 import { computeInputsHash } from "./profile.hash";
+import { renderPrompt, scopeProfilePrompt } from "../prompts";
 import type { ScopeProfile } from "../../types/onboarding.types";
 
 type Scope = ScopeProfile["scope"];
@@ -53,16 +54,6 @@ export function setProfileRunner(next: ProfileRunner): void {
   runner = next;
 }
 
-function buildPrompt(plugins: string[]): string {
-  const pluginsLine =
-    plugins.length > 0
-      ? `The following other-plugin data dirs were detected alongside it: ${plugins.join(", ")}.`
-      : "No other-plugin data dirs were detected.";
-  return `Explore the \`.claude\` directory at this root on your own — its agents, skills, MCP servers, hooks, and memory/CLAUDE.md. ${pluginsLine}
-
-Produce a concise narrative markdown profile of this setup: what's configured, what each major piece is for, and how the pieces fit together. Output only the profile.`;
-}
-
 function rowToProfile(row: Record<string, unknown>): ScopeProfile {
   return {
     scopePath: row.scope_path as string,
@@ -83,7 +74,7 @@ export async function ingestScope(
   scope: Scope,
   plugins: string[]
 ): Promise<ScopeProfile> {
-  const prompt = buildPrompt(plugins);
+  const prompt = renderPrompt(scopeProfilePrompt, plugins);
   const profileMd = await runner({ command: PROFILE_COMMAND, cwd: scopePath, prompt });
   const inputsHash = await computeInputsHash(scopePath);
   const generatedAt = new Date().toISOString();
