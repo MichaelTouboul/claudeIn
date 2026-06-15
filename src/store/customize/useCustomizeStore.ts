@@ -9,8 +9,11 @@ import type { McpServerEntry } from "@/lib/types";
  */
 export const CustomizeSection = {
   Profile: "profile",
-  Skills: "skills",
   Connectors: "connectors",
+  Skills: "skills",
+  Agents: "agents",
+  Hooks: "hooks",
+  Memory: "memory",
 } as const;
 export type CustomizeSection = (typeof CustomizeSection)[keyof typeof CustomizeSection];
 

@@ -168,6 +168,15 @@ export async function initDb(): Promise<void> {
       label    TEXT,
       added_at TEXT
     );
+    CREATE TABLE IF NOT EXISTS disabled_hooks (
+      id         TEXT PRIMARY KEY,
+      scope      TEXT,
+      event      TEXT NOT NULL,
+      matcher    TEXT,
+      command    TEXT NOT NULL,
+      layer_path TEXT NOT NULL,
+      removed_at TEXT
+    );
   `);
 
   runMigrations();

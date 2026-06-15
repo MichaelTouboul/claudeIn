@@ -105,6 +105,10 @@ contextBridge.exposeInMainWorld("api", {
   getSettings: (projectPath?: string) => ipcRenderer.invoke("settings:get", projectPath),
   watchSettings: (projectPath?: string) => ipcRenderer.invoke("settings:watch", projectPath),
   unwatchSettings: () => ipcRenderer.invoke("settings:unwatch"),
+
+  getHooks: (projectPath?: string) => ipcRenderer.invoke("hooks:list", projectPath),
+  setHookEnabled: (hookId: string, enabled: boolean, projectPath?: string) =>
+    ipcRenderer.invoke("hooks:set-enabled", hookId, enabled, projectPath),
   onSettingsChanged: (cb: (snapshot: import("../src/types/settings.types").SettingsSnapshot) => void) => {
     return pushBus.subscribe((raw) => {
       const data = raw as { type?: string; snapshot?: unknown };

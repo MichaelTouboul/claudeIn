@@ -4,9 +4,12 @@ import { ConnectorDetail } from "@/components/Customize/Connectors/ConnectorDeta
 import type { UseMcpManage } from "@/components/Customize/Connectors/useMcpManage";
 import { CustomizeSection, useCustomizeStore } from "@/store/customize/useCustomizeStore";
 
+import { AgentsPane } from "./AgentsPane";
 import { CustomizeHero } from "./CustomizeHero";
+import { HooksPane } from "./HooksPane";
+import { MemoryPane } from "./MemoryPane";
 import { ProfilePane } from "./ProfilePane";
-import { SkillsPlaceholder } from "./SkillsPlaceholder";
+import { SkillsPane } from "./SkillsPane";
 
 export type CustomizeContentProps = {
   manage: UseMcpManage;
@@ -31,14 +34,24 @@ function ConnectorsContent({ manage, projectPath }: CustomizeContentProps) {
 }
 
 // Section→content map (no fallback chain): each CustomizeSection renders its own
-// pane. Skills is a visual placeholder; Connectors is the MCP master-detail.
-const SECTION_CONTENT: Record<CustomizeSection, (props: CustomizeContentProps) => ReactElement> = {
+// pane. Connectors is the MCP master-detail; the ecosystem panes read the active
+// repo scope. `repoScope` is the store's project path (null → Personal only).
+const SECTION_CONTENT: Record<
+  CustomizeSection,
+  (props: CustomizeContentProps, repoScope: string | null) => ReactElement
+> = {
   [CustomizeSection.Profile]: () => <ProfilePane />,
-  [CustomizeSection.Skills]: () => <SkillsPlaceholder />,
   [CustomizeSection.Connectors]: (props) => <ConnectorsContent {...props} />,
+  [CustomizeSection.Skills]: (_props, repoScope) => <SkillsPane repoScope={repoScope} />,
+  [CustomizeSection.Agents]: (_props, repoScope) => <AgentsPane repoScope={repoScope} />,
+  [CustomizeSection.Hooks]: (_props, repoScope) => <HooksPane repoScope={repoScope} />,
+  [CustomizeSection.Memory]: (_props, repoScope) => <MemoryPane repoScope={repoScope} />,
 };
 
 export function CustomizeContent(props: CustomizeContentProps) {
   const section = useCustomizeStore((s) => s.section);
-  return <div className="flex-1 flex flex-col min-h-0">{SECTION_CONTENT[section](props)}</div>;
+  const repoScope = useCustomizeStore((s) => s.repoScope);
+  return (
+    <div className="flex-1 flex flex-col min-h-0">{SECTION_CONTENT[section](props, repoScope)}</div>
+  );
 }

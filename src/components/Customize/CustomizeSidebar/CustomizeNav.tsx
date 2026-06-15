@@ -1,4 +1,4 @@
-import { Plug, Sparkles, User } from "lucide-react";
+import { Bot, Brain, Plug, Sparkles, User, Zap } from "lucide-react";
 import type { KeyboardEvent, ReactNode } from "react";
 
 import { Stack } from "@/components/_ui/Stack";
@@ -22,8 +22,11 @@ type NavPresentation = {
 // drives the rendered order.
 const NAV_PRESENTATION: Record<CustomizeSection, NavPresentation> = {
   [CustomizeSection.Profile]: { label: "Profile", icon: () => <User size={16} /> },
-  [CustomizeSection.Skills]: { label: "Skills", icon: () => <Sparkles size={16} /> },
   [CustomizeSection.Connectors]: { label: "Connectors", icon: () => <Plug size={16} /> },
+  [CustomizeSection.Skills]: { label: "Skills", icon: () => <Sparkles size={16} /> },
+  [CustomizeSection.Agents]: { label: "Sub-agents", icon: () => <Bot size={16} /> },
+  [CustomizeSection.Hooks]: { label: "Hooks", icon: () => <Zap size={16} /> },
+  [CustomizeSection.Memory]: { label: "Memory", icon: () => <Brain size={16} /> },
 };
 
 const SECTIONS = Object.values(CustomizeSection);
