@@ -56,6 +56,8 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@fontsource-variable/geist": "^5.2.9",
+    "@fontsource-variable/geist-mono": "^5.2.8",
     "@lexical/list": "^0.45.0",
     "@lexical/markdown": "^0.45.0",
     "@lexical/react": "^0.45.0",

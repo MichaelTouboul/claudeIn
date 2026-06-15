@@ -1,0 +1,21 @@
+/* ===========================================================================
+ * MOTION
+ * ---------------------------------------------------------------------------
+ * Ported from the ClaudeIn Design System skill (tokens/motion.css). Calm and
+ * quick: short fades, small translate/scale on enter, no bounce. Components
+ * should still respect prefers-reduced-motion at the usage site.
+ * ======================================================================== */
+
+:root {
+  --duration-instant: 80ms;
+  --duration-fast: 140ms;
+  --duration-base: 200ms;
+  --duration-slow: 300ms;
+
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+
+  /* Interaction deltas */
+  --press-scale: 0.97;
+}
