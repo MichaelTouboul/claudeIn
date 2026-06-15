@@ -90,8 +90,8 @@ export function McpRawConfig({ raw }: McpRawConfigProps) {
     <Stack
       gap={2}
       data-testid="mcp-raw-config"
-      className="rounded px-3 py-2"
-      style={{ backgroundColor: "var(--color-surface-1)", border: "1px solid var(--color-border-subtle)" }}
+      className="rounded-[var(--radius-md)] px-3 py-2.5"
+      style={{ backgroundColor: "var(--color-surface-inset)", border: "1px solid var(--color-border)" }}
     >
       {render !== null ? render(raw) : null}
     </Stack>

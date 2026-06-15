@@ -38,6 +38,7 @@ export function CustomizeSidebar({
 
   const [addScope, setAddScope] = useState<McpManageScope | null>(null);
   const selectedKey = selectedServer === null ? null : serverKey(selectedServer);
+  const connectorCount = projectServers.length + personalServers.length;
 
   const submitAdd = (input: McpAddInput) =>
     manage.add({ ...input, projectPath: input.scope === "project" ? projectPath : undefined });
@@ -45,11 +46,15 @@ export function CustomizeSidebar({
   return (
     <aside
       aria-label="Customize navigation"
-      className="flex flex-col gap-4 w-64 shrink-0 h-full overflow-y-auto p-4"
-      style={{ background: "var(--color-surface-1)", borderRight: "1px solid var(--color-border)" }}
+      className="flex flex-col gap-4 w-[var(--sidebar-width)] shrink-0 h-full overflow-y-auto p-4 border-r border-border"
+      style={{ background: "var(--color-surface-1)" }}
     >
       <RepoScopeDropdown repos={repos} value={repoScope} onChange={setRepoScope} />
-      <CustomizeNav active={section} onSelect={setSection} />
+      <CustomizeNav
+        active={section}
+        onSelect={setSection}
+        counts={{ [CustomizeSection.Connectors]: connectorCount }}
+      />
 
       {section === CustomizeSection.Connectors ? (
         <div

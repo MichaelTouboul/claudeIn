@@ -40,41 +40,45 @@ export function CustomizeHero() {
     <section
       data-testid="customize-hero"
       aria-label="Customize Claude"
-      className="flex-1 h-full overflow-auto p-8 flex flex-col gap-6"
+      className="flex-1 h-full overflow-auto px-8 py-7 flex flex-col gap-6"
     >
-      <Stack gap={2}>
-        <h2
-          className="text-2xl font-semibold"
+      <Stack gap={1.5}>
+        <h1
+          className="text-[22px] font-semibold tracking-[-0.01em]"
           style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-sans)" }}
         >
-          Customize Claude
-        </h2>
+          Connectors
+        </h1>
         <p
-          className="text-sm leading-relaxed max-w-prose"
+          className="text-sm leading-relaxed max-w-[60ch]"
           style={{ color: "var(--color-text-secondary)", fontFamily: "var(--font-sans)" }}
         >
-          Pick a connector from the left to view or edit it, or add a new one. Skills and plugins are
-          coming soon.
+          MCP servers give Claude new tools and data sources. Pick one to view or edit it, or add a
+          new one.
         </p>
       </Stack>
-      <ul className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <ul className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
         {HERO_OPTIONS.map((option) => (
           <li
             key={option.key}
-            className="flex flex-col gap-2 rounded-xl p-4"
+            className="flex flex-col gap-2 rounded-[var(--radius-lg)] p-4"
             style={{
-              background: "var(--color-surface-1)",
-              border: "1px solid var(--color-border-subtle)",
+              background: "var(--color-surface-2)",
+              border: "1px solid var(--color-border)",
+              boxShadow: "var(--shadow-xs)",
             }}
           >
             {option.icon}
             <span
-              className="text-sm font-medium"
+              className="text-sm font-semibold"
               style={{ color: "var(--color-text-primary)", fontFamily: "var(--font-sans)" }}
             >
               {option.title}
             </span>
-            <span className="text-xs leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>
+            <span
+              className="text-[13px] leading-relaxed"
+              style={{ color: "var(--color-text-muted)" }}
+            >
               {option.description}
             </span>
           </li>

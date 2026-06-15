@@ -31,11 +31,11 @@ export function McpAddDialog({ mode, open, onOpenChange, onSubmit, initialValues
   return (
     <Dialog open={open} onOpenChange={onOpenChange} title={titleByMode[mode]} contentClassName="w-[min(92vw,460px)]">
       <div
-        className="flex flex-col rounded-xl overflow-hidden"
+        className="flex flex-col rounded-[var(--radius-lg)] overflow-hidden"
         style={{
           background: "var(--color-surface-1)",
           border: "1px solid var(--color-border)",
-          boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
+          boxShadow: "var(--shadow-dialog)",
         }}
       >
         <h2
