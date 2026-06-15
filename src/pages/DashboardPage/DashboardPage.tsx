@@ -75,6 +75,7 @@ export function DashboardPage() {
         connected={connected}
         onOpenChat={() => setChatOpen(true)}
         onGoHome={() => navigate(AppPage.Home)}
+        onCustomize={() => navigate(AppPage.Customize)}
       />
 
       <div className="flex-1 min-h-0 flex flex-col">

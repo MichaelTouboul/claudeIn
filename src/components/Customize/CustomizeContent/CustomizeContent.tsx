@@ -5,6 +5,7 @@ import type { UseMcpManage } from "@/components/Customize/Connectors/useMcpManag
 import { CustomizeSection, useCustomizeStore } from "@/store/customize/useCustomizeStore";
 
 import { CustomizeHero } from "./CustomizeHero";
+import { ProfilePane } from "./ProfilePane";
 import { SkillsPlaceholder } from "./SkillsPlaceholder";
 
 export type CustomizeContentProps = {
@@ -32,6 +33,7 @@ function ConnectorsContent({ manage, projectPath }: CustomizeContentProps) {
 // Section→content map (no fallback chain): each CustomizeSection renders its own
 // pane. Skills is a visual placeholder; Connectors is the MCP master-detail.
 const SECTION_CONTENT: Record<CustomizeSection, (props: CustomizeContentProps) => ReactElement> = {
+  [CustomizeSection.Profile]: () => <ProfilePane />,
   [CustomizeSection.Skills]: () => <SkillsPlaceholder />,
   [CustomizeSection.Connectors]: (props) => <ConnectorsContent {...props} />,
 };

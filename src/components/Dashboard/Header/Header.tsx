@@ -1,4 +1,4 @@
-import { Home, MessageSquare } from 'lucide-react';
+import { Home, MessageSquare, Sliders } from 'lucide-react';
 
 import { Button } from '@/components/_ui/Button';
 import { Inline } from '@/components/_ui/Inline';
@@ -12,9 +12,11 @@ export type HeaderProps = {
   onOpenChat: () => void;
   /** Return to the Home page; omitted when the header isn't inside the Dashboard. */
   onGoHome?: () => void;
+  /** Open the Customize page; omitted when the header isn't inside the Dashboard. */
+  onCustomize?: () => void;
 };
 
-export function Header({ activeCount, connected, onOpenChat, onGoHome }: HeaderProps) {
+export function Header({ activeCount, connected, onOpenChat, onGoHome, onCustomize }: HeaderProps) {
   // `pr-16` reserves the top-right corner for the app-global Self-Improve
   // notification overlay (rendered in App.tsx, outside the Header), so the
   // floating bell never sits on top of the Chat button.
@@ -31,6 +33,12 @@ export function Header({ activeCount, connected, onOpenChat, onGoHome }: HeaderP
         </Button>
       ) : null}
       <div className="flex-1" />
+      {onCustomize ? (
+        <Button intent="outline" size="sm" onClick={onCustomize} className="text-fg-muted" style={{ fontFamily: 'var(--font-mono)' }}>
+          <Sliders size={12} />
+          Customize
+        </Button>
+      ) : null}
       <StatsBar activeCount={activeCount} connected={connected} />
       <Button intent="outline" size="sm" onClick={onOpenChat} className="glow-cyan text-accent" style={{ fontFamily: 'var(--font-mono)', border: '1px solid rgba(6, 182, 212, 0.25)' }}>
         <MessageSquare size={12} />
