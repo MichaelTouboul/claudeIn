@@ -7,8 +7,17 @@
  * component edits. See migration/MIGRATION.md for the few optional follow-ups.
  * ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
+
+/* Foundations tokens — split into partials to respect the 300-line limit.
+ * Geist is self-hosted (woff2 bundled via @fontsource-variable in main.tsx);
+ * NO runtime Google Fonts request. Partials carry @theme blocks (type scale,
+ * radii) + :root vars (spacing, elevation, motion); Tailwind processes the
+ * @theme here because they are imported into this Tailwind entry. */
+@import "./styles/tokens/typography.css";
+@import "./styles/tokens/spacing.css";
+@import "./styles/tokens/elevation.css";
+@import "./styles/tokens/motion.css";
 
 @source "../src/**/*.{ts,tsx}";
 @source "../src/index.html";
@@ -49,10 +58,12 @@
   --color-neutral-bg: #2b2f39;
   --color-neutral-fg-strong: #d7dce4;
 
-  /* Fonts — Geist (UI) + Geist Mono (code/data) */
+  /* Fonts — self-hosted Geist (UI) + Geist Mono (code/data).
+   * Family names are the EXACT ones @fontsource-variable registers
+   * ('Geist Variable' / 'Geist Mono Variable'); system fallbacks kept. */
   --color-text-on-accent: #14161b;
-  --font-sans: 'Geist', system-ui, -apple-system, sans-serif;
-  --font-mono: 'Geist Mono', 'SF Mono', 'JetBrains Mono', monospace;
+  --font-sans: 'Geist Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono Variable', 'SF Mono', 'JetBrains Mono', ui-monospace, monospace;
 }
 
 @layer base {
