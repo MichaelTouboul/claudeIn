@@ -128,20 +128,22 @@ Test files are **never co-located** in the source listing — they pollute the t
 All styling uses CSS custom properties defined in `index.css`:
 
 ```
---color-surface-0: #06080c    (deepest background)
---color-surface-1: #0a0e14    (panel backgrounds)
---color-surface-2: #111620    (card/hover backgrounds)
---color-surface-3: #181e2a    (elevated elements)
---color-border: #1e2636        --color-border-subtle: #151b26
---color-border-strong: #5a6a8c (3:1 control/input outlines — WCAG 1.4.11; decorative hairlines keep --color-border)
---color-fg: #e2e8f0            --color-fg-muted: #8892a4       --color-fg-subtle: #717c90
+--color-surface-0: #14161b    (app background — soft blue-charcoal, never pure black)
+--color-surface-1: #1d2027    (panel backgrounds)
+--color-surface-2: #23272f    (card/hover backgrounds)
+--color-surface-3: #2b2f39    (elevated elements)
+--color-border: #2b2f39        --color-border-subtle: #181b21
+--color-border-strong: #3a4150 (3:1 control/input outlines — WCAG 1.4.11; decorative hairlines keep --color-border)
+--color-fg: #eef1f6            --color-fg-muted: #b3bccb       --color-fg-subtle: #8b93a3
   (legacy aliases: --color-text-primary / -secondary / -muted map onto these)
---color-accent: #06b6d4 (cyan) --color-accent-dim: rgba(6,182,212,0.12)
---color-active: #4ade80        --color-danger: #f87171
---color-warning: #facc15 (yellow — tool/auth/hooks)  --color-info: #60a5fa (blue — sub-agent)
---color-history: #c084fc (purple — memory/history)
---color-neutral-fg/-bg/-fg-strong  (#9ca3af / #374151 / #d1d5db — attachment chip neutrals)
---font-sans: 'IBM Plex Sans'   --font-mono: 'JetBrains Mono'
+--color-accent: #818cf8 (indigo) --color-accent-dim: rgba(129,140,248,0.14)
+--color-accent-solid: #4f5dd9 (solid fill for the primary button — white text)
+--color-text-on-accent: #14161b (dark text on a light --color-accent fill)
+--color-active: #45d483        --color-danger: #ff8585
+--color-warning: #f0c14b (yellow — tool/auth/hooks)  --color-info: #6db4ff (blue — sub-agent)
+--color-history: #b794f6 (purple — memory/history)
+--color-neutral-fg/-bg/-fg-strong  (#8b93a3 / #2b2f39 / #d7dce4 — attachment chip neutrals)
+--font-sans: 'Geist'   --font-mono: 'Geist Mono'
 ```
 
 **Rules:**
