@@ -205,8 +205,17 @@ function changeEvents(): { type: string; request: ImproveRequest }[] {
     .map((d) => ({ type: d.type, request: d.request }));
 }
 
-async function waitFor(predicate: () => boolean): Promise<void> {
-  for (let i = 0; i < 40 && !predicate(); i++) await sleep(25);
+// Poll until `predicate` holds (5s ceiling). `onTick` re-fires each iteration to
+// defeat fs.watch's startup race: on macOS a change that lands in the first few ms
+// after fs.watch() begins is silently dropped (not delayed), so a one-shot write is
+// occasionally never seen. Re-writing the same file each tick guarantees the warm
+// watcher eventually catches one (the watcher has no diff-guard, so a same-content
+// re-write still broadcasts). Exits as soon as the predicate holds — no slowdown.
+async function waitFor(predicate: () => boolean, onTick?: () => Promise<void>): Promise<void> {
+  for (let i = 0; i < 200 && !predicate(); i++) {
+    await sleep(25);
+    if (onTick) await onTick();
+  }
 }
 
 describe("watchInbox", () => {
@@ -214,7 +223,10 @@ describe("watchInbox", () => {
     await watchInbox();
     const req = await submitRequest(baseInput);
 
-    await waitFor(() => changeEvents().some((e) => e.request.id === req.id));
+    await waitFor(
+      () => changeEvents().some((e) => e.request.id === req.id),
+      async () => void (await updateStatus(req.id, {})), // re-write same content to re-fire
+    );
 
     const event = changeEvents().find((e) => e.request.id === req.id);
     expect(event).toBeDefined();
@@ -228,8 +240,12 @@ describe("watchInbox", () => {
 
     await updateStatus(req.id, { status: ImproveStatus.Merged, commit: "c1" });
 
-    await waitFor(() =>
-      changeEvents().some((e) => e.request.id === req.id && e.request.status === ImproveStatus.Merged),
+    await waitFor(
+      () =>
+        changeEvents().some(
+          (e) => e.request.id === req.id && e.request.status === ImproveStatus.Merged,
+        ),
+      async () => void (await updateStatus(req.id, { status: ImproveStatus.Merged, commit: "c1" })),
     );
 
     const merged = changeEvents().find(
