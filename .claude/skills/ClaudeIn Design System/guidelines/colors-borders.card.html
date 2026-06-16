@@ -1,0 +1,21 @@
+<!-- @dsCard group="Colors" viewport="700x120" name="Borders" subtitle="Three weights — hairline, default, AA control outline" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; padding: 24px; background: var(--surface-base); }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .box { height: 56px; border-radius: var(--radius-md); background: var(--surface-1); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text-secondary); }
+  .cap { margin-top: 8px; font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); text-align: center; }
+</style>
+</head>
+<body>
+<div class="grid">
+  <div><div class="box" style="border:1px solid var(--border-subtle)">subtle</div><div class="cap">--border-subtle</div></div>
+  <div><div class="box" style="border:1px solid var(--border)">default</div><div class="cap">--border</div></div>
+  <div><div class="box" style="border:1px solid var(--border-strong)">strong · 3:1</div><div class="cap">--border-strong</div></div>
+</div>
+</body>
+</html>

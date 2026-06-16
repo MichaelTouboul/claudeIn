@@ -1,0 +1,290 @@
+<!-- @dsCard group="Customize" viewport="1280x720" name="Customize" subtitle="Ecosystem editor — connectors, skills, agents, hooks, memory" -->
+<!-- @startingPoint section="Screens" subtitle="ClaudeIn customize / ecosystem editor" viewport="1280x800" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ClaudeIn — Customize</title>
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--surface-base); color: var(--text-primary); }
+  #root { height: 100vh; }
+  .app { height: 100vh; display: flex; flex-direction: column; }
+  .topbar { display: flex; align-items: center; gap: 12px; height: var(--header-height); padding: 0 16px; background: var(--surface-1); border-bottom: 1px solid var(--border); }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
+  .crumb { color: var(--text-tertiary); font-size: 14px; }
+  .main { flex: 1; min-height: 0; display: flex; }
+  .rail { width: var(--sidebar-width); flex-shrink: 0; background: var(--surface-1); border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 14px; padding: 16px; overflow-y: auto; }
+  .nav { display: flex; flex-direction: column; gap: 2px; }
+  .navitem { display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 10px; border-radius: var(--radius-md); border: none; background: transparent; color: var(--text-secondary); font-family: var(--font-sans); font-size: 14px; cursor: pointer; text-align: left; width: 100%; transition: background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard); }
+  .navitem:hover { background: var(--surface-2); color: var(--text-primary); }
+  .navitem.on { background: var(--accent-subtle); color: var(--accent-text); font-weight: 500; }
+  .navitem .cnt { margin-left: auto; font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); }
+  .content { flex: 1; min-width: 0; overflow-y: auto; padding: 28px 32px; }
+  .chead { margin-bottom: 22px; }
+  .chead h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  .chead p { margin-top: 6px; color: var(--text-secondary); font-size: 14px; max-width: 60ch; }
+  .grouplabel { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-tertiary); padding: 0 4px; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
+  .srv { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 10px; border-radius: var(--radius-md); border: 1px solid transparent; background: transparent; cursor: pointer; text-align: left; color: var(--text-secondary); transition: background var(--duration-fast) var(--ease-standard); }
+  .srv:hover { background: var(--surface-2); }
+  .srv.on { background: var(--surface-2); border-color: var(--accent-border); color: var(--text-primary); }
+  .row { display: flex; align-items: center; gap: 10px; }
+  .field { display: flex; flex-direction: column; gap: 7px; }
+  .field > label { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel" src="./icons.jsx"></script>
+<script type="text/babel">
+const { useState } = React;
+const { Button, Badge, Avatar, Card, Tag, Input, Select, Switch, IconButton } = window.ClaudeInDesignSystem_25db6c;
+const Ic = window.ClaudeInIcons;
+
+const NAV = [
+  { id: 'profile', label: 'Profile', icon: <Ic.IconUser s={16} /> },
+  { id: 'connectors', label: 'Connectors', icon: <Ic.IconPlug s={16} />, count: 4 },
+  { id: 'skills', label: 'Skills', icon: <Ic.IconSparkles s={16} />, count: 12 },
+  { id: 'agents', label: 'Sub-agents', icon: <Ic.IconBot s={16} />, count: 6 },
+  { id: 'hooks', label: 'Hooks', icon: <Ic.IconZap s={16} />, count: 3 },
+  { id: 'memory', label: 'Memory', icon: <Ic.IconBrain s={16} />, count: 5 },
+];
+const SERVERS = [
+  { id: 'fs', name: 'filesystem', scope: 'project', transport: 'stdio', status: 'connected', cmd: 'npx -y @modelcontextprotocol/server-filesystem ~/code', tools: 8 },
+  { id: 'gh', name: 'github', scope: 'project', transport: 'http', status: 'connected', cmd: 'https://api.githubcopilot.com/mcp', tools: 26 },
+  { id: 'pg', name: 'postgres', scope: 'personal', transport: 'stdio', status: 'error', cmd: 'npx -y @modelcontextprotocol/server-postgres', tools: 0 },
+  { id: 'ln', name: 'linear', scope: 'personal', transport: 'http', status: 'connected', cmd: 'https://mcp.linear.app/sse', tools: 14 },
+];
+const SKILLS = [
+  { n: 'pdf-extract', d: 'Pull text & tables out of PDFs', s: 'project' },
+  { n: 'changelog', d: 'Draft a release changelog from commits', s: 'personal' },
+  { n: 'a11y-audit', d: 'Check a component for WCAG issues', s: 'project' },
+  { n: 'sql-explain', d: 'Explain & optimize a SQL query', s: 'personal' },
+];
+const AGENTS = [
+  { n: 'reviewer', d: 'Reviews diffs for bugs & style', hue: 'green' },
+  { n: 'researcher', d: 'Gathers context across the repo', hue: 'blue' },
+  { n: 'refactorer', d: 'Performs safe multi-file refactors', hue: 'purple' },
+  { n: 'tester', d: 'Writes and runs unit tests', hue: 'orange' },
+];
+const HOOKS = [
+  { event: 'PreToolUse', matcher: 'Bash', cmd: './.claude/hooks/guard.sh', on: true },
+  { event: 'PostToolUse', matcher: 'Edit|Write', cmd: 'npm run lint:fix', on: true },
+  { event: 'Stop', matcher: '*', cmd: './.claude/hooks/notify.sh', on: false },
+];
+const MEMORY = [
+  { path: 'CLAUDE.md', scope: 'project root', size: '9.4 KB' },
+  { path: 'src/CLAUDE.md', scope: 'renderer', size: '19 KB' },
+  { path: 'electron/CLAUDE.md', scope: 'main', size: '7.1 KB' },
+  { path: '~/.claude/CLAUDE.md', scope: 'personal', size: '2.3 KB' },
+];
+
+function SrvStatus({ status }) {
+  if (status === 'connected') return <Badge tone="success" dot shape="pill">connected</Badge>;
+  if (status === 'error') return <Badge tone="danger" dot shape="pill">error</Badge>;
+  return <Badge tone="neutral" dot shape="pill">idle</Badge>;
+}
+
+function Connectors() {
+  const [sel, setSel] = useState('gh');
+  const server = SERVERS.find((s) => s.id === sel);
+  return (
+    <div style={{ display: 'flex', gap: 24, height: '100%' }}>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {SERVERS.map((s) => (
+            <Card key={s.id} interactive selected={s.id === sel} padding="var(--space-3)" as="button"
+              onClick={() => setSel(s.id)} style={{ textAlign: 'left', width: '100%', cursor: 'pointer' }}>
+              <div className="row">
+                <span style={{ color: 'var(--accent-text)', display: 'flex' }}><Ic.IconPlug s={18} /></span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 14, fontWeight: 600, fontFamily: 'var(--font-mono)' }}>{s.name}</span>
+                    <Badge tone="neutral">{s.transport}</Badge>
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 2 }}>{s.tools} tools · {s.scope}</div>
+                </div>
+                <SrvStatus status={s.status} />
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+      <div style={{ width: 320, flexShrink: 0 }}>
+        <Card padding="var(--space-4)" style={{ position: 'sticky', top: 0 }}>
+          <div className="row" style={{ marginBottom: 14 }}>
+            <Avatar name={server.name} hue="cyan" square />
+            <div><div style={{ fontSize: 15, fontWeight: 600, fontFamily: 'var(--font-mono)' }}>{server.name}</div><SrvStatus status={server.status} /></div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div className="field"><label>Transport</label><Tag>{server.transport}</Tag></div>
+            <div className="field"><label>{server.transport === 'http' ? 'Endpoint' : 'Command'}</label>
+              <div className="mono" style={{ fontSize: 12, color: 'var(--text-secondary)', background: 'var(--surface-inset)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '8px 10px', wordBreak: 'break-all' }}>{server.cmd}</div>
+            </div>
+            <div className="field"><label>Scope</label><Switch checked={server.scope === 'project'} label={server.scope === 'project' ? 'This repo' : 'Personal'} /></div>
+            <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+              <Button intent="secondary" size="sm">Edit config</Button>
+              <Button intent="danger" size="sm">Remove</Button>
+            </div>
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+function Profile() {
+  return (
+    <div style={{ maxWidth: 460, display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div className="row" style={{ gap: 14 }}>
+        <Avatar name="Marie Dubois" hue="blue" size="lg" />
+        <div><div style={{ fontSize: 16, fontWeight: 600 }}>Marie Dubois</div><div className="mono" style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>marie@tastewise.io</div></div>
+      </div>
+      <div className="field"><label>Display name</label><Input defaultValue="Marie Dubois" /></div>
+      <div className="field"><label>Default model</label><Select options={[{value:'sonnet',label:'Claude Sonnet'},{value:'opus',label:'Claude Opus'},{value:'haiku',label:'Claude Haiku'}]} /></div>
+      <div className="field"><label>Preferences</label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 2 }}>
+          <Switch checked label="Auto-optimize context" />
+          <Switch checked={false} label="Confirm before running shell commands" />
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 8 }}><Button intent="primary">Save changes</Button><Button intent="ghost">Cancel</Button></div>
+    </div>
+  );
+}
+
+function Skills() {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 14 }}>
+      {SKILLS.map((s) => (
+        <Card key={s.n} interactive padding="var(--space-4)" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <span style={{ color: 'var(--success)' }}><Ic.IconSparkles s={18} /></span>
+          <div style={{ fontSize: 14, fontWeight: 600, fontFamily: 'var(--font-mono)' }}>{s.n}</div>
+          <div style={{ fontSize: 13, color: 'var(--text-tertiary)', lineHeight: 1.5 }}>{s.d}</div>
+          <Badge tone="neutral" style={{ alignSelf: 'flex-start' }}>{s.s}</Badge>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+function Agents() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {AGENTS.map((a) => (
+        <Card key={a.n} interactive padding="var(--space-3)">
+          <div className="row">
+            <Avatar name={a.n} hue={a.hue} />
+            <div style={{ flex: 1 }}><div style={{ fontSize: 14, fontWeight: 600 }}>{a.n}</div><div style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>{a.d}</div></div>
+            <Badge tone="info">sub-agent</Badge>
+            <IconButton aria-label="More"><Ic.IconMore s={16} /></IconButton>
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+function Hooks() {
+  const [hooks, setHooks] = useState(HOOKS);
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {hooks.map((h, i) => (
+        <Card key={h.event + h.matcher} padding="var(--space-3)">
+          <div className="row">
+            <Badge tone="warning">{h.event}</Badge>
+            <span className="mono" style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{h.matcher}</span>
+            <span className="mono" style={{ flex: 1, fontSize: 12, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{h.cmd}</span>
+            <Switch checked={h.on} onChange={() => setHooks((list) => list.map((x, j) => j === i ? { ...x, on: !x.on } : x))} />
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+function Memory() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {MEMORY.map((m) => (
+        <Card key={m.path} interactive padding="var(--space-3)">
+          <div className="row">
+            <span style={{ color: 'var(--history)' }}><Ic.IconFile s={18} /></span>
+            <div style={{ flex: 1 }}><div style={{ fontSize: 13, fontWeight: 600, fontFamily: 'var(--font-mono)' }}>{m.path}</div><div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{m.scope}</div></div>
+            <Badge tone="history">{m.size}</Badge>
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+const HEADERS = {
+  profile: ['Profile', 'Your identity and defaults across ClaudeIn.'],
+  connectors: ['Connectors', 'MCP servers give Claude new tools and data sources. Pick one to view or edit it.'],
+  skills: ['Skills', 'Reusable workflows Claude can call on demand.'],
+  agents: ['Sub-agents', 'Specialized agents Claude can delegate to.'],
+  hooks: ['Hooks', 'Shell commands that run on Claude Code lifecycle events.'],
+  memory: ['Memory', 'CLAUDE.md files that give Claude persistent context.'],
+};
+const PANES = { profile: Profile, connectors: Connectors, skills: Skills, agents: Agents, hooks: Hooks, memory: Memory };
+
+function App() {
+  const [section, setSection] = useState('connectors');
+  const [scope, setScope] = useState('claudein');
+  const Pane = PANES[section];
+  const [title, desc] = HEADERS[section];
+  return (
+    <div className="app">
+      <div className="topbar">
+        <span className="brand"><svg width="22" height="22" viewBox="0 0 32 32" fill="none" style={{ color: 'var(--accent-text)' }}><path d="M9 8.5 L17 16 L9 23.5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /><path d="M20.5 23.5 L25 23.5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" /></svg> ClaudeIn</span>
+        <span className="crumb">/ Customize</span>
+        <div style={{ flex: 1 }} />
+        <Button intent="ghost" size="sm" leftIcon={<Ic.IconArrowLeft s={15} />}>Home</Button>
+      </div>
+      <div className="main">
+        <div className="rail">
+          <div className="field"><label style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-tertiary)' }}>Scope</label>
+            <Select value={scope} onChange={(e) => setScope(e.target.value)} options={[{value:'claudein',label:'claudein'},{value:'all',label:'All repositories'},{value:'personal',label:'Personal only'}]} style={{ width: '100%' }} />
+          </div>
+          <div className="nav">
+            {NAV.map((n) => (
+              <button key={n.id} className={'navitem ' + (n.id === section ? 'on' : '')} onClick={() => setSection(n.id)}>
+                <span style={{ display: 'flex', color: n.id === section ? 'var(--accent-text)' : 'var(--text-tertiary)' }}>{n.icon}</span>
+                {n.label}
+                {n.count ? <span className="cnt">{n.count}</span> : null}
+              </button>
+            ))}
+          </div>
+          {section === 'connectors' ? (
+            <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 14 }}>
+              <div className="grouplabel">Servers <IconButton aria-label="Add server" size="sm"><Ic.IconPlus s={15} /></IconButton></div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {SERVERS.map((s) => (
+                  <div className="srv" key={s.id}><Ic.IconPlug s={14} /><span className="mono" style={{ fontSize: 12, flex: 1 }}>{s.name}</span><Status status={s.status} /></div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+        <div className="content">
+          <div className="chead"><h1>{title}</h1><p>{desc}</p></div>
+          <Pane />
+        </div>
+      </div>
+    </div>
+  );
+}
+function Status({ status }) {
+  const { StatusDot } = window.ClaudeInDesignSystem_25db6c;
+  return <StatusDot status={status === 'connected' ? 'live' : status === 'error' ? 'error' : 'idle'} />;
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

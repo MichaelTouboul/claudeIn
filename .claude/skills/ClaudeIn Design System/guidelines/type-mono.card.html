@@ -1,0 +1,26 @@
+<!-- @dsCard group="Type" viewport="700x150" name="Mono & data" subtitle="Tabular numerals, paths, IDs, diffs" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; padding: 22px; background: var(--surface-base); font-family: var(--font-mono); }
+  .well { background: var(--surface-inset); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px 16px; font-size: 13px; line-height: 1.7; }
+  .path { color: var(--text-secondary); }
+  .num { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+  .add { color: var(--success); }
+  .del { color: var(--danger); }
+  .key { color: var(--accent-text); }
+</style>
+</head>
+<body>
+  <div class="well">
+    <div><span class="path">~/code/claudein/src/index.css</span></div>
+    <div><span class="num">$0.4821</span> &nbsp;·&nbsp; <span class="num">12,480</span> tokens &nbsp;·&nbsp; <span class="num">3</span> agents</div>
+    <div><span class="add">+ const accent = '#4f5dd9';</span></div>
+    <div><span class="del">- const accent = '#06b6d4';</span></div>
+    <div><span class="key">sessionId</span>: 8f3c-a91d-4e22</div>
+  </div>
+</body>
+</html>

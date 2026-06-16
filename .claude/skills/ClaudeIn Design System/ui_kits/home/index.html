@@ -1,0 +1,162 @@
+<!-- @dsCard group="Home" viewport="1280x720" name="Home" subtitle="Greeting, favorite repositories, actions" -->
+<!-- @startingPoint section="Screens" subtitle="ClaudeIn home — repos & actions" viewport="1280x800" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ClaudeIn — Home</title>
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--surface-base); color: var(--text-primary); }
+  #root { height: 100vh; }
+  .topbar { display: flex; align-items: center; gap: 12px; height: var(--header-height); padding: 0 20px; background: var(--surface-1); border-bottom: 1px solid var(--border); }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
+  .scroll { height: calc(100vh - var(--header-height)); overflow-y: auto; }
+  .wrap { max-width: var(--content-max); margin: 0 auto; padding: 40px 32px 64px; display: flex; flex-direction: column; gap: 36px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(248px, 1fr)); gap: 16px; }
+  .sec-h { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+  .sec-h .overline, .sec-h .mono { white-space: nowrap; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel" src="./icons.jsx"></script>
+<script type="text/babel">
+const { useState } = React;
+const { Button, Card, Badge, Avatar, Tag, Input, Dialog, IconButton } = window.ClaudeInDesignSystem_25db6c;
+const { IconPlus, IconFolder, IconSearch, IconGitBranch, IconSparkles, IconUser, IconChevron, IconWand } = window.ClaudeInIcons;
+
+const REPOS = [
+  { id: 'r1', label: 'claudein', path: '~/code/claudein', branch: 'feature/redesign', hue: 'blue', active: '2m ago', running: true },
+  { id: 'r2', label: 'api-gateway', path: '~/work/api-gateway', branch: 'main', hue: 'green', active: '1h ago' },
+  { id: 'r3', label: 'design-tokens', path: '~/code/design-tokens', branch: 'main', hue: 'purple', active: 'yesterday' },
+  { id: 'r4', label: 'mobile-app', path: '~/work/mobile-app', branch: 'release/4.2', hue: 'orange', active: '3d ago' },
+];
+
+function RepoCard({ repo, onOpen, onRemove }) {
+  return (
+    <Card interactive padding="var(--space-4)" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
+        <Avatar name={repo.label} hue={repo.hue} square size="md" />
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{repo.label}</span>
+            {repo.running ? <Badge tone="success" dot shape="pill">live</Badge> : null}
+          </div>
+          <div className="mono" style={{ fontSize: 12, color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={repo.path}>{repo.path}</div>
+        </div>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-tertiary)', fontSize: 12, whiteSpace: 'nowrap' }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}><IconGitBranch s={13} />{repo.branch}</span>
+        <span style={{ color: 'var(--border-strong)' }}>·</span>
+        <span className="mono">{repo.active}</span>
+      </div>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <Button intent="primary" size="sm" onClick={() => onOpen(repo)}>Open</Button>
+        <Button intent="ghost" size="sm" onClick={() => onRemove(repo)}>Remove</Button>
+      </div>
+    </Card>
+  );
+}
+
+function AddRepoCard({ onAdd }) {
+  const [hover, setHover] = useState(false);
+  return (
+    <button type="button" onClick={onAdd} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
+      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 132,
+        borderRadius: 'var(--radius-lg)', border: `1px dashed ${hover ? 'var(--accent)' : 'var(--border-strong)'}`,
+        background: hover ? 'var(--accent-subtle)' : 'transparent', color: hover ? 'var(--accent-text)' : 'var(--text-tertiary)',
+        cursor: 'pointer', transition: 'all var(--duration-fast) var(--ease-standard)' }}>
+      <IconPlus s={20} />
+      <span style={{ fontSize: 13 }}>Add repository</span>
+    </button>
+  );
+}
+
+function App() {
+  const [repos, setRepos] = useState(REPOS);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [toast, setToast] = useState(null);
+
+  const open = (r) => { setToast(`Opening ${r.label}…`); setTimeout(() => setToast(null), 1800); };
+  const remove = (r) => setRepos((list) => list.filter((x) => x.id !== r.id));
+  const add = () => {
+    const n = repos.length + 1;
+    setRepos((list) => [...list, { id: 'r' + Date.now(), label: 'new-repo-' + n, path: '~/code/new-repo-' + n, branch: 'main', hue: 'cyan', active: 'just now' }]);
+  };
+
+  return (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div className="topbar">
+        <span className="brand"><svg width="22" height="22" viewBox="0 0 32 32" fill="none" style={{ color: 'var(--accent-text)' }}><path d="M9 8.5 L17 16 L9 23.5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /><path d="M20.5 23.5 L25 23.5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" /></svg> ClaudeIn</span>
+        <div style={{ flex: 1 }} />
+        <div style={{ width: 240 }}><Input size="sm" placeholder="Search projects…" leadingIcon={<IconSearch s={14} />} /></div>
+        <Button intent="primary" leftIcon={<IconPlus s={15} />}>New session</Button>
+        <IconButton aria-label="Profile" onClick={() => setProfileOpen(true)}><Avatar name="Marie Dubois" hue="blue" size="sm" /></IconButton>
+      </div>
+
+      <div className="scroll">
+        <div className="wrap">
+          <header>
+            <h1 style={{ fontSize: 28, fontWeight: 600, letterSpacing: '-0.02em' }}>Hello, Marie</h1>
+            <p style={{ marginTop: 6, color: 'var(--text-secondary)', fontSize: 15 }}>Pick up where you left off, or start something new.</p>
+          </header>
+
+          <section>
+            <div className="sec-h">
+              <span className="overline">Favorite repositories</span>
+              <span className="mono" style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{repos.length} repos</span>
+            </div>
+            <div className="grid">
+              {repos.map((r) => <RepoCard key={r.id} repo={r} onOpen={open} onRemove={remove} />)}
+              <AddRepoCard onAdd={add} />
+            </div>
+          </section>
+
+          <section>
+            <div className="sec-h"><span className="overline">Actions</span></div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+              <Button intent="secondary" leftIcon={<IconUser s={15} />}>Chat with Claude</Button>
+              <Button intent="secondary" leftIcon={<IconWand s={15} />}>Customize Claude</Button>
+              <Button intent="outline" disabled>Task <span style={{ color: 'var(--text-tertiary)' }}>· soon</span></Button>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <Dialog open={profileOpen} onClose={() => setProfileOpen(false)} variant="drawer-right" width={420} title="My profile">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <Avatar name="Marie Dubois" hue="blue" size="lg" />
+            <div>
+              <div style={{ fontSize: 16, fontWeight: 600 }}>Marie Dubois</div>
+              <div className="mono" style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>marie@tastewise.io</div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <Badge tone="accent">Pro</Badge>
+            <Badge tone="neutral" mono={false}>12 projects</Badge>
+            <Badge tone="neutral" mono={false}>Joined 2025</Badge>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <span className="overline">Default model</span>
+            <Tag selected>Claude Sonnet</Tag>
+          </div>
+        </div>
+      </Dialog>
+
+      {toast ? (
+        <div className="ci-fade-in" style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', background: 'var(--surface-3)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '10px 16px', boxShadow: 'var(--shadow-popover)', fontSize: 13 }}>{toast}</div>
+      ) : null}
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

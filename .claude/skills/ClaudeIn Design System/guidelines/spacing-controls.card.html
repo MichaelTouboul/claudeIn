@@ -1,0 +1,21 @@
+<!-- @dsCard group="Spacing" viewport="700x120" name="Control heights" subtitle="Comfortable density — sm 28 · md 36 · lg 44" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; padding: 24px; background: var(--surface-base); display: flex; gap: 16px; align-items: center; }
+  .ctl { display: flex; align-items: center; padding: 0 16px; background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: var(--radius-md); color: var(--text-secondary); font-size: 13px; }
+  .cap { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); margin-left: 4px; }
+</style>
+</head>
+<body>
+  <div class="ctl" style="height:var(--control-sm)">sm</div>
+  <span class="cap">28</span>
+  <div class="ctl" style="height:var(--control-md)">md (default)</div>
+  <span class="cap">36</span>
+  <div class="ctl" style="height:var(--control-lg)">lg</div>
+  <span class="cap">44 · touch-safe</span>
+</body>
+</html>

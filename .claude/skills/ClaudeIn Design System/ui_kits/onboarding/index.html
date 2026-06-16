@@ -1,0 +1,177 @@
+<!-- @dsCard group="Onboarding" viewport="1280x720" name="Onboarding" subtitle="Multi-step first-run: welcome → consent → repos → analyzing → done" -->
+<!-- @startingPoint section="Screens" subtitle="ClaudeIn onboarding flow" viewport="1280x800" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ClaudeIn — Onboarding</title>
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--surface-base); color: var(--text-primary); }
+  #root { height: 100vh; }
+  .stage { height: 100vh; display: flex; align-items: center; justify-content: center; padding: 32px; }
+  .card { width: 560px; max-width: 100%; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); overflow: hidden; }
+  .body { padding: 32px; display: flex; flex-direction: column; gap: 20px; }
+  .steps { display: flex; align-items: center; gap: 8px; padding: 18px 32px; border-bottom: 1px solid var(--border-subtle); }
+  .step { width: 24px; height: 4px; border-radius: var(--radius-pill); background: var(--surface-3); transition: background var(--duration-base) var(--ease-standard); }
+  .step.on { background: var(--accent-solid); }
+  .step.done { background: var(--accent); }
+  h2 { font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  .lead { color: var(--text-secondary); font-size: 15px; line-height: 1.55; }
+  .footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 32px; border-top: 1px solid var(--border-subtle); background: var(--surface-1); }
+  .checklist { display: flex; flex-direction: column; gap: 2px; }
+  .clitem { display: flex; align-items: flex-start; gap: 12px; padding: 12px; border-radius: var(--radius-md); }
+  .repolist { display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto; }
+  .reporow { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-2); cursor: pointer; }
+  .analysis { display: flex; flex-direction: column; gap: 10px; }
+  .aline { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-secondary); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel" src="./icons.jsx"></script>
+<script type="text/babel">
+const { useState, useEffect } = React;
+const { Button, Checkbox, Badge, Avatar, ProgressBar, StatusDot } = window.ClaudeInDesignSystem_25db6c;
+const { IconCheck, IconShield, IconFolder, IconBrain, IconGitBranch, IconArrowLeft, IconSparkles, IconLock } = window.ClaudeInIcons;
+
+const DETECTED = [
+  { id: 'd1', label: 'claudein', path: '~/code/claudein', hue: 'blue' },
+  { id: 'd2', label: 'api-gateway', path: '~/work/api-gateway', hue: 'green' },
+  { id: 'd3', label: 'design-tokens', path: '~/code/design-tokens', hue: 'purple' },
+  { id: 'd4', label: 'mobile-app', path: '~/work/mobile-app', hue: 'orange' },
+];
+const SCANS = ['Reading project memory (CLAUDE.md)', 'Indexing sub-agents & skills', 'Mapping MCP servers & hooks', 'Estimating context budget'];
+
+function App() {
+  const [step, setStep] = useState(0);
+  const [understood, setUnderstood] = useState(false);
+  const [picked, setPicked] = useState({ d1: true, d2: true, d3: false, d4: false });
+  const [scanIdx, setScanIdx] = useState(0);
+
+  useEffect(() => {
+    if (step !== 3) return;
+    setScanIdx(0);
+    const t = setInterval(() => setScanIdx((i) => {
+      if (i >= SCANS.length) { clearInterval(t); setTimeout(() => setStep(4), 500); return i; }
+      return i + 1;
+    }), 700);
+    return () => clearInterval(t);
+  }, [step]);
+
+  const pickedCount = Object.values(picked).filter(Boolean).length;
+
+  return (
+    <div className="stage">
+      <div className="card">
+        <div className="steps" aria-hidden="true">
+          {[0,1,2,3,4].map((i) => <div key={i} className={'step ' + (i === step ? 'on' : i < step ? 'done' : '')} />)}
+          <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-tertiary)' }}>Step {Math.min(step+1,5)} of 5</span>
+        </div>
+
+        {step === 0 ? (
+          <>
+            <div className="body">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <svg width="34" height="34" viewBox="0 0 32 32" fill="none" style={{ color: 'var(--accent-text)' }}><path d="M9 8.5 L17 16 L9 23.5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /><path d="M20.5 23.5 L25 23.5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" /></svg>
+                <h2>Welcome to ClaudeIn</h2>
+              </div>
+              <p className="lead">A cleaner home for everything Claude Code makes invisible — your sessions, sub-agents, skills, memory and context, all in one calm workspace.</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-tertiary)', fontSize: 13 }}>
+                <IconLock s={15} /> None of your data leaves your machine.
+              </div>
+            </div>
+            <div className="footer"><span /><Button intent="primary" size="lg" rightIcon={<IconCheck s={16} />} onClick={() => setStep(1)}>Get started</Button></div>
+          </>
+        ) : null}
+
+        {step === 1 ? (
+          <>
+            <div className="body">
+              <h2>Local access</h2>
+              <p className="lead">ClaudeIn reads a few things on your machine to tailor the experience. It never writes without asking, and nothing is uploaded.</p>
+              <div className="checklist">
+                {[
+                  { icon: <IconFolder s={16} />, t: 'Your projects', d: 'Folders with a .claude/ directory' },
+                  { icon: <IconBrain s={16} />, t: 'Memory & agents', d: 'CLAUDE.md, sub-agents, skills' },
+                  { icon: <IconShield s={16} />, t: 'Session history', d: 'Local transcripts & token costs' },
+                ].map((x) => (
+                  <div className="clitem" key={x.t} style={{ background: 'var(--surface-2)' }}>
+                    <span style={{ color: 'var(--accent-text)', marginTop: 1 }}>{x.icon}</span>
+                    <div><div style={{ fontSize: 14, fontWeight: 600 }}>{x.t}</div><div style={{ fontSize: 13, color: 'var(--text-tertiary)' }}>{x.d}</div></div>
+                  </div>
+                ))}
+              </div>
+              <Checkbox checked={understood} onChange={() => setUnderstood((v) => !v)} label="I understand ClaudeIn works entirely on-device." />
+            </div>
+            <div className="footer">
+              <Button intent="ghost" leftIcon={<IconArrowLeft s={15} />} onClick={() => setStep(0)}>Back</Button>
+              <Button intent="primary" disabled={!understood} onClick={() => setStep(2)}>Continue</Button>
+            </div>
+          </>
+        ) : null}
+
+        {step === 2 ? (
+          <>
+            <div className="body">
+              <h2>Choose your repositories</h2>
+              <p className="lead">We found {DETECTED.length} projects with Claude Code set up. Pick the ones to watch — you can change this anytime.</p>
+              <div className="repolist">
+                {DETECTED.map((r) => (
+                  <label className="reporow" key={r.id} style={{ borderColor: picked[r.id] ? 'var(--accent-border)' : 'var(--border)', background: picked[r.id] ? 'var(--accent-subtle)' : 'var(--surface-2)' }}>
+                    <Checkbox checked={!!picked[r.id]} onChange={() => setPicked((p) => ({ ...p, [r.id]: !p[r.id] }))} />
+                    <Avatar name={r.label} hue={r.hue} square size="sm" />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 14, fontWeight: 600 }}>{r.label}</div>
+                      <div className="mono" style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{r.path}</div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="footer">
+              <Button intent="ghost" leftIcon={<IconArrowLeft s={15} />} onClick={() => setStep(1)}>Back</Button>
+              <Button intent="primary" disabled={pickedCount === 0} onClick={() => setStep(3)}>Analyze {pickedCount} {pickedCount === 1 ? 'repo' : 'repos'}</Button>
+            </div>
+          </>
+        ) : null}
+
+        {step === 3 ? (
+          <div className="body" style={{ paddingTop: 28, paddingBottom: 28 }}>
+            <h2>Analyzing your setup…</h2>
+            <ProgressBar value={null} />
+            <div className="analysis" style={{ marginTop: 6 }}>
+              {SCANS.map((s, i) => (
+                <div className="aline" key={s} style={{ opacity: i <= scanIdx ? 1 : 0.4 }}>
+                  {i < scanIdx ? <span style={{ color: 'var(--success)' }}><IconCheck s={16} /></span> : <StatusDot status={i === scanIdx ? 'info' : 'idle'} pulse={i === scanIdx} />}
+                  {s}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {step === 4 ? (
+          <>
+            <div className="body" style={{ alignItems: 'center', textAlign: 'center', paddingTop: 36, paddingBottom: 28 }}>
+              <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'var(--success-subtle)', border: '1px solid color-mix(in srgb, var(--success) 35%, transparent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--success)' }}><IconCheck s={28} /></div>
+              <h2>You're all set</h2>
+              <p className="lead" style={{ maxWidth: '40ch' }}>{pickedCount} repositories are ready. ClaudeIn will keep them in sync as you work.</p>
+              <div style={{ display: 'flex', gap: 8 }}><Badge tone="success" dot>watching {pickedCount}</Badge><Badge tone="accent">on-device</Badge></div>
+            </div>
+            <div className="footer"><span /><Button intent="primary" size="lg" rightIcon={<IconSparkles s={16} />} onClick={() => setStep(0)}>Open ClaudeIn</Button></div>
+          </>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

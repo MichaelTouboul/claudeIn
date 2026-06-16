@@ -1,0 +1,27 @@
+<!-- @dsCard group="Colors" viewport="700x130" name="Agent identity hues" subtitle="Per-agent accent colors for chips, dots & avatars" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; padding: 20px; background: var(--surface-base); }
+  .grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 10px; }
+  .item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .av { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 13px; font-weight: 600; }
+  .name { font-size: 11px; color: var(--text-tertiary); }
+</style>
+</head>
+<body>
+<div class="grid">
+  <div class="item"><span class="av" style="color:var(--agent-cyan);background:color-mix(in srgb,var(--agent-cyan) 18%,var(--surface-2));border:1px solid color-mix(in srgb,var(--agent-cyan) 30%,transparent)">CY</span><span class="name">cyan</span></div>
+  <div class="item"><span class="av" style="color:var(--agent-blue);background:color-mix(in srgb,var(--agent-blue) 18%,var(--surface-2));border:1px solid color-mix(in srgb,var(--agent-blue) 30%,transparent)">BL</span><span class="name">blue</span></div>
+  <div class="item"><span class="av" style="color:var(--agent-green);background:color-mix(in srgb,var(--agent-green) 18%,var(--surface-2));border:1px solid color-mix(in srgb,var(--agent-green) 30%,transparent)">GR</span><span class="name">green</span></div>
+  <div class="item"><span class="av" style="color:var(--agent-yellow);background:color-mix(in srgb,var(--agent-yellow) 18%,var(--surface-2));border:1px solid color-mix(in srgb,var(--agent-yellow) 30%,transparent)">YE</span><span class="name">yellow</span></div>
+  <div class="item"><span class="av" style="color:var(--agent-orange);background:color-mix(in srgb,var(--agent-orange) 18%,var(--surface-2));border:1px solid color-mix(in srgb,var(--agent-orange) 30%,transparent)">OR</span><span class="name">orange</span></div>
+  <div class="item"><span class="av" style="color:var(--agent-red);background:color-mix(in srgb,var(--agent-red) 18%,var(--surface-2));border:1px solid color-mix(in srgb,var(--agent-red) 30%,transparent)">RE</span><span class="name">red</span></div>
+  <div class="item"><span class="av" style="color:var(--agent-purple);background:color-mix(in srgb,var(--agent-purple) 18%,var(--surface-2));border:1px solid color-mix(in srgb,var(--agent-purple) 30%,transparent)">PU</span><span class="name">purple</span></div>
+  <div class="item"><span class="av" style="color:var(--agent-pink);background:color-mix(in srgb,var(--agent-pink) 18%,var(--surface-2));border:1px solid color-mix(in srgb,var(--agent-pink) 30%,transparent)">PI</span><span class="name">pink</span></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!-- @dsCard group="Brand" viewport="700x200" name="Logo" subtitle="Refined chevron mark, app-icon tile, wordmark" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; padding: 28px; background: var(--surface-base); display: flex; align-items: center; gap: 40px; }
+  .item { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .mark { color: var(--accent-text); }
+  .cap { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); }
+  .lockup { display: flex; align-items: center; gap: 10px; }
+  .word { font-family: var(--font-sans); font-size: 22px; font-weight: 600; letter-spacing: -0.01em; color: var(--text-primary); }
+</style>
+</head>
+<body>
+  <div class="item">
+    <span class="mark"><img src="../assets/claudein-mark.svg" width="44" height="44" alt="ClaudeIn mark" style="filter:none"></span>
+    <span class="cap">mark</span>
+  </div>
+  <div class="item">
+    <img src="../assets/claudein-icon.svg" width="72" height="72" alt="ClaudeIn app icon">
+    <span class="cap">app icon</span>
+  </div>
+  <div class="item">
+    <div class="lockup">
+      <svg width="30" height="30" viewBox="0 0 32 32" fill="none" style="color:var(--accent-text)"><path d="M9 8.5 L17 16 L9 23.5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.5 23.5 L25 23.5" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+      <span class="word">ClaudeIn</span>
+    </div>
+    <span class="cap">horizontal lockup</span>
+  </div>
+</body>
+</html>

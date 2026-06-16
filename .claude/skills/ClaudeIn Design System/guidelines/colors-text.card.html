@@ -1,0 +1,21 @@
+<!-- @dsCard group="Colors" viewport="700x150" name="Text on base" subtitle="All three tiers verified ≥4.5:1 (WCAG AA)" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; padding: 24px; background: var(--surface-base); }
+  .row { display: flex; align-items: baseline; gap: 16px; padding: 8px 0; border-bottom: 1px solid var(--border-subtle); }
+  .row:last-child { border-bottom: none; }
+  .sample { flex: 1; }
+  .ratio { font-family: var(--font-mono); font-size: 11px; color: var(--success); }
+  .tok { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); width: 150px; }
+</style>
+</head>
+<body>
+  <div class="row"><span class="sample" style="color:var(--text-primary);font-size:16px;font-weight:600">Primary — headings &amp; key copy</span><span class="tok">--text-primary</span><span class="ratio">15.1 : 1</span></div>
+  <div class="row"><span class="sample" style="color:var(--text-secondary);font-size:15px">Secondary — body &amp; descriptions</span><span class="tok">--text-secondary</span><span class="ratio">9.2 : 1</span></div>
+  <div class="row"><span class="sample" style="color:var(--text-tertiary);font-size:14px">Tertiary — captions, meta, hints</span><span class="tok">--text-tertiary</span><span class="ratio">4.8 : 1</span></div>
+</body>
+</html>

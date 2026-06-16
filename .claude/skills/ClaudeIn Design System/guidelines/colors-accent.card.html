@@ -1,0 +1,35 @@
+<!-- @dsCard group="Colors" viewport="700x180" name="Accent — Indigo" subtitle="Calm developer-tool indigo, the single brand accent" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; padding: 20px; background: var(--surface-base); }
+  .ramp { display: grid; grid-template-columns: repeat(9, 1fr); gap: 6px; margin-bottom: 16px; }
+  .step { height: 44px; border-radius: var(--radius-sm); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 4px; font-family: var(--font-mono); font-size: 10px; color: rgba(255,255,255,0.65); }
+  .roles { display: flex; gap: 12px; flex-wrap: wrap; }
+  .role { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); }
+  .key { width: 22px; height: 22px; border-radius: var(--radius-sm); flex-shrink: 0; }
+  .mono { font-family: var(--font-mono); color: var(--text-tertiary); font-size: 11px; }
+</style>
+</head>
+<body>
+<div class="ramp">
+  <div class="step" style="background:var(--indigo-50);color:#333">50</div>
+  <div class="step" style="background:var(--indigo-100);color:#333">100</div>
+  <div class="step" style="background:var(--indigo-200);color:#333">200</div>
+  <div class="step" style="background:var(--indigo-300);color:#222">300</div>
+  <div class="step" style="background:var(--indigo-400)">400</div>
+  <div class="step" style="background:var(--indigo-500)">500</div>
+  <div class="step" style="background:var(--indigo-600)">600</div>
+  <div class="step" style="background:var(--indigo-700)">700</div>
+  <div class="step" style="background:var(--indigo-900)">900</div>
+</div>
+<div class="roles">
+  <div class="role"><span class="key" style="background:var(--accent-solid)"></span> fill <span class="mono">--accent-solid</span></div>
+  <div class="role"><span class="key" style="background:var(--accent-text)"></span> text/icon <span class="mono">--accent-text</span></div>
+  <div class="role"><span class="key" style="background:var(--accent-subtle);border:1px solid var(--accent-border)"></span> subtle <span class="mono">--accent-subtle</span></div>
+</div>
+</body>
+</html>

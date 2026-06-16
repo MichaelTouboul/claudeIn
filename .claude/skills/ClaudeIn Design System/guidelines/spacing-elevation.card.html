@@ -1,0 +1,21 @@
+<!-- @dsCard group="Spacing" viewport="700x170" name="Elevation" subtitle="Neutral depth — no decorative glow" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; padding: 28px 22px; background: var(--surface-base); display: flex; gap: 22px; align-items: center; }
+  .item { text-align: center; }
+  .box { width: 92px; height: 66px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+  .cap { margin-top: 12px; font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); }
+</style>
+</head>
+<body>
+  <div class="item"><div class="box" style="box-shadow:var(--shadow-xs)"></div><div class="cap">xs</div></div>
+  <div class="item"><div class="box" style="box-shadow:var(--shadow-sm)"></div><div class="cap">sm</div></div>
+  <div class="item"><div class="box" style="box-shadow:var(--shadow-md)"></div><div class="cap">md · popover</div></div>
+  <div class="item"><div class="box" style="box-shadow:var(--shadow-lg)"></div><div class="cap">lg</div></div>
+  <div class="item"><div class="box" style="box-shadow:var(--shadow-dialog)"></div><div class="cap">dialog</div></div>
+</body>
+</html>

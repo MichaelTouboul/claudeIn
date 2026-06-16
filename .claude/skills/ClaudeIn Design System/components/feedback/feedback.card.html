@@ -1,0 +1,52 @@
+<!-- @dsCard group="Components" viewport="700x320" name="Feedback" subtitle="Banner, Spinner, ProgressBar, Tooltip, EmptyState" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  body { margin: 0; padding: 24px; background: var(--surface-base); }
+  .stack { display: flex; flex-direction: column; gap: 16px; }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+  .lbl { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel">
+  const { Banner, Spinner, ProgressBar, Tooltip, EmptyState, Button } = window.ClaudeInDesignSystem_25db6c;
+  const Info = () => <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.4"/><path d="M8 7.2v3.4M8 5.2v.2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>;
+  function Demo() {
+    return (
+      <div className="stack">
+        <Banner tone="info" icon={<Info/>} title="Context optimized">ClaudeIn trimmed 4,200 tokens from this session.</Banner>
+        <Banner tone="warning" icon={<Info/>}>This agent is requesting permission to run a shell command.</Banner>
+        <Banner tone="success" icon={<Info/>} action={<Button intent="ghost" size="sm">Undo</Button>}>Memory file saved.</Banner>
+        <div className="row">
+          <div>
+            <div className="lbl">Spinner</div>
+            <div className="row"><Spinner size={14}/><Spinner size={20}/><Spinner size={20} color="var(--success)"/></div>
+          </div>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <div className="lbl">Progress</div>
+            <div style={{display:'flex',flexDirection:'column',gap:10}}>
+              <ProgressBar value={64}/>
+              <ProgressBar value={null}/>
+            </div>
+          </div>
+          <div>
+            <div className="lbl">Tooltip</div>
+            <Tooltip label="Copied to clipboard"><Button intent="secondary" size="sm">Hover me</Button></Tooltip>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(<Demo/>);
+</script>
+</body>
+</html>

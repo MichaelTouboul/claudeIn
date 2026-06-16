@@ -1,0 +1,22 @@
+<!-- @dsCard group="Spacing" viewport="700x140" name="Radii" subtitle="From controls (8) to cards (12) to pills" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; padding: 22px; background: var(--surface-base); display: flex; gap: 18px; align-items: flex-end; }
+  .item { text-align: center; }
+  .box { width: 64px; height: 56px; background: var(--surface-2); border: 1px solid var(--border-strong); }
+  .cap { margin-top: 8px; font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); }
+</style>
+</head>
+<body>
+  <div class="item"><div class="box" style="border-radius:var(--radius-xs)"></div><div class="cap">xs · 4</div></div>
+  <div class="item"><div class="box" style="border-radius:var(--radius-sm)"></div><div class="cap">sm · 6</div></div>
+  <div class="item"><div class="box" style="border-radius:var(--radius-md)"></div><div class="cap">md · 8</div></div>
+  <div class="item"><div class="box" style="border-radius:var(--radius-lg)"></div><div class="cap">lg · 12</div></div>
+  <div class="item"><div class="box" style="border-radius:var(--radius-xl)"></div><div class="cap">xl · 16</div></div>
+  <div class="item"><div class="box" style="border-radius:var(--radius-pill)"></div><div class="cap">pill</div></div>
+</body>
+</html>

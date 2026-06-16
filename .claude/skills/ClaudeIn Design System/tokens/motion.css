@@ -1,0 +1,21 @@
+/* ===========================================================================
+ * MOTION
+ * ---------------------------------------------------------------------------
+ * Calm and quick. Short fades and small translate/scale on enter; no bounce,
+ * no infinite decorative loops on content. Everything respects
+ * prefers-reduced-motion (see base.css).
+ * ======================================================================== */
+
+:root {
+  --duration-instant: 80ms;  /* @kind other */
+  --duration-fast:    140ms; /* @kind other */
+  --duration-base:    200ms; /* @kind other */
+  --duration-slow:    300ms; /* @kind other */
+
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);     /* @kind other */
+  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);  /* @kind other */
+  --ease-in:       cubic-bezier(0.4, 0, 1, 1);      /* @kind other */
+
+  /* Interaction deltas */
+  --press-scale: 0.97; /* @kind other */
+}

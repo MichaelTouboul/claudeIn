@@ -1,0 +1,26 @@
+<!-- @dsCard group="Colors" viewport="700x150" name="Status colors" subtitle="Semantic hues, tuned for legibility on dark" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; padding: 20px; background: var(--surface-base); }
+  .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .item { display: flex; flex-direction: column; gap: 8px; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 500; align-self: flex-start; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .name { font-size: 12px; color: var(--text-secondary); }
+  .val { font-family: var(--font-mono); font-size: 10px; color: var(--text-tertiary); }
+</style>
+</head>
+<body>
+<div class="grid">
+  <div class="item"><span class="pill" style="color:var(--success);background:var(--success-subtle)"><span class="dot" style="background:var(--success)"></span>Active</span><span class="name">success</span><span class="val">#45d483</span></div>
+  <div class="item"><span class="pill" style="color:var(--warning);background:var(--warning-subtle)"><span class="dot" style="background:var(--warning)"></span>Warning</span><span class="name">warning</span><span class="val">#f0c14b</span></div>
+  <div class="item"><span class="pill" style="color:var(--danger);background:var(--danger-subtle)"><span class="dot" style="background:var(--danger)"></span>Danger</span><span class="name">danger</span><span class="val">#ff8585</span></div>
+  <div class="item"><span class="pill" style="color:var(--info);background:var(--info-subtle)"><span class="dot" style="background:var(--info)"></span>Info</span><span class="name">info</span><span class="val">#6db4ff</span></div>
+  <div class="item"><span class="pill" style="color:var(--history);background:var(--history-subtle)"><span class="dot" style="background:var(--history)"></span>History</span><span class="name">history</span><span class="val">#b794f6</span></div>
+</div>
+</body>
+</html>

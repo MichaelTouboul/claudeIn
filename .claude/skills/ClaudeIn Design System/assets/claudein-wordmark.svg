@@ -1,0 +1,5 @@
+<svg width="168" height="32" viewBox="0 0 168 32" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ClaudeIn">
+  <path d="M9 8.5 L17 16 L9 23.5" stroke="#a3adff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+  <path d="M20.5 23.5 L25 23.5" stroke="#a3adff" stroke-width="3" stroke-linecap="round"></path>
+  <text x="38" y="22" font-family="Geist, system-ui, sans-serif" font-size="19" font-weight="600" letter-spacing="-0.01em" fill="#eef1f6">ClaudeIn</text>
+</svg>
