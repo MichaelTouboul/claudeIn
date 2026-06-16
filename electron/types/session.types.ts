@@ -11,6 +11,9 @@ export type SessionSummary = {
   startedAt: string | null;
   lastActiveAt: string | null;
   model: string | null;
+  // Best-effort context-window fill (0–100) from the LAST assistant turn's
+  // usage in the transcript; null when no assistant usage was recorded.
+  contextPercent: number | null;
   projectDirName: string;
   status: SessionStatus;
   pinned: boolean;

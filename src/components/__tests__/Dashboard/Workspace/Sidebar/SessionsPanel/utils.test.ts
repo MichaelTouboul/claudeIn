@@ -15,6 +15,7 @@ function session(id: string, status: SessionStatus, over: Partial<SessionSummary
     startedAt: null,
     lastActiveAt: new Date().toISOString(),
     model: "claude-opus-4",
+    contextPercent: null,
     projectDirName: "proj",
     status,
     pinned: false,

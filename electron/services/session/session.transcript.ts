@@ -37,6 +37,39 @@ export function extractAssistantUsage(obj: Record<string, unknown>): TranscriptU
   return { model, tokensIn, tokensOut };
 }
 
+/** Effective Claude Code context-window size used to turn token fill into a %. */
+export const CONTEXT_WINDOW_TOKENS = 200_000;
+
+/**
+ * Total context-window fill (tokens) carried by ONE assistant turn's usage:
+ * `input + cache_read + cache_creation + output`. Claude reports these
+ * per-turn cumulatively (the cache tokens are the live conversation prefix),
+ * so the LAST assistant turn's total best approximates current context fill.
+ * Returns `null` for a non-assistant / usage-less line.
+ */
+export function extractContextFill(obj: Record<string, unknown>): number | null {
+  if (obj.type !== "assistant") return null;
+  const message = obj.message as Record<string, unknown> | undefined;
+  const usage = message?.usage as Record<string, unknown> | undefined;
+  if (!usage) return null;
+  const num = (k: string): number => (typeof usage[k] === "number" ? (usage[k] as number) : 0);
+  const total =
+    num("input_tokens") +
+    num("cache_read_input_tokens") +
+    num("cache_creation_input_tokens") +
+    num("output_tokens");
+  return total > 0 ? total : null;
+}
+
+/**
+ * Convert a context-fill token count into a clamped 0–100 percentage of the
+ * Claude Code context window. `null` fill → `null` (unknown, omit the bar).
+ */
+export function contextFillToPercent(fill: number | null): number | null {
+  if (fill === null) return null;
+  return Math.min(Math.round((fill / CONTEXT_WINDOW_TOKENS) * 100), 100);
+}
+
 /**
  * Mutable cross-line parse state. Tool-only assistant turns accumulate their
  * tool names here until a text turn flushes them (mirrors `loadConversation`).
