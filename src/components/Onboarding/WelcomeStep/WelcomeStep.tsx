@@ -11,19 +11,10 @@ type WelcomeStepProps = {
   onNext: () => void;
 };
 
-/** The ClaudeIn prompt-chevron brand mark, matching the home topbar. */
+/** The ClaudeIn logo — the same gradient tile asset used everywhere (header, favicon). */
 function BrandMark() {
   return (
-    <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-      <path
-        d="M9 8.5 L17 16 L9 23.5"
-        stroke="currentColor"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path d="M20.5 23.5 L25 23.5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-    </svg>
+    <img src="/claudein-icon.svg" width={30} height={30} alt="" aria-hidden="true" draggable={false} />
   );
 }
 
