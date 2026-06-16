@@ -42,4 +42,10 @@
   --sidebar-width: 264px;
   --header-height: 52px;
   --content-max: 960px;
+  /* Right gutter the Header reserves for the app-global notification overlay
+   * (VersionNotification + ImproveNotification, see App.tsx). Sized for both
+   * buttons + their gap + the overlay's right inset, so the overlay never sits
+   * on top of the Header's right-edge controls. Single source of truth shared by
+   * the Header padding and the overlay inset. */
+  --header-overlay-gutter: 112px;
 }

@@ -27,7 +27,10 @@ export function CustomizeTopBar({ onBack }: CustomizeTopBarProps) {
       // The global `.titlebar-drag button { -webkit-app-region: no-drag }` rule
       // keeps the interactive controls clickable.
       className={cn(
-        "titlebar-drag flex h-[var(--header-height)] items-center gap-3 pr-4 shrink-0 border-b border-border",
+        // `pr-[var(--header-overlay-gutter)]` reserves the top-right corner for
+        // the app-global notification overlay (App.tsx) so its buttons never sit
+        // on top of the profile avatar; same token the Dashboard Header uses.
+        "titlebar-drag flex h-[var(--header-height)] items-center gap-3 pr-[var(--header-overlay-gutter)] shrink-0 border-b border-border",
         isMac ? "pl-20" : "pl-4",
       )}
       style={{ background: "var(--color-surface-1)" }}
