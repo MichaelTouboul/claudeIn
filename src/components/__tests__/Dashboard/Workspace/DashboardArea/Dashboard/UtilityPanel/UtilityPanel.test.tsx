@@ -77,7 +77,9 @@ describe('UtilityPanel', () => {
     // The former table is gone; the code object's content + title show instead.
     expect(screen.queryByText('Alice')).toBeNull();
     expect(screen.getByText('Code')).toBeInTheDocument();
-    expect(screen.getByText('const z = 9;')).toBeInTheDocument();
+    // CodeTab now syntax-highlights — the source is split across token spans, so
+    // assert on the joined textContent of the rendered <code> element.
+    expect(document.querySelector('code')?.textContent).toBe('const z = 9;');
   });
 
   it('the close button hides the panel (keeping its accessible name)', () => {

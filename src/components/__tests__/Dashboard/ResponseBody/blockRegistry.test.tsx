@@ -16,7 +16,8 @@ function renderMd(src: string) {
 describe('blockRegistry', () => {
   it('routes a fenced code block to CodeBlock (Copy action present)', () => {
     renderMd('```ts\nconst x = 1;\n```');
-    expect(screen.getByText('const x = 1;')).toBeInTheDocument();
+    // Syntax-highlighted: source is split across token spans, assert textContent.
+    expect(document.querySelector('code')?.textContent).toBe('const x = 1;');
     expect(screen.getByRole('button', { name: 'Copy' })).toBeInTheDocument();
   });
 

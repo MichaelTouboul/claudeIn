@@ -2,6 +2,7 @@ import { codeTabId, PanelTabKind, usePanelStore } from '@/store/dashboard/usePan
 
 import { BlockShell } from '../../BlockShell/BlockShell';
 import type { BlockAction } from '../../responseBody.types';
+import { CodeView } from '../codeHighlight/CodeView';
 
 export type CodeBlockData = { lang: string | null; src: string };
 export type CodeBlockProps = { data: CodeBlockData; raw: string };
@@ -11,6 +12,8 @@ export type CodeBlockProps = { data: CodeBlockData; raw: string };
 export function CodeBlock({ data }: CodeBlockProps) {
   const openPanel = usePanelStore((s) => s.open);
 
+  // Open-in-panel stays a BlockShell hover action. Copy is owned by CodeView's
+  // header button (always copies the RAW `data.src` — highlighting is display-only).
   const open: BlockAction = {
     id: 'open',
     label: 'Open',
@@ -24,35 +27,11 @@ export function CodeBlock({ data }: CodeBlockProps) {
       }),
   };
 
-  const copy: BlockAction = {
-    id: 'copy',
-    label: 'Copy',
-    kind: 'local',
-    run: () => void navigator.clipboard?.writeText(data.src),
-  };
-
   return (
     <BlockShell>
       {(register) => {
-        register([open, copy]);
-        return (
-          <div>
-            {data.lang ? (
-              <div
-                className="px-3 pt-2 text-xs font-mono"
-                style={{ color: 'var(--color-text-muted)' }}
-              >
-                {data.lang}
-              </div>
-            ) : null}
-            <pre
-              className="overflow-x-auto px-3 pb-3 pt-1 text-sm leading-relaxed"
-              style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)' }}
-            >
-              <code>{data.src}</code>
-            </pre>
-          </div>
-        );
+        register([open]);
+        return <CodeView src={data.src} lang={data.lang} />;
       }}
     </BlockShell>
   );
