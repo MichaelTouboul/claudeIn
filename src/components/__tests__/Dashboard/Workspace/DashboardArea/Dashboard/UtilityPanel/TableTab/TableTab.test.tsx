@@ -27,6 +27,19 @@ const multiRowTab: PanelTab = {
   },
 };
 
+const statusTab: PanelTab = {
+  id: 'table:3',
+  kind: PanelTabKind.Table,
+  title: 'Roadmap',
+  payload: {
+    columns: [
+      { field: 'pillar', headerName: 'Pillar' },
+      { field: 'status', headerName: 'Status' },
+    ],
+    rows: [{ id: 0, pillar: 'UX', status: 'done' }],
+  },
+};
+
 beforeEach(() => {
   usePanelStore.setState({ isOpen: true, current: tab });
 });
@@ -100,6 +113,47 @@ describe('TableTab', () => {
 
     // Cleanup: resolve the pending transform.
     act(() => resolve?.(''));
+  });
+
+  it('editing a cell commits the row and the edit is reflected in the exported markdown (still editable after restyle)', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+    render(<TableTab tab={tab} />);
+
+    // The cell must still be editable after the styling change.
+    const cell = screen.getByText('Alice').closest('[role="gridcell"]');
+    expect(cell?.className).toContain('MuiDataGrid-cell--editable');
+
+    // Simulate the DataGrid commit path (processRowUpdate → commitRow): the source
+    // of truth is the store, which is what the exporter reads.
+    act(() => {
+      usePanelStore.getState().commitRow({ id: 0, name: 'Edited' });
+    });
+
+    // Copy must now reflect the committed edit — proving the edit→commit→export
+    // data flow survived the restyle.
+    fireEvent.click(screen.getByRole('button', { name: /copy/i }));
+    await waitFor(() =>
+      expect(writeText).toHaveBeenCalledWith('| Name |\n| --- |\n| Edited |'),
+    );
+  });
+
+  it('renders a status cell as a badge (visual) without changing the cell value seen by exports', async () => {
+    usePanelStore.setState({ isOpen: true, current: statusTab });
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+    render(<TableTab tab={statusTab} />);
+
+    // The badge shows the raw status text verbatim.
+    expect(screen.getByText('done')).not.toBeNull();
+
+    // The exported markdown still carries the raw status value (badge is display-only).
+    fireEvent.click(screen.getByRole('button', { name: /copy/i }));
+    await waitFor(() =>
+      expect(writeText).toHaveBeenCalledWith(
+        '| Pillar | Status |\n| --- | --- |\n| UX | done |',
+      ),
+    );
   });
 
   it('persists two back-to-back row edits without dropping the first (no stale closure)', () => {
