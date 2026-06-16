@@ -1,0 +1,34 @@
+/* ===========================================================================
+ * ELEVATION — shadows & overlay treatments
+ * ---------------------------------------------------------------------------
+ * On a dark UI, elevation reads through a lighter surface + a soft, low-opacity
+ * shadow. The original relied on cyan "glow" box-shadows; the refresh drops
+ * decorative glow in favour of honest, neutral depth. Borders do most of the
+ * separation work; shadows are reserved for things that truly float (popovers,
+ * dialogs, dropdowns, toasts).
+ * ======================================================================== */
+
+:root {
+  /* Resting / inset */
+  --shadow-none: none;
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.32);
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.36);
+
+  /* Floating layers */
+  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.42);
+  --shadow-lg: 0 14px 36px rgba(0, 0, 0, 0.50);
+  --shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.58);
+
+  /* Component-specific */
+  --shadow-popover: 0 10px 30px rgba(0, 0, 0, 0.52);
+  --shadow-dialog:  0 28px 70px rgba(0, 0, 0, 0.62);
+
+  /* Inner well (code blocks, pressed inputs) */
+  --shadow-inset: inset 0 1px 2px rgba(0, 0, 0, 0.30);
+
+  /* Focus ring (composable) */
+  --ring-focus: 0 0 0 2px var(--focus-ring-offset), 0 0 0 4px var(--focus-ring);
+
+  /* Hairline top highlight for raised cards (very subtle) */
+  --highlight-top: inset 0 1px 0 rgba(255, 255, 255, 0.03); /* @kind shadow */
+}

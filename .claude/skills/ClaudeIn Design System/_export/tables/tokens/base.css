@@ -1,0 +1,130 @@
+/* ===========================================================================
+ * BASE — element defaults, focus, scrollbars, helpers
+ * ---------------------------------------------------------------------------
+ * The only file in the token closure that emits real rules (vs. custom props).
+ * Keeps the body/typographic baseline and a handful of utility classes the
+ * specimen cards and kits rely on.
+ * ======================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--tracking-normal);
+  color: var(--text-primary);
+  background: var(--surface-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Code & data render in the mono face by default */
+code, kbd, pre, samp {
+  font-family: var(--font-mono);
+  font-feature-settings: 'liga' 1, 'calt' 1;
+}
+
+/* Headings inherit display tracking */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-primary);
+}
+
+/* Visible, consistent focus for keyboard users only */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+::selection {
+  background: var(--accent-subtle);
+  color: var(--text-primary);
+}
+
+/* --- Scrollbars: thin, neutral, only visible on hover-capable devices ---- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--neutral-700) transparent;
+}
+*::-webkit-scrollbar { width: 9px; height: 9px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--neutral-700);
+  border-radius: var(--radius-pill);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--neutral-600); }
+
+/* --- Helper classes ----------------------------------------------------- */
+
+/* Uppercase overline / section label */
+.overline {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+/* Monospaced data run */
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* Subtle separating dot used between meta items */
+.dot-sep::before { content: '·'; margin: 0 var(--space-2); color: var(--text-tertiary); }
+
+/* --- Keyframes & animation utilities (shipped to consumers) ------------- */
+@keyframes ci-spin { to { transform: rotate(360deg); } }
+@keyframes ci-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+@keyframes ci-progress-indeterminate {
+  0%   { transform: translateX(-100%) scaleX(0.4); }
+  50%  { transform: translateX(20%) scaleX(0.6); }
+  100% { transform: translateX(220%) scaleX(0.4); }
+}
+@keyframes ci-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.ci-spin { animation: ci-spin 0.7s linear infinite; }
+.ci-pulse { animation: ci-pulse 1.8s ease-in-out infinite; }
+/* .ci-fade-in's visible end-state IS the base style; the fade only plays when
+   motion is allowed, so reduced-motion / no-anim contexts never hide content. */
+@media (prefers-reduced-motion: no-preference) {
+  .ci-fade-in { animation: ci-fade-in var(--duration-base) var(--ease-out); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
