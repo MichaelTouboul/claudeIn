@@ -7,6 +7,7 @@ import { useDashboardStore } from '@/store/dashboard/useDashboardStore';
 import { useDashboardUIStore } from '@/store/dashboard/useDashboardUIStore';
 import { useEventsStore } from '@/store/dashboard/useEventsStore';
 import { useFavoritesStore } from '@/store/dashboard/useFavoritesStore';
+import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
 vi.mock('@/contexts/ProjectContext', () => ({
   useProject: () => ({ projectId: 'p1', projectName: 'p1', isUserProject: false, refresh: vi.fn() }),
@@ -26,9 +27,9 @@ function agent(id: string): AgentSummary {
   };
 }
 
-const skill = (name: string): SkillSummary =>
-  ({ name, filePath: `/s/${name}.md`, scope: 'project' } as SkillSummary);
-const hook = (event: string): HookConfig => ({ event, matcher: '*', command: 'echo' } as HookConfig);
+const skill = (name: string, description = ''): SkillSummary =>
+  ({ name, description, filePath: `/s/${name}.md`, scope: 'project' } as SkillSummary);
+const hook = (event: string, matcher = '*', command = 'echo'): HookConfig => ({ event, matcher, command });
 const mcp = (name: string): McpServerEntry =>
   ({ name, source: 'project-mcp-json', scope: 'project', transport: 'stdio', target: 'cmd', shadowed: false });
 
@@ -86,5 +87,75 @@ describe('LibraryNav', () => {
     fireEvent.click(screen.getByText('Agents'));
     expect(screen.getByText('a1')).toBeInTheDocument();
     expect(screen.getByRole('tablist')).toBeInTheDocument(); // AgentsZone scope tabs
+  });
+
+  it('Skills list has a filter that narrows the rows and a scope badge', () => {
+    useDashboardStore.setState({ skills: [skill('pdf-extract', 'Pull tables'), skill('changelog', 'Release notes')] });
+    render(<LibraryNav onAgentAction={vi.fn()} onNewAgent={vi.fn()} />);
+    fireEvent.click(screen.getByText('Skills'));
+
+    expect(screen.getByText('pdf-extract')).toBeInTheDocument();
+    expect(screen.getByText('changelog')).toBeInTheDocument();
+    // Scope badge present (project skills → "project").
+    expect(screen.getAllByText('project').length).toBeGreaterThan(0);
+
+    const filter = screen.getByLabelText('Filter skills');
+    fireEvent.change(filter, { target: { value: 'changelog' } });
+    expect(screen.getByText('changelog')).toBeInTheDocument();
+    expect(screen.queryByText('pdf-extract')).not.toBeInTheDocument();
+  });
+
+  it('Hooks list has a filter that narrows the rows', () => {
+    useDashboardStore.setState({
+      hooks: [hook('PreToolUse', 'Bash', 'guard.sh'), hook('PostToolUse', 'Edit', 'lint.sh')],
+    });
+    render(<LibraryNav onAgentAction={vi.fn()} onNewAgent={vi.fn()} />);
+    fireEvent.click(screen.getByText('Hooks'));
+
+    expect(screen.getByText('PreToolUse')).toBeInTheDocument();
+    expect(screen.getByText('PostToolUse')).toBeInTheDocument();
+
+    const filter = screen.getByLabelText('Filter hooks');
+    fireEvent.change(filter, { target: { value: 'PostToolUse' } });
+    expect(screen.getByText('PostToolUse')).toBeInTheDocument();
+    expect(screen.queryByText('PreToolUse')).not.toBeInTheDocument();
+  });
+
+  it('MCP list has a filter that narrows the rows and a scope badge', () => {
+    render(<LibraryNav onAgentAction={vi.fn()} onNewAgent={vi.fn()} />);
+    fireEvent.click(screen.getByText('MCP servers'));
+
+    expect(screen.getByText('m1')).toBeInTheDocument();
+    expect(screen.getByText('m4')).toBeInTheDocument();
+    expect(screen.getAllByText('project').length).toBeGreaterThan(0);
+
+    const filter = screen.getByLabelText('Filter servers');
+    fireEvent.change(filter, { target: { value: 'm4' } });
+    expect(screen.getByText('m4')).toBeInTheDocument();
+    expect(screen.queryByText('m1')).not.toBeInTheDocument();
+  });
+
+  it('opening a skill row routes to a center tab via addTab', () => {
+    useDashboardStore.setState({ skills: [skill('pdf-extract', 'Pull tables')] });
+    const addTab = vi.spyOn(useWorkspaceStore.getState(), 'addTab');
+    render(<LibraryNav onAgentAction={vi.fn()} onNewAgent={vi.fn()} />);
+    fireEvent.click(screen.getByText('Skills'));
+    fireEvent.click(screen.getByText('pdf-extract'));
+    expect(addTab).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: 'skill', title: 'pdf-extract', skillId: '/s/pdf-extract.md' }),
+    );
+    addTab.mockRestore();
+  });
+
+  it('a skill row More menu opens its favorites action', async () => {
+    useDashboardStore.setState({ skills: [skill('pdf-extract', 'Pull tables')] });
+    render(<LibraryNav onAgentAction={vi.fn()} onNewAgent={vi.fn()} />);
+    fireEvent.click(screen.getByText('Skills'));
+    // Radix DropdownMenu uses pointer capture (absent in jsdom) — open via the
+    // keyboard path: focus the trigger and press Enter.
+    const trigger = screen.getByLabelText('More actions');
+    trigger.focus();
+    fireEvent.keyDown(trigger, { key: 'Enter' });
+    expect(await screen.findByText('Add to favorites')).toBeInTheDocument();
   });
 });

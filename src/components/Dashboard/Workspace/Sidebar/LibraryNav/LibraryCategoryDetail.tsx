@@ -2,9 +2,9 @@ import type { AgentScope, AgentSummary, HookConfig, McpServerEntry, SkillSummary
 import { LibraryCategory } from '@/store/dashboard/useDashboardUIStore';
 
 import { AgentsZone } from '../AgentsZone/AgentsZone';
-import { HookRow } from '../HookRow/HookRow';
-import { McpRow } from '../McpRow/McpRow';
-import { SkillRow } from '../SkillRow/SkillRow';
+import { HooksZone } from '../HooksZone/HooksZone';
+import { McpZone } from '../McpZone/McpZone';
+import { SkillsZone } from '../SkillsZone/SkillsZone';
 
 export type LibraryCategoryDetailProps = {
   category: LibraryCategory;
@@ -23,10 +23,14 @@ export type LibraryCategoryDetailProps = {
 };
 
 /**
- * The drilled-in list for one library category. Reuses the EXACT components the
- * old PanelsArea rendered (AgentsZone/AgentList, SkillRow, HookRow) plus the new
- * McpRow, so nothing reachable before the switch is lost. Empty states are kept
- * minimal here — the polished detail panes come in a later phase.
+ * The drilled-in list for one library category (LEVEL 1 of the drill-down). Each
+ * category follows the SAME grammar — a filter input above redesigned, scope-
+ * tinted rows with a per-item More menu — via its own Zone component.
+ *
+ * Routing note: the spec (library-drilldown.html) draws the item *detail* in
+ * this sidebar column; we deliberately route "open" to a CENTER tab instead
+ * (richer editor, owned by a parallel task) — the sidebar stays the browser.
+ * `onSelectAgent`/`onSelectSkill` are the `addTab` callbacks wired in LibraryNav.
  */
 export function LibraryCategoryDetail({
   category,
@@ -59,50 +63,13 @@ export function LibraryCategoryDetail({
 
   if (category === LibraryCategory.Skills) {
     return (
-      <div className="pt-1">
-        {skills.length > 0 ? (
-          skills.map((s) => (
-            <SkillRow
-              key={s.filePath}
-              skill={s}
-              selected={selectedSkillPath === s.filePath}
-              onSelect={onSelectSkill}
-            />
-          ))
-        ) : (
-          <EmptyHint label="No skills" />
-        )}
-      </div>
+      <SkillsZone skills={skills} selectedSkillPath={selectedSkillPath} onSelectSkill={onSelectSkill} />
     );
   }
 
   if (category === LibraryCategory.Hooks) {
-    return (
-      <div className="pt-1">
-        {hooks.length > 0 ? (
-          hooks.map((h) => <HookRow key={`${h.event}:${h.matcher}`} hook={h} />)
-        ) : (
-          <EmptyHint label="No hooks" />
-        )}
-      </div>
-    );
+    return <HooksZone hooks={hooks} />;
   }
 
-  return (
-    <div className="pt-1">
-      {mcp.length > 0 ? (
-        mcp.map((server) => <McpRow key={`${server.scope}:${server.name}`} server={server} />)
-      ) : (
-        <EmptyHint label="No MCP servers" />
-      )}
-    </div>
-  );
-}
-
-function EmptyHint({ label }: { label: string }) {
-  return (
-    <p className="px-3 py-2 text-xs" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
-      {label}
-    </p>
-  );
+  return <McpZone mcp={mcp} />;
 }
