@@ -32,19 +32,26 @@ Build check used in agent verification: `npx electron-vite build`
 
 ## Versioning — land on `main` via `land.sh`, never merge by hand
 
-**Every** landing on `main` bumps `package.json` `"version"`, regardless of source
-(Self-Improve watcher, autonomous dev-loop, manual merge). There is exactly one way to
-land work:
+Every landing on `main` goes through one script, and the bump follows **Conventional
+Commits** — derived from the branch's commit messages, not chosen by hand:
 
 ```bash
-.claude/hooks/land.sh <branch> [patch|minor]   # level defaults to patch; prints the new version
+.claude/hooks/land.sh <branch> [auto|none|patch|minor|major]   # level defaults to auto; prints the version
 ```
 
-It owns `bump → merge --no-ff → gate → push` and is cwd-drift-immune (resolves the main
-worktree itself, asserts `HEAD == main`). A tracked `pre-push` hook
-(`.claude/githooks/`, wired by `npm run hooks:install`, also run on `postinstall`)
-**rejects any push to `main` that doesn't bump the version** — so a hand merge that skips
-the bump fails at push. `feature` → `minor`, everything else → `patch`. Design:
+`auto` (the default) derives the level via `.claude/hooks/bump-level.sh`:
+`feat` → **minor**, `fix`/`perf` → **patch**, breaking (`type!:` or `BREAKING CHANGE:`)
+→ **major**, and a branch of **only** non-releasing types (`chore`/`docs`/`style`/
+`refactor`/`test`/`ci`/`build`) → **none** (a chore landing — no bump). A non-Conventional
+subject is treated as `patch` (so a forgotten bump is never mistaken for a chore). Pass an
+explicit level to override.
+
+`land.sh` owns `derive → merge --no-ff → bump (unless none) → gate → push` and is
+cwd-drift-immune (resolves the main worktree itself, asserts `HEAD == main`). A tracked
+`pre-push` hook (`.claude/githooks/`, wired by `npm run hooks:install`, also run on
+`postinstall`) **re-derives the level with the same helper** and rejects a push to `main`
+that skips a bump the commits actually require — while letting a `none` (chore-only)
+landing through. `git push --no-verify` is the visible override. Design:
 `docs/superpowers/specs/2026-06-15-universal-versioning-design.md`.
 
 ## Architecture

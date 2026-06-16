@@ -32,8 +32,13 @@ while read -r local_ref local_sha remote_ref remote_sha; do
 
   old_version=$(version_at "$remote_sha")
   if [ "$new_version" = "$old_version" ]; then
-    echo "✗ pre-push: main push rejected — version not bumped (still $new_version)." >&2
-    echo "  Land via .claude/hooks/land.sh <branch> [patch|minor] (or --no-verify to override)." >&2
+    # No bump — allowed ONLY if every new commit is a non-releasing Conventional type
+    # (chore/docs/etc → level 'none'). Same derivation land.sh uses, so the two agree.
+    level=$(bash "$ROOT/.claude/hooks/bump-level.sh" "$ROOT" "$remote_sha..$local_sha" 2>/dev/null)
+    [ "$level" = "none" ] && continue   # chore-only landing — no bump required
+    echo "✗ pre-push: main push rejected — version not bumped (still $new_version)," >&2
+    echo "  but the new commits imply a '$level' release. Land via .claude/hooks/land.sh <branch>" >&2
+    echo "  (auto-derives the bump), or use --no-verify to override." >&2
     exit 1
   fi
 done
