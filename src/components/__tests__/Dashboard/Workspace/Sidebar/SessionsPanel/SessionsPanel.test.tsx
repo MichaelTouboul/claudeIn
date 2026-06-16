@@ -37,7 +37,7 @@ function session(id: string, status: SessionStatus, over: Partial<SessionSummary
   return {
     sessionId: id, filePath: `/sessions/${id}.jsonl`, agentName: null, title: `Title ${id}`,
     firstPrompt: null, messageCount: 3, branch: null, startedAt: null,
-    lastActiveAt: new Date().toISOString(), model: "claude-opus-4", projectDirName: "proj",
+    lastActiveAt: new Date().toISOString(), model: "claude-opus-4", contextPercent: null, projectDirName: "proj",
     status, pinned: false, archived: false, pinnedAt: null, ...over,
   };
 }

@@ -1,7 +1,12 @@
 import fs from "fs";
 import path from "path";
 import readline from "readline";
-import { extractAssistantUsage, getProjectsBase } from "./session.transcript";
+import {
+  contextFillToPercent,
+  extractAssistantUsage,
+  extractContextFill,
+  getProjectsBase,
+} from "./session.transcript";
 import { getMeta, listMeta, type ConversationMeta } from "../conversation/conversation.meta";
 import type { SessionStatus, SessionSummary, SessionConversation, SessionMessage } from "../../types/session.types";
 
@@ -26,9 +31,16 @@ function getSessionsDir(projectPath: string): string {
 
 // --- Metadata listing (lazy, first ~50 lines per file) ---
 
+// Header metadata (title/agent/branch/firstPrompt/model) lives in the first
+// lines, so it is captured only while `lineCount < 50`. The context-window fill,
+// by contrast, is the LAST assistant turn's usage — so we keep streaming to EOF
+// and track the most recent fill (cheap per-line work, mirrors activity.service
+// reading whole transcripts). The percentage is clamped to 0–100; `null` when
+// no assistant usage was ever seen → the row omits the context bar gracefully.
 async function extractMetadata(filePath: string): Promise<Partial<SessionSummary>> {
   const meta: Partial<SessionSummary> = {};
   let lineCount = 0;
+  let lastContextFill: number | null = null;
 
   return new Promise((resolve) => {
     const stream = fs.createReadStream(filePath, { encoding: "utf-8" });
@@ -38,28 +50,34 @@ async function extractMetadata(filePath: string): Promise<Partial<SessionSummary
       lineCount++;
       try {
         const obj = JSON.parse(line);
-        if (obj.type === "ai-title" && obj.aiTitle) meta.title = obj.aiTitle;
-        if (obj.type === "agent-setting" && obj.agentSetting) meta.agentName = obj.agentSetting;
-        if (obj.type === "user" && obj.promptId && !meta.firstPrompt) {
-          const content = obj.message?.content;
-          if (typeof content === "string") {
-            meta.firstPrompt = content.length > 120 ? content.slice(0, 120) + "…" : content;
+        if (lineCount <= 50) {
+          if (obj.type === "ai-title" && obj.aiTitle) meta.title = obj.aiTitle;
+          if (obj.type === "agent-setting" && obj.agentSetting) meta.agentName = obj.agentSetting;
+          if (obj.type === "user" && obj.promptId && !meta.firstPrompt) {
+            const content = obj.message?.content;
+            if (typeof content === "string") {
+              meta.firstPrompt = content.length > 120 ? content.slice(0, 120) + "…" : content;
+            }
+            if (obj.timestamp && !meta.startedAt) meta.startedAt = obj.timestamp;
+            if (obj.gitBranch && !meta.branch) meta.branch = obj.gitBranch;
           }
-          if (obj.timestamp && !meta.startedAt) meta.startedAt = obj.timestamp;
-          if (obj.gitBranch && !meta.branch) meta.branch = obj.gitBranch;
+          if (obj.type === "assistant" && obj.message?.model && !meta.model) {
+            meta.model = obj.message.model;
+          }
         }
-        if (obj.type === "assistant" && obj.message?.model && !meta.model) {
-          meta.model = obj.message.model;
-        }
+        const fill = extractContextFill(obj);
+        if (fill !== null) lastContextFill = fill;
       } catch {}
-      if (lineCount >= 50) {
-        rl.close();
-        stream.destroy();
-      }
     });
 
-    rl.on("close", () => resolve(meta));
-    rl.on("error", () => resolve(meta));
+    rl.on("close", () => {
+      meta.contextPercent = contextFillToPercent(lastContextFill);
+      resolve(meta);
+    });
+    rl.on("error", () => {
+      meta.contextPercent = contextFillToPercent(lastContextFill);
+      resolve(meta);
+    });
   });
 }
 
@@ -104,6 +122,7 @@ export async function listSessions(projectPath: string): Promise<SessionSummary[
       startedAt: meta.startedAt || null,
       lastActiveAt,
       model: meta.model || null,
+      contextPercent: meta.contextPercent ?? null,
       projectDirName: path.basename(dir),
       status: deriveStatus(lastActiveAt),
       pinned: Boolean(cmeta?.pinnedAt),

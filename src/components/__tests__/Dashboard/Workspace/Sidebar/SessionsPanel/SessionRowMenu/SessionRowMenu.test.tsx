@@ -17,7 +17,7 @@ function makeSession(over: Partial<SessionSummary> = {}): SessionSummary {
   return {
     sessionId: "s1", filePath: "/sessions/s1.jsonl", agentName: null, title: "My session",
     firstPrompt: null, messageCount: 2, branch: null, startedAt: null, lastActiveAt: null,
-    model: null, projectDirName: "proj", status: "recent",
+    model: null, contextPercent: null, projectDirName: "proj", status: "recent",
     pinned: false, archived: false, pinnedAt: null, ...over,
   };
 }

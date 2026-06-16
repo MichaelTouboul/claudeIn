@@ -32,3 +32,15 @@ declare module "*?fresh=list" {
   const mod: any;
   export = mod;
 }
+declare module "*?fresh=ctx-last" {
+  const mod: any;
+  export = mod;
+}
+declare module "*?fresh=ctx-cap" {
+  const mod: any;
+  export = mod;
+}
+declare module "*?fresh=ctx-none" {
+  const mod: any;
+  export = mod;
+}
