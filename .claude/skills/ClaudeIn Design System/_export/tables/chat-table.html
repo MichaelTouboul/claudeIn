@@ -1,0 +1,136 @@
+<!-- @dsCard group="Dashboard" viewport="900x720" name="Tableau dans le chat — avant / après" subtitle="Rendu Markdown des tables avec le design system" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClaudeIn — Chat table</title>
+<link rel="icon" type="image/svg+xml" href="./assets/claudein-favicon.svg">
+<link rel="stylesheet" href="./styles.css">
+<style>
+  body { margin: 0; background: var(--surface-base); color: var(--text-primary); }
+  .page { max-width: 860px; margin: 0 auto; padding: 36px 28px 64px; display: flex; flex-direction: column; gap: 14px; }
+  .flabel { display: flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-tertiary); margin-top: 18px; }
+  .flabel .pill { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0; text-transform: none; border-radius: var(--radius-pill); padding: 2px 9px; }
+  .pill-old { color: var(--text-tertiary); background: var(--surface-2); border: 1px solid var(--border); }
+  .pill-new { color: var(--accent-text); background: var(--accent-subtle); border: 1px solid var(--accent-border); }
+  .text { font-size: 14px; line-height: 1.6; color: var(--text-secondary); }
+
+  /* ---- AVANT: brut, plein mono ---- */
+  .old { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; font-family: var(--font-mono); font-size: 13px; }
+  .old .r { display: grid; grid-template-columns: 2fr 2fr 1fr; }
+  .old .r > div { padding: 13px 16px; border-bottom: 1px solid var(--border-subtle); color: var(--text-secondary); }
+  .old .r.head > div { color: var(--text-primary); }
+  .old .r:last-child > div { border-bottom: none; }
+
+  /* ---- APRÈS: design system ---- */
+  .tbl { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; font-size: 14px; background: var(--surface-1); box-shadow: var(--shadow-sm); }
+  .tbl thead th { text-align: left; font-family: var(--font-sans); font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: var(--text-tertiary); text-transform: uppercase; background: var(--surface-2); padding: 11px 16px; border-bottom: 1px solid var(--border); }
+  .tbl tbody td { padding: 12px 16px; border-bottom: 1px solid var(--border-subtle); color: var(--text-secondary); vertical-align: middle; }
+  .tbl tbody tr:last-child td { border-bottom: none; }
+  .tbl tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--surface-base) 55%, transparent); }
+  .tbl tbody tr:hover td { background: var(--surface-3); }
+  .tbl td.t-strong { color: var(--text-primary); font-weight: 500; }
+  .tbl td.t-mono { font-family: var(--font-mono); color: var(--text-primary); }
+  .tbl td.t-num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; color: var(--text-secondary); }
+  .tbl th.right { text-align: right; }
+  .wrap-card { position: relative; }
+  .acts { position: absolute; top: 8px; right: 8px; display: flex; gap: 6px; opacity: 0; transition: opacity var(--duration-fast) var(--ease-standard); }
+  .wrap-card:hover .acts { opacity: 1; }
+  .actbtn { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; font-size: 12px; color: var(--text-secondary); background: var(--surface-3); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; }
+  .actbtn:hover { color: var(--text-primary); border-color: var(--border-strong); }
+</style>
+</head>
+<body>
+<div class="page" id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="./_ds_bundle.js"></script>
+<script type="text/babel" src="./icons.jsx"></script>
+<script type="text/babel">
+const { Badge } = window.ClaudeInDesignSystem_25db6c;
+const Ic = window.ClaudeInIcons;
+
+const ROWS = [
+  { pillar:'UX beyond the terminal', feat:'Chat avec syntax highlighting & diffs', status:'done' },
+  { pillar:'Visualize ecosystem', feat:'Browser de memories / sub-agents / skills', status:'wip' },
+  { pillar:'Multi-project dashboards', feat:'Workspace multi-projets en onglets', status:'done' },
+  { pillar:'In-app task management', feat:'Vue Jira intégrée', status:'planned' },
+  { pillar:'Context optimization', feat:'Compaction intelligente & pruning mémoire', status:'planned' },
+];
+const STATUS = {
+  done: <Badge tone="success" dot>Fait</Badge>,
+  wip: <Badge tone="warning" dot>En cours</Badge>,
+  planned: <Badge tone="neutral" dot>Prévu</Badge>,
+};
+const CMDS = [
+  { cmd:'npm run dev', desc:'Lance le dev server (HMR)', dur:'~2s' },
+  { cmd:'npm run build', desc:'Build de production', dur:'~15s' },
+  { cmd:'npm run lint', desc:'0 erreur / 0 warning requis', dur:'~5s' },
+  { cmd:'npm run typecheck', desc:'tsc --noEmit', dur:'~8s' },
+];
+
+function Acts() {
+  return (
+    <div className="acts">
+      <span className="actbtn"><Ic.IconBoxes s={13} /> Open</span>
+      <span className="actbtn"><Ic.IconCopy s={13} /> Copy</span>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <>
+      <div className="flabel">Avant <span className="pill pill-old">actuel</span></div>
+      <div className="old">
+        <div className="r head"><div>Pillar</div><div>Fonctionnalité</div><div>Statut</div></div>
+        <div className="r"><div>UX beyond the terminal</div><div>Chat avec syntax highlighting & diffs</div><div>✅ Fait</div></div>
+        <div className="r"><div>Visualize ecosystem</div><div>Browser de memories / sub-agents / skills</div><div>🚧 En cours</div></div>
+        <div className="r"><div>Multi-project dashboards</div><div>Workspace multi-projets en onglets</div><div>✅ Fait</div></div>
+        <div className="r"><div>In-app task management</div><div>Vue Jira intégrée</div><div>📋 Prévu</div></div>
+      </div>
+
+      <div className="flabel">Après <span className="pill pill-new">design system</span></div>
+      <div className="text">Voici les piliers du produit :</div>
+      <div className="wrap-card">
+        <Acts />
+        <table className="tbl">
+          <thead><tr><th>Pillar</th><th>Fonctionnalité</th><th>Statut</th></tr></thead>
+          <tbody>
+            {ROWS.map((r) => (
+              <tr key={r.pillar}>
+                <td className="t-strong">{r.pillar}</td>
+                <td>{r.feat}</td>
+                <td>{STATUS[r.status]}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="text" style={{ marginTop:8 }}>Et un tableau de commandes (mono pour le code, durées alignées à droite) :</div>
+      <div className="wrap-card">
+        <Acts />
+        <table className="tbl">
+          <thead><tr><th>Commande</th><th>Description</th><th className="right">Durée</th></tr></thead>
+          <tbody>
+            {CMDS.map((c) => (
+              <tr key={c.cmd}>
+                <td className="t-mono">{c.cmd}</td>
+                <td>{c.desc}</td>
+                <td className="t-num">{c.dur}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
