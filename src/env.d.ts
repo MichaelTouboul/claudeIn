@@ -17,6 +17,9 @@ interface Window {
 
     getHomeDir: () => Promise<string>;
     getAppVersion: () => Promise<string>;
+    watchAppVersion: () => Promise<void>;
+    unwatchAppVersion: () => Promise<void>;
+    onVersionChanged: (cb: (version: string) => void) => () => void;
 
     transform: (input: { kind: import("./store/usePanelStore").PanelTabKind; instruction: string; content: string }) => Promise<string>;
 

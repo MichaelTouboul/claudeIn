@@ -27,6 +27,16 @@ contextBridge.exposeInMainWorld("api", {
 
   getHomeDir: () => ipcRenderer.invoke("system:home-dir"),
   getAppVersion: () => ipcRenderer.invoke("system:appVersion"),
+  watchAppVersion: () => ipcRenderer.invoke("system:watch-version"),
+  unwatchAppVersion: () => ipcRenderer.invoke("system:unwatch-version"),
+  onVersionChanged: (cb: (version: string) => void) => {
+    return pushBus.subscribe((raw) => {
+      const data = raw as { type?: string; version?: unknown };
+      if (data?.type === "version_changed" && typeof data.version === "string") {
+        cb(data.version);
+      }
+    });
+  },
 
   transform: (input: { kind: "table" | "code" | "text"; instruction: string; content: string }) =>
     ipcRenderer.invoke("panel:transform", input),

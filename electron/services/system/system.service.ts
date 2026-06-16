@@ -7,7 +7,7 @@ export function getHomeDir(): string {
 }
 
 /** Semver used when the app's package.json cannot be located/parsed. */
-const FALLBACK_VERSION = "0.0.0";
+export const FALLBACK_VERSION = "0.0.0";
 
 /** Read the `version` field of a package.json file; `0.0.0` if missing/invalid. */
 export function readVersionFromPackageJson(file: string): string {
@@ -37,15 +37,25 @@ function packageJsonCandidates(): string[] {
 }
 
 /**
+ * The absolute path of the app's package.json actually used to source the
+ * version — the first candidate that exists AND yields a real (non-fallback)
+ * version. `null` when none qualifies. The version watcher (`version.watch.ts`)
+ * watches exactly this file so dev, bundled app, and tests stay in lockstep.
+ */
+export function getPackageJsonPath(): string | null {
+  for (const file of packageJsonCandidates()) {
+    if (!fs.existsSync(file)) continue;
+    if (readVersionFromPackageJson(file) !== FALLBACK_VERSION) return file;
+  }
+  return null;
+}
+
+/**
  * The current app version, sourced from package.json's `version`. Read from the
  * file (not `app.getVersion()`) so it works identically in the main process,
  * the bundled app, and node tests — no Electron coupling.
  */
 export function getAppVersion(): string {
-  for (const file of packageJsonCandidates()) {
-    if (!fs.existsSync(file)) continue;
-    const version = readVersionFromPackageJson(file);
-    if (version !== FALLBACK_VERSION) return version;
-  }
-  return FALLBACK_VERSION;
+  const file = getPackageJsonPath();
+  return file ? readVersionFromPackageJson(file) : FALLBACK_VERSION;
 }
