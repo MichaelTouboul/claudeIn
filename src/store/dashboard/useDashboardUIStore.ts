@@ -1,13 +1,13 @@
 import { create } from "zustand";
 
-import type { AgentSummary, SkillSummary  } from "@/lib/types";
+import type { AgentScope, AgentSummary, SkillSummary  } from "@/lib/types";
 
 type DashboardUIState = {
   selectedAgent: AgentSummary | null;
   selectedSkill: SkillSummary | null;
   selectedSessionId: string | null;
   openPanels: Set<string>;
-  scopeTab: "project" | "user";
+  scopeTab: AgentScope;
 
   selectAgent: (a: AgentSummary) => void;
   togglePanel: (panel: string) => void;
@@ -15,7 +15,7 @@ type DashboardUIState = {
   // `/agents` and `/skills` view slash commands to open the screen without
   // accidentally closing an already-open panel.
   openPanel: (panel: string) => void;
-  setScopeTab: (tab: "project" | "user") => void;
+  setScopeTab: (tab: AgentScope) => void;
   setSelectedAgent: (a: AgentSummary | null) => void;
   backToProject: () => void;
 };

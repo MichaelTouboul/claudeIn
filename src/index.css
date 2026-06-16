@@ -46,6 +46,8 @@
      with dark (surface-0) label text. */
   --color-accent: #818cf8;                    /* was #06b6d4 (cyan) */
   --color-accent-dim: rgba(129, 140, 248, 0.14);
+  --color-accent-subtle: rgba(129, 140, 248, 0.10); /* selected-row tint (skill --accent-subtle) */
+  --color-accent-border: rgba(129, 140, 248, 0.25); /* selected/active hairline (skill --accent-border) */
   --color-accent-solid: #4f5dd9;              /* solid fill for the primary button (white text) */
   --color-accent-text: #a3adff;               /* accent AS text on dark (the "In" in the ClaudeIn wordmark) — indigo-300, AA on surfaces */
 

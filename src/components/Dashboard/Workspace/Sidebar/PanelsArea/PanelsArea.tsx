@@ -7,7 +7,7 @@ import { type ReactNode } from "react";
 import { Accordion } from '@/components/_ui/Accordion';
 import { useProject } from '@/contexts/ProjectContext';
 import type { SessionSummary } from '@/hooks/useSessions';
-import type { AgentSummary, SkillSummary  } from '@/lib/types';
+import { type AgentSummary, type SkillSummary } from '@/lib/types';
 import { useDashboardStore } from '@/store/dashboard/useDashboardStore';
 import { useDashboardUIStore } from '@/store/dashboard/useDashboardUIStore';
 import { useEventsStore } from '@/store/dashboard/useEventsStore';
@@ -15,6 +15,7 @@ import { EMPTY, useFavoritesStore } from '@/store/dashboard/useFavoritesStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
 import { AgentList } from '../AgentList/AgentList';
+import { AgentsZone } from '../AgentsZone/AgentsZone';
 import { HookRow } from '../HookRow/HookRow';
 import { SectionLabel } from '../SectionLabel/SectionLabel';
 import { SessionsPanel } from '../SessionsPanel/SessionsPanel';
@@ -26,6 +27,7 @@ export type PanelsAreaProps = {
   sessionsLoading: boolean;
   sessionsRefresh: () => Promise<void> | void;
   onAgentAction: (action: string, agentName: string) => void;
+  onNewAgent: () => void;
 };
 
 export function PanelsArea({
@@ -33,6 +35,7 @@ export function PanelsArea({
   sessionsLoading,
   sessionsRefresh,
   onAgentAction,
+  onNewAgent,
 }: PanelsAreaProps) {
   const { projectId, isUserProject, refresh } = useProject();
   const agents = useDashboardStore((s) => s.agents);
@@ -50,8 +53,6 @@ export function PanelsArea({
   const onSelectAgent = (a: AgentSummary) => addTab({ kind: 'agent', title: a.id, agentName: a.id });
   const onSelectSkill = (s: SkillSummary) => addTab({ kind: 'skill', title: s.name, skillId: s.filePath });
 
-  const projectAgents = agents.filter((a) => a.scope === "project");
-  const userAgents = agents.filter((a) => a.scope === "user");
   const projectSkills = skills.filter((s) => s.scope !== "user");
   const userSkills = skills.filter((s) => s.scope === "user");
 
@@ -118,62 +119,16 @@ export function PanelsArea({
         label: "Agents",
         icon: <Bot size={11} className="text-accent" />,
         count: agents.length,
-        content: isUserProject ? (
-          <AgentList agents={agents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} />
-        ) : (
-          <div>
-            <div
-              className="flex items-center gap-px px-2 mb-2 p-0.5 rounded-lg"
-              style={{ background: 'var(--color-surface-0)', border: '1px solid var(--color-border-subtle)' }}
-            >
-              <button
-                onClick={() => setScopeTab("project")}
-                className="flex-1 flex items-center justify-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-md transition-all duration-200"
-                style={scopeTab === "project" ? {
-                  background: 'var(--color-accent-dim)',
-                  color: 'var(--color-accent)',
-                  boxShadow: 'inset 0 0 8px rgba(129, 140, 248,0.08)',
-                } : {
-                  color: 'var(--color-text-muted)',
-                }}
-              >
-                <Globe size={10} />
-                Project
-                <span style={{ fontFamily: 'var(--font-mono)', fontFeatureSettings: "'tnum' 1", fontSize: '10px', opacity: 0.6 }}>{projectAgents.length}</span>
-              </button>
-              <button
-                onClick={() => setScopeTab("user")}
-                className="flex-1 flex items-center justify-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-md transition-all duration-200"
-                style={scopeTab === "user" ? {
-                  background: 'rgba(234, 179, 8, 0.1)',
-                  color: '#eab308',
-                  boxShadow: 'inset 0 0 8px rgba(234,179,8,0.06)',
-                } : {
-                  color: 'var(--color-text-muted)',
-                }}
-              >
-                <User size={10} />
-                User
-                <span style={{ fontFamily: 'var(--font-mono)', fontFeatureSettings: "'tnum' 1", fontSize: '10px', opacity: 0.6 }}>{userAgents.length}</span>
-              </button>
-            </div>
-            {scopeTab === "project" ? (
-              projectAgents.length > 0 ? (
-                <AgentList agents={projectAgents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} />
-              ) : (
-                <div className="px-3 py-6 text-center">
-                  <p className="text-xs text-fg-muted mb-1.5">No project agents</p>
-                  <p className="text-[10px] text-fg-subtle leading-relaxed">Link user agents or create agents in <code className="text-accent/80 bg-accent/8 px-1 py-0.5 rounded">.claude/agents/</code></p>
-                </div>
-              )
-            ) : (
-              userAgents.length > 0 ? (
-                <AgentList agents={userAgents} selectedId={selectedAgent?.id ?? null} onSelect={onSelectAgent} onAgentAction={onAgentAction} />
-              ) : (
-                <p className="px-3 py-6 text-xs text-fg-muted text-center">No user agents</p>
-              )
-            )}
-          </div>
+        content: (
+          <AgentsZone
+            agents={agents}
+            scope={scopeTab}
+            onScopeChange={setScopeTab}
+            selectedId={selectedAgent?.id ?? null}
+            onSelect={onSelectAgent}
+            onAgentAction={onAgentAction}
+            onNewAgent={onNewAgent}
+          />
         ),
       },
       (projectSkills.length > 0 || userSkills.length > 0) ? {

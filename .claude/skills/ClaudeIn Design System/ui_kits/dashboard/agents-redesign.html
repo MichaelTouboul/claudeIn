@@ -1,0 +1,158 @@
+<!-- @dsCard group="Dashboard" viewport="780x740" name="Sidebar agents — avant / après" subtitle="Refonte de la visualisation des agents" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClaudeIn — Agents sidebar redesign</title>
+<link rel="icon" type="image/svg+xml" href="../../assets/claudein-favicon.svg">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  body { margin: 0; background: #0b0d11; color: var(--text-primary); }
+  .page { display: flex; gap: 28px; align-items: flex-start; padding: 40px 32px 64px; justify-content: center; }
+  .col { display: flex; flex-direction: column; gap: 12px; }
+  .flabel { display: flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-tertiary); padding-left: 4px; }
+  .flabel .pill { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0; text-transform: none; border-radius: var(--radius-pill); padding: 2px 9px; }
+  .pill-old { color: var(--text-tertiary); background: var(--surface-2); border: 1px solid var(--border); }
+  .pill-new { color: var(--accent-text); background: var(--accent-subtle); border: 1px solid var(--accent-border); }
+  /* sidebar shell */
+  .side { width: 280px; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; height: 600px; display: flex; flex-direction: column; }
+  .zone { display: flex; align-items: center; gap: 9px; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-tertiary); padding: 16px 16px 10px; }
+  .zone .ico { color: var(--accent-text); display: flex; }
+  .zone .cnt { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); letter-spacing: 0; }
+  .zone .chev { margin-left: auto; color: var(--text-tertiary); display: flex; }
+</style>
+</head>
+<body>
+<div class="page" id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel" src="./icons.jsx"></script>
+<script type="text/babel">
+const { useState } = React;
+const { Badge, StatusDot, Input, SegmentedControl } = window.ClaudeInDesignSystem_25db6c;
+const Ic = window.ClaudeInIcons;
+
+const HUE = { cyan:'var(--agent-cyan)', blue:'var(--agent-blue)', green:'var(--agent-green)', yellow:'var(--agent-yellow)', orange:'var(--agent-orange)', red:'var(--agent-red)', purple:'var(--agent-purple)', pink:'var(--agent-pink)' };
+
+const PROJECT = [
+  { id:'g', name:'claude-md-guardian', hue:'purple', desc:'Keeps CLAUDE.md files accurate', model:'Sonnet', running:true },
+  { id:'m', name:'migration-reviewer', hue:'blue', desc:'Reviews DB migrations for safety', model:'Opus', last:'2d ago' },
+];
+const USER = [
+  { id:'rv', name:'reviewer', hue:'green', desc:'Reviews diffs for bugs & style' },
+  { id:'rs', name:'researcher', hue:'blue', desc:'Gathers cross-repo context' },
+  { id:'rf', name:'refactorer', hue:'purple', desc:'Safe multi-file refactors', running:true },
+  { id:'ts', name:'tester', hue:'orange', desc:'Writes & runs unit tests' },
+  { id:'dw', name:'doc-writer', hue:'cyan', desc:'Drafts docs from code' },
+  { id:'pl', name:'planner', hue:'pink', desc:'Breaks tickets into steps' },
+  { id:'sc', name:'security-scanner', hue:'red', desc:'Flags risky patterns & secrets' },
+];
+const PLUGIN = [
+  { id:'cr', name:'code-reviewer', hue:'green', desc:'Reviews PRs against conventions', source:'quality-pack' },
+  { id:'ps', name:'pr-summarizer', hue:'blue', desc:'Summarizes pull requests', source:'github-pack', running:true },
+  { id:'tn', name:'test-runner', hue:'orange', desc:'Runs the affected test suite', source:'quality-pack' },
+  { id:'cg', name:'changelog-gen', hue:'pink', desc:'Generates release notes', source:'release-pack' },
+  { id:'sa', name:'security-audit', hue:'red', desc:'Audits deps for CVEs', source:'security-pack' },
+  { id:'pf', name:'perf-profiler', hue:'cyan', desc:'Profiles hot code paths', source:'perf-pack' },
+];
+
+function Tile({ hue, running }) {
+  return (
+    <span style={{ position:'relative', width:30, height:30, flexShrink:0, borderRadius:'var(--radius-md)',
+      display:'flex', alignItems:'center', justifyContent:'center',
+      background:`color-mix(in srgb, ${HUE[hue]} 16%, var(--surface-2))`,
+      border:`1px solid color-mix(in srgb, ${HUE[hue]} 32%, transparent)`, color:HUE[hue] }}>
+      <Ic.IconBot s={16} />
+      {running ? <span style={{ position:'absolute', top:-3, right:-3, width:10, height:10, borderRadius:'50%', background:'var(--success)', border:'2px solid var(--surface-1)' }} /> : null}
+    </span>
+  );
+}
+
+function Row({ a, active }) {
+  const [h, setH] = useState(false);
+  return (
+    <div onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}
+      style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 10px', margin:'0 8px', borderRadius:'var(--radius-md)', cursor:'pointer',
+        background: active ? 'var(--accent-subtle)' : h ? 'var(--surface-2)' : 'transparent',
+        transition:'background var(--duration-fast) var(--ease-standard)' }}>
+      <Tile hue={a.hue} running={a.running} />
+      <div style={{ flex:1, minWidth:0 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+          <span style={{ fontSize:13, fontWeight:500, color: active ? 'var(--accent-text)' : 'var(--text-primary)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{a.name}</span>
+          {a.running ? <span style={{ fontSize:10.5, fontWeight:600, color:'var(--success)', flexShrink:0 }}>running</span> : null}
+        </div>
+        <div style={{ fontSize:12, color:'var(--text-tertiary)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', marginTop:1 }}>{a.desc}</div>
+      </div>
+      {h
+        ? <span style={{ color:'var(--text-tertiary)', display:'flex', flexShrink:0 }}><Ic.IconMore s={16} /></span>
+        : a.source
+          ? <span title={a.source} style={{ display:'inline-flex', alignItems:'center', gap:4, flexShrink:0, padding:'2px 7px', borderRadius:'var(--radius-pill)', background:'var(--surface-inset)', border:'1px solid var(--border)', color:'var(--text-tertiary)' }}><Ic.IconBoxes s={11} /><span className="mono" style={{ fontSize:10.5, whiteSpace:'nowrap' }}>{a.source.replace('-pack','')}</span></span>
+          : null}
+    </div>
+  );
+}
+
+/* ---------- AVANT (current) ---------- */
+function Before() {
+  return (
+    <div className="side">
+      <div className="zone"><span className="ico"><Ic.IconBot s={15} /></span> Agents <span className="cnt">19</span><span className="chev"><Ic.IconChevronDown s={15} /></span></div>
+      <div style={{ padding:'0 12px 10px' }}>
+        <div style={{ display:'flex', gap:0, background:'var(--surface-inset)', border:'1px solid var(--border)', borderRadius:'var(--radius-md)', padding:3 }}>
+          <div style={{ flex:1, textAlign:'center', padding:'6px', borderRadius:'var(--radius-sm)', background:'var(--surface-3)', color:'var(--accent-text)', fontSize:13 }}>Project 2</div>
+          <div style={{ flex:1, textAlign:'center', padding:'6px', color:'var(--text-tertiary)', fontSize:13 }}>User 17</div>
+        </div>
+      </div>
+      <div style={{ paddingTop:4 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 16px' }}><span style={{ width:9, height:9, borderRadius:'50%', background:'var(--agent-purple)' }} /><span style={{ fontSize:15 }}>claude-md-guardian</span></div>
+        <div style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 16px' }}><span style={{ width:9, height:9, borderRadius:'50%', background:'var(--neutral-500)' }} /><span style={{ fontSize:15 }}>migration-reviewer</span></div>
+      </div>
+      <div style={{ flex:1 }} />
+    </div>
+  );
+}
+
+/* ---------- APRÈS (redesigned) ---------- */
+function After() {
+  const [tab, setTab] = useState('project');
+  const [q, setQ] = useState('');
+  const list = tab === 'project' ? PROJECT : tab === 'plugin' ? PLUGIN : USER;
+  const filtered = list.filter((a) => a.name.includes(q) || a.desc.toLowerCase().includes(q.toLowerCase()));
+  return (
+    <div className="side">
+      <div className="zone"><span className="ico"><Ic.IconBot s={15} /></span> Agents <span className="cnt">25</span><span className="chev"><Ic.IconChevronDown s={15} /></span></div>
+      <div style={{ padding:'0 12px 8px' }}>
+        <SegmentedControl size="sm" value={tab} onChange={(v)=>{setTab(v);setQ('');}} style={{ display:'flex', width:'100%' }}
+          options={[{ value:'project', label:<span style={{whiteSpace:'nowrap'}}>Project 2</span> }, { value:'user', label:<span style={{whiteSpace:'nowrap'}}>User 17</span> }, { value:'plugin', label:<span style={{whiteSpace:'nowrap'}}>Plugin 6</span> }]} />
+      </div>
+      {tab !== 'project' ? (
+        <div style={{ padding:'4px 12px 10px' }}>
+          <Input size="sm" placeholder="Filter agents…" leadingIcon={<Ic.IconSearch s={13} />} value={q} onChange={(e)=>setQ(e.target.value)} />
+        </div>
+      ) : null}
+      <div style={{ flex:1, overflowY:'auto', paddingTop:2 }}>
+        {filtered.map((a, i) => <Row key={a.id} a={a} active={tab==='project' && i===0} />)}
+      </div>
+      <div style={{ padding:'10px 16px', borderTop:'1px solid var(--border-subtle)', display:'flex', alignItems:'center', gap:7, color:'var(--text-tertiary)', fontSize:12.5, cursor:'pointer' }}>
+        <Ic.IconPlus s={14} /> New agent
+      </div>
+    </div>
+  );
+}
+
+function Showcase() {
+  return (
+    <>
+      <div className="col"><div className="flabel">Avant <span className="pill pill-old">actuel</span></div><Before /></div>
+      <div className="col"><div className="flabel">Après <span className="pill pill-new">amélioré</span></div><After /></div>
+    </>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<Showcase />);
+</script>
+</body>
+</html>

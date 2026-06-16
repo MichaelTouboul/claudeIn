@@ -17,6 +17,7 @@ function makeAgent(name: string): AgentSummary {
     frontmatter: { name, description: '' },
     subAgents: [],
     shadowed: false,
+    source: null,
   };
 }
 

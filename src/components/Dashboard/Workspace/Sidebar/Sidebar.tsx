@@ -68,6 +68,12 @@ export function Sidebar() {
         // TODO: implement add sub-agent modal
         alert(`Add sub-agent to ${agentName} — coming soon`);
         break;
+      case "create":
+        // No dedicated create-agent modal exists yet; route to the same
+        // (deferred) entry point so the affordance is wired, not silently a
+        // no-op. Replace with the create flow once it lands.
+        alert("New agent — coming soon");
+        break;
       case "toggle-favorite":
         if (projectId) void useFavoritesStore.getState().toggle(projectId, "agent", agentName);
         break;
@@ -93,6 +99,7 @@ export function Sidebar() {
         sessionsLoading={sessionsLoading}
         sessionsRefresh={sessionsRefresh}
         onAgentAction={handleAgentAction}
+        onNewAgent={() => handleAgentAction("create", "")}
       />
 
       <ResizeHandle onMouseDown={handleResizeDragStart} />

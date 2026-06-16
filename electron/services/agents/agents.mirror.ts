@@ -2,6 +2,7 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import matter from "gray-matter";
+import { scanPluginAgents } from "./plugin-agents";
 import { unionAgents } from "./agents.union";
 import { broadcast } from "../core/broadcast";
 import type { AgentFrontmatter } from "../../types/agent.types";
@@ -93,6 +94,7 @@ function scanDir(root: string, scope: AgentScope): AgentSummary[] {
                 ? fm.subAgents
                 : extractSubAgents(content),
             shadowed: false, // the union sets the real value
+            source: null, // user/project agents have no owning plugin pack
           });
         } catch {
           // malformed file → skip (faithful-mirror rule)
@@ -114,7 +116,8 @@ export function getAgents(projectPath?: string): AgentsSnapshot {
   const projectSummaries = projectPath
     ? scanDir(path.join(projectPath, ".claude", "agents"), "project")
     : [];
-  const agents = unionAgents(userSummaries, projectSummaries);
+  const pluginSummaries = scanPluginAgents();
+  const agents = unionAgents(userSummaries, projectSummaries, pluginSummaries);
   return { projectPath: projectPath ?? null, agents };
 }
 

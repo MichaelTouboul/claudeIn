@@ -1,6 +1,6 @@
 import type { AgentFrontmatter } from "./agent.types";
 
-export const AgentScope = { User: "user", Project: "project" } as const;
+export const AgentScope = { User: "user", Project: "project", Plugin: "plugin" } as const;
 export type AgentScope = (typeof AgentScope)[keyof typeof AgentScope];
 
 export interface AgentSummary {
@@ -12,6 +12,8 @@ export interface AgentSummary {
   frontmatter: AgentFrontmatter; // parsed; lightweight (no body/memory/annex)
   subAgents: string[];
   shadowed: boolean; // true when a project agent of the same name overrides it
+  /** The owning plugin pack name for `scope: Plugin` agents; null otherwise. */
+  source: string | null;
 }
 
 export interface AgentsSnapshot {
