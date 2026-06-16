@@ -1,4 +1,4 @@
-import { Bot, Plug, Settings, Wrench } from 'lucide-react';
+import { Bot, Plug, Sparkles, Zap } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 import { LibraryCategory } from '@/store/dashboard/useDashboardUIStore';
@@ -10,8 +10,8 @@ export type CategoryMeta = {
 
 /**
  * Per-category presentation, keyed by the LibraryCategory enum — one
- * authoritative behavior map (no fallback chains). Icons/colors mirror the zone
- * icons the old PanelsArea accordion used so nothing visible changes hue.
+ * authoritative behavior map (no fallback chains). Icons/colors mirror
+ * library.html's category nav (Bot/Sparkles/Zap/Plug, info/active/warning/accent).
  */
 export const CATEGORY_META: Record<LibraryCategory, CategoryMeta> = {
   [LibraryCategory.Agents]: {
@@ -20,11 +20,11 @@ export const CATEGORY_META: Record<LibraryCategory, CategoryMeta> = {
   },
   [LibraryCategory.Skills]: {
     label: 'Skills',
-    icon: <Wrench size={17} className="text-active" />,
+    icon: <Sparkles size={17} className="text-active" />,
   },
   [LibraryCategory.Hooks]: {
     label: 'Hooks',
-    icon: <Settings size={17} className="text-[var(--color-warning)]" />,
+    icon: <Zap size={17} className="text-[var(--color-warning)]" />,
   },
   [LibraryCategory.Mcp]: {
     label: 'MCP servers',
