@@ -43,6 +43,7 @@ function agentSummary(id: string, color: string): AgentSummary {
     frontmatter: { name: id, description: "", color },
     subAgents: [],
     shadowed: false,
+    source: null,
   };
 }
 

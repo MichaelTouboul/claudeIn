@@ -12,14 +12,18 @@ import type { AgentSummary } from "../../types/agents-mirror.types";
  *   agent is the active one (`shadowed: false`); the user agent is KEPT in the
  *   list marked `shadowed: true` (the UI decides whether to dim it).
  * - No collision → every agent is active (`shadowed: false`).
+ * - Plugin agents are a SEPARATE scope: they are appended after the project +
+ *   user groups, sorted by `id`, and never participate in user↔project shadowing
+ *   (a plugin agent sharing a name neither shadows nor is shadowed).
  * - Inputs are never mutated: fresh summary objects are returned.
- * - Stable order (locked): project group first, then user group; within each
- *   group sorted by `id` ascending (`localeCompare`). Keeps the broadcast diff
- *   stable regardless of filesystem read order.
+ * - Stable order (locked): project group first, then user, then plugin; within
+ *   each group sorted by `id` ascending (`localeCompare`). Keeps the broadcast
+ *   diff stable regardless of filesystem read order.
  */
 export function unionAgents(
   userAgents: AgentSummary[],
   projectAgents: AgentSummary[],
+  pluginAgents: AgentSummary[] = [],
 ): AgentSummary[] {
   const projectIds = new Set(projectAgents.map((a) => a.id));
 
@@ -31,5 +35,9 @@ export function unionAgents(
     .map((agent) => ({ ...agent, shadowed: projectIds.has(agent.id) }))
     .sort((a, b) => a.id.localeCompare(b.id));
 
-  return [...project, ...user];
+  const plugin = pluginAgents
+    .map((agent) => ({ ...agent, shadowed: false }))
+    .sort((a, b) => a.id.localeCompare(b.id));
+
+  return [...project, ...user, ...plugin];
 }

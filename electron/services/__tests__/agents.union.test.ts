@@ -14,6 +14,7 @@ function summary(id: string, scope: AgentSummary["scope"]): AgentSummary {
     frontmatter: { name: id, description: `${id} desc` },
     subAgents: [],
     shadowed: false,
+    source: scope === "plugin" ? "some-pack" : null,
   };
 }
 
@@ -48,6 +49,31 @@ describe("unionAgents", () => {
 
   it("empty inputs → empty output", () => {
     expect(unionAgents([], [])).toEqual([]);
+  });
+
+  it("plugin agents are appended after project + user, sorted by id, never shadowed", () => {
+    const result = unionAgents(
+      [summary("alpha", "user")],
+      [summary("beta", "project")],
+      [summary("zulu", "plugin"), summary("kilo", "plugin")],
+    );
+    expect(result.map((a) => `${a.scope}:${a.id}`)).toEqual([
+      "project:beta",
+      "user:alpha",
+      "plugin:kilo",
+      "plugin:zulu",
+    ]);
+    expect(result.filter((a) => a.scope === "plugin").every((a) => a.shadowed === false)).toBe(true);
+  });
+
+  it("a plugin agent sharing a name with a project agent does NOT shadow it (separate scope)", () => {
+    const result = unionAgents(
+      [],
+      [summary("dup", "project")],
+      [summary("dup", "plugin")],
+    );
+    expect(result.find((a) => a.scope === "plugin" && a.id === "dup")?.shadowed).toBe(false);
+    expect(result.find((a) => a.scope === "project" && a.id === "dup")?.shadowed).toBe(false);
   });
 
   it("does not mutate its inputs (returns fresh summaries with shadowed set)", () => {

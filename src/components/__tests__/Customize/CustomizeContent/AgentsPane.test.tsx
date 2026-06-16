@@ -23,6 +23,7 @@ function agent(
     frontmatter: { name: id, description },
     subAgents: [],
     shadowed: false,
+    source: null,
   };
 }
 

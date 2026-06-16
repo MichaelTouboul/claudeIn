@@ -120,6 +120,26 @@ describe("agents.mirror getAgents", () => {
     expect(() => getAgents()).not.toThrow();
     expect(getAgents().agents).toEqual([]);
   });
+
+  it("surfaces installed-plugin agents with scope=plugin + source, alongside user agents", () => {
+    writeAgent(userAgentsDir, "u.md", { name: "u-agent", description: "U" });
+    // Lay down a plugins registry + a pack carrying an agent under HOME.
+    const installPath = path.join(tmpHome, ".claude", "plugins", "cache", "mp", "qa", "1.0.0");
+    fs.mkdirSync(installPath, { recursive: true });
+    fs.writeFileSync(path.join(installPath, "plugin.json"), JSON.stringify({ name: "quality-pack" }));
+    writeAgent(path.join(installPath, "agents"), "cr.md", { name: "code-reviewer", description: "Reviews" });
+    fs.writeFileSync(
+      path.join(tmpHome, ".claude", "plugins", "installed_plugins.json"),
+      JSON.stringify({ version: 2, plugins: { "quality-pack@mp": [{ scope: "user", installPath }] } }),
+    );
+
+    const agents = getAgents().agents;
+    const cr = agents.find((a) => a.id === "code-reviewer");
+    expect(cr?.scope).toBe("plugin");
+    expect(cr?.source).toBe("quality-pack");
+    // user agents unaffected
+    expect(agents.find((a) => a.id === "u-agent")?.scope).toBe("user");
+  });
 });
 
 describe("agents.mirror watchAgents", () => {

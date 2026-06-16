@@ -16,7 +16,7 @@ function project(id: string, path: string): Project {
 function agent(id: string): AgentSummary {
   return {
     id, scope: 'project', filePath: `/a/${id}`, relativePath: `${id}.md`,
-    folder: '', frontmatter: { name: id, description: id }, subAgents: [], shadowed: false,
+    folder: '', frontmatter: { name: id, description: id }, subAgents: [], shadowed: false, source: null,
   };
 }
 
