@@ -138,7 +138,11 @@ bump the version, so the invariant holds regardless of who lands the work. See
 - **Bump level — by request `type`** (the watcher maps type → level, then passes it):
   - `feature` → **minor** bump (`0.X.0`): `land.sh <branch> minor`.
   - `bug` / `performance` / `design` / `copy` → **patch** bump (`0.0.X`):
-    `land.sh <branch> patch` (patch is also `land.sh`'s default).
+    `land.sh <branch> patch`.
+  - These explicit levels are now **overrides**. As of the 2026-06-16 amendment,
+    `land.sh`'s default is `auto` — the level is derived from the branch's commits
+    (Conventional Commits; chore/docs-only → **none**, no bump). See the design doc's
+    amendment. The watcher may keep passing explicit levels or switch to `auto`.
 
 - **Where it happens — inside the SERIALIZED merge lane.** `land.sh` is the single
   merge path, so it *is* the serialization point: the bump runs as part of finalizing

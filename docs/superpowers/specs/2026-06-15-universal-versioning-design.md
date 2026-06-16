@@ -148,3 +148,30 @@ worktree/gate dev-loop. Build directly and verify by dry-run on a throwaway bran
    the `pre-push` hook **rejects** it; then `land.sh`-style bump → push accepted.
 3. `land.sh throwaway minor` → assert minor bump.
 4. Confirm `land.sh` aborts when `HEAD != main` and when cwd is inside a worktree.
+
+## Amendment (2026-06-16) — Conventional-Commits-derived levels; `chore` → no bump
+
+Decision 3 above (patch-by-default, manual level) is **superseded**. Rationale: SemVer
+and Conventional Commits both say a non-releasing change (a skill, docs, CI config) should
+produce **no** version bump. Forcing a patch on every chore made the version a landing
+*counter* rather than a release marker. The original "no commit-message inference" worry
+is resolved by deriving over the *branch's whole commit set* (not the throwaway branch
+*name*), which is stable regardless of `worktree-agent-<id>` naming.
+
+**New rule — the level is a function of the commits, not a manual arg:**
+
+- One shared derivation, `.claude/hooks/bump-level.sh <root> <range>` → `major|minor|patch|none`:
+  - breaking (`type!:` or a `BREAKING CHANGE:` footer) → **major**
+  - `feat` → **minor**; `fix`/`perf`/`revert` → **patch**
+  - `chore`/`docs`/`style`/`refactor`/`test`/`ci`/`build` → **none**
+  - anything non-Conventional → **patch** (safety: a forgotten bump is never read as a chore)
+  - merge commits ignored (`--no-merges`); highest level across the range wins.
+- `land.sh <branch>` defaults to `auto` (derive); `none|patch|minor|major` override.
+  When the level is `none`, the merge lands with **no** `npm version` call.
+- The `pre-push` guardrail **re-derives with the same helper**: a no-bump push to `main`
+  is rejected *unless* every new commit is non-releasing (`none`). So the invariant is no
+  longer "main always bumps" but "**main never advances with a bump it owes un-paid**".
+
+**Tests** (live in `.claude/hooks/__tests__/`, run with `bash`): `bump-level.test.sh`
+(12 cases over a throwaway repo) and `pre-push.test.sh` (6-case end-to-end accept/reject
+against a bare remote wired with the real hooks).
