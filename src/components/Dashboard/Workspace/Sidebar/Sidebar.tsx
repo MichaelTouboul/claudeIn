@@ -1,47 +1,34 @@
 import { useEffect } from 'react';
 
+import { SegmentedControl } from '@/components/_ui/SegmentedControl';
 import { useProject } from '@/contexts/ProjectContext';
 import { useResizableSidebar } from '@/hooks/useResizableSidebar';
 import { useSessions } from '@/hooks/useSessions';
 import { useDashboardStore } from '@/store/dashboard/useDashboardStore';
-import { useDashboardUIStore } from '@/store/dashboard/useDashboardUIStore';
+import { SidebarView, useDashboardUIStore } from '@/store/dashboard/useDashboardUIStore';
 import { useFavoritesStore, useInitFavorites } from '@/store/dashboard/useFavoritesStore';
+import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
 import { ConversationList } from './ConversationList/ConversationList';
-import { PanelsArea } from './PanelsArea/PanelsArea';
+import { LibraryNav } from './LibraryNav/LibraryNav';
 import { ResizeHandle } from './ResizeHandle/ResizeHandle';
+import { SidebarFooter } from './SidebarFooter/SidebarFooter';
 
-// Inject animation keyframes
-if (typeof document !== "undefined" && !document.getElementById("chat-animations")) {
-  const style = document.createElement("style");
-  style.id = "chat-animations";
-  style.textContent = `
-    @keyframes chatSlideIn {
-      0% { opacity: 0; transform: translateX(-16px); max-height: 0; }
-      50% { max-height: 40px; }
-      100% { opacity: 1; transform: translateX(0); max-height: 40px; }
-    }
-  `;
-  document.head.appendChild(style);
-}
-
-function ZoneHeader({ label }: { label: string }) {
-  return (
-    <div
-      className="px-3.5 pt-4 pb-1.5 text-2xs font-semibold uppercase"
-      style={{ color: 'var(--color-text-muted)', letterSpacing: 'var(--tracking-caps)' }}
-    >
-      {label}
-    </div>
-  );
-}
+const SWITCH_OPTIONS = [
+  { value: SidebarView.Sessions, label: 'Sessions' },
+  { value: SidebarView.Library, label: 'Library' },
+];
 
 export function Sidebar() {
   const { projectId, projectPath } = useProject();
   useInitFavorites(projectId);
-  const { sessions, loading: sessionsLoading, refresh: sessionsRefresh } = useSessions(projectPath);
+  const { sessions, refresh: sessionsRefresh } = useSessions(projectPath);
 
   const { width: sidebarWidth, ref: sidebarRef, startDrag: handleResizeDragStart } = useResizableSidebar();
+
+  const view = useDashboardUIStore((s) => s.sidebarView);
+  const setView = useDashboardUIStore((s) => s.setSidebarView);
+  const addTab = useWorkspaceStore((s) => s.addTab);
 
   useEffect(() => {
     useDashboardUIStore.getState().setSelectedAgent(null);
@@ -80,6 +67,13 @@ export function Sidebar() {
     }
   };
 
+  // "+ New session" opens a fresh chat tab — the existing new-conversation entry
+  // point (same tab the WorkspaceBar "+" creates).
+  const onNewSession = () => addTab({ kind: 'chat', title: 'Chat' });
+  // No plugin-install flow exists yet; flag the affordance so it is wired (not
+  // silently omitted) until that flow lands.
+  const onInstallPlugin = () => alert('Install from plugin — coming soon');
+
   return (
     <div
       ref={sidebarRef}
@@ -90,17 +84,25 @@ export function Sidebar() {
         borderRight: '1px solid var(--color-border)',
       }}
     >
-      <ZoneHeader label="Activity" />
-      <ConversationList sessions={sessions} onChanged={sessionsRefresh} />
+      <div className="px-3 pt-3 pb-2 shrink-0">
+        <SegmentedControl
+          options={SWITCH_OPTIONS}
+          value={view}
+          onChange={setView}
+          size="sm"
+          className="w-full"
+        />
+      </div>
 
-      <ZoneHeader label="Library" />
-      <PanelsArea
-        sessions={sessions}
-        sessionsLoading={sessionsLoading}
-        sessionsRefresh={sessionsRefresh}
-        onAgentAction={handleAgentAction}
-        onNewAgent={() => handleAgentAction("create", "")}
-      />
+      {view === SidebarView.Sessions ? (
+        <div className="flex-1 overflow-y-auto min-h-0">
+          <ConversationList sessions={sessions} onChanged={sessionsRefresh} />
+        </div>
+      ) : (
+        <LibraryNav onAgentAction={handleAgentAction} onNewAgent={() => handleAgentAction("create", "")} />
+      )}
+
+      <SidebarFooter view={view} onNewSession={onNewSession} onInstallPlugin={onInstallPlugin} />
 
       <ResizeHandle onMouseDown={handleResizeDragStart} />
     </div>
