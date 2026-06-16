@@ -26,6 +26,7 @@ contextBridge.exposeInMainWorld("api", {
     ipcRenderer.invoke("agents:memory:delete", agentName, fileName),
 
   getHomeDir: () => ipcRenderer.invoke("system:home-dir"),
+  openPath: (target: string) => ipcRenderer.invoke("system:open-path", target),
   getAppVersion: () => ipcRenderer.invoke("system:appVersion"),
   watchAppVersion: () => ipcRenderer.invoke("system:watch-version"),
   unwatchAppVersion: () => ipcRenderer.invoke("system:unwatch-version"),

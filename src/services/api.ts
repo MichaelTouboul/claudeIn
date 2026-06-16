@@ -29,6 +29,9 @@ export const api = {
 
   getAppVersion: (): Promise<string> => window.api.getAppVersion(),
 
+  /** Open a file/folder with the OS default app; resolves to '' on success or an error message. */
+  openPath: (target: string): Promise<string> => window.api.openPath(target),
+
   getProjectMemory: (projectId: string) => window.api.getProjectMemory(projectId),
   updateProjectMemoryFile: (projectId: string, fileName: string, content: string) =>
     window.api.updateProjectMemoryFile(projectId, fileName, content),

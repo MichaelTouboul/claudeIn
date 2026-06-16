@@ -16,6 +16,7 @@ interface Window {
     deleteMemoryFile: (agentName: string, fileName: string) => Promise<void>;
 
     getHomeDir: () => Promise<string>;
+    openPath: (target: string) => Promise<string>;
     getAppVersion: () => Promise<string>;
     watchAppVersion: () => Promise<void>;
     unwatchAppVersion: () => Promise<void>;

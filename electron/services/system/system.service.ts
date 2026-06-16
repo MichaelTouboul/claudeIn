@@ -1,9 +1,21 @@
+import { shell } from "electron";
 import fs from "fs";
 import os from "os";
 import path from "path";
 
 export function getHomeDir(): string {
   return os.homedir();
+}
+
+/**
+ * Open a file/folder with the OS default application. Returns the empty string
+ * on success, or a non-empty error message when the path can't be opened
+ * (missing file, invalid path, no associated app) — the renderer surfaces it.
+ */
+export async function openPath(target: string): Promise<string> {
+  if (!target) return "No path provided.";
+  if (!fs.existsSync(target)) return `File not found: ${target}`;
+  return shell.openPath(target);
 }
 
 /** Semver used when the app's package.json cannot be located/parsed. */
