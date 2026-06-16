@@ -9,6 +9,10 @@ export type UseReposPick = {
   favorites: Set<string>;
   /** Toggle a favorite: persist via add/remove then reflect locally. */
   toggle: (repoPath: string) => Promise<void>;
+  /** Pin every repo in `paths` not already favorited (persisting each). */
+  pinAll: (paths: string[]) => Promise<void>;
+  /** Unpin every repo in `paths` currently favorited (persisting each). */
+  clearAll: (paths: string[]) => Promise<void>;
   /** Open the folder picker and pin the chosen dir as a favorite. */
   addFolder: () => Promise<void>;
 };
@@ -62,6 +66,37 @@ export function useReposPick(): UseReposPick {
     [favorites, repos],
   );
 
+  const pinAll = useCallback(
+    async (paths: string[]) => {
+      const toAdd = paths.filter((p) => !favorites.has(p));
+      await Promise.all(
+        toAdd.map((p) => {
+          const repo = repos.find((r) => r.path === p);
+          return window.api.addFavoriteRepo(p, repo?.label ?? undefined, repo?.logoDataUrl ?? null);
+        }),
+      );
+      setFavorites((prev) => {
+        const next = new Set(prev);
+        toAdd.forEach((p) => next.add(p));
+        return next;
+      });
+    },
+    [favorites, repos],
+  );
+
+  const clearAll = useCallback(
+    async (paths: string[]) => {
+      const toRemove = paths.filter((p) => favorites.has(p));
+      await Promise.all(toRemove.map((p) => window.api.removeFavoriteRepo(p)));
+      setFavorites((prev) => {
+        const next = new Set(prev);
+        toRemove.forEach((p) => next.delete(p));
+        return next;
+      });
+    },
+    [favorites],
+  );
+
   const addFolder = useCallback(async () => {
     const dir = await window.api.openDirectoryPicker();
     if (dir === null) return;
@@ -77,5 +112,5 @@ export function useReposPick(): UseReposPick {
     setFavorites((prev) => new Set(prev).add(dir));
   }, []);
 
-  return { repos, loading, favorites, toggle, addFolder };
+  return { repos, loading, favorites, toggle, pinAll, clearAll, addFolder };
 }

@@ -94,12 +94,20 @@ describe("OnboardingPage", () => {
   });
 
   it("runs the full flow to Done, which completes onboarding and navigates home", async () => {
+    scanRepos.mockResolvedValue([
+      { path: "/code/alpha", scope: "project", hasClaude: true, plugins: [], label: null, logoDataUrl: null },
+    ]);
     render(<OnboardingPage />);
     await click(/get started/i);
     await click(/authorize/i);
     await screen.findByText("backend");
     await click(/confirm/i);
     await click(/authorize/i);
+    // The repo picker disables "Continue" until at least one repo is picked.
+    const box = await screen.findByRole("checkbox", { name: /alpha/i });
+    await act(async () => {
+      fireEvent.click(box);
+    });
     await click(/continue/i);
     await click(/open claudein/i);
 

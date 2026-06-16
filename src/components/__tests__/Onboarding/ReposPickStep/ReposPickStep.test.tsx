@@ -135,8 +135,10 @@ describe("ReposPickStep", () => {
     expect(await screen.findByText("manual")).toBeInTheDocument();
   });
 
-  it("'Continue' advances", async () => {
+  it("'Continue' advances once a repo is selected", async () => {
     const onNext = vi.fn();
+    scanRepos.mockResolvedValue([candidate("/code/alpha")]);
+    listFavoriteRepos.mockResolvedValue([favorite("/code/alpha")]);
     render(<ReposPickStep stepIndex={5} onNext={onNext} />);
     const next = await screen.findByRole("button", { name: /continue/i });
 
@@ -145,5 +147,67 @@ describe("ReposPickStep", () => {
     });
 
     expect(onNext).toHaveBeenCalledTimes(1);
+  });
+
+  it("the search box filters the grid by name and label", async () => {
+    scanRepos.mockResolvedValue([
+      candidate("/code/alpha", "A web app"),
+      candidate("/code/beta", "A mobile thing"),
+    ]);
+    render(<ReposPickStep stepIndex={5} onNext={vi.fn()} />);
+    await screen.findByText("alpha");
+
+    const search = screen.getByPlaceholderText(/search/i);
+    fireEvent.change(search, { target: { value: "beta" } });
+    expect(screen.getByText("beta")).toBeInTheDocument();
+    expect(screen.queryByText("alpha")).not.toBeInTheDocument();
+
+    // matching on the label too
+    fireEvent.change(search, { target: { value: "web" } });
+    expect(screen.getByText("alpha")).toBeInTheDocument();
+    expect(screen.queryByText("beta")).not.toBeInTheDocument();
+  });
+
+  it("the selected badge reflects the favorites count", async () => {
+    scanRepos.mockResolvedValue([candidate("/code/alpha"), candidate("/code/beta")]);
+    listFavoriteRepos.mockResolvedValue([favorite("/code/alpha")]);
+    render(<ReposPickStep stepIndex={5} onNext={vi.fn()} />);
+    expect(await screen.findByText(/1 selected/i)).toBeInTheDocument();
+  });
+
+  it("'Select all' pins every (filtered) repo, then 'Clear all' unpins them", async () => {
+    scanRepos.mockResolvedValue([candidate("/code/alpha"), candidate("/code/beta")]);
+    render(<ReposPickStep stepIndex={5} onNext={vi.fn()} />);
+    const selectAll = await screen.findByRole("button", { name: /select all/i });
+
+    await act(async () => {
+      fireEvent.click(selectAll);
+    });
+    await waitFor(() => expect(addFavoriteRepo).toHaveBeenCalledWith("/code/alpha", undefined, null));
+    expect(addFavoriteRepo).toHaveBeenCalledWith("/code/beta", undefined, null);
+    expect(await screen.findByText(/2 selected/i)).toBeInTheDocument();
+
+    const clearAll = screen.getByRole("button", { name: /clear all/i });
+    await act(async () => {
+      fireEvent.click(clearAll);
+    });
+    await waitFor(() => expect(removeFavoriteRepo).toHaveBeenCalledWith("/code/alpha"));
+    expect(removeFavoriteRepo).toHaveBeenCalledWith("/code/beta");
+    expect(await screen.findByText(/0 selected/i)).toBeInTheDocument();
+  });
+
+  it("'Continue' is disabled when nothing is selected and enabled once a repo is picked", async () => {
+    scanRepos.mockResolvedValue([candidate("/code/alpha")]);
+    render(<ReposPickStep stepIndex={5} onNext={vi.fn()} />);
+    const next = await screen.findByRole("button", { name: /continue/i });
+    expect(next).toBeDisabled();
+
+    const box = screen.getByRole("checkbox", { name: /alpha/i });
+    await act(async () => {
+      fireEvent.click(box);
+    });
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: /continue/i })).not.toBeDisabled(),
+    );
   });
 });

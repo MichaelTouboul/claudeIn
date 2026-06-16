@@ -1,0 +1,201 @@
+<!-- @dsCard group="Onboarding" viewport="900x1480" name="Profil & Repos — version améliorée" subtitle="Refonte des étapes 4 et 6 de l'onboarding" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClaudeIn — Onboarding (refined)</title>
+<link rel="icon" type="image/svg+xml" href="../../assets/claudein-favicon.svg">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  body { margin: 0; background: #0b0d11; color: var(--text-primary); }
+  .page { max-width: 860px; margin: 0 auto; padding: 44px 24px 72px; display: flex; flex-direction: column; gap: 18px; }
+  .flabel { display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-tertiary); margin-top: 22px; }
+  .flabel .pill { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0; text-transform: none; color: var(--accent-text); background: var(--accent-subtle); border: 1px solid var(--accent-border); border-radius: var(--radius-pill); padding: 2px 9px; }
+
+  /* The onboarding card shell */
+  .shell { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); overflow: hidden; }
+  .steps { display: flex; align-items: center; gap: 8px; padding: 18px 28px; border-bottom: 1px solid var(--border-subtle); }
+  .step { width: 26px; height: 4px; border-radius: var(--radius-pill); background: var(--surface-3); }
+  .step.on { background: var(--accent-solid); }
+  .step.done { background: var(--accent); }
+  .stepnum { margin-left: auto; font-family: var(--font-mono); font-size: 12px; color: var(--text-tertiary); }
+  .body { padding: 28px; }
+  h2 { font-size: 23px; font-weight: 600; letter-spacing: -0.01em; }
+  .lead { color: var(--text-secondary); font-size: 15px; line-height: 1.55; margin: 8px 0 0; }
+  .foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 28px; border-top: 1px solid var(--border-subtle); }
+</style>
+</head>
+<body>
+<div class="page" id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel" src="./icons.jsx"></script>
+<script type="text/babel">
+const { useState } = React;
+const { Button, Badge, Avatar, Card, Tag, Input, Checkbox } = window.ClaudeInDesignSystem_25db6c;
+const Ic = window.ClaudeInIcons;
+
+/* ---------------- Step 4 — Your profile (refined) ---------------- */
+const STATS = [
+  { icon: <Ic.IconBot s={16} />, n: 17, label: 'agents' },
+  { icon: <Ic.IconSparkles s={16} />, n: 5, label: 'skills' },
+  { icon: <Ic.IconPlug s={16} />, n: 2, label: 'MCP servers' },
+  { icon: <Ic.IconZap s={16} />, n: 4, label: 'hooks' },
+];
+const STACK = ['TypeScript', 'Express', 'React', 'Node', 'Nx', 'MongoDB', 'Elasticsearch'];
+const DOMAINS = ['backend', 'frontend', 'full-stack', 'monorepo', 'elasticsearch', 'mongodb', 'devops', 'observability'];
+
+function ProfileStep() {
+  return (
+    <div className="shell">
+      <div className="steps">
+        {[1,1,1,1,0,0,0].map((d,i)=><div key={i} className={'step '+(i===3?'on':i<3?'done':'')} />)}
+        <span className="stepnum">Step 4 of 7</span>
+      </div>
+      <div className="body">
+        <h2>Your profile</h2>
+        <p className="lead">Here's what ClaudeIn picked up from your setup. Review it, then confirm.</p>
+
+        {/* Identity + setup card */}
+        <div style={{ marginTop: 22, background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '18px 20px' }}>
+            <Avatar name="Michael Touboul" hue="blue" size="lg" />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 17, fontWeight: 600, letterSpacing: '-0.01em' }}>Michael Touboul</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 3 }}>
+                <span className="mono" style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>~/.claude</span>
+                <Badge tone="neutral" shape="pill">personal</Badge>
+              </div>
+            </div>
+            <Button intent="outline" size="sm" leftIcon={<Ic.IconSettings s={14} />}>Edit</Button>
+          </div>
+
+          {/* Stat strip — the hero */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '1px solid var(--border-subtle)', background: 'var(--surface-inset)' }}>
+            {STATS.map((s, i) => (
+              <div key={s.label} style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: '14px 16px', borderLeft: i ? '1px solid var(--border-subtle)' : 'none' }}>
+                <span style={{ color: 'var(--accent-text)', display: 'flex' }}>{s.icon}</span>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
+                  <span className="mono" style={{ fontSize: 20, fontWeight: 600, color: 'var(--text-primary)' }}>{s.n}</span>
+                  <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{s.label}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Stack */}
+        <div style={{ marginTop: 22 }}>
+          <div className="overline" style={{ marginBottom: 10 }}>Stack</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {STACK.map((t) => <Tag key={t}>{t}</Tag>)}
+          </div>
+        </div>
+
+        {/* Domains */}
+        <div style={{ marginTop: 20 }}>
+          <div className="overline" style={{ marginBottom: 10 }}>Domains</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {DOMAINS.map((d) => <Tag key={d}>{d}</Tag>)}
+          </div>
+        </div>
+      </div>
+      <div className="foot">
+        <Button intent="ghost" leftIcon={<Ic.IconArrowLeft s={15} />}>Back</Button>
+        <Button intent="primary" rightIcon={<Ic.IconCheck s={16} />}>Confirm &amp; continue</Button>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- Step 6 — Choose repositories (refined) ---------------- */
+const REPOS = [
+  { id: 'ams', name: 'AMS', hue: 'cyan', lang: 'Python', desc: 'A Python/FastAPI + React platform for asset management and reporting.' },
+  { id: 'aig', name: 'ai-gateway', hue: 'blue', lang: 'TypeScript', desc: 'An OAuth 2.1 authorization server and unified gateway for model providers.' },
+  { id: 'mgs', name: 'mongosh-scripts', hue: 'yellow', lang: 'JavaScript', desc: 'A collection of mongosh scripts for migrations, backfills and ops.' },
+  { id: 'cam', name: 'claude-agent-manager', hue: 'purple', lang: 'TypeScript', desc: 'ClaudeIn — an Electron desktop companion for Claude Code.' },
+  { id: 'tw', name: 'tastewise', hue: 'blue', lang: 'Python', desc: 'The Tastewise monorepo — a full food-intelligence platform.' },
+  { id: 'twb', name: 'tastewise-teams-mcp-bot', hue: 'purple', lang: 'TypeScript', desc: 'A Teams bot and Microsoft Graph MCP integration.' },
+  { id: 'twm', name: 'tw-mcp', hue: 'green', lang: 'Python', desc: 'A FastMCP server that wraps the Tastewise public API.' },
+  { id: 'twa', name: 'tw-mcp-auth-stabilization', hue: 'red', lang: 'Python', desc: 'A Python FastMCP service hardening the auth flow.' },
+];
+const LANG_DOT = { Python: '#6db4ff', TypeScript: '#818cf8', JavaScript: '#f0c14b' };
+
+function RepoTile({ repo, on, toggle }) {
+  return (
+    <button type="button" onClick={() => toggle(repo.id)}
+      style={{ display: 'flex', alignItems: 'flex-start', gap: 12, textAlign: 'left', padding: 14, cursor: 'pointer',
+        borderRadius: 'var(--radius-lg)', background: on ? 'var(--accent-subtle)' : 'var(--surface-2)',
+        border: `1px solid ${on ? 'var(--accent-border)' : 'var(--border)'}`,
+        transition: 'background var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard)' }}>
+      <Avatar name={repo.name} hue={repo.hue} square size="md" />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{repo.name}</span>
+        </div>
+        <div style={{ fontSize: 13, color: 'var(--text-tertiary)', lineHeight: 1.45, marginTop: 3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{repo.desc}</div>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 9, fontSize: 12, color: 'var(--text-secondary)' }}>
+          <span style={{ width: 8, height: 8, borderRadius: '50%', background: LANG_DOT[repo.lang] }} />{repo.lang}
+        </div>
+      </div>
+      <span aria-hidden="true" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, flexShrink: 0, borderRadius: 'var(--radius-xs)',
+        background: on ? 'var(--accent-solid)' : 'transparent', border: `1px solid ${on ? 'var(--accent-solid)' : 'var(--border-strong)'}`, color: '#fff' }}>
+        {on ? <Ic.IconCheck s={13} /> : null}
+      </span>
+    </button>
+  );
+}
+
+function ReposStep() {
+  const [sel, setSel] = useState({ cam: true, tw: true, twm: true });
+  const toggle = (id) => setSel((s) => ({ ...s, [id]: !s[id] }));
+  const count = Object.values(sel).filter(Boolean).length;
+  const allOn = count === REPOS.length;
+  const toggleAll = () => setSel(allOn ? {} : Object.fromEntries(REPOS.map((r) => [r.id, true])));
+
+  return (
+    <div className="shell">
+      <div className="steps">
+        {[1,1,1,1,1,1,0].map((d,i)=><div key={i} className={'step '+(i===5?'on':i<5?'done':'')} />)}
+        <span className="stepnum">Step 6 of 7</span>
+      </div>
+      <div className="body">
+        <h2>Choose your repositories</h2>
+        <p className="lead">Pick the ones to keep as favorites on your home screen — you can change this anytime.</p>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0 16px' }}>
+          <div style={{ flex: 1 }}><Input size="sm" placeholder="Search repositories…" leadingIcon={<Ic.IconSearch s={14} />} /></div>
+          <Badge tone={count ? 'accent' : 'neutral'} shape="pill">{count} selected</Badge>
+          <Button intent="ghost" size="sm" onClick={toggleAll}>{allOn ? 'Clear all' : 'Select all'}</Button>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          {REPOS.map((r) => <RepoTile key={r.id} repo={r} on={!!sel[r.id]} toggle={toggle} />)}
+        </div>
+      </div>
+      <div className="foot">
+        <Button intent="secondary" leftIcon={<Ic.IconFolder s={15} />}>Add a folder</Button>
+        <Button intent="primary" disabled={count === 0} rightIcon={<Ic.IconChevron s={15} />}>Continue with {count}</Button>
+      </div>
+    </div>
+  );
+}
+
+function Showcase() {
+  return (
+    <>
+      <div className="flabel">Étape 4 — Your profile <span className="pill">amélioré</span></div>
+      <ProfileStep />
+      <div className="flabel">Étape 6 — Choose your repositories <span className="pill">amélioré</span></div>
+      <ReposStep />
+    </>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<Showcase />);
+</script>
+</body>
+</html>
