@@ -1,0 +1,122 @@
+/* ===========================================================================
+ * COLORS — ClaudeIn refined dark theme
+ * ---------------------------------------------------------------------------
+ * A calmer, higher-contrast evolution of the original near-black terminal UI.
+ * Surfaces are a soft blue-charcoal (not pure black). The accent is a calm
+ * developer-tool indigo. Every text/background pairing below is chosen to meet
+ * WCAG 2.1 AA (4.5:1 for body text, 3:1 for large text & UI outlines).
+ *
+ * Two layers:
+ *   1. PRIMITIVES — raw ramps (--neutral-*, --indigo-*, status hues). Don't
+ *      reference these directly in product code.
+ *   2. SEMANTIC ALIASES — what components actually use (--surface-*, --text-*,
+ *      --accent-*, --border-*, status). Add a new semantic token here before
+ *      reaching for a raw value.
+ * ======================================================================== */
+
+:root {
+  /* --- Neutral ramp (cool, blue-tinted charcoal) --------------------------- */
+  --neutral-950: #0f1115;
+  --neutral-900: #14161b; /* app canvas */
+  --neutral-850: #181b21;
+  --neutral-800: #1d2027; /* panels, header, sidebar */
+  --neutral-750: #23272f; /* cards */
+  --neutral-700: #2b2f39; /* hover / elevated */
+  --neutral-600: #3a4150; /* strong border */
+  --neutral-500: #4d5564;
+  --neutral-400: #6b7380;
+  --neutral-300: #8b93a3; /* subtle text — AA floor on canvas */
+  --neutral-200: #b3bccb; /* secondary text */
+  --neutral-100: #d7dce4;
+  --neutral-50:  #eef1f6; /* primary text */
+  --white: #ffffff;
+
+  /* --- Indigo ramp (the accent) ------------------------------------------- */
+  --indigo-50:  #eef0ff;
+  --indigo-100: #dee2ff;
+  --indigo-200: #c4caff;
+  --indigo-300: #a3adff; /* accent text/icon on dark — AA */
+  --indigo-400: #818cf8;
+  --indigo-500: #6573e8; /* brand reference */
+  --indigo-600: #4f5dd9; /* solid fill — white text passes AA (5.4:1) */
+  --indigo-700: #4049b8;
+  --indigo-800: #333a8f;
+  --indigo-900: #262a5e;
+
+  /* --- Status hues (tuned for legibility on dark) -------------------------- */
+  --green-400:  #45d483; /* success text/icon */
+  --green-600:  #2f9e63; /* success fill (white text) */
+  --amber-400:  #f0c14b; /* warning text/icon */
+  --amber-600:  #b8852a;
+  --red-400:    #ff8585; /* danger text/icon */
+  --red-600:    #d8453f; /* danger fill (white text) */
+  --blue-400:   #6db4ff; /* info text/icon */
+  --purple-400: #b794f6; /* history/memory text/icon */
+
+  /* --- Agent identity colors (accessible chip text on dark) ---------------- */
+  --agent-cyan:   #34d3ee;
+  --agent-blue:   #6da8ff;
+  --agent-green:  #45d483;
+  --agent-yellow: #f0c14b;
+  --agent-orange: #ff9d5c;
+  --agent-red:    #ff8585;
+  --agent-purple: #b794f6;
+  --agent-pink:   #f78fc2;
+
+  /* =======================================================================
+   * SEMANTIC ALIASES — use these in product code
+   * ===================================================================== */
+
+  /* Surfaces — ascending elevation */
+  --surface-base:   var(--neutral-900); /* app background */
+  --surface-1:      var(--neutral-800); /* sidebars, headers, panels */
+  --surface-2:      var(--neutral-750); /* cards, raised blocks */
+  --surface-3:      var(--neutral-700); /* hover, popovers, menus */
+  --surface-inset:  var(--neutral-950); /* code wells, input fills */
+  --surface-overlay: rgba(8, 9, 12, 0.66); /* modal scrim */
+
+  /* Text */
+  --text-primary:   var(--neutral-50);   /* ~15:1 on base */
+  --text-secondary: var(--neutral-200);  /* ~9:1 — muted body */
+  --text-tertiary:  var(--neutral-300);  /* ~4.8:1 — captions, AA floor */
+  --text-disabled:  var(--neutral-400);  /* non-text only */
+  --text-inverse:   var(--neutral-900);  /* on accent / light fills */
+  --text-on-accent: var(--white);        /* on --accent-solid */
+
+  /* Borders */
+  --border-subtle: var(--neutral-850);   /* dividers, hairlines */
+  --border:        var(--neutral-700);   /* default component edge */
+  --border-strong: var(--neutral-600);   /* 3:1 control/input outline (1.4.11) */
+
+  /* Accent */
+  --accent:         var(--indigo-500);
+  --accent-solid:   var(--indigo-600);   /* button fill; pair w/ --text-on-accent */
+  --accent-hover:   var(--indigo-500);
+  --accent-active:  var(--indigo-700);
+  --accent-text:    var(--indigo-300);   /* links, accent icons on dark */
+  --accent-subtle:  rgba(101, 115, 232, 0.14); /* tinted backgrounds */
+  --accent-border:  rgba(101, 115, 232, 0.40);
+
+  /* Status — text/icon (on dark surfaces) */
+  --success:        var(--green-400);
+  --success-solid:  var(--green-600);
+  --success-subtle: rgba(69, 212, 131, 0.13);
+  --warning:        var(--amber-400);
+  --warning-subtle: rgba(240, 193, 75, 0.13);
+  --danger:         var(--red-400);
+  --danger-solid:   var(--red-600);
+  --danger-subtle:  rgba(255, 133, 133, 0.12);
+  --info:           var(--blue-400);
+  --info-subtle:    rgba(109, 180, 255, 0.12);
+  --history:        var(--purple-400);
+  --history-subtle: rgba(183, 148, 246, 0.13);
+
+  /* Live status dot */
+  --status-live:    var(--green-400);
+  --status-idle:    var(--neutral-400);
+  --status-error:   var(--red-400);
+
+  /* Focus ring — single source of truth */
+  --focus-ring:     var(--indigo-300);
+  --focus-ring-offset: var(--surface-base);
+}

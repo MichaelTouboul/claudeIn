@@ -1,0 +1,38 @@
+/* ===========================================================================
+ * TYPOGRAPHY
+ * ---------------------------------------------------------------------------
+ * Geist for the interface, Geist Mono for code, data, IDs, paths, numbers.
+ * The original UI set labels in mono and lowercase ("you", "agent"); the
+ * refresh moves UI copy to the proportional sans and reserves mono for things
+ * that are literally machine text. Sizes use a comfortable 14px body base.
+ * ======================================================================== */
+
+:root {
+  /* Families */
+  --font-sans: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono', 'SF Mono', 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Type scale — size / line-height pairs */
+  --text-2xs:  11px;  --leading-2xs:  15px; /* dense meta only */
+  --text-xs:   12px;  --leading-xs:   16px;
+  --text-sm:   13px;  --leading-sm:   18px;
+  --text-base: 14px;  --leading-base: 21px; /* body default */
+  --text-md:   15px;  --leading-md:   23px;
+  --text-lg:   17px;  --leading-lg:   26px;
+  --text-xl:   20px;  --leading-xl:   28px;
+  --text-2xl:  24px;  --leading-2xl:  32px;
+  --text-3xl:  30px;  --leading-3xl:  38px;
+  --text-4xl:  38px;  --leading-4xl:  46px;
+
+  /* Weights */
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  /* Tracking */
+  --tracking-tight:  -0.01em; /* display / headings */
+  --tracking-normal: 0;
+  --tracking-wide:   0.02em;
+  --tracking-caps:   0.08em;  /* uppercase overlines */
+}

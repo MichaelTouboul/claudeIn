@@ -1,0 +1,159 @@
+<!-- @dsCard group="Dashboard" viewport="900x900" name="Bloc de code — avant / après (chat + panel)" subtitle="Coloration syntaxique, en-tête langage, copier, numéros de ligne" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClaudeIn — Code block</title>
+<link rel="icon" type="image/svg+xml" href="./assets/claudein-favicon.svg">
+<link rel="stylesheet" href="./styles.css">
+<style>
+  body { margin: 0; background: var(--surface-base); color: var(--text-primary); }
+  .page { max-width: 860px; margin: 0 auto; padding: 34px 28px 64px; display: flex; flex-direction: column; gap: 14px; }
+  .flabel { display: flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-tertiary); margin-top: 16px; }
+  .flabel .pill { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0; text-transform: none; border-radius: var(--radius-pill); padding: 2px 9px; }
+  .pill-old { color: var(--text-tertiary); background: var(--surface-2); border: 1px solid var(--border); }
+  .pill-new { color: var(--accent-text); background: var(--accent-subtle); border: 1px solid var(--accent-border); }
+
+  /* AVANT: brut */
+  .old { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+  .old .lang { font-family: var(--font-mono); font-size: 12px; color: var(--text-tertiary); padding: 10px 14px 0; }
+  .old pre { margin: 0; padding: 12px 14px; font-family: var(--font-mono); font-size: 13px; line-height: 1.7; color: var(--text-secondary); white-space: pre; overflow-x: auto; }
+
+  /* APRÈS: bloc design system */
+  .cb { background: var(--surface-inset); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-xs); }
+  .cb-h { display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: var(--surface-2); border-bottom: 1px solid var(--border); }
+  .cb-lang { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); }
+  .cb-dot { width: 8px; height: 8px; border-radius: 2px; background: var(--agent-yellow); }
+  .cb-acts { margin-left: auto; display: flex; gap: 4px; }
+  .cb-btn { display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; font-size: 12px; color: var(--text-tertiary); background: transparent; border: none; border-radius: var(--radius-sm); cursor: pointer; }
+  .cb-btn:hover { color: var(--text-primary); background: var(--surface-3); }
+  .cb-body { display: flex; font-family: var(--font-mono); font-size: 13px; line-height: 1.75; overflow-x: auto; }
+  .cb-gutter { flex-shrink: 0; padding: 12px 0; text-align: right; color: var(--text-tertiary); opacity: 0.5; user-select: none; border-right: 1px solid var(--border-subtle); }
+  .cb-gutter span { display: block; padding: 0 12px; }
+  .cb-code { padding: 12px 16px; white-space: pre; }
+
+  /* panel */
+  .panel { width: 380px; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; display: flex; flex-direction: column; }
+  .panel-h { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--border-subtle); }
+  .panel-h .t { font-size: 14px; font-weight: 600; }
+  .panel-body { font-family: var(--font-mono); font-size: 13px; line-height: 1.75; padding: 10px 0; display: flex; }
+  .transform { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-top: 1px solid var(--border); background: var(--surface-base); }
+  .tinput { flex: 1; display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; background: var(--surface-inset); border: 1px solid var(--border-strong); border-radius: var(--radius-md); color: var(--text-tertiary); font-size: 12.5px; }
+
+  /* tokens */
+  .tok-kw { color: var(--accent-text); }
+  .tok-str { color: var(--success); }
+  .tok-num { color: var(--agent-orange); }
+  .tok-com { color: var(--text-tertiary); font-style: italic; }
+  .tok-fn { color: var(--info); }
+  .tok-pun { color: var(--text-tertiary); }
+  .tok-id { color: var(--text-primary); }
+</style>
+</head>
+<body>
+<div class="page" id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="./_ds_bundle.js"></script>
+<script type="text/babel" src="./icons.jsx"></script>
+<script type="text/babel">
+const { IconButton, Button, Badge } = window.ClaudeInDesignSystem_25db6c;
+const Ic = window.ClaudeInIcons;
+
+const CODE = `function fibonacci(n) {
+  const suite = [0, 1];
+  for (let i = 2; i < n; i++) {
+    suite[i] = suite[i - 1] + suite[i - 2];
+  }
+  return suite.slice(0, n);
+}
+
+console.log(fibonacci(10));
+// → [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]`;
+
+const KW = new Set(['function','const','let','var','for','return','if','else','while','new','of','in','await','async','typeof','class','export','import','from','default']);
+const esc = (s) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+function highlight(code) {
+  const re = /(\/\/[^\n]*|\/\*[\s\S]*?\*\/)|(`(?:[^`\\]|\\.)*`|"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')|(\b\d+(?:\.\d+)?\b)|([A-Za-z_$][\w$]*)|(\s+)|([^\w\s])/g;
+  let out = '', m, prevNonSpace = '';
+  const toks = [];
+  while ((m = re.exec(code))) toks.push(m);
+  for (let i = 0; i < toks.length; i++) {
+    const t = toks[i];
+    if (t[1]) out += '<span class="tok-com">' + esc(t[1]) + '</span>';
+    else if (t[2]) out += '<span class="tok-str">' + esc(t[2]) + '</span>';
+    else if (t[3]) out += '<span class="tok-num">' + esc(t[3]) + '</span>';
+    else if (t[4]) {
+      let next = '';
+      for (let j = i + 1; j < toks.length; j++){ if (toks[j][5]) continue; next = toks[j][0]; break; }
+      if (KW.has(t[4])) out += '<span class="tok-kw">' + t[4] + '</span>';
+      else if (next === '(') out += '<span class="tok-fn">' + esc(t[4]) + '</span>';
+      else out += '<span class="tok-id">' + esc(t[4]) + '</span>';
+    }
+    else if (t[5]) out += t[5];
+    else out += '<span class="tok-pun">' + esc(t[6]) + '</span>';
+  }
+  return out;
+}
+
+const LINES = CODE.split('\n');
+const hl = highlight(CODE);
+
+function Gutter() {
+  return <div className="cb-gutter">{LINES.map((_, i) => <span key={i}>{i + 1}</span>)}</div>;
+}
+
+function App() {
+  return (
+    <>
+      <div className="flabel">Avant <span className="pill pill-old">actuel</span></div>
+      <div className="old">
+        <div className="lang">javascript</div>
+        <pre>{CODE}</pre>
+      </div>
+
+      <div className="flabel">Après — dans le chat <span className="pill pill-new">design system</span></div>
+      <div className="cb">
+        <div className="cb-h">
+          <span className="cb-lang"><span className="cb-dot"></span> javascript</span>
+          <div className="cb-acts">
+            <button className="cb-btn"><Ic.IconCopy s={14} /> Copy</button>
+            <button className="cb-btn"><Ic.IconBoxes s={14} /> Open</button>
+          </div>
+        </div>
+        <div className="cb-body">
+          <Gutter />
+          <div className="cb-code" dangerouslySetInnerHTML={{ __html: hl }} />
+        </div>
+      </div>
+
+      <div className="flabel">Après — dans le panneau <span className="pill pill-new">design system</span></div>
+      <div className="panel">
+        <div className="panel-h">
+          <span style={{ color:'var(--accent-text)', display:'flex' }}><Ic.IconTerminal s={16} /></span>
+          <span className="t">Code</span>
+          <Badge tone="neutral">javascript</Badge>
+          <div style={{ flex:1 }} />
+          <IconButton aria-label="Copy" size="sm"><Ic.IconCopy s={15} /></IconButton>
+          <IconButton aria-label="Close" size="sm"><Ic.IconX s={15} /></IconButton>
+        </div>
+        <div className="panel-body">
+          <Gutter />
+          <div className="cb-code" dangerouslySetInnerHTML={{ __html: hl }} />
+        </div>
+        <div className="transform">
+          <div className="tinput"><span style={{ color:'var(--accent-text)', display:'flex' }}><Ic.IconSparkles s={15} /></span> Ask to transform this…</div>
+          <Button intent="primary" size="sm">Run</Button>
+        </div>
+      </div>
+    </>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
