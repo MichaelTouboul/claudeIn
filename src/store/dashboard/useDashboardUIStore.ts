@@ -2,12 +2,37 @@ import { create } from "zustand";
 
 import type { AgentScope, AgentSummary, SkillSummary  } from "@/lib/types";
 
+/**
+ * The sidebar is a two-mode panel toggled by a SegmentedControl. The active mode
+ * lives in the store (not local state) because the sidebar can unmount (project
+ * switch / resize teardown) and the choice must survive.
+ */
+export const SidebarView = {
+  Sessions: "sessions",
+  Library: "library",
+} as const;
+export type SidebarView = (typeof SidebarView)[keyof typeof SidebarView];
+
+/** The four library categories the Library mode drills into. */
+export const LibraryCategory = {
+  Agents: "agents",
+  Skills: "skills",
+  Hooks: "hooks",
+  Mcp: "mcp",
+} as const;
+export type LibraryCategory =
+  (typeof LibraryCategory)[keyof typeof LibraryCategory];
+
 type DashboardUIState = {
   selectedAgent: AgentSummary | null;
   selectedSkill: SkillSummary | null;
   selectedSessionId: string | null;
   openPanels: Set<string>;
   scopeTab: AgentScope;
+  // Sidebar switch: which mode is showing, and (in Library mode) which category
+  // is drilled into (null = the category list). Persisted across sidebar unmount.
+  sidebarView: SidebarView;
+  libraryCategory: LibraryCategory | null;
 
   selectAgent: (a: AgentSummary) => void;
   togglePanel: (panel: string) => void;
@@ -18,6 +43,10 @@ type DashboardUIState = {
   setScopeTab: (tab: AgentScope) => void;
   setSelectedAgent: (a: AgentSummary | null) => void;
   backToProject: () => void;
+  // Switch the sidebar mode. Leaving Library resets the drilled-in category so
+  // returning to Library always lands on the category list, not a stale drill.
+  setSidebarView: (view: SidebarView) => void;
+  setLibraryCategory: (category: LibraryCategory | null) => void;
 };
 
 export const useDashboardUIStore = create<DashboardUIState>((set) => ({
@@ -26,6 +55,8 @@ export const useDashboardUIStore = create<DashboardUIState>((set) => ({
   selectedSessionId: null,
   openPanels: new Set(),
   scopeTab: "project",
+  sidebarView: "sessions",
+  libraryCategory: null,
 
   selectAgent: (a) => set({ selectedAgent: a, selectedSkill: null }),
   togglePanel: (panel) =>
@@ -45,4 +76,7 @@ export const useDashboardUIStore = create<DashboardUIState>((set) => ({
   setScopeTab: (tab) => set({ scopeTab: tab }),
   setSelectedAgent: (selectedAgent) => set({ selectedAgent }),
   backToProject: () => set({ selectedAgent: null, selectedSkill: null }),
+  setSidebarView: (view) =>
+    set(view === "library" ? { sidebarView: view } : { sidebarView: view, libraryCategory: null }),
+  setLibraryCategory: (libraryCategory) => set({ libraryCategory }),
 }));
