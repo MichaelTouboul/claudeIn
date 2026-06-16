@@ -1,0 +1,206 @@
+<!-- @dsCard group="Dashboard" viewport="1280x720" name="Library — navigation en profondeur (pas d'accordéon)" subtitle="Catégories › liste › détail, dans la colonne — chat conservé" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClaudeIn — Library drill-down</title>
+<link rel="icon" type="image/svg+xml" href="../../assets/claudein-favicon.svg">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--surface-base); color: var(--text-primary); }
+  #root { height: 100vh; }
+  .app { height: 100vh; display: flex; flex-direction: column; }
+  .topbar { display: flex; align-items: center; gap: 12px; height: var(--header-height); padding: 0 16px; background: var(--surface-1); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
+  .proj { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--text-secondary); padding: 5px 10px; border-radius: var(--radius-md); border: 1px solid var(--border); }
+  .stat { display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 12px; color: var(--text-tertiary); }
+  .main { flex: 1; min-height: 0; display: flex; }
+
+  .side { width: var(--sidebar-width); flex-shrink: 0; background: var(--surface-1); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+  .switch-wrap { padding: 12px 12px 8px; }
+  .backbar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--border-subtle); cursor: pointer; color: var(--text-secondary); font-size: 13px; font-weight: 500; }
+  .backbar:hover { color: var(--text-primary); }
+  .navitem { display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 12px; margin: 0 8px; border: none; background: transparent; border-radius: var(--radius-md); color: var(--text-secondary); font-family: var(--font-sans); font-size: 14px; cursor: pointer; text-align: left; width: calc(100% - 16px); transition: background var(--duration-fast) var(--ease-standard); }
+  .navitem:hover { background: var(--surface-2); color: var(--text-primary); }
+  .navitem .cnt { margin-left: auto; font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); }
+  .arow { display: flex; align-items: center; gap: 10px; margin: 0 8px; padding: 8px 10px; border-radius: var(--radius-md); cursor: pointer; transition: background var(--duration-fast) var(--ease-standard); }
+  .arow:hover { background: var(--surface-2); }
+  .arow.on { background: var(--accent-subtle); }
+  .slidewrap { flex: 1; min-height: 0; position: relative; overflow: hidden; }
+  .pane { position: absolute; inset: 0; overflow-y: auto; display: flex; flex-direction: column; }
+
+  .center { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .tabs { display: flex; align-items: stretch; gap: 2px; height: 38px; background: var(--surface-1); border-bottom: 1px solid var(--border); padding: 0 8px; }
+  .tab { display: flex; align-items: center; gap: 8px; padding: 0 14px; font-size: 13px; color: var(--text-tertiary); border-bottom: 2px solid transparent; white-space: nowrap; }
+  .tab.on { color: var(--text-primary); border-bottom-color: var(--accent); background: var(--surface-base); }
+  .chat { flex: 1; min-height: 0; overflow-y: auto; padding: 24px 28px; display: flex; flex-direction: column; gap: 22px; }
+  .bubble { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 12px 14px; color: var(--text-primary); font-size: 14px; max-width: 640px; }
+  .text { font-size: 14px; line-height: 1.6; color: var(--text-secondary); max-width: 640px; }
+  .well { background: var(--surface-inset); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px 12px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; }
+  .composer { border-top: 1px solid var(--border); background: var(--surface-1); padding: 14px 16px; }
+  .cbar { display: flex; align-items: center; gap: 10px; background: var(--surface-inset); border: 1px solid var(--border-strong); border-radius: var(--radius-lg); padding: 8px 10px; }
+  .cinput { flex: 1; border: none; outline: none; background: transparent; color: var(--text-primary); font-family: var(--font-sans); font-size: 14px; }
+  .field { margin: 0 16px 4px; }
+  .flabel { font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-tertiary); margin: 14px 16px 6px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel" src="./icons.jsx"></script>
+<script type="text/babel">
+const { useState } = React;
+const { Button, Badge, Avatar, IconButton, StatusDot, Tag, SegmentedControl, Input, Switch, Menu } = window.ClaudeInDesignSystem_25db6c;
+const Ic = window.ClaudeInIcons;
+const HUE = { blue:'var(--agent-blue)', green:'var(--agent-green)', purple:'var(--agent-purple)', red:'var(--agent-red)', orange:'var(--agent-orange)', pink:'var(--agent-pink)', cyan:'var(--agent-cyan)' };
+
+const CATS = [
+  { id:'agents', icon:<Ic.IconBot s={17} />, color:'var(--info)', label:'Agents', count:25 },
+  { id:'skills', icon:<Ic.IconSparkles s={17} />, color:'var(--success)', label:'Skills', count:10 },
+  { id:'hooks', icon:<Ic.IconZap s={17} />, color:'var(--warning)', label:'Hooks', count:1 },
+  { id:'mcp', icon:<Ic.IconPlug s={17} />, color:'var(--accent-text)', label:'MCP servers', count:4 },
+];
+const AGENTS = [
+  { id:'g', name:'claude-md-guardian', hue:'purple', desc:'Keeps CLAUDE.md files accurate', scope:'project', model:'Sonnet', running:true,
+    prompt:'You maintain CLAUDE.md files. When code changes, you update the relevant memory file to stay accurate — never invent conventions.' },
+  { id:'mr', name:'migration-reviewer', hue:'blue', desc:'Reviews DB migrations for safety', scope:'project', model:'Opus',
+    prompt:'You review database migrations for destructive operations, missing rollbacks and lock risks before they are applied.' },
+  { id:'rv', name:'reviewer', hue:'green', desc:'Reviews diffs for bugs & style', scope:'user', model:'Sonnet',
+    prompt:'You review diffs for correctness, edge cases and style consistency, citing file and line.' },
+  { id:'rf', name:'refactorer', hue:'pink', desc:'Safe multi-file refactors', scope:'user', model:'Opus', running:true,
+    prompt:'You perform safe, incremental multi-file refactors with tests passing at each step.' },
+];
+
+function AgentTile({ hue, running, size=34 }) {
+  return (
+    <span style={{ position:'relative', width:size, height:size, flexShrink:0, borderRadius:'var(--radius-md)', display:'flex', alignItems:'center', justifyContent:'center',
+      background:`color-mix(in srgb, ${HUE[hue]} 16%, var(--surface-2))`, border:`1px solid color-mix(in srgb, ${HUE[hue]} 32%, transparent)`, color:HUE[hue] }}>
+      <Ic.IconBot s={Math.round(size*0.52)} />
+      {running ? <span style={{ position:'absolute', top:-3, right:-3, width:10, height:10, borderRadius:'50%', background:'var(--success)', border:'2px solid var(--surface-1)' }} /> : null}
+    </span>
+  );
+}
+
+function Chat() {
+  return (
+    <div className="center">
+      <div className="tabs">
+        <div className="tab on"><StatusDot status="live" pulse /> Refactor auth middleware</div>
+        <div className="tab">Update onboarding screens</div>
+        <div className="tab" style={{ color:'var(--text-tertiary)' }}><Ic.IconPlus s={14} /></div>
+      </div>
+      <div className="chat">
+        <div><div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:7 }}><Ic.IconChevron s={14} /><span style={{ fontSize:12, fontWeight:600, color:'var(--accent-text)' }}>You</span></div><div style={{ marginLeft:22 }}><div className="bubble">Refactor the auth middleware to use the new TokenService.</div></div></div>
+        <div><div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:7 }}><span style={{ color:'var(--text-tertiary)', display:'flex' }}><Ic.IconBot s={14} /></span><span style={{ fontSize:12, fontWeight:600, color:'var(--text-secondary)' }}>Claude</span></div><div style={{ marginLeft:22 }}><div className="text">I'll read the current middleware and the token service, then make the change.</div></div></div>
+        <div><div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:7 }}><span style={{ color:'var(--warning)', display:'flex' }}><Ic.IconWrench s={13} /></span><span className="mono" style={{ fontSize:12, fontWeight:600, color:'var(--warning)' }}>Read</span></div><div style={{ marginLeft:22 }}><div className="well" style={{ color:'var(--text-tertiary)' }}>src/auth/middleware.ts · src/services/token.service.ts</div></div></div>
+        <div><div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:7 }}><span style={{ color:'var(--text-tertiary)', display:'flex' }}><Ic.IconBot s={14} /></span><span style={{ fontSize:12, fontWeight:600, color:'var(--text-secondary)' }}>Claude</span></div><div style={{ marginLeft:22 }}><div className="text" style={{ marginBottom:10 }}>Delegating verification to TokenService:</div><div className="well"><div style={{ color:'var(--danger)' }}>-  const payload = jwt.verify(token, SECRET);</div><div style={{ color:'var(--success)' }}>+  const payload = await tokenService.verify(token);</div></div></div></div>
+      </div>
+      <div className="composer"><div className="cbar"><span style={{ color:'var(--accent-text)', display:'flex' }}><Ic.IconChevron s={16} /></span><input className="cinput" placeholder="Type a prompt, / for commands or @ to mention…" /><Tag>Claude Sonnet</Tag><IconButton aria-label="Send" intent="primary"><Ic.IconSend s={16} /></IconButton></div></div>
+    </div>
+  );
+}
+
+function Sidebar() {
+  // nav stack: [] = categories, ['agents'] = list, ['agents','g'] = detail
+  const [stack, setStack] = useState([]);
+  const cat = stack[0];
+  const agentId = stack[1];
+  const agent = AGENTS.find((a) => a.id === agentId);
+
+  return (
+    <div className="side">
+      <div className="switch-wrap">
+        <SegmentedControl value="library" onChange={()=>{}} style={{ display:'flex', width:'100%' }}
+          options={[{ value:'sessions', label:<span style={{whiteSpace:'nowrap'}}>Sessions</span> }, { value:'library', label:<span style={{whiteSpace:'nowrap'}}>Library</span> }]} />
+      </div>
+
+      {/* back bar appears once you've drilled in */}
+      {stack.length > 0 ? (
+        <div className="backbar" onClick={() => setStack((s) => s.slice(0, -1))}>
+          <Ic.IconArrowLeft s={15} /> {stack.length === 1 ? 'Library' : CATS.find((c)=>c.id===cat).label}
+        </div>
+      ) : null}
+
+      <div className="slidewrap">
+        {/* LEVEL 0 — categories */}
+        {stack.length === 0 ? (
+          <div className="pane" style={{ paddingTop:4 }}>
+            {CATS.map((c) => (
+              <button key={c.id} className="navitem" onClick={() => setStack([c.id])}>
+                <span style={{ color:c.color, display:'flex' }}>{c.icon}</span>
+                <span style={{ flex:1 }}>{c.label}</span>
+                <span className="cnt">{c.count}</span>
+                <span style={{ color:'var(--text-tertiary)', display:'flex' }}><Ic.IconChevron s={15} /></span>
+              </button>
+            ))}
+          </div>
+        ) : null}
+
+        {/* LEVEL 1 — agents list */}
+        {stack.length === 1 && cat === 'agents' ? (
+          <div className="pane">
+            <div style={{ padding:'10px 12px 6px' }}><Input size="sm" placeholder="Filter agents…" leadingIcon={<Ic.IconSearch s={13} />} /></div>
+            {AGENTS.map((a) => (
+              <div key={a.id} className="arow" style={{ cursor:'default' }}>
+                <AgentTile hue={a.hue} running={a.running} size={30} />
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                    <span style={{ fontSize:13, fontWeight:500, color:'var(--text-primary)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{a.name}</span>
+                    {a.running ? <span style={{ fontSize:10.5, fontWeight:600, color:'var(--success)' }}>running</span> : null}
+                  </div>
+                  <div style={{ fontSize:12, color:'var(--text-tertiary)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', marginTop:1 }}>{a.desc}</div>
+                </div>
+                <Menu align="end" trigger={<IconButton aria-label="Options" size="sm"><Ic.IconMore s={16} /></IconButton>} items={[
+                  { label:'Edit', icon:<Ic.IconSettings s={14} />, onSelect:()=>{} },
+                  { label:'Duplicate', icon:<Ic.IconCopy s={14} />, onSelect:()=>{} },
+                  { separator:true },
+                  { label:'Remove', tone:'danger', onSelect:()=>{} },
+                ]} />
+              </div>
+            ))}
+          </div>
+        ) : null}
+
+        {/* other categories — short placeholder list */}
+        {stack.length === 1 && cat !== 'agents' ? (
+          <div className="pane" style={{ padding:'14px 16px', color:'var(--text-tertiary)', fontSize:13, lineHeight:1.6 }}>
+            La liste <b style={{ color:'var(--text-secondary)' }}>{CATS.find((c)=>c.id===cat).label}</b> s'affiche ici, même grammaire que les agents — chaque item s'ouvre en détail dans cette colonne.
+          </div>
+        ) : null}
+      </div>
+
+      <div style={{ borderTop:'1px solid var(--border-subtle)', padding:'10px 16px', display:'flex', alignItems:'center', gap:7, color:'var(--text-tertiary)', fontSize:12.5, cursor:'pointer' }}>
+        <Ic.IconPlus s={14} /> New agent
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <div className="app">
+      <div className="topbar">
+        <span className="brand"><svg width="22" height="22" viewBox="0 0 96 96" fill="none"><rect width="96" height="96" rx="24" fill="#5b6cf0"/><path d="M33 30 L51 48 L33 66" stroke="#fff" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/><path d="M58 66 H70" stroke="#fff" strokeWidth="8" strokeLinecap="round"/></svg> ClaudeIn</span>
+        <Button intent="ghost" size="sm" leftIcon={<Ic.IconHome s={15} />}>Home</Button>
+        <span className="proj"><Avatar name="claudein" hue="blue" square size="xs" /> claudein <Ic.IconChevronDown s={13} /></span>
+        <div style={{ flex:1 }} />
+        <span className="stat"><StatusDot status="live" pulse /> Live</span>
+        <span className="stat" style={{ color:'var(--accent-text)' }}><Ic.IconActivity s={13} /> 2 active</span>
+      </div>
+      <div className="main">
+        <Sidebar />
+        <Chat />
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
