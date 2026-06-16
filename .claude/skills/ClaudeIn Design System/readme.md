@@ -198,7 +198,8 @@ sit naturally on any surface step. No frosted-glass panels in the main chrome.
 - `home/` · `dashboard/` · `onboarding/` · `customize/`
 
 **Other**
-- `assets/` — `claudein-mark.svg`, `claudein-icon.svg`, `claudein-wordmark.svg`.
+- `assets/` — `claudein-mark.svg`, `claudein-icon.svg`, `claudein-icon-mono.svg`,
+  `claudein-favicon.svg`, `claudein-wordmark.svg`.
 - `SKILL.md` — Agent-Skill manifest so this system works inside Claude Code.
 
 > The compiler regenerates `_ds_bundle.js`, `_ds_manifest.json`, `_adherence.oxlintrc.json`
