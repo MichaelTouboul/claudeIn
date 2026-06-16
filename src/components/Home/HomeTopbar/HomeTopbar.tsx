@@ -4,6 +4,8 @@ import { Avatar } from "@/components/_ui/Avatar";
 import { Button } from "@/components/_ui/Button";
 import { IconButton } from "@/components/_ui/IconButton";
 import { Input } from "@/components/_ui/Input";
+import { BrandName } from "@/components/BrandName/BrandName";
+import { Logo } from "@/components/Logo/Logo";
 
 type HomeTopbarProps = {
   /** Live search value filtering the favorite repos grid. */
@@ -32,24 +34,8 @@ export function HomeTopbar({
       style={{ background: "var(--color-surface-1)" }}
     >
       <span className="flex items-center gap-2 text-[15px] font-semibold tracking-[-0.01em] text-fg">
-        <svg
-          width="22"
-          height="22"
-          viewBox="0 0 32 32"
-          fill="none"
-          aria-hidden="true"
-          style={{ color: "var(--color-accent)" }}
-        >
-          <path
-            d="M9 8.5 L17 16 L9 23.5"
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path d="M20.5 23.5 L25 23.5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-        </svg>
-        ClaudeIn
+        <Logo size={22} />
+        <BrandName />
       </span>
       <div className="flex-1" />
       <div className="w-60">

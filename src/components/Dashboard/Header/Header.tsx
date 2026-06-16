@@ -2,8 +2,9 @@ import { Home, MessageSquare, Sliders } from 'lucide-react';
 
 import { Button } from '@/components/_ui/Button';
 import { Inline } from '@/components/_ui/Inline';
-import { Logo } from '@/components/Dashboard/Logo/Logo';
+import { BrandName } from '@/components/BrandName/BrandName';
 import { StatsBar } from '@/components/Dashboard/StatsBar/StatsBar';
+import { Logo } from '@/components/Logo/Logo';
 import { cn, isMac  } from '@/lib/utils';
 
 export type HeaderProps = {
@@ -27,7 +28,7 @@ export function Header({ activeCount, connected, onOpenChat, onGoHome, onCustomi
     >
       <Inline gap={2}>
         <Logo size={22} />
-        <span className="text-md font-semibold tracking-[-0.01em] text-fg">ClaudeIn</span>
+        <BrandName className="text-md font-semibold tracking-[-0.01em] text-fg" />
       </Inline>
       {onGoHome ? (
         <Button intent="ghost" size="sm" onClick={onGoHome} leftIcon={<Home size={15} aria-hidden="true" />}>
