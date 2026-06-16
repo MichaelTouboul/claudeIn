@@ -4,6 +4,10 @@ import { useCallback, useState } from 'react';
 
 import { muiTheme } from '@/components/Dashboard/ResponseBody/blocks/TableBlock/muiTheme';
 import {
+  isStatusColumn,
+  renderStatusCell,
+} from '@/components/Dashboard/ResponseBody/blocks/TableBlock/statusCell';
+import {
   type PanelTab,
   PanelTabKind,
   type TablePayload,
@@ -41,7 +45,11 @@ export function TableTab({ tab }: { tab: PanelTab }) {
     headerName: c.headerName,
     flex: 1,
     minWidth: 120,
+    // Editability is UNCHANGED — cells stay editable except while a transform runs.
     editable: !isTransforming,
+    // Status columns DISPLAY a design-system badge (visual only). The underlying
+    // cell value is untouched, so the edit→commit→export path still sees raw text.
+    ...(isStatusColumn(c.headerName) ? { renderCell: renderStatusCell } : {}),
   }));
 
   // Edits are ephemeral in-tab: commit the single edited row to the panel tab so
@@ -83,7 +91,7 @@ export function TableTab({ tab }: { tab: PanelTab }) {
               // processRowUpdate can't throw today, but surface it if it ever does.
               console.error('TableTab: row update failed', error);
             }}
-            sx={{ border: 0, height: '100%', fontFamily: "'JetBrains Mono', monospace" }}
+            sx={{ border: 0, height: '100%' }}
           />
         </div>
       </ThemeProvider>

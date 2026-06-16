@@ -53,17 +53,23 @@ export function TableToolbar({ payload, title }: TableToolbarProps) {
   };
 
   return (
-    <div className="flex items-center gap-1.5 px-2 py-1.5" style={{ borderBottom: '1px solid var(--color-border)' }}>
-      <Button intent="outline" size="sm" onClick={() => triggerXlsx(payload, title)}>
-        <FileSpreadsheet size={13} />
+    <div
+      className="flex items-center gap-2 px-3 py-2 shrink-0"
+      style={{
+        borderBottom: '1px solid var(--color-border-subtle)',
+        background: 'var(--color-surface-1)',
+      }}
+    >
+      <Button intent="secondary" size="sm" onClick={() => triggerXlsx(payload, title)}>
+        <FileSpreadsheet size={14} />
         Excel
       </Button>
-      <Button intent="outline" size="sm" onClick={() => triggerPdf(payload, title)}>
-        <FileText size={13} />
+      <Button intent="secondary" size="sm" onClick={() => triggerPdf(payload, title)}>
+        <FileText size={14} />
         PDF
       </Button>
-      <Button intent="outline" size="sm" onClick={onCopy}>
-        <Clipboard size={13} />
+      <Button intent="secondary" size="sm" onClick={onCopy}>
+        <Clipboard size={14} />
         {COPY_LABEL[copyState]}
       </Button>
     </div>

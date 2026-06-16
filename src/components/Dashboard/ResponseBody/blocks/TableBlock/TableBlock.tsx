@@ -7,6 +7,7 @@ import { BlockShell } from '../../BlockShell/BlockShell';
 import type { BlockAction } from '../../responseBody.types';
 import { muiTheme } from './muiTheme';
 import { type HastNode, parseTableNode } from './parseTable';
+import { isStatusColumn, renderStatusCell } from './statusCell';
 
 /** Footer is noise for small tables; show it only once paging is plausible. */
 const FOOTER_ROW_THRESHOLD = 10;
@@ -22,6 +23,9 @@ export function TableBlock({ node, raw }: TableBlockProps) {
     headerName: c.headerName,
     flex: 1,
     minWidth: 120,
+    // Status columns render a design-system badge (visual only — the row value is
+    // untouched, so the chat-side Copy still emits the raw markdown).
+    ...(isStatusColumn(c.headerName) ? { renderCell: renderStatusCell } : {}),
   }));
 
   const openPanel = usePanelStore((s) => s.open);
@@ -60,7 +64,7 @@ export function TableBlock({ node, raw }: TableBlockProps) {
                 density="compact"
                 hideFooter={rows.length <= FOOTER_ROW_THRESHOLD}
                 disableRowSelectionOnClick
-                sx={{ border: 0, fontFamily: "'JetBrains Mono', monospace" }}
+                sx={{ border: 0 }}
               />
             </div>
           </ThemeProvider>
