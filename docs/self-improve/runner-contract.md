@@ -1,9 +1,11 @@
 # Self-Improve loop — runner contract
 
 This document specifies how a Claude Code `/loop` watcher (the **runner**)
-consumes the Self-Improve **inbox** produced by the app in phase I1. It is
-**documentation only** — the watcher itself is not built here. The app side
-(types, service, IPC) is implemented in:
+consumes the Self-Improve **inbox** produced by the app in phase I1. The runner
+is now implemented as the **`self-improve-runner` skill**
+(`.claude/skills/self-improve-runner/SKILL.md`) — run it under `/loop` with
+`--dangerously-skip-permissions`; this document remains the protocol spec it
+follows. The app side (types, service, IPC) is implemented in:
 
 - `electron/types/improve.types.ts`
 - `electron/services/improve-inbox.service.ts` + `improve-inbox.io.ts`
