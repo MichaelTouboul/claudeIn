@@ -73,6 +73,10 @@ beforeEach(() => {
     unwatchImproveInbox: () => Promise.resolve(),
     listImproveRequests: () => Promise.resolve([]),
     onImproveRequestChanged: () => () => {},
+    getAppVersion: () => Promise.resolve("1.0.0"),
+    watchAppVersion: () => Promise.resolve(),
+    unwatchAppVersion: () => Promise.resolve(),
+    onVersionChanged: () => () => {},
   } as unknown as Window["api"];
 });
 

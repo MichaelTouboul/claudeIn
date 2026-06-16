@@ -1,10 +1,12 @@
 import { type ReactElement } from "react";
 
 import { ImproveNotification } from "@/components/Header/ImproveNotification/ImproveNotification";
+import { VersionNotification } from "@/components/Header/VersionNotification/VersionNotification";
 import { ImproveModal } from "@/components/ImproveModal/ImproveModal";
 import { useBootPage } from "@/hooks/useBootPage";
 import { useImproveContextMenu } from "@/hooks/useImproveContextMenu";
 import { useInitImprove } from "@/hooks/useInitImprove";
+import { useInitVersion } from "@/hooks/useInitVersion";
 import { CustomizePage } from "@/pages/CustomizePage/CustomizePage";
 import { DashboardPage } from "@/pages/DashboardPage/DashboardPage";
 import { HomePage } from "@/pages/HomePage/HomePage";
@@ -20,11 +22,11 @@ const PAGE_VIEW: Record<AppPage, () => ReactElement> = {
 };
 
 /**
- * The Self-Improve notification is hidden during first-run onboarding only;
- * it is always discoverable on every other page. Value→behavior map, not a
- * fallback chain (CLAUDE.md).
+ * The Header notification overlays (Self-Improve + app-version) are hidden during
+ * first-run onboarding only; always discoverable on every other page. Value→
+ * behavior map, not a fallback chain (CLAUDE.md).
  */
-const SHOW_IMPROVE_OVERLAY: Record<AppPage, boolean> = {
+const SHOW_HEADER_OVERLAYS: Record<AppPage, boolean> = {
   [AppPage.Onboarding]: false,
   [AppPage.Home]: true,
   [AppPage.Dashboard]: true,
@@ -47,14 +49,18 @@ export default function App() {
   // Self-Improve notification (I5) — watch the inbox + subscribe + seed once at
   // the root so it runs regardless of which page is shown (not per-page).
   useInitImprove();
+  // App-version notification — watch package.json for land.sh bumps + subscribe
+  // + seed once at the root, same lifecycle as the improve notification.
+  useInitVersion();
   if (currentPage === null) {
     return <BootLoader />;
   }
   return (
     <>
       {PAGE_VIEW[currentPage]()}
-      {SHOW_IMPROVE_OVERLAY[currentPage] ? (
-        <div className="fixed top-3 right-3 z-[60]">
+      {SHOW_HEADER_OVERLAYS[currentPage] ? (
+        <div className="fixed top-3 right-3 z-[60] flex items-center gap-2">
+          <VersionNotification />
           <ImproveNotification />
         </div>
       ) : null}

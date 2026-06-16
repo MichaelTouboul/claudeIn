@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { UserProfile } from "@/lib/types";
 import { AppPage, useAppStore } from "@/store/useAppStore";
 import { useImproveStore } from "@/store/useImproveStore";
+import { useVersionStore } from "@/store/useVersionStore";
 
 import App from "./App";
 
@@ -42,15 +43,24 @@ const watchImproveInbox = vi.fn<() => Promise<void>>();
 const unwatchImproveInbox = vi.fn<() => Promise<void>>();
 const listImproveRequests = vi.fn<() => Promise<[]>>();
 const onImproveRequestChanged = vi.fn(() => () => {});
+const getAppVersion = vi.fn<() => Promise<string>>();
+const watchAppVersion = vi.fn<() => Promise<void>>();
+const unwatchAppVersion = vi.fn<() => Promise<void>>();
+const onVersionChanged = vi.fn(() => () => {});
 
 beforeEach(() => {
   useAppStore.setState({ currentPage: null, selectedProject: null });
   useImproveStore.setState({ requests: {}, acknowledgedIds: new Set() });
+  useVersionStore.setState({ running: "", latest: null, acknowledged: null });
   getUserProfile.mockReset();
   watchImproveInbox.mockReset().mockResolvedValue(undefined);
   unwatchImproveInbox.mockReset().mockResolvedValue(undefined);
   listImproveRequests.mockReset().mockResolvedValue([]);
   onImproveRequestChanged.mockClear();
+  getAppVersion.mockReset().mockResolvedValue("1.0.0");
+  watchAppVersion.mockReset().mockResolvedValue(undefined);
+  unwatchAppVersion.mockReset().mockResolvedValue(undefined);
+  onVersionChanged.mockClear();
   window.api = {
     getUserProfile,
     onImproveContextMenuSelected: () => () => {},
@@ -58,6 +68,10 @@ beforeEach(() => {
     unwatchImproveInbox,
     listImproveRequests,
     onImproveRequestChanged,
+    getAppVersion,
+    watchAppVersion,
+    unwatchAppVersion,
+    onVersionChanged,
   } as unknown as Window["api"];
 });
 
