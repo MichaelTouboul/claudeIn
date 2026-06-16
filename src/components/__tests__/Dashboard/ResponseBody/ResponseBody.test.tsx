@@ -10,6 +10,9 @@ describe('ResponseBody', () => {
     expect(screen.getByRole('heading', { name: 'Title' })).toBeInTheDocument();
     // GFM tables route to TableBlock, an MUI DataGrid (role="grid", not <table>).
     expect(screen.getByRole('grid')).toBeInTheDocument();
-    expect(screen.getByText('const x = 1;')).toBeInTheDocument();
+    // CodeBlock now syntax-highlights — the source is split across token spans,
+    // so assert on the joined textContent of the <code> element.
+    const code = document.querySelector('code');
+    expect(code?.textContent).toBe('const x = 1;');
   });
 });

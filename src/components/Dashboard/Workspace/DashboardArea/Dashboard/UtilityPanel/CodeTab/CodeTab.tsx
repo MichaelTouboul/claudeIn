@@ -1,13 +1,15 @@
 import { useCallback } from 'react';
 
+import { CodeView } from '@/components/Dashboard/ResponseBody/blocks/codeHighlight/CodeView';
 import { type PanelTab, PanelTabKind, usePanelStore } from '@/store/dashboard/usePanelStore';
 
 import { PromptBar } from '../PromptBar/PromptBar';
 
 /**
- * Read-only code view. Matches the plain monospace `<pre>` style of the chat
- * CodeBlock (no Shiki) so the panel reads consistently with the response body.
- * A shared PromptBar is pinned at the bottom for one-shot LLM transforms.
+ * Read-only code view. Reuses the chat CodeBlock's design-system `CodeView`
+ * (language header + line-number gutter + syntax highlighting) so the panel
+ * reads identically to the response body. A shared PromptBar is pinned at the
+ * bottom for one-shot LLM transforms — it always operates on the raw `src`.
  */
 export function CodeTab({ tab }: { tab: PanelTab }) {
   const update = usePanelStore((s) => s.update);
@@ -28,18 +30,8 @@ export function CodeTab({ tab }: { tab: PanelTab }) {
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="min-h-0 flex-1 overflow-auto">
-        {lang ? (
-          <div className="px-3 pt-2 text-xs font-mono" style={{ color: 'var(--color-text-muted)' }}>
-            {lang}
-          </div>
-        ) : null}
-        <pre
-          className="overflow-x-auto px-3 pb-3 pt-1 text-sm leading-relaxed"
-          style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)' }}
-        >
-          <code>{src}</code>
-        </pre>
+      <div className="min-h-0 flex-1 overflow-auto p-2">
+        <CodeView src={src} lang={lang} />
       </div>
       <PromptBar kind={PanelTabKind.Code} content={src} apply={applyTransform} />
     </div>
