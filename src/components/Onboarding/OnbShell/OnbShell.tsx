@@ -3,8 +3,10 @@ import { type ReactNode } from "react";
 import { OnbSteps } from "./OnbSteps";
 
 type OnbShellProps = {
-  /** Accessible name for the step's labelled region; also the card heading. */
+  /** Accessible name for the step's labelled region; also the default card heading. */
   title: string;
+  /** Optional styled heading (e.g. with the `BrandName` wordmark); falls back to `title`. */
+  titleNode?: ReactNode;
   /** Optional short lead paragraph under the title. */
   subtitle?: string;
   /** Zero-based index of the active step (drives the progress header). */
@@ -33,6 +35,7 @@ type OnbShellProps = {
  */
 export function OnbShell({
   title,
+  titleNode,
   subtitle,
   stepIndex,
   icon,
@@ -66,7 +69,7 @@ export function OnbShell({
               {icon}
             </span>
           ) : null}
-          <h2 className="text-[22px] font-semibold tracking-[-0.01em] text-fg">{title}</h2>
+          <h2 className="text-[22px] font-semibold tracking-[-0.01em] text-fg">{titleNode ?? title}</h2>
         </div>
         {subtitle !== undefined ? (
           <p className="text-[15px] leading-relaxed text-fg-muted" style={centered ? { maxWidth: "44ch" } : undefined}>

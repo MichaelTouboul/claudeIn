@@ -47,6 +47,7 @@
   --color-accent: #818cf8;                    /* was #06b6d4 (cyan) */
   --color-accent-dim: rgba(129, 140, 248, 0.14);
   --color-accent-solid: #4f5dd9;              /* solid fill for the primary button (white text) */
+  --color-accent-text: #a3adff;               /* accent AS text on dark (the "In" in the ClaudeIn wordmark) — indigo-300, AA on surfaces */
 
   /* Focus ring — single source of truth (indigo-300, AA on dark). Every _ui
      primitive points its :focus-visible ring here instead of the bare accent.

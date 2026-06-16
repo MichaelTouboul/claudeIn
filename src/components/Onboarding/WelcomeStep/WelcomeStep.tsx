@@ -1,6 +1,7 @@
 import { Check, Lock } from "lucide-react";
 
 import { Button } from "@/components/_ui/Button";
+import { BrandName } from "@/components/BrandName/BrandName";
 
 import { OnbShell } from "../OnbShell/OnbShell";
 
@@ -25,6 +26,11 @@ export function WelcomeStep({ stepIndex, onNext }: WelcomeStepProps) {
       stepIndex={stepIndex}
       icon={<BrandMark />}
       title="Welcome to ClaudeIn"
+      titleNode={
+        <>
+          Welcome to <BrandName />
+        </>
+      }
       subtitle="A cleaner home for everything Claude Code makes invisible — your sessions, sub-agents, skills, memory and context, all in one calm workspace."
       footer={
         <>
