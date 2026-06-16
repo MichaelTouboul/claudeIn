@@ -34,6 +34,24 @@ describe("improveChatPrompt — machine-parsable recap contract", () => {
     expect(flat).toContain("do not edit files");
   });
 
+  it("appends a turn's absolute image paths into the rendered prompt", () => {
+    const prompt = build({
+      type: ImproveType.Design,
+      transcript: [
+        {
+          role: "user",
+          text: "make this header match the mock",
+          images: ["/tmp/shot-1.png", "/tmp/shot-2.png"],
+        },
+      ],
+    });
+
+    expect(prompt).toContain("/tmp/shot-1.png");
+    expect(prompt).toContain("/tmp/shot-2.png");
+    // The user's text is still rendered alongside the paths.
+    expect(prompt).toContain("make this header match the mock");
+  });
+
   it("still embeds the request type and the running transcript", () => {
     const prompt = build({
       type: ImproveType.Performance,

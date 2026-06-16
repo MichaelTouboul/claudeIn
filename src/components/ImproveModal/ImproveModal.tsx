@@ -47,7 +47,7 @@ function ImproveModalContent({ onClose }: { onClose: () => void }) {
         target={target}
         disabled={loading || submitting}
       />
-      <ImproveChat messages={messages} loading={loading} onSend={(t) => void send(t)} />
+      <ImproveChat messages={messages} loading={loading} onSend={(t, imgs) => void send(t, imgs)} />
       <div
         className="flex items-center justify-end gap-2 px-4 py-3 border-t"
         style={{ borderColor: 'var(--color-border)' }}

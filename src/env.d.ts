@@ -65,6 +65,8 @@ interface Window {
       kind?: import("./types/attachment.types").FilePickerKind,
     ) => Promise<string[]>;
     readImageAsDataUrl: (filePath: string) => Promise<string | null>;
+    /** Persist a pasted `data:image/*;base64,…` URL to a temp file; returns its abs path. */
+    saveImageFromDataUrl: (dataUrl: string) => Promise<string | null>;
     getPathForFile: (file: File) => string;
 
     onEvent: (cb: (data: unknown) => void) => () => void;

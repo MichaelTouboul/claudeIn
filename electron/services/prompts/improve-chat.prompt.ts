@@ -43,9 +43,17 @@ function readSource(sourcePath: string): string {
   }
 }
 
+/** Render one turn, appending any attached image paths so `--print` loads them. */
+function renderTurn(turn: ImproveTranscriptTurn): string {
+  const base = `${turn.role}: ${turn.text}`;
+  if (!turn.images || turn.images.length === 0) return base;
+  const paths = turn.images.map((p) => `- ${p}`).join("\n");
+  return `${base}\n[attached images]\n${paths}`;
+}
+
 function renderTranscript(transcript: ImproveTranscriptTurn[]): string {
   if (transcript.length === 0) return "(no messages yet)";
-  return transcript.map((t) => `${t.role}: ${t.text}`).join("\n");
+  return transcript.map(renderTurn).join("\n");
 }
 
 function renderContext(input: ImproveChatInput): string {
