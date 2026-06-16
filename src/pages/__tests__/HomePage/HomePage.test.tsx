@@ -13,6 +13,7 @@ function makeProfile(overrides: Partial<UserProfile> = {}): UserProfile {
     role: "Engineer",
     plugins: ["babysitter"],
     capabilities: { agents: { count: 2, names: ["a", "b"] }, skills: 1, mcp: 0, hooks: 3 },
+    stack: ["TypeScript"],
     domains: ["backend"],
     onboardingCompletedAt: "x",
     generatedAt: null,

@@ -91,6 +91,7 @@ describe("fillUserProfile", () => {
       return JSON.stringify({
         name: "Ada Lovelace",
         role: "TypeScript + Node, with PostgreSQL",
+        stack: ["TypeScript", "Node", "PostgreSQL"],
         domains: ["backend", "infra"],
       });
     });
@@ -106,6 +107,7 @@ describe("fillUserProfile", () => {
       mcp: 1,
       hooks: 2,
     });
+    expect(profile.stack).toEqual(["TypeScript", "Node", "PostgreSQL"]);
     expect(profile.domains).toEqual(["backend", "infra"]);
     expect(profile.generatedAt).toBeTruthy();
 
@@ -136,6 +138,7 @@ describe("fillUserProfile", () => {
     const profile = await search.fillUserProfile(claudePath);
     expect(profile.name).toBeNull();
     expect(profile.role).toBeNull();
+    expect(profile.stack).toEqual([]);
     expect(profile.domains).toEqual([]);
     expect(profile.capabilities.hooks).toBe(0);
   });

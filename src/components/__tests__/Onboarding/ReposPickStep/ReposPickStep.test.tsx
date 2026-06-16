@@ -8,8 +8,9 @@ function candidate(
   path: string,
   label: string | null = null,
   logoDataUrl: string | null = null,
+  language: string | null = null,
 ): RepoCandidate {
-  return { path, scope: "project", hasClaude: true, plugins: [], label, logoDataUrl };
+  return { path, scope: "project", hasClaude: true, plugins: [], label, logoDataUrl, language };
 }
 
 function favorite(path: string): FavoriteRepo {
@@ -43,6 +44,20 @@ describe("ReposPickStep", () => {
     render(<ReposPickStep stepIndex={5} onNext={vi.fn()} />);
     expect(await screen.findByText("alpha")).toBeInTheDocument();
     expect(screen.getByText("A web app")).toBeInTheDocument();
+  });
+
+  it("shows the language dot + name when present, and nothing when null", async () => {
+    scanRepos.mockResolvedValue([
+      candidate("/code/alpha", null, null, "TypeScript"),
+      candidate("/code/beta"),
+    ]);
+    render(<ReposPickStep stepIndex={5} onNext={vi.fn()} />);
+
+    expect(await screen.findByText("TypeScript")).toBeInTheDocument();
+    // the language dot is rendered alongside the name (decorative).
+    expect(document.querySelector("[data-lang-dot]")).not.toBeNull();
+    // beta has no language → no dot for it; only one dot total in the grid.
+    expect(document.querySelectorAll("[data-lang-dot]")).toHaveLength(1);
   });
 
   it("renders the detected logo image when present, else a letter avatar", async () => {

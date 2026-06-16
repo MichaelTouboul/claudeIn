@@ -62,6 +62,23 @@
   --color-info: #6db4ff;        /* was #60a5fa */
   --color-history: #b794f6;     /* was #c084fc */
 
+  /* Language dots — the repo-tile language indicator (matches the onboarding
+   * mock's LANG_DOT idiom). Semantic per-language hues, tuned for dark surfaces. */
+  --color-lang-typescript: #818cf8; /* indigo (accent family) */
+  --color-lang-javascript: #f0c14b; /* yellow */
+  --color-lang-python: #6db4ff;     /* blue */
+  --color-lang-go: #6db4ff;         /* blue (Go gopher cyan-blue) */
+  --color-lang-rust: #ff8585;       /* red-orange */
+  --color-lang-java: #ff8585;       /* red */
+  --color-lang-kotlin: #b794f6;     /* purple */
+  --color-lang-ruby: #ff8585;       /* red */
+  --color-lang-php: #b794f6;        /* purple */
+  --color-lang-c: #8b93a3;          /* gray */
+  --color-lang-cpp: #6db4ff;        /* blue */
+  --color-lang-csharp: #45d483;     /* green */
+  --color-lang-swift: #f0c14b;      /* orange/yellow */
+  --color-lang-default: #8b93a3;    /* neutral fallback */
+
   /* Neutral grays (attachment chip etc.) */
   --color-neutral-fg: #8b93a3;
   --color-neutral-bg: #2b2f39;

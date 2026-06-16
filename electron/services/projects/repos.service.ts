@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
 
 import { scanCandidates } from "../system/onboarding.service";
+import { detectRepoLanguage } from "./repo-language";
 import { detectRepoLogo } from "./repo-logo";
 import { renderPrompt, repoLabelPrompt } from "../prompts";
 import type { Candidate } from "../../types/onboarding.types";
@@ -49,15 +50,16 @@ export function setReposRunner(next: ReposRunner): void {
 
 async function labelFor(candidate: Candidate): Promise<RepoCandidate> {
   const logoDataUrl = detectRepoLogo(candidate.path);
+  const language = detectRepoLanguage(candidate.path);
   try {
     const label = await runner({
       command: REPOS_COMMAND,
       cwd: candidate.path,
       prompt: renderPrompt(repoLabelPrompt, undefined),
     });
-    return { ...candidate, label: label.length > 0 ? label : null, logoDataUrl };
+    return { ...candidate, label: label.length > 0 ? label : null, logoDataUrl, language };
   } catch {
-    return { ...candidate, label: null, logoDataUrl };
+    return { ...candidate, label: null, logoDataUrl, language };
   }
 }
 

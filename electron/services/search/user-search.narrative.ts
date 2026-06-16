@@ -1,7 +1,9 @@
-/** The LLM-narrated subset of the profile (identity + domains). */
+/** The LLM-narrated subset of the profile (identity + stack + domains). */
 export interface Narrative {
   name: string | null;
   role: string | null;
+  /** Individual technologies (languages/frameworks/tools) — the Stack tag chips. */
+  stack: string[];
   domains: string[];
 }
 
@@ -59,6 +61,7 @@ function narrativeFromObject(obj: Record<string, unknown>): Narrative {
   return {
     name: asStringOrNull(obj.name),
     role: asStringOrNull(obj.role),
+    stack: isStringArray(obj.stack) ? obj.stack : [],
     domains: isStringArray(obj.domains) ? obj.domains : [],
   };
 }
@@ -96,6 +99,7 @@ export function parseNarrative(raw: string): Narrative {
   return {
     name: null,
     role: null,
+    stack: [],
     domains: [],
   };
 }

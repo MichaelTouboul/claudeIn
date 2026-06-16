@@ -15,6 +15,7 @@ function makeProfile(overrides: Partial<UserProfile> = {}): UserProfile {
     role: "A backend engineer working in TypeScript and Node.",
     plugins: [],
     capabilities: { agents: { count: 17, names: [] }, skills: 5, mcp: 2, hooks: 4 },
+    stack: ["TypeScript", "Node"],
     domains: ["backend", "infra"],
     onboardingCompletedAt: null,
     generatedAt: null,
@@ -60,7 +61,7 @@ describe("ConsentReposStep", () => {
 });
 
 describe("ProfileReviewStep", () => {
-  it("renders the identity, stat strip, domains and confirms", () => {
+  it("renders the identity, stat strip, stack chips, domains and confirms", () => {
     const onConfirm = vi.fn();
     render(
       <ProfileReviewStep
@@ -68,6 +69,7 @@ describe("ProfileReviewStep", () => {
         profile={makeProfile()}
         onSave={(p) => Promise.resolve(p)}
         onConfirm={onConfirm}
+        onBack={vi.fn()}
       />,
     );
     // identity
@@ -82,11 +84,46 @@ describe("ProfileReviewStep", () => {
     expect(screen.getByText("MCP servers")).toBeInTheDocument();
     expect(screen.getByText("4")).toBeInTheDocument();
     expect(screen.getByText("hooks")).toBeInTheDocument();
+    // stack chips (NOT the role sentence)
+    expect(screen.getByText("Stack")).toBeInTheDocument();
+    expect(screen.getByText("TypeScript")).toBeInTheDocument();
+    expect(screen.getByText("Node")).toBeInTheDocument();
+    expect(
+      screen.queryByText("A backend engineer working in TypeScript and Node."),
+    ).not.toBeInTheDocument();
     // domains chips
     expect(screen.getByText("backend")).toBeInTheDocument();
     expect(screen.getByText("infra")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /confirm/i }));
     expect(onConfirm).toHaveBeenCalledTimes(1);
+  });
+
+  it("omits the Stack section when the stack array is empty", () => {
+    render(
+      <ProfileReviewStep
+        stepIndex={3}
+        profile={makeProfile({ stack: [] })}
+        onSave={(p) => Promise.resolve(p)}
+        onConfirm={vi.fn()}
+        onBack={vi.fn()}
+      />,
+    );
+    expect(screen.queryByText("Stack")).not.toBeInTheDocument();
+  });
+
+  it("renders a Back button that calls onBack", () => {
+    const onBack = vi.fn();
+    render(
+      <ProfileReviewStep
+        stepIndex={3}
+        profile={makeProfile()}
+        onSave={(p) => Promise.resolve(p)}
+        onConfirm={vi.fn()}
+        onBack={onBack}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /back/i }));
+    expect(onBack).toHaveBeenCalledTimes(1);
   });
 
   it("shows the home directory chip as ~/.claude even for an absolute path", () => {
@@ -96,6 +133,7 @@ describe("ProfileReviewStep", () => {
         profile={makeProfile({ claudeUserPath: "/Users/ada/.claude" })}
         onSave={(p) => Promise.resolve(p)}
         onConfirm={vi.fn()}
+        onBack={vi.fn()}
       />,
     );
     expect(screen.getByText("~/.claude")).toBeInTheDocument();
@@ -111,6 +149,7 @@ describe("ProfileReviewStep", () => {
         profile={makeProfile()}
         onSave={onSave}
         onConfirm={vi.fn()}
+        onBack={vi.fn()}
       />,
     );
     fireEvent.click(screen.getByRole("button", { name: /edit/i }));

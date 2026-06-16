@@ -1,4 +1,4 @@
-import { Check } from "lucide-react";
+import { ArrowLeft, Check } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/_ui/Button";
@@ -18,6 +18,8 @@ type ProfileReviewStepProps = {
   onSave: (next: UserProfile) => Promise<UserProfile>;
   /** Confirm the profile and advance to the repo consent. */
   onConfirm: () => void;
+  /** Step back to the previous step (re-runs the analysis — the "redo" semantic). */
+  onBack: () => void;
 };
 
 /**
@@ -32,6 +34,7 @@ export function ProfileReviewStep({
   profile,
   onSave,
   onConfirm,
+  onBack,
 }: ProfileReviewStepProps) {
   const [editing, setEditing] = useState(false);
 
@@ -63,7 +66,14 @@ export function ProfileReviewStep({
       footer={
         editing ? undefined : (
           <>
-            <span />
+            <Button
+              intent="ghost"
+              size="md"
+              leftIcon={<ArrowLeft size={15} aria-hidden="true" />}
+              onClick={onBack}
+            >
+              Back
+            </Button>
             <Button
               intent="primary"
               size="md"

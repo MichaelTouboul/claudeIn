@@ -106,7 +106,15 @@ export function useReposPick(): UseReposPick {
         ? prev
         : [
             ...prev,
-            { path: dir, scope: "project", hasClaude: true, plugins: [], label: null, logoDataUrl: null },
+            {
+              path: dir,
+              scope: "project",
+              hasClaude: true,
+              plugins: [],
+              label: null,
+              logoDataUrl: null,
+              language: null,
+            },
           ],
     );
     setFavorites((prev) => new Set(prev).add(dir));

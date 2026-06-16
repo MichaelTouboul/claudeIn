@@ -9,24 +9,25 @@ import type { UserProfile } from "../../types/user.interface";
 /**
  * User profile persistence — the `user_profile` singleton (id = 1) is the single
  * source of truth for "onboarding done" (`onboardingCompletedAt != null`). JSON
- * columns (`plugins`, `capabilities`, `domains`) are serialized on the way in and
- * parsed on the way out by `user-profile.map`. sql.js is synchronous; all calls
- * are guarded by the DB wrapper, never `.then()`/`.catch()`.
+ * columns (`plugins`, `capabilities`, `stack`, `domains`) are serialized on the
+ * way in and parsed on the way out by `user-profile.map`. sql.js is synchronous;
+ * all calls are guarded by the DB wrapper, never `.then()`/`.catch()`.
  *
  * The legacy `summary` / `workflow` columns still exist in the table but are no
  * longer read or written — they are simply left untouched (no migration needed).
  */
 
 const UPSERT_SQL = `INSERT INTO user_profile (
-    id, claude_user_path, name, role, plugins, capabilities, domains,
+    id, claude_user_path, name, role, plugins, capabilities, stack, domains,
     onboarding_completed_at, generated_at, updated_at
-  ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  ) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   ON CONFLICT(id) DO UPDATE SET
     claude_user_path = excluded.claude_user_path,
     name = excluded.name,
     role = excluded.role,
     plugins = excluded.plugins,
     capabilities = excluded.capabilities,
+    stack = excluded.stack,
     domains = excluded.domains,
     onboarding_completed_at = excluded.onboarding_completed_at,
     generated_at = excluded.generated_at,

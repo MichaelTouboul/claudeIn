@@ -56,6 +56,8 @@ describe("scanRepos", () => {
     expect(result[0].label).toBeNull();
     // Non-existent repo path → no logo detected.
     expect(result[0].logoDataUrl).toBeNull();
+    // Non-existent repo path → undetectable language.
+    expect(result[0].language).toBeNull();
   });
 
   it("returns [] when no project repos are found", async () => {

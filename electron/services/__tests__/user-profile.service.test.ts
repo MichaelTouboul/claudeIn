@@ -20,6 +20,7 @@ const sample: UserProfile = {
   role: "Engineer",
   plugins: ["babysitter"],
   capabilities: { agents: { count: 2, names: ["a", "b"] }, skills: 3, mcp: 1, hooks: 4 },
+  stack: ["TypeScript", "Node"],
   domains: ["backend", "infra"],
   onboardingCompletedAt: null,
   generatedAt: "2026-06-11T00:00:00.000Z",
@@ -45,7 +46,20 @@ describe("getUserProfile", () => {
     // saveUserProfile re-stamps updatedAt; compare against the stored value.
     expect(got).toEqual(stored);
     expect(got?.capabilities.agents.names).toEqual(["a", "b"]);
+    expect(got?.stack).toEqual(["TypeScript", "Node"]);
     expect(got?.domains).toEqual(["backend", "infra"]);
+  });
+
+  it("defaults stack to [] for a legacy row written without it", () => {
+    // simulate a pre-stack row: insert a singleton with a NULL stack column.
+    getDb()
+      .prepare(
+        "INSERT INTO user_profile (id, name, domains) VALUES (1, ?, ?)",
+      )
+      .run("Legacy", JSON.stringify(["backend"]));
+    const got = svc.getUserProfile();
+    expect(got?.stack).toEqual([]);
+    expect(got?.domains).toEqual(["backend"]);
   });
 });
 
@@ -77,6 +91,7 @@ describe("updateUserProfile", () => {
     const updated = svc.updateUserProfile({ name: "Solo" });
     expect(updated.name).toBe("Solo");
     expect(updated.plugins).toEqual([]);
+    expect(updated.stack).toEqual([]);
     expect(updated.capabilities).toEqual({
       agents: { count: 0, names: [] },
       skills: 0,

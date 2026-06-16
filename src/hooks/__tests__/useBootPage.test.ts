@@ -13,6 +13,7 @@ function makeProfile(overrides: Partial<UserProfile> = {}): UserProfile {
     role: null,
     plugins: [],
     capabilities: { agents: { count: 0, names: [] }, skills: 0, mcp: 0, hooks: 0 },
+    stack: [],
     domains: [],
     onboardingCompletedAt: null,
     generatedAt: null,

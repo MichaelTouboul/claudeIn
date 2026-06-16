@@ -29,16 +29,20 @@ type ProfileSectionsProps = {
 };
 
 /**
- * The two read sections under the identity card. "Stack" surfaces the LLM `role`
- * sentence as a single readable line (it is prose, not a tag array), while
- * "Domains" wraps the detected domain tags as chips.
+ * The two read sections under the identity card. "Stack" wraps the LLM-inferred
+ * individual technologies (`profile.stack`) as tag chips, and "Domains" wraps the
+ * detected domain tags as chips. Each section is omitted when its array is empty.
  */
 export function ProfileSections({ profile }: ProfileSectionsProps) {
   return (
     <Stack gap={4}>
-      {profile.role !== null ? (
+      {profile.stack.length > 0 ? (
         <Section label="Stack">
-          <p className="text-sm leading-relaxed text-fg-muted">{profile.role}</p>
+          <div className="flex flex-wrap gap-2">
+            {profile.stack.map((t) => (
+              <Tag key={t}>{t}</Tag>
+            ))}
+          </div>
         </Section>
       ) : null}
       {profile.domains.length > 0 ? (

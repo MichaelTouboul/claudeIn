@@ -13,6 +13,7 @@ function makeProfile(): UserProfile {
     role: "Engineer",
     plugins: [],
     capabilities: { agents: { count: 0, names: [] }, skills: 0, mcp: 0, hooks: 0 },
+    stack: ["TypeScript"],
     domains: ["backend"],
     onboardingCompletedAt: "x",
     generatedAt: null,

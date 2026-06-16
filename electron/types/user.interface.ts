@@ -15,8 +15,8 @@ export interface Capabilities {
  * The fixed-schema user profile — a DB singleton (`user_profile`, id = 1).
  *
  * Deterministic fields (`claudeUserPath`, `plugins`, `capabilities`) are filled
- * by a scan and are read-only / re-scannable. LLM fields (`role`, `domains`) are
- * editable. `onboardingCompletedAt` is the single source of truth for
+ * by a scan and are read-only / re-scannable. LLM fields (`role`, `stack`,
+ * `domains`) are editable. `onboardingCompletedAt` is the single source of truth for
  * "onboarding done" — non-null once the user finishes the flow.
  */
 export interface UserProfile {
@@ -28,6 +28,11 @@ export interface UserProfile {
   /** Detected plugin names alongside the user `.claude` (e.g. `['babysitter']`). */
   plugins: string[];
   capabilities: Capabilities;
+  /**
+   * LLM-inferred individual technologies (languages/frameworks/tools), rendered
+   * as the "Stack" tag chips. Editable like `domains`; `[]` when none inferred.
+   */
+  stack: string[];
   /** LLM-inferred domain tags. */
   domains: string[];
   /** ISO timestamp set by `completeOnboarding`; null until onboarding is done. */

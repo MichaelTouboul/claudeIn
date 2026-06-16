@@ -13,6 +13,7 @@ function makeProfile(overrides: Partial<UserProfile> = {}): UserProfile {
     role: "Engineer",
     plugins: ["babysitter"],
     capabilities: { agents: { count: 2, names: ["a", "b"] }, skills: 1, mcp: 0, hooks: 3 },
+    stack: ["TypeScript"],
     domains: ["backend"],
     onboardingCompletedAt: null,
     generatedAt: null,
@@ -50,7 +51,15 @@ beforeEach(() => {
     .mockResolvedValue(makeProfile({ onboardingCompletedAt: "2026-06-11" }));
   resetUser.mockReset().mockResolvedValue(undefined);
   scanRepos.mockReset().mockResolvedValue([
-    { path: "/code/alpha", scope: "project", hasClaude: true, plugins: [], label: null, logoDataUrl: null },
+    {
+      path: "/code/alpha",
+      scope: "project",
+      hasClaude: true,
+      plugins: [],
+      label: null,
+      logoDataUrl: null,
+      language: null,
+    },
   ]);
   listFavoriteRepos.mockReset().mockResolvedValue([]);
   addFavoriteRepo.mockReset().mockResolvedValue(undefined);
