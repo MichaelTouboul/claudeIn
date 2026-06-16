@@ -23,7 +23,20 @@ import type { BuildImproveRequestArgs, ChatMessage } from './types';
 const MAX_TITLE_LEN = 120;
 
 function toTranscript(messages: ChatMessage[]): ImproveTranscriptTurn[] {
-  return messages.map((m) => ({ role: m.role, text: m.text }));
+  return messages.map((m) => ({
+    role: m.role,
+    text: m.text,
+    ...(m.images && m.images.length > 0 ? { images: m.images } : {}),
+  }));
+}
+
+/** All distinct absolute image paths attached across the conversation. */
+function allImagePaths(messages: ChatMessage[]): string[] {
+  const seen = new Set<string>();
+  for (const m of messages) {
+    for (const p of m.images ?? []) seen.add(p);
+  }
+  return [...seen];
 }
 
 function firstUserText(messages: ChatMessage[]): string {
@@ -141,10 +154,17 @@ export function buildImproveRequest({
   messages,
 }: BuildImproveRequestArgs): ImproveRequestInput {
   const { title, description, acceptance } = deriveContent(messages);
+  // Surface attached screenshots in the description so the downstream runner /
+  // feature-dev sees the absolute paths even if the recap text omitted them.
+  const images = allImagePaths(messages);
+  const fullDescription =
+    images.length > 0
+      ? `${description}\n\nAttached images:\n${images.map((p) => `- ${p}`).join('\n')}`
+      : description;
   const input: ImproveRequestInput = {
     type,
     title,
-    description,
+    description: fullDescription,
     acceptance,
     transcript: toTranscript(messages),
   };

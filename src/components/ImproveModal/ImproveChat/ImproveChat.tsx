@@ -1,14 +1,16 @@
-import { type FormEvent,useState } from 'react';
+import { ImagePlus } from 'lucide-react';
+import { type FormEvent, type KeyboardEvent, useState } from 'react';
 
 import { Button } from '@/components/_ui/Button/Button';
-import { Input } from '@/components/_ui/Input';
 
 import type { ChatMessage } from '../types';
+import { AttachedImages } from './AttachedImages';
+import { useImproveChatAttach } from './useImproveChatAttach';
 
 type ImproveChatProps = {
   messages: ChatMessage[];
   loading: boolean;
-  onSend: (text: string) => void;
+  onSend: (text: string, images?: string[]) => void;
 };
 
 const roleStyle: Record<ChatMessage['role'], { align: string; bg: string }> = {
@@ -16,17 +18,30 @@ const roleStyle: Record<ChatMessage['role'], { align: string; bg: string }> = {
   assistant: { align: 'self-start', bg: 'var(--color-surface-3)' },
 };
 
-/** Scoping chat: scrollable message list + a labelled input/send row. */
+/** Scoping chat: scrollable message list + a multiline composer with image attach. */
 export function ImproveChat({ messages, loading, onSend }: ImproveChatProps) {
   const [draft, setDraft] = useState('');
+  const attach = useImproveChatAttach();
 
-  const submit = (e: FormEvent) => {
-    e.preventDefault();
+  const submit = (e?: FormEvent) => {
+    e?.preventDefault();
     const text = draft.trim();
-    if (!text || loading) return;
-    onSend(text);
+    const images = attach.attached.map((a) => a.path);
+    if ((!text && images.length === 0) || loading) return;
+    onSend(text, images.length > 0 ? images : undefined);
     setDraft('');
+    attach.clear();
   };
+
+  // Enter (no Shift) sends; Shift+Enter inserts a newline (default behavior).
+  const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      submit();
+    }
+  };
+
+  const canSend = !loading && (draft.trim() !== '' || attach.attached.length > 0);
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
@@ -47,6 +62,15 @@ export function ImproveChat({ messages, loading, onSend }: ImproveChatProps) {
               style={{ background: roleStyle[m.role].bg, color: 'var(--color-text-primary)' }}
             >
               {m.text}
+              {m.images && m.images.length > 0 ? (
+                <span
+                  className="flex items-center gap-1 mt-1 text-[11px]"
+                  style={{ color: 'var(--color-text-muted)' }}
+                >
+                  <ImagePlus size={11} />
+                  {m.images.length} image{m.images.length > 1 ? 's' : ''} attached
+                </span>
+              ) : null}
             </div>
           ))
         )}
@@ -62,20 +86,45 @@ export function ImproveChat({ messages, loading, onSend }: ImproveChatProps) {
 
       <form
         onSubmit={submit}
-        className="flex items-center gap-2 px-4 py-3 border-t"
-        style={{ borderColor: 'var(--color-border)' }}
+        className="flex flex-col border-t"
+        style={{
+          borderColor: attach.isDragging ? 'var(--color-accent)' : 'var(--color-border)',
+        }}
+        {...attach.dragHandlers}
       >
-        <Input
-          aria-label="Message"
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          disabled={loading}
-          placeholder="Type a message…"
-          className="flex-1 bg-surface-3"
-        />
-        <Button type="submit" intent="outline" disabled={loading || draft.trim() === ''}>
-          Send
-        </Button>
+        <AttachedImages images={attach.attached} onRemove={attach.remove} />
+        <div className="flex items-end gap-2 px-4 py-3">
+          <Button
+            type="button"
+            intent="ghost"
+            size="icon"
+            onClick={() => void attach.pick()}
+            disabled={loading}
+            title="Attach image"
+            aria-label="Attach image"
+          >
+            <ImagePlus size={16} />
+          </Button>
+          <textarea
+            aria-label="Message"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={onKeyDown}
+            onPaste={attach.onPaste}
+            disabled={loading}
+            rows={1}
+            placeholder="Type a message… (Enter to send, Shift+Enter for newline)"
+            className="flex-1 resize-none rounded px-3 py-2 text-sm bg-surface-3 outline-none max-h-32"
+            style={{
+              color: 'var(--color-text-primary)',
+              border: '1px solid var(--color-border-strong)',
+              minHeight: '2.25rem',
+            }}
+          />
+          <Button type="submit" intent="outline" disabled={!canSend}>
+            Send
+          </Button>
+        </div>
       </form>
     </div>
   );

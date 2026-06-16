@@ -11,7 +11,7 @@ const nextId = (): string => `msg-${Date.now()}-${seq++}`;
 type UseImproveModalChat = {
   messages: ChatMessage[];
   loading: boolean;
-  send: (text: string) => Promise<void>;
+  send: (text: string, images?: string[]) => Promise<void>;
 };
 
 /**
@@ -27,9 +27,18 @@ export function useImproveModalChat(
   const [loading, setLoading] = useState(false);
 
   const send = useCallback(
-    async (text: string) => {
-      const userTurn: ChatMessage = { id: nextId(), role: 'user', text };
-      const transcript = [...messages, userTurn].map((m) => ({ role: m.role, text: m.text }));
+    async (text: string, images?: string[]) => {
+      const userTurn: ChatMessage = {
+        id: nextId(),
+        role: 'user',
+        text,
+        ...(images && images.length > 0 ? { images } : {}),
+      };
+      const transcript = [...messages, userTurn].map((m) => ({
+        role: m.role,
+        text: m.text,
+        ...(m.images && m.images.length > 0 ? { images: m.images } : {}),
+      }));
       setMessages((prev) => [...prev, userTurn]);
       setLoading(true);
       try {

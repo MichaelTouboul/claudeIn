@@ -7,6 +7,20 @@ import { ImproveType } from '@/lib/types';
 const user = (text: string): ChatMessage => ({ id: text, role: 'user', text });
 const assistant = (text: string): ChatMessage => ({ id: `a:${text}`, role: 'assistant', text });
 
+describe('buildImproveRequest — image threading', () => {
+  it('carries a turn\'s images into the transcript and lists their paths in the description', () => {
+    const messages: ChatMessage[] = [
+      { id: 'u1', role: 'user', text: 'match this mock', images: ['/tmp/a.png', '/tmp/b.png'] },
+    ];
+
+    const req = buildImproveRequest({ type: ImproveType.Design, target: null, messages });
+
+    expect(req.transcript?.[0].images).toEqual(['/tmp/a.png', '/tmp/b.png']);
+    expect(req.description).toContain('/tmp/a.png');
+    expect(req.description).toContain('/tmp/b.png');
+  });
+});
+
 describe('buildImproveRequest — recap → ImproveRequest mapping', () => {
   it('parses Title / Description / Acceptance bullets from the latest assistant recap', () => {
     const messages: ChatMessage[] = [

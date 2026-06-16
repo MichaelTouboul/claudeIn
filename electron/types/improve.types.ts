@@ -36,6 +36,12 @@ export type ImproveStatus = (typeof ImproveStatus)[keyof typeof ImproveStatus];
 export interface ImproveTranscriptTurn {
   role: string;
   text: string;
+  /**
+   * Absolute paths to images attached to this turn. `claude --print` loads local
+   * image paths referenced in the prompt text, so the prompt builder appends
+   * these so the run picks them up as image input. Optional/absent on text turns.
+   */
+  images?: string[];
 }
 
 /** A single self-improvement request, persisted as one JSON file. */
