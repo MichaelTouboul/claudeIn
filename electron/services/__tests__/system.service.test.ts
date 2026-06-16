@@ -1,10 +1,13 @@
 // @vitest-environment node
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import fs from "fs";
 import os from "os";
 import path from "path";
 
-import { getAppVersion, readVersionFromPackageJson } from "../system/system.service";
+const { openPathMock } = vi.hoisted(() => ({ openPathMock: vi.fn<(p: string) => Promise<string>>() }));
+vi.mock("electron", () => ({ shell: { openPath: openPathMock } }));
+
+import { getAppVersion, openPath, readVersionFromPackageJson } from "../system/system.service";
 
 describe("getAppVersion", () => {
   it("returns the version declared in the repo package.json", () => {
@@ -33,5 +36,43 @@ describe("readVersionFromPackageJson", () => {
 
   it("falls back to 0.0.0 when the file is missing or unparseable", () => {
     expect(readVersionFromPackageJson(path.join(os.tmpdir(), "nope-package.json"))).toBe("0.0.0");
+  });
+});
+
+describe("openPath", () => {
+  beforeEach(() => openPathMock.mockReset());
+
+  it("returns an error for an empty path without touching shell", async () => {
+    expect(await openPath("")).toMatch(/no path/i);
+    expect(openPathMock).not.toHaveBeenCalled();
+  });
+
+  it("returns a not-found error for a missing path without touching shell", async () => {
+    const missing = path.join(os.tmpdir(), "cam-openpath-missing-xyz.md");
+    expect(await openPath(missing)).toMatch(/not found/i);
+    expect(openPathMock).not.toHaveBeenCalled();
+  });
+
+  it("delegates to shell.openPath for an existing file and returns its result", async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "cam-openpath-"));
+    const file = path.join(dir, "f.md");
+    fs.writeFileSync(file, "x", "utf-8");
+    openPathMock.mockResolvedValue("");
+
+    expect(await openPath(file)).toBe("");
+    expect(openPathMock).toHaveBeenCalledWith(file);
+
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  it("surfaces a non-empty shell error string", async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "cam-openpath-"));
+    const file = path.join(dir, "g.md");
+    fs.writeFileSync(file, "x", "utf-8");
+    openPathMock.mockResolvedValue("no app associated");
+
+    expect(await openPath(file)).toBe("no app associated");
+
+    fs.rmSync(dir, { recursive: true, force: true });
   });
 });
