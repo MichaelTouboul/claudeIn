@@ -1,0 +1,194 @@
+<!-- @dsCard group="Dashboard" viewport="800x760" name="Sidebar sessions & IA — avant / après" subtitle="Liste de conversations + switch Sessions/Library" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClaudeIn — Sessions sidebar redesign</title>
+<link rel="icon" type="image/svg+xml" href="../../assets/claudein-favicon.svg">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  body { margin: 0; background: #0b0d11; color: var(--text-primary); }
+  .page { display: flex; gap: 28px; align-items: flex-start; padding: 40px 32px 64px; justify-content: center; }
+  .col { display: flex; flex-direction: column; gap: 12px; }
+  .flabel { display: flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-tertiary); padding-left: 4px; }
+  .flabel .pill { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0; text-transform: none; border-radius: var(--radius-pill); padding: 2px 9px; }
+  .pill-old { color: var(--text-tertiary); background: var(--surface-2); border: 1px solid var(--border); }
+  .pill-new { color: var(--accent-text); background: var(--accent-subtle); border: 1px solid var(--accent-border); }
+  .side { width: 300px; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; height: 660px; display: flex; flex-direction: column; }
+  .top { display: flex; align-items: center; gap: 9px; padding: 14px 16px; border-bottom: 1px solid var(--border-subtle); }
+  .brand { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; letter-spacing: -0.01em; }
+  .zone { display: flex; align-items: center; gap: 9px; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-tertiary); padding: 14px 16px 8px; }
+  .zone .ico { color: var(--accent-text); display: flex; }
+  .zone .cnt { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); letter-spacing: 0; }
+  .zone .chev { margin-left: auto; color: var(--text-tertiary); display: flex; }
+  .grp { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-tertiary); padding: 14px 16px 6px; }
+  .actrow { display: flex; align-items: center; gap: 10px; margin: 0 8px; padding: 8px 10px; border-radius: var(--radius-md); font-size: 13px; color: var(--text-secondary); cursor: pointer; }
+  .actrow.on { background: var(--accent-subtle); color: var(--accent-text); }
+</style>
+</head>
+<body>
+<div class="page" id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel" src="./icons.jsx"></script>
+<script type="text/babel">
+const { useState } = React;
+const { Badge, StatusDot, Input, SegmentedControl } = window.ClaudeInDesignSystem_25db6c;
+const Ic = window.ClaudeInIcons;
+
+const GROUPS = [
+  { label: 'Today', items: [
+    { id:'s1', title:'Résoudre problème de push local', branch:'main', ctx:38, time:'2h', active:true },
+    { id:'s2', title:'Update onboarding, dashboard & customize', branch:'main', ctx:62, time:'4h' },
+  ]},
+  { label: 'Yesterday', items: [
+    { id:'s3', title:'Refactor auth middleware', branch:'feature/auth', ctx:18, time:'18:41' },
+    { id:'s4', title:'Set up CI pipeline', branch:'main', ctx:9, time:'15:02' },
+    { id:'s5', title:'Fix flaky e2e tests', branch:'fix/e2e', ctx:88, time:'11:20' },
+  ]},
+  { label: 'Previous 7 days', items: [
+    { id:'s6', title:'Add MCP server for Postgres', branch:'main', ctx:6, time:'Mon' },
+    { id:'s7', title:'Write changelog for 0.9.0', branch:'release/0.9', ctx:24, time:'Sun' },
+  ]},
+];
+const LIBRARY = [
+  { icon:<Ic.IconBot s={16} />, color:'var(--info)', label:'Agents', count:25 },
+  { icon:<Ic.IconSparkles s={16} />, color:'var(--success)', label:'Skills', count:10 },
+  { icon:<Ic.IconZap s={16} />, color:'var(--warning)', label:'Hooks', count:1 },
+  { icon:<Ic.IconPlug s={16} />, color:'var(--accent-text)', label:'MCP servers', count:4 },
+];
+
+function ContextBar({ pct }) {
+  const color = pct < 60 ? 'var(--success)' : pct < 85 ? 'var(--warning)' : 'var(--danger)';
+  return (
+    <span title={'Context ' + pct + '% used'} style={{ display:'inline-flex', alignItems:'center', gap:6, flexShrink:0 }}>
+      <span style={{ width:54, height:4, borderRadius:'var(--radius-pill)', background:'var(--surface-inset)', overflow:'hidden' }}>
+        <span style={{ display:'block', height:'100%', width:pct + '%', background:color, borderRadius:'var(--radius-pill)' }} />
+      </span>
+      <span className="mono" style={{ fontSize:10.5, color:'var(--text-tertiary)' }}>{pct}%</span>
+    </span>
+  );
+}
+
+function SessionRow({ s }) {
+  const [h, setH] = useState(false);
+  return (
+    <div onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}
+      style={{ margin:'0 8px', padding:'9px 10px', borderRadius:'var(--radius-md)', cursor:'pointer',
+        background: s.active ? 'var(--accent-subtle)' : h ? 'var(--surface-2)' : 'transparent',
+        transition:'background var(--duration-fast) var(--ease-standard)' }}>
+      <div style={{ display:'flex', alignItems:'baseline', gap:8 }}>
+        <span title={s.title} style={{ flex:1, minWidth:0, fontSize:13, fontWeight:500, lineHeight:'18px', color: s.active ? 'var(--accent-text)' : 'var(--text-primary)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{s.title}</span>
+        <span className="mono" style={{ flexShrink:0, fontSize:10.5, color:'var(--text-tertiary)' }}>{s.time}</span>
+      </div>
+      <div style={{ display:'flex', alignItems:'center', gap:8, marginTop:5, color:'var(--text-tertiary)', fontSize:11.5 }}>
+        <span style={{ display:'inline-flex', alignItems:'center', gap:4, flexShrink:0, maxWidth:120 }}><Ic.IconGitBranch s={12} /><span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{s.branch}</span></span>
+        <span style={{ marginLeft:'auto', flexShrink:0 }}><ContextBar pct={s.ctx} /></span>
+      </div>
+    </div>
+  );
+}
+
+function TopBar() {
+  return (
+    <div className="top">
+      <svg width="20" height="20" viewBox="0 0 96 96" fill="none"><rect width="96" height="96" rx="24" fill="#5b6cf0"/><path d="M33 30 L51 48 L33 66" stroke="#fff" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/><path d="M58 66 H70" stroke="#fff" strokeWidth="8" strokeLinecap="round"/></svg>
+      <span className="brand">ClaudeIn</span>
+      <div style={{ flex:1 }} />
+      <span style={{ display:'inline-flex', alignItems:'center', gap:5, fontSize:13, color:'var(--text-secondary)' }}><Ic.IconHome s={15} /> Home</span>
+    </div>
+  );
+}
+
+/* ---------------- AVANT ---------------- */
+function Before() {
+  return (
+    <div className="side">
+      <TopBar />
+      <div className="zone" style={{ paddingBottom:2 }}>Activity</div>
+      <div className="actrow"><StatusDot status="idle" /> Chat</div>
+      <div className="actrow on" style={{ fontFamily:'var(--font-mono)', fontSize:12 }}><StatusDot status="live" /> &lt;command-message&gt;loop…</div>
+      <div className="zone" style={{ marginTop:4 }}><span className="ico"><Ic.IconClock s={15} /></span> Sessions <span className="cnt">33</span><span className="chev"><Ic.IconChevronDown s={15} /></span></div>
+      <div className="grp">Recent</div>
+      <div style={{ flex:1, overflowY:'hidden' }}>
+        {['Résoudre problème de push local','In one short sentence, describe what this re…','In one short sentence, describe what this re…','In one short sentence, describe what this re…'].map((t,i)=>(
+          <div key={i} style={{ padding:'8px 16px' }}>
+            <div style={{ fontSize:14, color:'var(--text-primary)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{t}</div>
+            <div className="mono" style={{ fontSize:11, color:'var(--text-tertiary)', marginTop:3 }}>8&nbsp;&nbsp;💬 {i?204:7578}&nbsp;&nbsp;⎇ main</div>
+          </div>
+        ))}
+        <div style={{ margin:'8px 16px', padding:'9px', textAlign:'center', border:'1px solid var(--border)', borderRadius:'var(--radius-md)', fontSize:13, color:'var(--text-secondary)' }}>Load more (22)</div>
+      </div>
+      <div style={{ borderTop:'1px solid var(--border-subtle)', opacity:0.85 }}>
+        <div className="zone" style={{ padding:'9px 16px' }}><span className="ico"><Ic.IconBot s={14} /></span> Agents <span className="cnt">25</span></div>
+        <div className="zone" style={{ padding:'9px 16px' }}><span style={{ color:'var(--success)', display:'flex' }}><Ic.IconSparkles s={14} /></span> Skills <span className="cnt">10</span></div>
+        <div className="zone" style={{ padding:'9px 16px' }}><span style={{ color:'var(--warning)', display:'flex' }}><Ic.IconZap s={14} /></span> Hooks <span className="cnt">1</span></div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- APRÈS ---------------- */
+function After() {
+  const [view, setView] = useState('sessions');
+  const [q, setQ] = useState('');
+  return (
+    <div className="side">
+      <TopBar />
+      <div className="zone" style={{ paddingBottom:2 }}>Activity</div>
+      <div className="actrow on"><StatusDot status="live" pulse /> Current chat <span style={{ marginLeft:'auto', fontFamily:'var(--font-mono)', fontSize:10.5, color:'var(--accent-text)' }}>loop</span></div>
+      <div style={{ padding:'10px 12px 8px' }}>
+        <SegmentedControl size="sm" value={view} onChange={(v)=>{setView(v);setQ('');}} style={{ display:'flex', width:'100%' }}
+          options={[{ value:'sessions', label:<span style={{whiteSpace:'nowrap'}}>Sessions</span> }, { value:'library', label:<span style={{whiteSpace:'nowrap'}}>Library</span> }]} />
+      </div>
+
+      {view === 'sessions' ? (
+        <>
+          <div style={{ padding:'2px 12px 6px' }}>
+            <Input size="sm" placeholder="Search sessions…" leadingIcon={<Ic.IconSearch s={13} />} value={q} onChange={(e)=>setQ(e.target.value)} />
+          </div>
+          <div style={{ flex:1, overflowY:'auto' }}>
+            {GROUPS.map((g) => (
+              <div key={g.label}>
+                <div className="grp">{g.label}</div>
+                {g.items.map((s) => <SessionRow key={s.id} s={s} />)}
+              </div>
+            ))}
+            <div style={{ margin:'10px 16px 14px', padding:'9px', textAlign:'center', border:'1px solid var(--border)', borderRadius:'var(--radius-md)', fontSize:13, color:'var(--text-secondary)', cursor:'pointer' }}>Load more (22)</div>
+          </div>
+        </>
+      ) : (
+        <div style={{ flex:1, overflowY:'auto', paddingTop:6 }}>
+          {LIBRARY.map((l) => (
+            <div key={l.label} className="actrow" style={{ padding:'11px 12px' }}>
+              <span style={{ color:l.color, display:'flex' }}>{l.icon}</span>
+              <span style={{ flex:1, fontSize:13.5, color:'var(--text-primary)' }}>{l.label}</span>
+              <span className="mono" style={{ fontSize:11, color:'var(--text-tertiary)' }}>{l.count}</span>
+              <span style={{ color:'var(--text-tertiary)', display:'flex' }}><Ic.IconChevron s={15} /></span>
+            </div>
+          ))}
+          <div style={{ margin:'10px 16px', padding:'12px', borderRadius:'var(--radius-md)', background:'var(--surface-inset)', border:'1px solid var(--border-subtle)', fontSize:12, color:'var(--text-tertiary)', lineHeight:1.5 }}>
+            Your agents, skills, hooks and MCP servers — browse and edit without leaving your sessions.
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Showcase() {
+  return (
+    <>
+      <div className="col"><div className="flabel">Avant <span className="pill pill-old">actuel</span></div><Before /></div>
+      <div className="col"><div className="flabel">Après <span className="pill pill-new">amélioré</span></div><After /></div>
+    </>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<Showcase />);
+</script>
+</body>
+</html>

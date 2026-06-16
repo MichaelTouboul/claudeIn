@@ -18,7 +18,7 @@ If the user invokes this skill without any other guidance, ask them what they wa
 - **`components/`** — React primitives (Button, Input, Badge, Card, Tabs, Dialog, …), one `<Name>.jsx` + `<Name>.d.ts` per file. In a compiled-bundle context they live on `window.<Namespace>` (see the component cards for the exact destructure); in source, import the `.jsx` directly.
 - **`guidelines/*.card.html`** — foundation specimens (color, type, spacing, brand) you can open to see tokens in use.
 - **`ui_kits/<product>/`** — full screen recreations (home, dashboard, onboarding, customize). Each is a self-contained `index.html` + `icons.jsx`. Copy one as a starting point for a new screen.
-- **`assets/`** — the logo: `claudein-mark.svg` (bare prompt-chevron `>_`), `claudein-icon.svg` (gradient app-icon tile), `claudein-icon-mono.svg` (flat monochrome tile), `claudein-favicon.svg`, `claudein-wordmark.svg`.
+- **`assets/`** — the logo (`claudein-mark.svg`, `claudein-icon.svg`, `claudein-wordmark.svg`).
 
 ## House rules (the short version)
 
