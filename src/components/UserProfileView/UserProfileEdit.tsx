@@ -16,6 +16,7 @@ type UserProfileEditProps = {
 type Draft = {
   name: string;
   role: string;
+  stack: string;
   domains: string;
 };
 
@@ -23,8 +24,17 @@ function toDraft(p: UserProfile): Draft {
   return {
     name: p.name ?? "",
     role: p.role ?? "",
+    stack: p.stack.join(", "),
     domains: p.domains.join(", "),
   };
+}
+
+/** Split a comma-separated draft field into trimmed, non-empty tags. */
+function toTags(value: string): string[] {
+  return value
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
 }
 
 function applyDraft(p: UserProfile, d: Draft): UserProfile {
@@ -33,10 +43,8 @@ function applyDraft(p: UserProfile, d: Draft): UserProfile {
     ...p,
     name: blank(d.name),
     role: blank(d.role),
-    domains: d.domains
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean),
+    stack: toTags(d.stack),
+    domains: toTags(d.domains),
   };
 }
 
@@ -71,6 +79,12 @@ export function UserProfileEdit({ profile, onSave, onCancel }: UserProfileEditPr
           Role
         </span>
         <Input className="bg-surface-0" value={draft.role} onChange={set("role")} />
+      </Stack>
+      <Stack as="label" gap={1} className="text-sm">
+        <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-sans)" }}>
+          Stack (comma-separated)
+        </span>
+        <Input className="bg-surface-0" value={draft.stack} onChange={set("stack")} />
       </Stack>
       <Stack as="label" gap={1} className="text-sm">
         <span className="text-[0.65rem] uppercase tracking-[0.12em] text-fg-subtle" style={{ fontFamily: "var(--font-sans)" }}>

@@ -13,4 +13,9 @@ export type RepoCandidate = Candidate & {
    * arbitrary FS paths), or null when none was found / it exceeded the size cap.
    */
   logoDataUrl: string | null;
+  /**
+   * The repo's primary language detected deterministically at scan time (manifest
+   * files first, then most common source extension), or null when undetectable.
+   */
+  language: string | null;
 };

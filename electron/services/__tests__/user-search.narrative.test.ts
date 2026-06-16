@@ -8,14 +8,25 @@ describe("parseNarrative", () => {
     const raw = JSON.stringify({
       name: "Ada Lovelace",
       role: "TypeScript + Node, with PostgreSQL",
+      stack: ["TypeScript", "Node", "PostgreSQL"],
       domains: ["backend", "infra"],
     });
 
     expect(parseNarrative(raw)).toEqual({
       name: "Ada Lovelace",
       role: "TypeScript + Node, with PostgreSQL",
+      stack: ["TypeScript", "Node", "PostgreSQL"],
       domains: ["backend", "infra"],
     });
+  });
+
+  it("defaults stack to [] when the model omits it", () => {
+    const raw = JSON.stringify({
+      name: "No Stack",
+      role: "Generalist",
+      domains: ["misc"],
+    });
+    expect(parseNarrative(raw).stack).toEqual([]);
   });
 
   it("extracts a ```json-fenced object preceded by prose", () => {
@@ -32,6 +43,7 @@ describe("parseNarrative", () => {
     expect(parseNarrative(raw)).toEqual({
       name: "Michael Touboul",
       role: "TypeScript + React + Electron",
+      stack: [],
       domains: ["frontend", "backend", "tooling"],
     });
   });
@@ -48,6 +60,7 @@ Thanks!`;
     expect(parseNarrative(raw)).toEqual({
       name: "Grace Hopper",
       role: "C++ and compiler toolchains",
+      stack: [],
       domains: ["compilers"],
     });
   });
@@ -59,6 +72,7 @@ Thanks!`;
     expect(parseNarrative(raw)).toEqual({
       name: "Nested",
       role: 'uses {a: 1} and "quotes"',
+      stack: [],
       domains: [],
     });
   });
@@ -69,6 +83,7 @@ Thanks!`;
     expect(parseNarrative(raw)).toEqual({
       name: null,
       role: null,
+      stack: [],
       domains: [],
     });
   });
@@ -77,6 +92,7 @@ Thanks!`;
     expect(parseNarrative("   ")).toEqual({
       name: null,
       role: null,
+      stack: [],
       domains: [],
     });
   });

@@ -66,6 +66,7 @@ export function OnboardingPage() {
         profile={profile}
         onSave={saveProfile}
         onConfirm={() => setStep(OnbStep.ConsentRepos)}
+        onBack={() => setStep(OnbStep.SearchUser)}
       />
     ),
     [OnbStep.ConsentRepos]: () => (

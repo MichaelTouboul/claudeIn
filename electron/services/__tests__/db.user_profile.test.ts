@@ -32,6 +32,7 @@ describe("user_profile table", () => {
         "plugins",
         "capabilities",
         "summary",
+        "stack",
         "domains",
         "workflow",
         "onboarding_completed_at",

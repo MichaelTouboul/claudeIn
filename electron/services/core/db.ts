@@ -157,6 +157,7 @@ export async function initDb(): Promise<void> {
       plugins                 TEXT,
       capabilities            TEXT,
       summary                 TEXT,
+      stack                   TEXT,
       domains                 TEXT,
       workflow                TEXT,
       onboarding_completed_at TEXT,
@@ -226,5 +227,17 @@ function runMigrations(): void {
 
   if (!favoriteRepoColumns.includes("logo_data_url")) {
     wrapper.exec("ALTER TABLE favorite_repos ADD COLUMN logo_data_url TEXT");
+  }
+
+  // stack — LLM-inferred individual technologies (the "Stack" tag chips),
+  // mirroring `domains`. Existing rows have a NULL stack column, which the map
+  // deserializes to `[]` (back-compat, no destructive migration).
+  const userProfileColumns = wrapper
+    .prepare("PRAGMA table_info(user_profile)")
+    .all()
+    .map((row) => row.name);
+
+  if (!userProfileColumns.includes("stack")) {
+    wrapper.exec("ALTER TABLE user_profile ADD COLUMN stack TEXT");
   }
 }

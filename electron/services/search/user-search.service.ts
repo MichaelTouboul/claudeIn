@@ -89,6 +89,7 @@ export async function fillUserProfile(claudePath: string): Promise<UserProfile> 
     name: narrative.name,
     role: narrative.role,
     capabilities,
+    stack: narrative.stack,
     domains: narrative.domains,
     generatedAt: now,
     updatedAt: now,

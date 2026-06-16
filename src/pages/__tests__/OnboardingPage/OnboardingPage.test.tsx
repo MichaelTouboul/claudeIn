@@ -12,6 +12,7 @@ function makeProfile(overrides: Partial<UserProfile> = {}): UserProfile {
     role: "Engineer",
     plugins: ["babysitter"],
     capabilities: { agents: { count: 2, names: ["a", "b"] }, skills: 1, mcp: 0, hooks: 3 },
+    stack: ["TypeScript"],
     domains: ["backend"],
     onboardingCompletedAt: null,
     generatedAt: null,
@@ -95,7 +96,15 @@ describe("OnboardingPage", () => {
 
   it("runs the full flow to Done, which completes onboarding and navigates home", async () => {
     scanRepos.mockResolvedValue([
-      { path: "/code/alpha", scope: "project", hasClaude: true, plugins: [], label: null, logoDataUrl: null },
+      {
+        path: "/code/alpha",
+        scope: "project",
+        hasClaude: true,
+        plugins: [],
+        label: null,
+        logoDataUrl: null,
+        language: null,
+      },
     ]);
     render(<OnboardingPage />);
     await click(/get started/i);

@@ -19,4 +19,11 @@ describe("userProfilePrompt", () => {
     expect(prompt).not.toContain('"summary"');
     expect(prompt).not.toContain('"workflow"');
   });
+
+  it("asks for a stack array of individual technologies alongside role", () => {
+    const prompt = build([]);
+    expect(prompt).toContain('"stack"');
+    // still keeps the prose role one-liner
+    expect(prompt).toContain('"role"');
+  });
 });

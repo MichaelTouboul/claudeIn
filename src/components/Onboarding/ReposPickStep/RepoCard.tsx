@@ -4,6 +4,7 @@ import type { RepoCandidate } from "@/lib/types";
 import { repoBasename } from "@/lib/utils";
 
 import { avatarLetter, avatarVariant } from "./repoAvatar";
+import { languageDotColor } from "./repoLanguage";
 
 type RepoCardProps = {
   repo: RepoCandidate;
@@ -35,10 +36,26 @@ function RepoAvatar({ name, logoDataUrl }: { name: string; logoDataUrl: string |
   );
 }
 
+/** The language indicator: a colored dot + the language name (mock's LANG_DOT). */
+function RepoLanguage({ language }: { language: string }) {
+  return (
+    <span className="mt-2 inline-flex items-center gap-1.5 text-xs text-fg-muted">
+      <span
+        data-lang-dot
+        aria-hidden
+        className="inline-block h-2 w-2 shrink-0 rounded-full"
+        style={{ background: languageDotColor(language) }}
+      />
+      {language}
+    </span>
+  );
+}
+
 /**
  * One scanned repo as a selectable tile (Step 6): a detected logo (or a
  * deterministic colored letter avatar fallback), the repo name, a two-line
- * description (the LLM `label`, falling back to the path), and the favorite
+ * description (the LLM `label`, falling back to the path), the detected primary
+ * language (a colored dot + name, omitted when undetectable), and the favorite
  * toggle. The whole tile is a `<label>` so clicking it flips the checkbox; a
  * selected tile swaps to the accent border + subtle accent fill.
  */
@@ -69,6 +86,7 @@ export function RepoCard({ repo, checked, onToggle }: RepoCardProps) {
         >
           {description}
         </span>
+        {repo.language !== null ? <RepoLanguage language={repo.language} /> : null}
       </div>
       <Checkbox
         checked={checked}
