@@ -28,7 +28,10 @@ export function HomeTopbar({
 }: HomeTopbarProps) {
   return (
     <header
-      className="flex h-[var(--header-height)] items-center gap-3 border-b border-border px-5"
+      // `pr-[var(--header-overlay-gutter)]` reserves the top-right corner for
+      // the app-global notification overlay (App.tsx) so its buttons never sit
+      // on top of the profile avatar; same token the Dashboard Header uses.
+      className="flex h-[var(--header-height)] items-center gap-3 border-b border-border pl-5 pr-[var(--header-overlay-gutter)]"
       style={{ background: "var(--color-surface-1)" }}
     >
       <span className="flex items-center gap-2 text-[15px] font-semibold tracking-[-0.01em] text-fg">

@@ -17,12 +17,15 @@ export type HeaderProps = {
 };
 
 export function Header({ activeCount, connected, onOpenChat, onGoHome, onCustomize }: HeaderProps) {
-  // `pr-16` reserves the top-right corner for the app-global Self-Improve
-  // notification overlay (rendered in App.tsx, outside the Header), so the
-  // floating bell never sits on top of the Chat button.
+  // The `--header-overlay-gutter` token reserves the top-right corner for the
+  // app-global notification overlay (VersionNotification + ImproveNotification,
+  // rendered in App.tsx outside the Header), so neither button ever sits on top
+  // of the Chat control. Both the gutter here and the overlay's inset reference
+  // the same token, so the two can't drift (a stale `pr-16` only fit one button
+  // and let the second overlap the Chat button).
   return (
     <div
-      className={cn('titlebar-drag flex h-[var(--header-height)] items-center gap-3 pr-16 shrink-0', isMac ? 'pl-20' : 'pl-4')}
+      className={cn('titlebar-drag flex h-[var(--header-height)] items-center gap-3 pr-[var(--header-overlay-gutter)] shrink-0', isMac ? 'pl-20' : 'pl-4')}
       style={{ background: 'var(--color-surface-1)', borderBottom: '1px solid var(--color-border)' }}
     >
       <Inline gap={2}>

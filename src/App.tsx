@@ -59,6 +59,9 @@ export default function App() {
     <>
       {PAGE_VIEW[currentPage]()}
       {SHOW_HEADER_OVERLAYS[currentPage] ? (
+        // Top-right notification overlay. The page top bars reserve a matching
+        // right gutter (`--header-overlay-gutter`) so these two buttons never
+        // sit on top of the header's right-edge controls.
         <div className="fixed top-3 right-3 z-[60] flex items-center gap-2">
           <VersionNotification />
           <ImproveNotification />
