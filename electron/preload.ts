@@ -195,8 +195,8 @@ contextBridge.exposeInMainWorld("api", {
   resetUser: () => ipcRenderer.invoke("user:reset"),
   scanRepos: (root?: string) => ipcRenderer.invoke("repos:scan", root),
   listFavoriteRepos: () => ipcRenderer.invoke("favoriteRepos:list"),
-  addFavoriteRepo: (repoPath: string, label?: string) =>
-    ipcRenderer.invoke("favoriteRepos:add", repoPath, label),
+  addFavoriteRepo: (repoPath: string, label?: string, logoDataUrl?: string | null) =>
+    ipcRenderer.invoke("favoriteRepos:add", repoPath, label, logoDataUrl),
   removeFavoriteRepo: (repoPath: string) => ipcRenderer.invoke("favoriteRepos:remove", repoPath),
   openDirectoryPicker: () => ipcRenderer.invoke("dialog:open-directory"),
 

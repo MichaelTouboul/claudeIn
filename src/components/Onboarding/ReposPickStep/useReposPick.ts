@@ -44,8 +44,14 @@ export function useReposPick(): UseReposPick {
   const toggle = useCallback(
     async (repoPath: string) => {
       const pinned = favorites.has(repoPath);
-      if (pinned) await window.api.removeFavoriteRepo(repoPath);
-      else await window.api.addFavoriteRepo(repoPath);
+      if (pinned) {
+        await window.api.removeFavoriteRepo(repoPath);
+      } else {
+        // Persist the scan-time label + detected logo so the favorite keeps both
+        // across reloads (the renderer can't re-detect a logo — it has no FS).
+        const repo = repos.find((r) => r.path === repoPath);
+        await window.api.addFavoriteRepo(repoPath, repo?.label ?? undefined, repo?.logoDataUrl ?? null);
+      }
       setFavorites((prev) => {
         const next = new Set(prev);
         if (pinned) next.delete(repoPath);
@@ -53,7 +59,7 @@ export function useReposPick(): UseReposPick {
         return next;
       });
     },
-    [favorites],
+    [favorites, repos],
   );
 
   const addFolder = useCallback(async () => {

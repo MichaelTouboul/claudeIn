@@ -24,7 +24,7 @@ import type { UserProfile } from "../types/user.interface";
  *   user:reset          → resetUser()                 → void
  *   repos:scan          → scanRepos(root?)            → RepoCandidate[]
  *   favoriteRepos:list  → list()                      → FavoriteRepo[]
- *   favoriteRepos:add   → add(path, label?)           → FavoriteRepo
+ *   favoriteRepos:add   → add(path, label?, logo?)    → FavoriteRepo
  *   favoriteRepos:remove→ remove(path)                → void
  */
 export function registerUserHandlers(): void {
@@ -38,6 +38,8 @@ export function registerUserHandlers(): void {
   ipcMain.handle("repos:scan", (_e, root?: string) => scanRepos(root));
 
   ipcMain.handle("favoriteRepos:list", () => list());
-  ipcMain.handle("favoriteRepos:add", (_e, repoPath: string, label?: string) => add(repoPath, label));
+  ipcMain.handle("favoriteRepos:add", (_e, repoPath: string, label?: string, logoDataUrl?: string | null) =>
+    add(repoPath, label, logoDataUrl),
+  );
   ipcMain.handle("favoriteRepos:remove", (_e, repoPath: string) => remove(repoPath));
 }

@@ -8,6 +8,12 @@ export type Project = {
   hasSettings: boolean;
   agentCount: number;
   skillCount: number;
+  /**
+   * Repo logo as a base64 `data:` URL, carried from the persisted favorite when
+   * the dashboard is opened. Null/absent for scanned projects with no pinned
+   * logo. Drives the folder-tab avatar.
+   */
+  logoDataUrl?: string | null;
 };
 
 export type SkillMetadata = {

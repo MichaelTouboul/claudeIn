@@ -22,7 +22,7 @@ function makeProfile(overrides: Partial<UserProfile> = {}): UserProfile {
 }
 
 function repo(path: string, label: string | null = null): FavoriteRepo {
-  return { path, label, addedAt: "2026-06-11T00:00:00Z" };
+  return { path, label, addedAt: "2026-06-11T00:00:00Z", logoDataUrl: null };
 }
 
 const getUserProfile = vi.fn<() => Promise<UserProfile | null>>();

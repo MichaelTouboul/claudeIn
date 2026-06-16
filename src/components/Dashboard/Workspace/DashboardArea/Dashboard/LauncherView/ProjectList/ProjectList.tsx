@@ -24,7 +24,12 @@ export function ProjectList({ onSelect, openIds }: ProjectListProps) {
   const openOther = async () => {
     const dir = await window.api.openDirectoryPicker();
     if (dir === null) return;
-    onSelect(projectForFavorite({ path: dir, label: null, addedAt: new Date().toISOString() }, projects));
+    onSelect(
+      projectForFavorite(
+        { path: dir, label: null, addedAt: new Date().toISOString(), logoDataUrl: null },
+        projects,
+      ),
+    );
   };
 
   return (

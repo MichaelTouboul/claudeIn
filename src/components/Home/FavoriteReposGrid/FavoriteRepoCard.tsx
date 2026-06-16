@@ -23,7 +23,13 @@ export function FavoriteRepoCard({ repo, onOpen, onRemove }: FavoriteRepoCardPro
       className="flex flex-col gap-3.5 rounded-lg border border-border bg-surface-1 p-4"
     >
       <div className="flex items-center gap-3">
-        <Avatar name={label} hue={repoHue(repo.path)} shape="square" size="md" />
+        <Avatar
+          name={label}
+          src={repo.logoDataUrl}
+          hue={repoHue(repo.path)}
+          shape="square"
+          size="md"
+        />
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold text-fg">{label}</p>
           <p className="truncate text-xs text-fg-subtle font-mono" title={repo.path}>

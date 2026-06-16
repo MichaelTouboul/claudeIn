@@ -6,7 +6,7 @@ import type { FavoriteRepo } from "@/lib/types";
 import { useFavoriteRepos } from "../useFavoriteRepos";
 
 function repo(path: string, label: string | null = null): FavoriteRepo {
-  return { path, label, addedAt: "2026-06-11T00:00:00Z" };
+  return { path, label, addedAt: "2026-06-11T00:00:00Z", logoDataUrl: null };
 }
 
 const listFavoriteRepos = vi.fn<() => Promise<FavoriteRepo[]>>();

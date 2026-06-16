@@ -9,7 +9,7 @@ import { AppPage, useAppStore } from "@/store/useAppStore";
 const PROJECT = "/code/alpha";
 
 function repo(path: string, label: string | null = null): FavoriteRepo {
-  return { path, label, addedAt: "2026-06-11T00:00:00Z" };
+  return { path, label, addedAt: "2026-06-11T00:00:00Z", logoDataUrl: null };
 }
 
 function entry(name: string, overrides: Partial<McpServerEntry> = {}): McpServerEntry {
