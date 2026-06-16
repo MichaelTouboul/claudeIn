@@ -1,7 +1,5 @@
 import { Badge } from "@/components/_ui/Badge";
 import { Checkbox } from "@/components/_ui/Checkbox";
-import { Inline } from "@/components/_ui/Inline";
-import { Stack } from "@/components/_ui/Stack";
 import type { RepoCandidate } from "@/lib/types";
 import { repoBasename } from "@/lib/utils";
 
@@ -20,7 +18,7 @@ function RepoAvatar({ name, logoDataUrl }: { name: string; logoDataUrl: string |
       <img
         src={logoDataUrl}
         alt={`${name} logo`}
-        className="h-8 w-8 shrink-0 rounded-md object-cover"
+        className="h-9 w-9 shrink-0 rounded-md object-cover"
         style={{ background: "var(--color-surface-3)" }}
       />
     );
@@ -30,7 +28,7 @@ function RepoAvatar({ name, logoDataUrl }: { name: string; logoDataUrl: string |
       variant={avatarVariant(name)}
       shape="rounded"
       aria-hidden
-      className="flex h-8 w-8 shrink-0 items-center justify-center !px-0 text-sm font-semibold"
+      className="flex h-9 w-9 shrink-0 items-center justify-center !px-0 text-sm font-semibold"
     >
       {avatarLetter(name)}
     </Badge>
@@ -38,42 +36,46 @@ function RepoAvatar({ name, logoDataUrl }: { name: string; logoDataUrl: string |
 }
 
 /**
- * One scanned repo as a selectable card matching the design-system onboarding
- * kit's repo row: a detected logo (or a deterministic colored letter avatar
- * fallback), the repo name, a truncated mono label/description, and the favorite
- * toggle. The whole card is a `<label>` so clicking it flips the checkbox; a
- * selected card swaps to the accent border + subtle accent fill.
+ * One scanned repo as a selectable tile (Step 6): a detected logo (or a
+ * deterministic colored letter avatar fallback), the repo name, a two-line
+ * description (the LLM `label`, falling back to the path), and the favorite
+ * toggle. The whole tile is a `<label>` so clicking it flips the checkbox; a
+ * selected tile swaps to the accent border + subtle accent fill.
  */
 export function RepoCard({ repo, checked, onToggle }: RepoCardProps) {
   const name = repoBasename(repo.path);
+  const description = repo.label ?? repo.path;
   return (
     <label
-      className="flex cursor-pointer items-center gap-3 rounded-md border p-3 transition-[background-color,border-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)]"
+      className="flex cursor-pointer items-start gap-3 rounded-lg border p-3.5 transition-[background-color,border-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)]"
       style={{
         fontFamily: "var(--font-sans)",
         borderColor: checked ? "var(--color-accent)" : "var(--color-border)",
         background: checked ? "var(--color-accent-dim)" : "var(--color-surface-2)",
       }}
     >
+      <RepoAvatar name={name} logoDataUrl={repo.logoDataUrl} />
+      <div className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-semibold text-fg">{name}</span>
+        <span
+          className="mt-1 block text-xs leading-relaxed text-fg-subtle"
+          style={{
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+          }}
+          title={description}
+        >
+          {description}
+        </span>
+      </div>
       <Checkbox
         checked={checked}
         onCheckedChange={() => onToggle(repo.path)}
-        className="shrink-0"
+        className="mt-0.5 shrink-0"
         aria-label={`Favorite ${name}`}
       />
-      <RepoAvatar name={name} logoDataUrl={repo.logoDataUrl} />
-      <Stack gap={0.5} className="min-w-0">
-        <span className="truncate text-sm font-medium text-fg">{name}</span>
-        <Inline gap={1} className="min-w-0">
-          <span
-            className="truncate text-xs text-fg-subtle"
-            style={{ fontFamily: "var(--font-mono)" }}
-            title={repo.label ?? repo.path}
-          >
-            {repo.label ?? repo.path}
-          </span>
-        </Inline>
-      </Stack>
     </label>
   );
 }

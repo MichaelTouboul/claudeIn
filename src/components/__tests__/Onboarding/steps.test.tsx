@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { ConsentReposStep } from "@/components/Onboarding/ConsentReposStep/ConsentReposStep";
@@ -8,17 +8,18 @@ import { ProfileReviewStep } from "@/components/Onboarding/ProfileReviewStep/Pro
 import { WelcomeStep } from "@/components/Onboarding/WelcomeStep/WelcomeStep";
 import type { UserProfile } from "@/lib/types";
 
-function makeProfile(): UserProfile {
+function makeProfile(overrides: Partial<UserProfile> = {}): UserProfile {
   return {
     claudeUserPath: "/home/u/.claude",
     name: "Ada",
-    role: null,
+    role: "A backend engineer working in TypeScript and Node.",
     plugins: [],
-    capabilities: { agents: { count: 0, names: [] }, skills: 0, mcp: 0, hooks: 0 },
-    domains: ["backend"],
+    capabilities: { agents: { count: 17, names: [] }, skills: 5, mcp: 2, hooks: 4 },
+    domains: ["backend", "infra"],
     onboardingCompletedAt: null,
     generatedAt: null,
     updatedAt: null,
+    ...overrides,
   };
 }
 
@@ -59,7 +60,7 @@ describe("ConsentReposStep", () => {
 });
 
 describe("ProfileReviewStep", () => {
-  it("renders the profile and confirms", () => {
+  it("renders the identity, stat strip, domains and confirms", () => {
     const onConfirm = vi.fn();
     render(
       <ProfileReviewStep
@@ -69,9 +70,56 @@ describe("ProfileReviewStep", () => {
         onConfirm={onConfirm}
       />,
     );
+    // identity
+    expect(screen.getByText("Ada")).toBeInTheDocument();
+    expect(screen.getByText("~/.claude")).toBeInTheDocument();
+    // stat strip — counts from capabilities
+    expect(screen.getByText("17")).toBeInTheDocument();
+    expect(screen.getByText("agents")).toBeInTheDocument();
+    expect(screen.getByText("5")).toBeInTheDocument();
+    expect(screen.getByText("skills")).toBeInTheDocument();
+    expect(screen.getByText("2")).toBeInTheDocument();
+    expect(screen.getByText("MCP servers")).toBeInTheDocument();
+    expect(screen.getByText("4")).toBeInTheDocument();
+    expect(screen.getByText("hooks")).toBeInTheDocument();
+    // domains chips
     expect(screen.getByText("backend")).toBeInTheDocument();
+    expect(screen.getByText("infra")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /confirm/i }));
     expect(onConfirm).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows the home directory chip as ~/.claude even for an absolute path", () => {
+    render(
+      <ProfileReviewStep
+        stepIndex={3}
+        profile={makeProfile({ claudeUserPath: "/Users/ada/.claude" })}
+        onSave={(p) => Promise.resolve(p)}
+        onConfirm={vi.fn()}
+      />,
+    );
+    expect(screen.getByText("~/.claude")).toBeInTheDocument();
+  });
+
+  it("Edit opens the inline editor reaching onSave", async () => {
+    const onSave = vi
+      .fn<(p: UserProfile) => Promise<UserProfile>>()
+      .mockImplementation((p) => Promise.resolve(p));
+    render(
+      <ProfileReviewStep
+        stepIndex={3}
+        profile={makeProfile()}
+        onSave={onSave}
+        onConfirm={vi.fn()}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /edit/i }));
+    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: "Grace" } });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /save/i }));
+    });
+    expect(onSave).toHaveBeenCalledTimes(1);
+    expect(onSave.mock.calls[0][0].name).toBe("Grace");
   });
 });
 

@@ -49,7 +49,9 @@ beforeEach(() => {
     .mockReset()
     .mockResolvedValue(makeProfile({ onboardingCompletedAt: "2026-06-11" }));
   resetUser.mockReset().mockResolvedValue(undefined);
-  scanRepos.mockReset().mockResolvedValue([]);
+  scanRepos.mockReset().mockResolvedValue([
+    { path: "/code/alpha", scope: "project", hasClaude: true, plugins: [], label: null, logoDataUrl: null },
+  ]);
   listFavoriteRepos.mockReset().mockResolvedValue([]);
   addFavoriteRepo.mockReset().mockResolvedValue(undefined);
   removeFavoriteRepo.mockReset().mockResolvedValue(undefined);
@@ -101,6 +103,11 @@ describe("first-run path", () => {
     await screen.findByText("backend");
     await clickButton(/confirm/i);
     await clickButton(/authorize/i); // consent repos
+    // The repo picker disables "Continue" until at least one repo is picked.
+    const repoBox = await screen.findByRole("checkbox", { name: /alpha/i });
+    await act(async () => {
+      fireEvent.click(repoBox);
+    });
     await clickButton(/continue/i);
     await clickButton(/open claudein/i);
 
