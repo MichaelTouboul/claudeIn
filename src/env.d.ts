@@ -133,6 +133,7 @@ interface Window {
     addFavoriteRepo: (
       repoPath: string,
       label?: string,
+      logoDataUrl?: string | null,
     ) => Promise<import("./types/user.types").FavoriteRepo>;
     removeFavoriteRepo: (repoPath: string) => Promise<void>;
     openDirectoryPicker: () => Promise<string | null>;

@@ -39,11 +39,12 @@ vi.mock("../services/projects/repos.service", () => ({
 }));
 
 const listMock = vi.fn<() => FavoriteRepo[]>();
-const addMock = vi.fn<(path: string, label?: string) => FavoriteRepo>();
+const addMock = vi.fn<(path: string, label?: string, logoDataUrl?: string | null) => FavoriteRepo>();
 const removeMock = vi.fn<(path: string) => void>();
 vi.mock("../services/projects/favorite-repos.service", () => ({
   list: () => listMock(),
-  add: (path: string, label?: string) => addMock(path, label),
+  add: (path: string, label?: string, logoDataUrl?: string | null) =>
+    addMock(path, label, logoDataUrl),
   remove: (path: string) => removeMock(path),
 }));
 
@@ -63,7 +64,12 @@ const profile: UserProfile = {
   updatedAt: null,
 };
 
-const favorite: FavoriteRepo = { path: "/work/a", label: "A", addedAt: "2026-06-11T00:00:00.000Z" };
+const favorite: FavoriteRepo = {
+  path: "/work/a",
+  label: "A",
+  addedAt: "2026-06-11T00:00:00.000Z",
+  logoDataUrl: null,
+};
 
 beforeAll(() => {
   registerUserHandlers();
@@ -151,7 +157,11 @@ describe("user / repos / favoriteRepos IPC", () => {
 
     addMock.mockReturnValue(favorite);
     await handlers.get("favoriteRepos:add")?.(fakeEvent, "/work/a", "A");
-    expect(addMock).toHaveBeenCalledWith("/work/a", "A");
+    expect(addMock).toHaveBeenCalledWith("/work/a", "A", undefined);
+
+    const logo = "data:image/png;base64,AAAA";
+    await handlers.get("favoriteRepos:add")?.(fakeEvent, "/work/b", "B", logo);
+    expect(addMock).toHaveBeenCalledWith("/work/b", "B", logo);
 
     await handlers.get("favoriteRepos:remove")?.(fakeEvent, "/work/a");
     expect(removeMock).toHaveBeenCalledWith("/work/a");

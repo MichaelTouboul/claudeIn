@@ -164,9 +164,10 @@ export async function initDb(): Promise<void> {
       updated_at              TEXT
     );
     CREATE TABLE IF NOT EXISTS favorite_repos (
-      path     TEXT PRIMARY KEY,
-      label    TEXT,
-      added_at TEXT
+      path          TEXT PRIMARY KEY,
+      label         TEXT,
+      added_at      TEXT,
+      logo_data_url TEXT
     );
     CREATE TABLE IF NOT EXISTS disabled_hooks (
       id         TEXT PRIMARY KEY,
@@ -213,5 +214,17 @@ function runMigrations(): void {
   // empty/fresh while the on-disk transcript is left untouched.
   if (!conversationMetaColumns.includes("cleared_at")) {
     wrapper.exec("ALTER TABLE conversation_meta ADD COLUMN cleared_at TEXT");
+  }
+
+  // logo_data_url — the repo logo detected at scan time, inlined as a base64
+  // `data:` URL so it survives reloads and is re-displayable (Avatar + folder
+  // tab) without re-reading the FS.
+  const favoriteRepoColumns = wrapper
+    .prepare("PRAGMA table_info(favorite_repos)")
+    .all()
+    .map((row) => row.name);
+
+  if (!favoriteRepoColumns.includes("logo_data_url")) {
+    wrapper.exec("ALTER TABLE favorite_repos ADD COLUMN logo_data_url TEXT");
   }
 }

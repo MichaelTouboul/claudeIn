@@ -37,6 +37,26 @@ describe("favorite-repos service", () => {
     expect(repos.list()[0].label).toBeNull();
   });
 
+  it("persists a logoDataUrl and reads it back from list", () => {
+    const logo = "data:image/svg+xml;base64,PHN2Zz4=";
+    const added = repos.add("/work/app", "App", logo);
+    expect(added.logoDataUrl).toBe(logo);
+    expect(repos.list()[0].logoDataUrl).toBe(logo);
+  });
+
+  it("stores logoDataUrl = null when none is provided", () => {
+    const added = repos.add("/work/lib");
+    expect(added.logoDataUrl).toBeNull();
+    expect(repos.list()[0].logoDataUrl).toBeNull();
+  });
+
+  it("upsert keeps an existing logo when re-added without one", () => {
+    const logo = "data:image/png;base64,AAAA";
+    repos.add("/work/app", "App", logo);
+    repos.add("/work/app", "Renamed");
+    expect(repos.list()[0].logoDataUrl).toBe(logo);
+  });
+
   it("add is idempotent on the path primary key (no duplicate, label updates)", () => {
     repos.add("/work/app", "App");
     repos.add("/work/app", "Renamed");

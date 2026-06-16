@@ -26,8 +26,10 @@ export function repoLabel(repo: FavoriteRepo): string {
  * a later scan reconciles to the same id.
  */
 export function projectForFavorite(repo: FavoriteRepo, scanned: Project[]): Project {
+  // The persisted logo lives on the favorite, not on the scanned project — carry
+  // it onto the resolved Project so the folder tab can show it either way.
   const match = scanned.find((p) => p.path === repo.path);
-  if (match) return match;
+  if (match) return { ...match, logoDataUrl: repo.logoDataUrl };
   return {
     id: base64url(repo.path),
     name: repoLabel(repo),
@@ -38,5 +40,6 @@ export function projectForFavorite(repo: FavoriteRepo, scanned: Project[]): Proj
     hasSettings: false,
     agentCount: 0,
     skillCount: 0,
+    logoDataUrl: repo.logoDataUrl,
   };
 }

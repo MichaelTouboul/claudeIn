@@ -13,7 +13,7 @@ function candidate(
 }
 
 function favorite(path: string): FavoriteRepo {
-  return { path, label: null, addedAt: "2026-06-11T00:00:00Z" };
+  return { path, label: null, addedAt: "2026-06-11T00:00:00Z", logoDataUrl: null };
 }
 
 const scanRepos = vi.fn<() => Promise<RepoCandidate[]>>();
@@ -87,7 +87,24 @@ describe("ReposPickStep", () => {
       fireEvent.click(box);
     });
 
-    await waitFor(() => expect(addFavoriteRepo).toHaveBeenCalledWith("/code/alpha"));
+    await waitFor(() =>
+      expect(addFavoriteRepo).toHaveBeenCalledWith("/code/alpha", undefined, null),
+    );
+  });
+
+  it("checking a repo persists its detected logo alongside the favorite", async () => {
+    const dataUrl = "data:image/png;base64,AAAA";
+    scanRepos.mockResolvedValue([candidate("/code/alpha", "A web app", dataUrl)]);
+    render(<ReposPickStep stepIndex={5} onNext={vi.fn()} />);
+    const box = await screen.findByRole("checkbox", { name: /alpha/i });
+
+    await act(async () => {
+      fireEvent.click(box);
+    });
+
+    await waitFor(() =>
+      expect(addFavoriteRepo).toHaveBeenCalledWith("/code/alpha", "A web app", dataUrl),
+    );
   });
 
   it("unchecking an already-favorite repo removes it", async () => {
@@ -113,6 +130,7 @@ describe("ReposPickStep", () => {
       fireEvent.click(add);
     });
 
+    // A manually-picked folder carries no detected logo (renderer can't read FS).
     await waitFor(() => expect(addFavoriteRepo).toHaveBeenCalledWith("/code/manual"));
     expect(await screen.findByText("manual")).toBeInTheDocument();
   });

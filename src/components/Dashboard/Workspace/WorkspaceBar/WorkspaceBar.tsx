@@ -1,5 +1,6 @@
 import { Plus, X } from 'lucide-react';
 
+import { Avatar } from '@/components/_ui/Avatar';
 import { Flex } from '@/components/_ui/Flex';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
@@ -30,15 +31,25 @@ export function WorkspaceBar() {
       {dashboards.map((d) => {
         const isActive = d.id === activeId;
         const label = dashboardLabel(d);
+        const project = d.scope.kind === 'project' ? d.scope.project : null;
         return (
           <div
             key={d.id}
-            className="group flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-t-md transition-colors shrink-0"
+            className="group flex items-center gap-2 pl-2 pr-1.5 py-1.5 rounded-t-md transition-colors shrink-0"
             style={{
               background: isActive ? 'var(--color-surface-2)' : 'transparent',
               borderBottom: isActive ? '2px solid var(--color-accent)' : '2px solid transparent',
             }}
           >
+            {project !== null ? (
+              <Avatar
+                name={project.name}
+                src={project.logoDataUrl}
+                hue="blue"
+                shape="square"
+                size="xs"
+              />
+            ) : null}
             <button
               role="tab"
               aria-selected={isActive}

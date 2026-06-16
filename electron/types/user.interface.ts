@@ -45,4 +45,10 @@ export interface FavoriteRepo {
   label: string | null;
   /** ISO timestamp the favorite was added. */
   addedAt: string;
+  /**
+   * The repo logo detected at scan time, inlined as a base64 `data:` URL (the
+   * renderer cannot read arbitrary FS paths), persisted so it survives reloads
+   * and is re-displayable. Null when none was detected.
+   */
+  logoDataUrl: string | null;
 }
