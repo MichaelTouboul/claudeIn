@@ -1,7 +1,12 @@
-<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ClaudeIn app icon">
-  
-  <rect x="1.5" y="1.5" width="125" height="125" rx="30" fill="#1d2027" stroke="#2b2f39" stroke-width="3"></rect>
-  <path d="M40 42 L72 64 L40 86" stroke="#a3adff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"></path>
-  <path d="M82 86 L96 86" stroke="#a3adff" stroke-width="11" stroke-linecap="round"></path>
-  <circle cx="92" cy="40" r="6" fill="#45d483"></circle>
+<svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ClaudeIn">
+  <defs>
+    <linearGradient id="ci-icon-grad" x1="0" y1="0" x2="96" y2="96" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8e9bff"></stop>
+      <stop offset="1" stop-color="#4a59d6"></stop>
+    </linearGradient>
+  </defs>
+  <rect width="96" height="96" rx="24" fill="url(#ci-icon-grad)"></rect>
+  <path d="M33 30 L51 48 L33 66" stroke="#15171c" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"></path>
+  <path d="M58 66 H70" stroke="#15171c" stroke-width="8" stroke-linecap="round"></path>
+  <circle cx="70" cy="28" r="6.5" fill="#45d483" stroke="#15171c" stroke-width="4"></circle>
 </svg>

@@ -7,17 +7,17 @@ export function Logo({ size = 18 }: LogoProps) {
     <svg
       width={size}
       height={size}
-      viewBox="0 0 24 24"
+      viewBox="0 0 32 32"
       fill="none"
       stroke="var(--color-accent)"
-      strokeWidth={2.5}
+      strokeWidth={3}
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
       focusable="false"
     >
-      <polyline points="6 7 11 12 6 17" />
-      <line x1="13" y1="17" x2="19" y2="17" />
+      <path d="M9 8.5 L17 16 L9 23.5" />
+      <path d="M20.5 23.5 L25 23.5" />
     </svg>
   );
 }

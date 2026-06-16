@@ -1,0 +1,11 @@
+<svg width="64" height="64" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ClaudeIn">
+  <defs>
+    <linearGradient id="ci-fav-grad" x1="0" y1="0" x2="96" y2="96" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8e9bff"></stop>
+      <stop offset="1" stop-color="#4a59d6"></stop>
+    </linearGradient>
+  </defs>
+  <rect width="96" height="96" rx="22" fill="url(#ci-fav-grad)"></rect>
+  <path d="M32 28 L54 48 L32 68" stroke="#15171c" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"></path>
+  <path d="M60 68 H72" stroke="#15171c" stroke-width="10" stroke-linecap="round"></path>
+</svg>
