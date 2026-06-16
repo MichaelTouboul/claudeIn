@@ -1,0 +1,11 @@
+/* ClaudeIn Design System — global entry point.
+ * Consumers link this ONE file. Keep it as @import lines only.
+ * Everything reachable from here ships to consuming projects. */
+
+@import "./tokens/fonts.css";
+@import "./tokens/colors.css";
+@import "./tokens/typography.css";
+@import "./tokens/spacing.css";
+@import "./tokens/elevation.css";
+@import "./tokens/motion.css";
+@import "./tokens/base.css";

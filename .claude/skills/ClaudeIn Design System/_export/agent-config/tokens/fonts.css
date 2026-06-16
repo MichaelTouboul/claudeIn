@@ -1,0 +1,6 @@
+/* Webfonts — Geist (UI) + Geist Mono (code/data).
+ * Both are on Google Fonts (OFL). Loaded via @import so consumers get them
+ * with a single linked stylesheet. If you self-host, swap these for local
+ * @font-face rules pointing at the woff2 binaries. */
+
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap');

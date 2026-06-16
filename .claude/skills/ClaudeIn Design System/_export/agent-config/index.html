@@ -1,0 +1,246 @@
+<!-- @dsCard group="Dashboard" viewport="1280x900" name="Configuration d'un agent — refacto" subtitle="Une seule page : identité + prompt + rail de config, édition en ligne" -->
+<!-- @startingPoint section="Screens" subtitle="ClaudeIn agent configuration" viewport="1280x900" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClaudeIn — Agent configuration</title>
+<link rel="icon" type="image/svg+xml" href="./assets/claudein-favicon.svg">
+<link rel="stylesheet" href="./styles.css">
+<style>
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--surface-base); color: var(--text-primary); }
+  #root { height: 100vh; }
+  .app { height: 100vh; display: flex; flex-direction: column; }
+  .topbar { display: flex; align-items: center; gap: 12px; height: var(--header-height); padding: 0 16px; background: var(--surface-1); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
+  .back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary); cursor: pointer; }
+  .scroll { flex: 1; min-height: 0; overflow-y: auto; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 26px 28px 60px; }
+
+  /* header */
+  .ahead { display: flex; align-items: flex-start; gap: 16px; }
+  .ident { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; }
+  .tile { position: relative; width: 46px; height: 46px; flex-shrink: 0; border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; }
+  .htitle { font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  .path { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 12px; color: var(--text-tertiary); margin-top: 4px; }
+  .copy { cursor: pointer; opacity: 0.7; }
+  .copy:hover { opacity: 1; color: var(--text-secondary); }
+  .actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+  .desc { margin-top: 18px; font-size: 15px; line-height: 1.6; color: var(--text-secondary); max-width: 70ch; }
+
+  /* two-column body */
+  .cols { display: grid; grid-template-columns: 1fr 320px; gap: 22px; margin-top: 26px; align-items: start; }
+  @media (max-width: 920px){ .cols { grid-template-columns: 1fr; } }
+  .card { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+  .card + .card { margin-top: 16px; }
+  .card-h { display: flex; align-items: center; gap: 8px; padding: 14px 16px; border-bottom: 1px solid var(--border-subtle); }
+  .card-h .ttl { font-size: 13px; font-weight: 600; letter-spacing: 0.02em; white-space: nowrap; }
+  .card-h .ico { color: var(--text-tertiary); display: flex; }
+  .card-b { padding: 16px; }
+
+  .prompt { font-family: var(--font-mono); font-size: 12.5px; line-height: 1.75; color: var(--text-secondary); white-space: pre-wrap; }
+  .prompt h1, .prompt h2 { color: var(--text-primary); }
+
+  /* config rows */
+  .crow { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border-subtle); }
+  .crow:last-child { border-bottom: none; }
+  .ckey { font-size: 13px; color: var(--text-tertiary); white-space: nowrap; }
+  .cval { font-size: 13px; color: var(--text-primary); font-family: var(--font-mono); text-align: right; }
+  .cval.inh { color: var(--text-tertiary); font-style: normal; font-family: var(--font-sans); font-size: 12px; }
+  .toolwrap { display: flex; flex-wrap: wrap; gap: 6px; }
+  .seglabel { font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-tertiary); }
+  .trigs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .fileitem { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: var(--radius-md); cursor: pointer; }
+  .fileitem:hover { background: var(--surface-2); }
+
+  /* edit field */
+  .efield { display: flex; flex-direction: column; gap: 6px; }
+  .elabel { font-size: 12px; color: var(--text-tertiary); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="./_ds_bundle.js"></script>
+<script type="text/babel" src="./icons.jsx"></script>
+<script type="text/babel">
+const { useState } = React;
+const { Button, Badge, IconButton, StatusDot, Tag, Input, Select, Switch, Menu, Tooltip } = window.ClaudeInDesignSystem_25db6c;
+const Ic = window.ClaudeInIcons;
+
+const AGENT = {
+  name: 'accessibility-audit-runner',
+  hue: 'var(--agent-blue)',
+  scope: 'inherit',
+  path: '~/perso/claude-agent-manager/.claude/agents/accessibility-audit-runner.md',
+  desc: 'Runs the accessibility-audit skill — a tool-driven WCAG 2.1 AA scan (axe-core runtime + eslint-plugin-jsx-a11y static) over the renderer and reports violations. Audit only — never fixes.',
+  triggers: ['a11y scan', 'run accessibility scan', 'wcag scan', 'axe scan'],
+  model: null, maxTurns: 30, background: true, permission: null, memory: null, isolation: null, effort: null,
+  tools: ['Read', 'Grep', 'Glob', 'Bash'],
+  skills: ['accessibility-audit'],
+  files: ['accessibility-audit-runner.md', 'aria-requirements-auditor.md'],
+  prompt: `# Accessibility audit runner
+
+You run the **accessibility-audit** skill (injected at startup; also at .claude/skills/accessibility-audit/SKILL.md) and report what the tooling finds. You are **advisory / audit-only** — you NEVER edit, create, or move files, and you never apply fixes.
+
+## Responsibility (and the line you do NOT cross)
+
+You own the **tool-driven** accessibility scan:
+- **Runtime:** inject axe-core into running pages and report WCAG 2.1 AA violations.
+- **Static:** run eslint-plugin-jsx-a11y against the source and report its findings.
+
+## Return
+A report: violations by severity/rule with locations, the mode you ran, and a short prioritized list. No code changes — ever.`,
+};
+
+function ConfigRow({ k, value, inherited }) {
+  return (
+    <div className="crow">
+      <span className="ckey">{k}</span>
+      {inherited
+        ? <span className="cval inh">Inherited</span>
+        : <span className="cval">{value}</span>}
+    </div>
+  );
+}
+
+function App() {
+  const [editing, setEditing] = useState(false);
+  const [a, setA] = useState(AGENT);
+  const set = (k, v) => setA((p) => ({ ...p, [k]: v }));
+
+  return (
+    <div className="app">
+      <div className="topbar">
+        <span className="brand"><svg width="22" height="22" viewBox="0 0 96 96" fill="none"><rect width="96" height="96" rx="24" fill="#5b6cf0"/><path d="M33 30 L51 48 L33 66" stroke="#fff" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/><path d="M58 66 H70" stroke="#fff" strokeWidth="8" strokeLinecap="round"/></svg> ClaudeIn</span>
+        <span style={{ color:'var(--border-strong)' }}>/</span>
+        <span className="back"><Ic.IconArrowLeft s={14} /> Library</span>
+        <span style={{ color:'var(--border-strong)' }}>/</span>
+        <span style={{ fontSize:13, color:'var(--text-secondary)' }}>Agents</span>
+      </div>
+
+      <div className="scroll">
+        <div className="wrap">
+          {/* header */}
+          <div className="ahead">
+            <div className="ident">
+              <span className="tile" style={{ background:'color-mix(in srgb, '+a.hue+' 16%, var(--surface-2))', border:'1px solid color-mix(in srgb, '+a.hue+' 32%, transparent)', color:a.hue }}>
+                <Ic.IconBot s={24} />
+                <span style={{ position:'absolute', top:-3, right:-3, width:12, height:12, borderRadius:'50%', background:'var(--status-idle)', border:'2px solid var(--surface-base)' }} />
+              </span>
+              <div style={{ minWidth:0 }}>
+                <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                  <span className="htitle">{a.name}</span>
+                  <Badge tone="neutral">{a.scope}</Badge>
+                  {editing ? <Badge tone="accent" dot>editing</Badge> : null}
+                </div>
+                <div className="path"><Ic.IconFile s={12} /> {a.path} <span className="copy"><Ic.IconCopy s={12} /></span></div>
+              </div>
+            </div>
+            <div className="actions">
+              {editing ? (
+                <>
+                  <Button intent="ghost" onClick={() => setEditing(false)}>Cancel</Button>
+                  <Button intent="primary" leftIcon={<Ic.IconCheck s={15} />} onClick={() => setEditing(false)}>Save</Button>
+                </>
+              ) : (
+                <>
+                  <Button intent="primary" leftIcon={<Ic.IconChevron s={15} />}>Run</Button>
+                  <Button intent="secondary" leftIcon={<Ic.IconSettings s={14} />} onClick={() => setEditing(true)}>Edit</Button>
+                  <Menu align="end" trigger={<IconButton aria-label="More"><Ic.IconMore s={18} /></IconButton>} items={[
+                    { label:'Duplicate', icon:<Ic.IconCopy s={14} />, onSelect:()=>{} },
+                    { label:'Reveal in Finder', icon:<Ic.IconFolder s={14} />, onSelect:()=>{} },
+                    { separator:true },
+                    { label:'Delete', tone:'danger', onSelect:()=>{} },
+                  ]} />
+                </>
+              )}
+            </div>
+          </div>
+
+          {editing
+            ? <div style={{ marginTop:18, maxWidth:'70ch' }}><div className="elabel" style={{ marginBottom:6 }}>Description</div><Input defaultValue={a.desc} /></div>
+            : <p className="desc">{a.desc}</p>}
+
+          {/* two columns */}
+          <div className="cols">
+            {/* main: prompt */}
+            <div>
+              <div className="card">
+                <div className="card-h"><span className="ico"><Ic.IconFile s={15} /></span><span className="ttl">System prompt</span>
+                  <div style={{ flex:1 }} />
+                  <Tooltip label="Copy"><IconButton aria-label="Copy prompt" size="sm"><Ic.IconCopy s={15} /></IconButton></Tooltip>
+                </div>
+                <div className="card-b">
+                  {editing
+                    ? <textarea defaultValue={a.prompt} style={{ width:'100%', minHeight:280, background:'var(--surface-inset)', border:'1px solid var(--border-strong)', borderRadius:'var(--radius-md)', color:'var(--text-primary)', fontFamily:'var(--font-mono)', fontSize:12.5, lineHeight:1.7, padding:12, resize:'vertical', outline:'none' }} />
+                    : <div className="prompt">{a.prompt}</div>}
+                </div>
+              </div>
+            </div>
+
+            {/* rail: config */}
+            <div>
+              <div className="card">
+                <div className="card-h"><span className="ico"><Ic.IconSettings s={15} /></span><span className="ttl">Configuration</span></div>
+                <div className="card-b" style={{ paddingTop:4, paddingBottom:4 }}>
+                  {editing ? (
+                    <div style={{ display:'flex', flexDirection:'column', gap:14, padding:'10px 0' }}>
+                      <div className="efield"><span className="elabel">Model</span><Select value={a.model || 'inherit'} onChange={(e)=>set('model', e.target.value==='inherit'?null:e.target.value)} options={[{value:'inherit',label:'— inherit —'},{value:'sonnet',label:'Claude Sonnet'},{value:'opus',label:'Claude Opus'},{value:'haiku',label:'Claude Haiku'}]} style={{ width:'100%' }} /></div>
+                      <div className="efield"><span className="elabel">Max turns</span><Input defaultValue={String(a.maxTurns)} /></div>
+                      <div className="efield"><span className="elabel">Permission mode</span><Select value={a.permission || 'inherit'} onChange={(e)=>set('permission', e.target.value==='inherit'?null:e.target.value)} options={[{value:'inherit',label:'— inherit —'},{value:'ask',label:'Ask each time'},{value:'auto',label:'Auto-approve'}]} style={{ width:'100%' }} /></div>
+                      <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                        <Switch checked={a.background} onChange={()=>set('background', !a.background)} label="Run in background" />
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <ConfigRow k="Model" value={a.model} inherited={!a.model} />
+                      <ConfigRow k="Max turns" value={a.maxTurns} />
+                      <ConfigRow k="Background" value={<Badge tone="success" dot>yes</Badge>} />
+                      <ConfigRow k="Permission" value={a.permission} inherited={!a.permission} />
+                      <ConfigRow k="Memory" value={a.memory} inherited={!a.memory} />
+                      <ConfigRow k="Isolation" value={a.isolation} inherited={!a.isolation} />
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className="card">
+                <div className="card-h"><span className="ico"><Ic.IconWrench s={15} /></span><span className="ttl">Tools</span><div style={{ flex:1 }} /><span className="cval" style={{ color:'var(--text-tertiary)' }}>{a.tools.length}</span></div>
+                <div className="card-b">
+                  <div className="toolwrap">{a.tools.map((t) => <Tag key={t}>{t}</Tag>)}</div>
+                  <div className="seglabel" style={{ marginTop:16, marginBottom:8 }}>Skills</div>
+                  <div className="toolwrap">{a.skills.map((s) => <Badge key={s} tone="success">{s}</Badge>)}</div>
+                </div>
+              </div>
+
+              <div className="card">
+                <div className="card-h"><span className="ico"><Ic.IconBoxes s={15} /></span><span className="ttl">Files</span></div>
+                <div className="card-b" style={{ padding:8 }}>
+                  {a.files.map((f) => (
+                    <div className="fileitem" key={f}>
+                      <span style={{ color:'var(--text-tertiary)', display:'flex' }}><Ic.IconFile s={15} /></span>
+                      <span className="mono" style={{ fontSize:12.5, color:'var(--text-secondary)', flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{f}</span>
+                      <span style={{ color:'var(--text-tertiary)', display:'flex' }}><Ic.IconChevron s={14} /></span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
