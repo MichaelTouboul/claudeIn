@@ -21,6 +21,7 @@ export { repoLabelPrompt } from "./repo-label.prompt";
 export type { RepoLabelInput } from "./repo-label.prompt";
 export { userProfilePrompt } from "./user-profile.prompt";
 export { scopeProfilePrompt } from "./scope-profile.prompt";
+export type { ScopeProfileInput } from "./scope-profile.prompt";
 export { panelTransformPrompt } from "./panel-transform.prompt";
 export { improveChatPrompt } from "./improve-chat.prompt";
 export { conversationTitlePrompt } from "./conversation-title.prompt";

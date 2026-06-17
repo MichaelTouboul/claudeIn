@@ -8,6 +8,7 @@ import {
   extractResolvedModel,
   getProjectsBase,
 } from "./session.transcript";
+import { isPhantomHelperTranscript, type PhantomSignals } from "./session.phantom";
 import { getMeta, listMeta, type ConversationMeta } from "../conversation/conversation.meta";
 import type { SessionStatus, SessionSummary, SessionConversation, SessionMessage } from "../../types/session.types";
 
@@ -32,14 +33,29 @@ function getSessionsDir(projectPath: string): string {
 
 // --- Metadata listing (lazy, first ~50 lines per file) ---
 
+// Phantom signals (`PhantomSignals` from `session.phantom`) are collected in the
+// SAME single pass as `meta` so phantom helper transcripts can be filtered
+// without a second read. They are internal only — never serialized to the
+// renderer (`SessionSummary` is unchanged).
+
 // Header metadata (title/agent/branch/firstPrompt/model) lives in the first
 // lines, so it is captured only while `lineCount < 50`. The context-window fill,
 // by contrast, is the LAST assistant turn's usage — so we keep streaming to EOF
 // and track the most recent fill (cheap per-line work, mirrors activity.service
 // reading whole transcripts). The percentage is clamped to 0–100; `null` when
 // no assistant usage was ever seen → the row omits the context bar gracefully.
-async function extractMetadata(filePath: string): Promise<Partial<SessionSummary>> {
+// In the same pass we collect `phantomSignals` (distinct top-level types, user
+// turn count, untruncated first user prompt) so phantom helper transcripts can
+// be filtered without a second read.
+async function extractMetadata(
+  filePath: string
+): Promise<{ meta: Partial<SessionSummary>; phantomSignals: PhantomSignals }> {
   const meta: Partial<SessionSummary> = {};
+  const phantomSignals: PhantomSignals = {
+    types: new Set<string>(),
+    userTurnCount: 0,
+    firstUserPrompt: null,
+  };
   let lineCount = 0;
   let lastContextFill: number | null = null;
   // Track the most recent `[1m]`-bearing resolvedModel across the whole
@@ -55,6 +71,14 @@ async function extractMetadata(filePath: string): Promise<Partial<SessionSummary
       lineCount++;
       try {
         const obj = JSON.parse(line);
+        if (typeof obj.type === "string") phantomSignals.types.add(obj.type);
+        if (obj.type === "user" && obj.promptId) {
+          phantomSignals.userTurnCount++;
+          const content = obj.message?.content;
+          if (typeof content === "string" && phantomSignals.firstUserPrompt === null) {
+            phantomSignals.firstUserPrompt = content;
+          }
+        }
         if (lineCount <= 50) {
           if (obj.type === "ai-title" && obj.aiTitle) meta.title = obj.aiTitle;
           if (obj.type === "agent-setting" && obj.agentSetting) meta.agentName = obj.agentSetting;
@@ -79,11 +103,11 @@ async function extractMetadata(filePath: string): Promise<Partial<SessionSummary
 
     rl.on("close", () => {
       meta.contextPercent = contextFillToPercent(lastContextFill, lastResolvedModel);
-      resolve(meta);
+      resolve({ meta, phantomSignals });
     });
     rl.on("error", () => {
       meta.contextPercent = contextFillToPercent(lastContextFill, lastResolvedModel);
-      resolve(meta);
+      resolve({ meta, phantomSignals });
     });
   });
 }
@@ -115,7 +139,14 @@ export async function listSessions(projectPath: string): Promise<SessionSummary[
       continue;
     }
 
-    const meta = await extractMetadata(filePath);
+    const { meta, phantomSignals } = await extractMetadata(filePath);
+
+    // Skip phantom one-shot `--print` helper transcripts (e.g. repo-label /
+    // scope-profile runs that landed in a scanned project's dir). A real
+    // interactive conversation always carries interactive-metadata lines and/or
+    // multiple user turns, so this never hides a genuine session.
+    if (isPhantomHelperTranscript(phantomSignals)) continue;
+
     const lastActiveAt = stat.mtime.toISOString();
 
     summaries.push({
