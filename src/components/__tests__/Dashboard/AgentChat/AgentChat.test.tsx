@@ -36,6 +36,7 @@ vi.mock('@/components/Dashboard/AgentChat/RichEditor/RichEditor', () => ({
       clear: vi.fn(),
       insertMention: vi.fn(),
       insertSlashCommand: vi.fn(),
+      setMarkdown: vi.fn(),
     }));
     editorOnChange = onChange;
     editorOnSubmit = onSubmit;

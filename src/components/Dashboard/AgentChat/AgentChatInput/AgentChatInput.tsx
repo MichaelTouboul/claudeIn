@@ -5,6 +5,7 @@ import { Button } from '@/components/_ui/Button';
 import { IconButton } from '@/components/_ui/IconButton';
 import type { FilePickerKind, SpawnSession  } from '@/lib/types';
 import { buildJsonAttachment } from '@/lib/utils';
+import { PanelTabKind, promptEditorTabId, usePanelStore } from '@/store/dashboard/usePanelStore';
 import { byComposer, useToonStore } from '@/store/useToonStore';
 
 import type { HistoryNavContext } from '../RichEditor/plugins/SubmitPlugin';
@@ -74,10 +75,32 @@ export function AgentChatInput({
   onHistoryNav,
 }: AgentChatInputProps) {
   const [plainText, setPlainText] = useState('');
-  // Prompt-editor mode: grows the in-place editor so a long prompt is
-  // comfortable to draft. The "prompt editor" button in the tools row toggles it.
-  const [editorExpanded, setEditorExpanded] = useState(false);
   const menus = useInputMenus(plainText, modelPickerOpen);
+
+  // The prompt-editor panel: the maximize button OPENS a real workspace editor
+  // (right sidebar) seeded with this composer's current markdown, rather than the
+  // old invisible inline max-height toggle. The button reflects/toggles whether
+  // the panel is currently showing THIS composer's editor.
+  const panelOpen = usePanelStore((s) => s.isOpen);
+  const panelCurrent = usePanelStore((s) => s.current);
+  const openPanel = usePanelStore((s) => s.open);
+  const closePanel = usePanelStore((s) => s.close);
+  const editorPanelOpen =
+    panelOpen &&
+    panelCurrent?.kind === PanelTabKind.PromptEditor &&
+    panelCurrent.payload.composerId === composerId;
+  const togglePromptEditor = () => {
+    if (editorPanelOpen) {
+      closePanel();
+      return;
+    }
+    openPanel({
+      id: promptEditorTabId(composerId),
+      kind: PanelTabKind.PromptEditor,
+      title: 'Éditeur de prompt',
+      payload: { composerId, text: input },
+    });
+  };
 
   // Select the stable `attachments` record (zustand selectors must return a stable
   // reference — `byComposer` builds a NEW array each call, which would loop), then
@@ -257,17 +280,16 @@ export function AgentChatInput({
           onNavKey={handleNavKey}
           onHistoryNav={onHistoryNav}
           onPasteText={handlePasteText}
-          expanded={editorExpanded}
         />
         <div className="flex items-center gap-1 pb-0.5">
           <IconButton
             size="sm"
-            onClick={() => setEditorExpanded((v) => !v)}
-            active={editorExpanded}
-            aria-label={editorExpanded ? 'Collapse prompt editor' : 'Open prompt editor'}
-            title={editorExpanded ? 'Collapse prompt editor' : 'Open prompt editor'}
+            onClick={togglePromptEditor}
+            active={editorPanelOpen}
+            aria-label={editorPanelOpen ? 'Collapse prompt editor' : 'Open prompt editor'}
+            title={editorPanelOpen ? 'Collapse prompt editor' : 'Open prompt editor'}
           >
-            {editorExpanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+            {editorPanelOpen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
           </IconButton>
           <AttachMenu onAttach={onAttach} />
           <Button

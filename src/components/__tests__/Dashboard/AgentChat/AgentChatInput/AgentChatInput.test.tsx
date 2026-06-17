@@ -6,6 +6,7 @@ import { AgentChatInput } from '@/components/Dashboard/AgentChat/AgentChatInput/
 import type { RichEditorHandle } from '@/components/Dashboard/AgentChat/RichEditor/RichEditor';
 import type { AgentSummary } from '@/lib/types';
 import { useDashboardStore } from '@/store/dashboard/useDashboardStore';
+import { PanelTabKind, usePanelStore } from '@/store/dashboard/usePanelStore';
 import { byComposer, useToonStore } from '@/store/useToonStore';
 
 // Capture the RichEditor wiring so a test can simulate the user pressing Tab (onComplete)
@@ -15,7 +16,6 @@ let editorOnChange: ((markdown: string, plain: string) => void) | null = null;
 let editorOnEnter: (() => boolean) | null = null;
 let editorOnComplete: (() => boolean) | null = null;
 let editorOnPasteText: ((text: string) => boolean) | null = null;
-let editorExpanded = false;
 
 const insertSlashCommand = vi.fn();
 const insertMention = vi.fn();
@@ -29,21 +29,18 @@ vi.mock('@/components/Dashboard/AgentChat/RichEditor/RichEditor', () => ({
     onEnter,
     onComplete,
     onPasteText,
-    expanded,
   }: {
     handleRef: Ref<RichEditorHandle>;
     onChange: (markdown: string, plain: string) => void;
     onEnter: () => boolean;
     onComplete: () => boolean;
     onPasteText?: (text: string) => boolean;
-    expanded?: boolean;
   }) => {
-    useImperativeHandle(handleRef, () => ({ focus, clear, insertMention, insertSlashCommand }));
+    useImperativeHandle(handleRef, () => ({ focus, clear, insertMention, insertSlashCommand, setMarkdown: vi.fn() }));
     editorOnChange = onChange;
     editorOnEnter = onEnter;
     editorOnComplete = onComplete;
     editorOnPasteText = onPasteText ?? null;
-    editorExpanded = expanded ?? false;
     return <div data-testid="rich-editor" />;
   },
 }));
@@ -73,10 +70,10 @@ function makeAgent(name: string): AgentSummary {
 const onSelectSlash = vi.fn();
 const onSend = vi.fn();
 
-function renderInput() {
+function renderInput(input = '') {
   return render(
     <AgentChatInput
-      input=""
+      input={input}
       attachedFiles={[]}
       waitingInput={false}
       isRunning={false}
@@ -104,7 +101,7 @@ beforeEach(() => {
   editorOnEnter = null;
   editorOnComplete = null;
   editorOnPasteText = null;
-  editorExpanded = false;
+  usePanelStore.setState({ isOpen: false, current: null, width: 480 });
   useToonStore.setState({ attachments: {}, editingId: null });
   insertSlashCommand.mockReset();
   insertMention.mockReset();
@@ -208,23 +205,26 @@ describe('AgentChatInput — paste-to-TOON interception', () => {
   });
 });
 
-describe('AgentChatInput — prompt editor (expand) toggle', () => {
-  it('starts collapsed and exposes an "Open prompt editor" control', () => {
+describe('AgentChatInput — prompt editor panel', () => {
+  it('starts closed and exposes an "Open prompt editor" control', () => {
     renderInput();
 
-    expect(editorExpanded).toBe(false);
+    expect(usePanelStore.getState().isOpen).toBe(false);
     expect(screen.getByRole('button', { name: 'Open prompt editor' })).toBeInTheDocument();
   });
 
-  it('expands the editor when the prompt-editor button is clicked, then collapses', () => {
-    renderInput();
+  it('opens a PromptEditor panel seeded with the composer draft, then closes', () => {
+    renderInput('# my long prompt');
 
     fireEvent.click(screen.getByRole('button', { name: 'Open prompt editor' }));
-    expect(editorExpanded).toBe(true);
-    // The control flips to a collapse affordance.
-    const collapse = screen.getByRole('button', { name: 'Collapse prompt editor' });
+    const panel = usePanelStore.getState();
+    expect(panel.isOpen).toBe(true);
+    expect(panel.current?.kind).toBe(PanelTabKind.PromptEditor);
+    if (panel.current?.kind !== PanelTabKind.PromptEditor) throw new Error('not a prompt-editor object');
+    expect(panel.current.payload).toEqual({ composerId: 'test-composer', text: '# my long prompt' });
 
-    fireEvent.click(collapse);
-    expect(editorExpanded).toBe(false);
+    // The control flips to a collapse affordance that closes the panel.
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse prompt editor' }));
+    expect(usePanelStore.getState().isOpen).toBe(false);
   });
 });
