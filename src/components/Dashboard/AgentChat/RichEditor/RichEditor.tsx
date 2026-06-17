@@ -15,7 +15,6 @@ import { CHAT_TRANSFORMERS } from './markdownTransformers';
 import { PastePlugin } from './plugins/PastePlugin';
 import { type HistoryNavContext, SUBMIT_INTENT, SubmitPlugin } from './plugins/SubmitPlugin';
 import { editorToMarkdown } from './serialize';
-import { Toolbar } from './Toolbar';
 
 export type RichEditorHandle = {
   clear: () => void;
@@ -45,6 +44,10 @@ export type RichEditorProps = {
   onPasteText?: (text: string) => boolean;
   handleRef: Ref<RichEditorHandle>;
   placeholder: string;
+  /** Expanded (long-prompt) mode — grows the editor's scroll height so a long
+   *  prompt is comfortable to draft in place. Toggled by the composer's editor
+   *  button. */
+  expanded?: boolean;
 };
 
 function SubmitBridge({ onSubmit }: { onSubmit: () => void }) {
@@ -105,7 +108,7 @@ function HandlePlugin({ handleRef }: { handleRef: Ref<RichEditorHandle> }) {
   return null;
 }
 
-export function RichEditor({ onChange, onSubmit, onEnter, onComplete, onNavKey, onHistoryNav, onPasteText, handleRef, placeholder }: RichEditorProps) {
+export function RichEditor({ onChange, onSubmit, onEnter, onComplete, onNavKey, onHistoryNav, onPasteText, handleRef, placeholder, expanded = false }: RichEditorProps) {
   return (
     <LexicalComposer
       initialConfig={{
@@ -118,12 +121,11 @@ export function RichEditor({ onChange, onSubmit, onEnter, onComplete, onNavKey, 
       }}
     >
       <div className="flex-1">
-        <Toolbar />
         <div className="relative">
           <RichTextPlugin
             contentEditable={
               <ContentEditable
-                className="text-sm font-mono leading-relaxed focus:outline-none min-h-[24px] max-h-[120px] overflow-y-auto"
+                className={`text-sm font-mono leading-relaxed focus:outline-none min-h-[24px] overflow-y-auto ${expanded ? 'max-h-[360px]' : 'max-h-[120px]'}`}
                 style={{ color: 'var(--color-text-primary)' }}
                 aria-placeholder={placeholder}
                 placeholder={

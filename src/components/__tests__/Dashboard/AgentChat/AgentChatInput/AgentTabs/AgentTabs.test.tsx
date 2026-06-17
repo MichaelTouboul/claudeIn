@@ -61,7 +61,7 @@ describe("AgentTabs", () => {
     expect(screen.getByText("writer")).toBeInTheDocument();
   });
 
-  it("pulses the dot only for an active agent", () => {
+  it("renders the live dot only for an active agent", () => {
     ingestEvent({ id: 2, agent_name: "live", session_id: "sess-1" });
     ingestEvent({ id: 1, agent_name: "resting", session_id: "sess-1" });
     // `resting`'s active window expires; `live` stays active.
@@ -69,10 +69,20 @@ describe("AgentTabs", () => {
 
     render(<AgentTabs claudeSessionId="sess-1" orchestratorName="orch" />);
 
-    const liveDot = screen.getByTestId("agent-tab-dot-live");
-    const restingDot = screen.getByTestId("agent-tab-dot-resting");
+    // The live (pulsing) dot overlays the avatar only while the agent is running;
+    // a resting agent shows no dot at all.
+    const liveDot = screen.getByTestId("agent-vignette-dot-live");
     expect(liveDot.className).toContain("animate-pulse");
-    expect(restingDot.className).not.toContain("animate-pulse");
+    expect(screen.queryByTestId("agent-vignette-dot-resting")).toBeNull();
+  });
+
+  it("labels the row and renders agents as vignettes", () => {
+    ingestEvent({ id: 1, agent_name: "researcher", session_id: "sess-1" });
+
+    render(<AgentTabs claudeSessionId="sess-1" orchestratorName="orch" />);
+
+    expect(screen.getByText("Active:")).toBeInTheDocument();
+    expect(screen.getByText("researcher")).toBeInTheDocument();
   });
 
   it("opens an agent object in the right panel when a presence tab is clicked", () => {
@@ -109,7 +119,7 @@ describe("AgentTabs", () => {
     const { rerender } = render(
       <AgentTabs claudeSessionId="sess-1" orchestratorName="orch" />,
     );
-    fireEvent.click(screen.getByTestId("agent-tab-dismiss-researcher"));
+    fireEvent.click(screen.getByTestId("agent-vignette-dismiss-researcher"));
 
     // Dismiss must not open the right panel (it is not a tab click).
     expect(usePanelStore.getState().isOpen).toBe(false);
@@ -123,7 +133,7 @@ describe("AgentTabs", () => {
     const { rerender } = render(
       <AgentTabs claudeSessionId="sess-1" orchestratorName="orch" />,
     );
-    fireEvent.click(screen.getByTestId("agent-tab-dismiss-researcher"));
+    fireEvent.click(screen.getByTestId("agent-vignette-dismiss-researcher"));
     rerender(<AgentTabs claudeSessionId="sess-1" orchestratorName="orch" />);
     expect(screen.queryByText("researcher")).not.toBeInTheDocument();
 

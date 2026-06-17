@@ -1,7 +1,8 @@
-import { ChevronRight, Loader2, Paperclip, Send, X } from 'lucide-react';
+import { ChevronRight, Loader2, Maximize2, Minimize2, Paperclip, Send, X } from 'lucide-react';
 import { type RefObject, useMemo, useState } from 'react';
 
 import { Button } from '@/components/_ui/Button';
+import { IconButton } from '@/components/_ui/IconButton';
 import type { FilePickerKind, SpawnSession  } from '@/lib/types';
 import { buildJsonAttachment } from '@/lib/utils';
 import { byComposer, useToonStore } from '@/store/useToonStore';
@@ -73,6 +74,9 @@ export function AgentChatInput({
   onHistoryNav,
 }: AgentChatInputProps) {
   const [plainText, setPlainText] = useState('');
+  // Prompt-editor mode: grows the in-place editor so a long prompt is
+  // comfortable to draft. The "prompt editor" button in the tools row toggles it.
+  const [editorExpanded, setEditorExpanded] = useState(false);
   const menus = useInputMenus(plainText, modelPickerOpen);
 
   // Select the stable `attachments` record (zustand selectors must return a stable
@@ -253,21 +257,33 @@ export function AgentChatInput({
           onNavKey={handleNavKey}
           onHistoryNav={onHistoryNav}
           onPasteText={handlePasteText}
+          expanded={editorExpanded}
         />
-        <AttachMenu onAttach={onAttach} />
-        <Button
-          intent="ghost"
-          size="icon"
-          onClick={onSend}
-          disabled={(!input.trim() && attachedFiles.length === 0 && jsonAttachments.length === 0) || spawning}
-          title="Send"
-        >
-          {spawning ? (
-            <Loader2 size={16} className="animate-spin" />
-          ) : (
-            <Send size={16} />
-          )}
-        </Button>
+        <div className="flex items-center gap-1 pb-0.5">
+          <IconButton
+            size="sm"
+            onClick={() => setEditorExpanded((v) => !v)}
+            active={editorExpanded}
+            aria-label={editorExpanded ? 'Collapse prompt editor' : 'Open prompt editor'}
+            title={editorExpanded ? 'Collapse prompt editor' : 'Open prompt editor'}
+          >
+            {editorExpanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+          </IconButton>
+          <AttachMenu onAttach={onAttach} />
+          <Button
+            intent="ghost"
+            size="icon"
+            onClick={onSend}
+            disabled={(!input.trim() && attachedFiles.length === 0 && jsonAttachments.length === 0) || spawning}
+            title="Send"
+          >
+            {spawning ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <Send size={16} />
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   );

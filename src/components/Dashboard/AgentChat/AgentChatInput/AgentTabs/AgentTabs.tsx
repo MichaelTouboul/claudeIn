@@ -1,11 +1,6 @@
-import { Network, X } from "lucide-react";
+import { Network } from "lucide-react";
 
-import { StatusDot } from "@/components/_ui/StatusDot";
-import { colorMap } from "@/components/Dashboard/Workspace/utils";
-import {
-  CONVERSATION_AGENT_DOT,
-  useConversationAgents,
-} from "@/hooks/useConversationAgents";
+import { useConversationAgents } from "@/hooks/useConversationAgents";
 import { useAgentDismissStore } from "@/store/dashboard/useAgentDismissStore";
 import {
   agentTabId,
@@ -13,6 +8,8 @@ import {
   usePanelStore,
   workflowTabId,
 } from "@/store/dashboard/usePanelStore";
+
+import { AgentVignette } from "./AgentVignette";
 
 export type AgentTabsProps = {
   // The conversation this input belongs to. Sub-agent presence is scoped to it.
@@ -22,10 +19,11 @@ export type AgentTabsProps = {
   orchestratorName: string;
 };
 
-// Presence row above the editor: one tab per sub-agent seen in this
-// conversation. Dot reuses the AgentRow pattern (pulsing colored dot when
-// active, static otherwise). Clicking a tab opens/focuses that agent's live
-// activity view in the right panel (UtilityPanel). Renders nothing when the
+// Active-agents row above the composer: an "Active:" label, a session-overview
+// control, and one vignette per sub-agent seen in this conversation. Each
+// vignette shows a hue-tinted avatar (live dot when running), the name, and an
+// inline `×`. Clicking a vignette opens that agent's live view in the right
+// panel; the `×` cosmetically dismisses it. Renders nothing when the
 // conversation has no sub-agents.
 export function AgentTabs({ claudeSessionId, orchestratorName }: AgentTabsProps) {
   const agents = useConversationAgents(claudeSessionId, orchestratorName);
@@ -34,7 +32,10 @@ export function AgentTabs({ claudeSessionId, orchestratorName }: AgentTabsProps)
   if (agents.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5 px-3 pb-2">
+    <div className="flex flex-wrap items-center gap-[7px] px-3 pb-2">
+      <span className="mr-0.5 text-[11px] text-[var(--color-text-muted)]">
+        Active:
+      </span>
       <button
         type="button"
         aria-label="Open session overview"
@@ -47,7 +48,7 @@ export function AgentTabs({ claudeSessionId, orchestratorName }: AgentTabsProps)
             payload: { claudeSessionId },
           })
         }
-        className="flex items-center justify-center w-6 h-6 rounded-md cursor-pointer transition-colors hover:bg-surface-3"
+        className="flex h-6 w-6 items-center justify-center rounded-md cursor-pointer transition-colors hover:bg-surface-3"
         style={{
           background: "var(--color-surface-2)",
           color: "var(--color-text-secondary)",
@@ -56,54 +57,21 @@ export function AgentTabs({ claudeSessionId, orchestratorName }: AgentTabsProps)
       >
         <Network size={12} />
       </button>
-      {agents.map((agent) => {
-        const pulse = CONVERSATION_AGENT_DOT[agent.status].pulse;
-        const dotClass = pulse
-          ? "bg-active"
-          : colorMap[agent.color] || "bg-surface-3";
-        return (
-          <div
-            key={agent.name}
-            className="group flex items-center gap-1.5 pl-2 pr-1 py-1 rounded-md text-xs transition-colors"
-            style={{
-              background: "var(--color-surface-2)",
-              color: "var(--color-text-secondary)",
-              border: "1px solid var(--color-border)",
-            }}
-          >
-            <button
-              type="button"
-              onClick={() =>
-                openPanel({
-                  id: agentTabId(agent.name, claudeSessionId),
-                  kind: PanelTabKind.Agent,
-                  title: agent.name,
-                  payload: { agentName: agent.name, claudeSessionId },
-                })
-              }
-              className="flex items-center gap-1.5 cursor-pointer hover:text-fg transition-colors"
-            >
-              <StatusDot
-                data-testid={`agent-tab-dot-${agent.name}`}
-                size="sm"
-                pulse={pulse}
-                className={dotClass}
-              />
-              <span className="truncate max-w-[140px] font-medium">{agent.name}</span>
-            </button>
-            <button
-              type="button"
-              aria-label={`Dismiss ${agent.name}`}
-              data-testid={`agent-tab-dismiss-${agent.name}`}
-              onClick={() => dismiss(claudeSessionId, agent.name, agent.latestSeq)}
-              className="flex items-center justify-center w-4 h-4 rounded cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity hover:bg-surface-3"
-              style={{ color: "var(--color-text-muted)" }}
-            >
-              <X size={11} />
-            </button>
-          </div>
-        );
-      })}
+      {agents.map((agent) => (
+        <AgentVignette
+          key={agent.name}
+          agent={agent}
+          onOpen={() =>
+            openPanel({
+              id: agentTabId(agent.name, claudeSessionId),
+              kind: PanelTabKind.Agent,
+              title: agent.name,
+              payload: { agentName: agent.name, claudeSessionId },
+            })
+          }
+          onDismiss={() => dismiss(claudeSessionId, agent.name, agent.latestSeq)}
+        />
+      ))}
     </div>
   );
 }
