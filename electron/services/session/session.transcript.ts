@@ -37,15 +37,31 @@ export function extractAssistantUsage(obj: Record<string, unknown>): TranscriptU
   return { model, tokensIn, tokensOut };
 }
 
-/** Effective Claude Code context-window size used to turn token fill into a %. */
-export const CONTEXT_WINDOW_TOKENS = 200_000;
+/**
+ * The standard Claude context-window sizes, smallest first. A model id alone
+ * does not tell us which window a session ran on — `claude-opus-4-8` reports the
+ * SAME id whether the conversation used the 200k window or the 1M (`[1m]`) tier.
+ * So we tier by *observed* fill: pick the smallest standard window that actually
+ * contains the measured prompt size (see `contextFillToPercent`).
+ */
+export const CONTEXT_WINDOW_TIERS = [200_000, 1_000_000] as const;
+
+/** Back-compat: the smallest (default) Claude context window, in tokens. */
+export const CONTEXT_WINDOW_TOKENS = CONTEXT_WINDOW_TIERS[0];
 
 /**
- * Total context-window fill (tokens) carried by ONE assistant turn's usage:
- * `input + cache_read + cache_creation + output`. Claude reports these
- * per-turn cumulatively (the cache tokens are the live conversation prefix),
- * so the LAST assistant turn's total best approximates current context fill.
- * Returns `null` for a non-assistant / usage-less line.
+ * Prompt-side context fill (tokens) carried by ONE assistant turn's usage:
+ * `input + cache_read + cache_creation`. Claude reports these per-turn
+ * cumulatively (the cache tokens are the live conversation prefix), so the LAST
+ * assistant turn's prompt total best approximates current context fill.
+ *
+ * `output_tokens` is deliberately EXCLUDED: it is the model's *response*, not
+ * part of the context window at the moment usage is reported (it only enters the
+ * context as input on the *next* turn, where it is already counted in the cache
+ * read). Including it overshoots the real fill by the last response's size.
+ *
+ * Returns `null` for a non-assistant / usage-less line, or when the prompt-side
+ * fill is zero.
  */
 export function extractContextFill(obj: Record<string, unknown>): number | null {
   if (obj.type !== "assistant") return null;
@@ -56,18 +72,33 @@ export function extractContextFill(obj: Record<string, unknown>): number | null 
   const total =
     num("input_tokens") +
     num("cache_read_input_tokens") +
-    num("cache_creation_input_tokens") +
-    num("output_tokens");
+    num("cache_creation_input_tokens");
   return total > 0 ? total : null;
 }
 
 /**
+ * Pick the effective context window for an observed fill: the smallest standard
+ * Claude window that still contains it. A 173k prefix reads against 200k; a 786k
+ * prefix is unambiguously a 1M-tier session and reads against 1M (instead of
+ * blowing past a hard-coded 200k and clamping to an aberrant 100%).
+ */
+function effectiveWindow(fill: number): number {
+  for (const tier of CONTEXT_WINDOW_TIERS) {
+    if (fill <= tier) return tier;
+  }
+  return CONTEXT_WINDOW_TIERS[CONTEXT_WINDOW_TIERS.length - 1];
+}
+
+/**
  * Convert a context-fill token count into a clamped 0–100 percentage of the
- * Claude Code context window. `null` fill → `null` (unknown, omit the bar).
+ * session's effective context window. `null` fill → `null` (unknown, omit the
+ * bar). The 100 cap is reserved for a genuinely over-full window, never reached
+ * by a mis-sized denominator.
  */
 export function contextFillToPercent(fill: number | null): number | null {
   if (fill === null) return null;
-  return Math.min(Math.round((fill / CONTEXT_WINDOW_TOKENS) * 100), 100);
+  const window = effectiveWindow(fill);
+  return Math.min(Math.round((fill / window) * 100), 100);
 }
 
 /**

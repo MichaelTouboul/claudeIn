@@ -40,6 +40,10 @@ declare module "*?fresh=ctx-cap" {
   const mod: any;
   export = mod;
 }
+declare module "*?fresh=ctx-1m" {
+  const mod: any;
+  export = mod;
+}
 declare module "*?fresh=ctx-none" {
   const mod: any;
   export = mod;
