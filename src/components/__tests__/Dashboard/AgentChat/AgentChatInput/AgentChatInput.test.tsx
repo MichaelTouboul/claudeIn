@@ -1,4 +1,4 @@
-import { act, render } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { type Ref, useImperativeHandle } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -15,6 +15,7 @@ let editorOnChange: ((markdown: string, plain: string) => void) | null = null;
 let editorOnEnter: (() => boolean) | null = null;
 let editorOnComplete: (() => boolean) | null = null;
 let editorOnPasteText: ((text: string) => boolean) | null = null;
+let editorExpanded = false;
 
 const insertSlashCommand = vi.fn();
 const insertMention = vi.fn();
@@ -28,18 +29,21 @@ vi.mock('@/components/Dashboard/AgentChat/RichEditor/RichEditor', () => ({
     onEnter,
     onComplete,
     onPasteText,
+    expanded,
   }: {
     handleRef: Ref<RichEditorHandle>;
     onChange: (markdown: string, plain: string) => void;
     onEnter: () => boolean;
     onComplete: () => boolean;
     onPasteText?: (text: string) => boolean;
+    expanded?: boolean;
   }) => {
     useImperativeHandle(handleRef, () => ({ focus, clear, insertMention, insertSlashCommand }));
     editorOnChange = onChange;
     editorOnEnter = onEnter;
     editorOnComplete = onComplete;
     editorOnPasteText = onPasteText ?? null;
+    editorExpanded = expanded ?? false;
     return <div data-testid="rich-editor" />;
   },
 }));
@@ -100,6 +104,7 @@ beforeEach(() => {
   editorOnEnter = null;
   editorOnComplete = null;
   editorOnPasteText = null;
+  editorExpanded = false;
   useToonStore.setState({ attachments: {}, editingId: null });
   insertSlashCommand.mockReset();
   insertMention.mockReset();
@@ -200,5 +205,26 @@ describe('AgentChatInput — paste-to-TOON interception', () => {
 
     expect(claimed).toBe(false);
     expect(byComposer(useToonStore.getState().attachments, 'test-composer')).toHaveLength(0);
+  });
+});
+
+describe('AgentChatInput — prompt editor (expand) toggle', () => {
+  it('starts collapsed and exposes an "Open prompt editor" control', () => {
+    renderInput();
+
+    expect(editorExpanded).toBe(false);
+    expect(screen.getByRole('button', { name: 'Open prompt editor' })).toBeInTheDocument();
+  });
+
+  it('expands the editor when the prompt-editor button is clicked, then collapses', () => {
+    renderInput();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open prompt editor' }));
+    expect(editorExpanded).toBe(true);
+    // The control flips to a collapse affordance.
+    const collapse = screen.getByRole('button', { name: 'Collapse prompt editor' });
+
+    fireEvent.click(collapse);
+    expect(editorExpanded).toBe(false);
   });
 });
