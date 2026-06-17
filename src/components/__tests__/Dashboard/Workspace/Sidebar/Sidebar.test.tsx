@@ -46,7 +46,9 @@ describe('Sidebar switch', () => {
     render(<Sidebar />);
     expect(screen.getByTestId('conversation-list')).toBeInTheDocument();
     expect(screen.queryByTestId('library-nav')).not.toBeInTheDocument();
-    expect(screen.getByText('New session')).toBeInTheDocument();
+    // Footer always offers "Install from plugin" — never "New session".
+    expect(screen.getByText('Install from plugin')).toBeInTheDocument();
+    expect(screen.queryByText('New session')).not.toBeInTheDocument();
   });
 
   it('toggling the SegmentedControl swaps to Library and persists in the store', () => {
@@ -56,7 +58,7 @@ describe('Sidebar switch', () => {
     expect(useDashboardUIStore.getState().sidebarView).toBe(SidebarView.Library);
     expect(screen.getByTestId('library-nav')).toBeInTheDocument();
     expect(screen.queryByTestId('conversation-list')).not.toBeInTheDocument();
-    // Footer affordance flips per mode.
+    // Footer always offers "Install from plugin".
     expect(screen.getByText('Install from plugin')).toBeInTheDocument();
     expect(screen.queryByText('New session')).not.toBeInTheDocument();
   });
