@@ -16,6 +16,8 @@
       "Bash(find *)",
       "Bash(grep *)",
       "Bash(bash *)",
+      "Bash(.claude/hooks/land.sh *)",
+      "Bash(.claude/hooks/gate.sh *)",
       "Bash(cd *)",
       "Bash(echo *)",
       "Bash(printf *)",
