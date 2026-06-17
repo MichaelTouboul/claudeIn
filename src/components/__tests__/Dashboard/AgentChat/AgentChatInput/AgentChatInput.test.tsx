@@ -90,6 +90,7 @@ function renderInput() {
       onRemoveAttachment={() => {}}
       onAttach={() => {}}
       onSend={onSend}
+      onHistoryNav={() => null}
     />,
   );
 }
