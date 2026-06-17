@@ -28,6 +28,11 @@ export const lineStyleByKind: Record<LineKind, LineStyle> = {
     background: 'transparent',
     color: 'var(--color-text-secondary)',
   },
+  [LineKind.Hunk]: {
+    sign: '',
+    background: 'var(--color-surface-2)',
+    color: 'var(--color-text-secondary)',
+  },
 };
 
 /** Format a gutter line number (or a blank cell when absent). */

@@ -14,6 +14,7 @@ export const PanelTabKind = {
   Workflow: 'workflow',
   Toon: 'toon',
   PromptEditor: 'prompt-editor',
+  Diff: 'diff',
 } as const;
 export type PanelTabKind = (typeof PanelTabKind)[keyof typeof PanelTabKind];
 
@@ -47,6 +48,13 @@ export type ToonPayload = { attachmentId: string };
  * (see `useComposerBridgeStore`); identity is the composer, not the content.
  */
 export type PromptEditorPayload = { composerId: string; text: string };
+/**
+ * A read-only repo diff view. Like the live views it carries no snapshot — the
+ * body fetches the diff from `window.api.gitDiff(repoPath, mode)` on mount and on
+ * mode toggle. Identity is the repo path, so re-opening the same repo's Changes
+ * view reuses the SAME panel object while the body re-fetches its current state.
+ */
+export type DiffPayload = { repoPath: string };
 
 /**
  * A panel object — discriminated by `kind`, so `payload` is narrowed per kind.
@@ -61,7 +69,8 @@ export type PanelTab =
   | { id: string; kind: typeof PanelTabKind.Agent; title: string; payload: AgentPayload }
   | { id: string; kind: typeof PanelTabKind.Workflow; title: string; payload: WorkflowPayload }
   | { id: string; kind: typeof PanelTabKind.Toon; title: string; payload: ToonPayload }
-  | { id: string; kind: typeof PanelTabKind.PromptEditor; title: string; payload: PromptEditorPayload };
+  | { id: string; kind: typeof PanelTabKind.PromptEditor; title: string; payload: PromptEditorPayload }
+  | { id: string; kind: typeof PanelTabKind.Diff; title: string; payload: DiffPayload };
 
 /** Payload type for a given object kind — single source for kind→payload mapping. */
 export type PayloadByKind = {
@@ -72,6 +81,7 @@ export type PayloadByKind = {
   [PanelTabKind.Workflow]: WorkflowPayload;
   [PanelTabKind.Toon]: ToonPayload;
   [PanelTabKind.PromptEditor]: PromptEditorPayload;
+  [PanelTabKind.Diff]: DiffPayload;
 };
 
 /**
@@ -235,4 +245,13 @@ export function toonTabId(attachmentId: string): string {
  */
 export function promptEditorTabId(composerId: string): string {
   return `prompt-editor:${composerId}`;
+}
+
+/**
+ * Stable id for a repo diff object. Identity is the repo path itself — re-opening
+ * the same repo's Changes view reuses the SAME panel object while the body
+ * re-fetches its live working/branch diff from `window.api.gitDiff`.
+ */
+export function diffTabId(repoPath: string): string {
+  return `diff:${repoPath}`;
 }

@@ -17,6 +17,7 @@ import { registerTransformHandlers } from "./transform.ipc";
 import { registerOnboardingHandlers } from "./onboarding.ipc";
 import { registerUserHandlers } from "./user.ipc";
 import { registerImproveHandlers } from "./improve.ipc";
+import { registerGitHandlers } from "./git.ipc";
 
 export function registerAllHandlers(): void {
   registerAgentHandlers();
@@ -38,4 +39,5 @@ export function registerAllHandlers(): void {
   registerOnboardingHandlers();
   registerUserHandlers();
   registerImproveHandlers();
+  registerGitHandlers();
 }

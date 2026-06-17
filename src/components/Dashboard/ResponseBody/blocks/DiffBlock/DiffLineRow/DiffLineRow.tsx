@@ -1,6 +1,6 @@
 import { MessageSquare } from 'lucide-react';
 
-import type { DiffLine } from '../diff.types';
+import { type DiffLine, LineKind } from '../diff.types';
 import { DiffAskInput } from '../DiffAskInput/DiffAskInput';
 import { DiffAskPopover } from '../DiffAskPopover/DiffAskPopover';
 import { gutterLabel, gutterStyle, lineStyleByKind } from '../lineStyle';
@@ -29,6 +29,25 @@ export function DiffLineRow({
   onClose,
 }: DiffLineRowProps) {
   const style = lineStyleByKind[line.kind];
+
+  // A hunk separator (`@@ … @@`) is a structural marker, not editable content:
+  // render it as a full-width muted monospace band with no gutter numbers and no
+  // Ask-Claude affordance.
+  if (line.kind === LineKind.Hunk) {
+    return (
+      <pre
+        className="overflow-x-auto whitespace-pre px-3 py-px text-xs leading-relaxed"
+        style={{
+          background: style.background,
+          color: style.color,
+          fontFamily: 'var(--font-mono)',
+        }}
+      >
+        {line.text}
+      </pre>
+    );
+  }
+
   return (
     <div className="group/row">
       <div
