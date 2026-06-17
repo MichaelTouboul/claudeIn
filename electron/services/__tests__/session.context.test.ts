@@ -59,10 +59,11 @@ function writeTranscript(id: string, lines: string[]): void {
 }
 
 describe("listSessions contextPercent", () => {
-  it("derives contextPercent from the LAST assistant usage (incl. cache tokens)", async () => {
+  it("derives contextPercent from the LAST assistant usage prompt tokens (EXCLUDING output)", async () => {
     const { listSessions } = await import("../session/session.service?fresh=ctx-last");
-    // Last turn: input 10_000 + cache_read 90_000 + cache_creation 0 + output 0
-    // = 100_000 of a 200_000 window → 50%.
+    // Last turn prompt: input 10_000 + cache_read 90_000 + cache_creation 0
+    // = 100_000 of the 200_000 window → 50%. The 9_000 output_tokens MUST NOT
+    // inflate the fill (they are the response, not the context prefix).
     writeTranscript("ctx", [
       userLine("main"),
       assistantLine({ input_tokens: 5_000, output_tokens: 200 }),
@@ -70,7 +71,7 @@ describe("listSessions contextPercent", () => {
         input_tokens: 10_000,
         cache_read_input_tokens: 90_000,
         cache_creation_input_tokens: 0,
-        output_tokens: 0,
+        output_tokens: 9_000,
       }),
     ]);
 
@@ -80,11 +81,30 @@ describe("listSessions contextPercent", () => {
     expect(s?.branch).toBe("main");
   });
 
-  it("caps contextPercent at 100", async () => {
+  it("reads a 1M-tier session (>200k prompt) against the 1M window, not a clamped 100", async () => {
+    const { listSessions } = await import("../session/session.service?fresh=ctx-1m");
+    // Ground-truth shape: a long Opus session whose prefix reached ~786k tokens
+    // is on the 1M window → ~79%, NOT an aberrant clamp to 100% of 200k.
+    writeTranscript("wide", [
+      userLine(),
+      assistantLine({
+        input_tokens: 2,
+        cache_read_input_tokens: 785_964,
+        cache_creation_input_tokens: 938,
+        output_tokens: 1_770,
+      }),
+    ]);
+
+    const sessions = await listSessions(PROJECT_PATH);
+    const s = sessions.find((x: SessionSummary) => x.sessionId === "wide");
+    expect(s?.contextPercent).toBe(79);
+  });
+
+  it("caps contextPercent at 100 only for a genuinely over-full 1M context", async () => {
     const { listSessions } = await import("../session/session.service?fresh=ctx-cap");
     writeTranscript("big", [
       userLine(),
-      assistantLine({ input_tokens: 300_000, output_tokens: 50_000 }),
+      assistantLine({ input_tokens: 1_200_000, output_tokens: 50_000 }),
     ]);
 
     const sessions = await listSessions(PROJECT_PATH);
