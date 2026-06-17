@@ -4,6 +4,7 @@ import { ContextBar } from '@/components/_ui/ContextBar';
 import { AgentContextMenu } from '@/components/Dashboard/AgentContextMenu/AgentContextMenu';
 import { useProject } from '@/contexts/ProjectContext';
 import type { AgentSummary } from '@/lib/types';
+import { contextPercentForAgent } from '@/store/dashboard/sessionContext';
 import { useEventsStore } from '@/store/dashboard/useEventsStore';
 import { useFavoritesStore } from '@/store/dashboard/useFavoritesStore';
 
@@ -25,6 +26,9 @@ export function AgentRow({ agent, selected, onSelect, onAgentAction }: AgentRowP
   const { projectId } = useProject();
   const active = useEventsStore((s) => s.activeAgents.has(agent.id));
   const context = useEventsStore((s) => s.agentContexts.get(agent.id));
+  // The bar percent is the ONE backend value for this agent's live session(s),
+  // identical to the sidebar row's number for the same conversation.
+  const percent = useEventsStore((s) => contextPercentForAgent(s.presence, s.sessionContexts, agent.id));
   const isFavorite = useFavoritesStore((s) =>
     (s.byProject[projectId ?? ''] || []).some((f) => f.item_type === 'agent' && f.item_name === agent.id),
   );
@@ -39,8 +43,13 @@ export function AgentRow({ agent, selected, onSelect, onAgentAction }: AgentRowP
         onClick={() => onSelect(agent)}
         className="relative flex flex-1 items-center gap-2.5 min-w-0 text-left"
       >
-        {active && context && context.percent > 0 ? (
-          <ContextBar percent={context.percent} tokensIn={context.tokensIn} tokensOut={context.tokensOut} costUsd={context.costUsd} />
+        {active && percent !== null && percent > 0 ? (
+          <ContextBar
+            percent={percent}
+            tokensIn={context?.tokensIn ?? 0}
+            tokensOut={context?.tokensOut ?? 0}
+            costUsd={context?.costUsd ?? 0}
+          />
         ) : null}
         <AgentTile color={agent.frontmatter.color} running={active} />
         <span className="relative flex-1 min-w-0">

@@ -5,6 +5,7 @@ import { StatusDot } from "@/components/_ui/StatusDot";
 import { EventConsole } from "@/components/Dashboard/EventConsole/EventConsole";
 import { colorMap } from "@/components/Dashboard/Workspace/utils";
 import { paletteColor } from "@/hooks/useConversationAgents";
+import { contextPercentForAgent } from "@/store/dashboard/sessionContext";
 import { AgentPresenceStatus, useEventsStore } from "@/store/dashboard/useEventsStore";
 import { type PanelTab, PanelTabKind } from "@/store/dashboard/usePanelStore";
 
@@ -34,6 +35,12 @@ export function AgentTab({ tab }: { tab: PanelTab }) {
   );
   const globalTool = useEventsStore((s) => s.currentTools.get(agentName));
   const context = useEventsStore((s) => s.agentContexts.get(agentName));
+  // Backend context %: this conversation's value (keyed by claudeSessionId) when
+  // known, else the agent's live session(s). Never computed in the renderer.
+  const percent = useEventsStore((s) =>
+    (claudeSessionId ? s.sessionContexts.get(claudeSessionId) : undefined) ??
+    contextPercentForAgent(s.presence, s.sessionContexts, agentName),
+  );
   // Select the raw buffer (stable reference) and filter in a memo, so the
   // selector never returns a fresh array on every store read (infinite render).
   const allEvents = useEventsStore((s) => s.events);
@@ -71,12 +78,12 @@ export function AgentTab({ tab }: { tab: PanelTab }) {
           background: "var(--color-surface-1)",
         }}
       >
-        {context && context.percent > 0 ? (
+        {percent !== null && percent !== undefined && percent > 0 ? (
           <ContextBar
-            percent={context.percent}
-            tokensIn={context.tokensIn}
-            tokensOut={context.tokensOut}
-            costUsd={context.costUsd}
+            percent={percent}
+            tokensIn={context?.tokensIn ?? 0}
+            tokensOut={context?.tokensOut ?? 0}
+            costUsd={context?.costUsd ?? 0}
           />
         ) : null}
         <StatusDot

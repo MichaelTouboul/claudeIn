@@ -71,9 +71,10 @@ export function ConversationList({ sessions, onChanged }: ConversationListProps)
   const addTab = useWorkspaceStore((s) => s.addTab);
   const overrides = usePinnedStore((s) => s.overrides);
   const statuses = useConversationStatusStore((s) => s.statuses);
-  // Live context fill per agent — preferred over the transcript-derived percent
-  // for a session that is actively running.
-  const agentContexts = useEventsStore((s) => s.agentContexts);
+  // Backend-computed live context % per claudeSessionId — preferred over the
+  // transcript-derived percent for a session that is actively growing. This is
+  // the SAME backend value the live agent bar reads, so the two never diverge.
+  const sessionContexts = useEventsStore((s) => s.sessionContexts);
 
   const active = dashboards.find((d) => d.id === activeDashboardId);
   const activeTab = active?.tabs.find((t) => t.id === active.activeTabId);
@@ -99,12 +100,12 @@ export function ConversationList({ sessions, onChanged }: ConversationListProps)
     addTab({ kind: "session", title, sessionFilePath: s.filePath, sessionId: s.sessionId });
   };
 
-  // Best-effort context %: the live agent context for a running session wins;
-  // otherwise the transcript-derived value. null → the row omits the bar.
+  // Best-effort context %: the backend live value for this conversation (keyed by
+  // its claudeSessionId) wins; otherwise the transcript-derived value listed with
+  // the session. Both come from the one backend computation. null → omit the bar.
   const contextPercentFor = (s: SessionSummary): number | null => {
-    const live = s.agentName ? agentContexts.get(s.agentName) : undefined;
-    if (live && (live.tokensIn > 0 || live.tokensOut > 0)) return Math.round(live.percent);
-    return s.contextPercent;
+    const live = sessionContexts.get(s.sessionId);
+    return live ?? s.contextPercent;
   };
 
   // Flatten the "Load more" cap across the time-grouped history while keeping
