@@ -1,4 +1,6 @@
 // @vitest-environment node
+import os from "node:os";
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Candidate } from "../../types/onboarding.types";
@@ -28,10 +30,14 @@ describe("scanRepos", () => {
   it("filters to scope=project and attaches a per-repo LLM label via the runner seam", async () => {
     scanCandidatesMock.mockResolvedValue([userCandidate, projectA, projectB]);
 
-    const seen: string[] = [];
+    const seenCwds: string[] = [];
+    let call = 0;
+    // Distinguish repos via the stub's return value, NOT via cwd: cwd is now
+    // always os.tmpdir() so the per-repo label run never pollutes a scanned repo.
     repos.setReposRunner(async ({ cwd }) => {
-      seen.push(cwd);
-      return `label for ${cwd}`;
+      seenCwds.push(cwd);
+      call += 1;
+      return `label ${call}`;
     });
 
     const result = await repos.scanRepos("/work");
@@ -39,10 +45,13 @@ describe("scanRepos", () => {
     expect(scanCandidatesMock).toHaveBeenCalledWith("/work");
     // user scope dropped
     expect(result.map((r) => r.path)).toEqual(["/work/a", "/work/b"]);
-    expect(result[0].label).toBe("label for /work/a");
-    expect(result[1].label).toBe("label for /work/b");
-    // ran once per project repo, with cwd = repo path
-    expect(seen).toEqual(["/work/a", "/work/b"]);
+    expect(result[0].label).toBe("label 1");
+    expect(result[1].label).toBe("label 2");
+    // ran once per project repo, ALWAYS with cwd = os.tmpdir() (never the repo path)
+    expect(seenCwds).toHaveLength(2);
+    expect(seenCwds).toEqual([os.tmpdir(), os.tmpdir()]);
+    expect(seenCwds).not.toContain("/work/a");
+    expect(seenCwds).not.toContain("/work/b");
   });
 
   it("sets label = null when the runner throws for a repo", async () => {

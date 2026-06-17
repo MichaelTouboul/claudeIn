@@ -1,8 +1,10 @@
 import { spawn } from "node:child_process";
+import os from "node:os";
 
 import { scanCandidates } from "../system/onboarding.service";
 import { detectRepoLanguage } from "./repo-language";
 import { detectRepoLogo } from "./repo-logo";
+import { buildRepoLabelContext } from "./repo-context";
 import { renderPrompt, repoLabelPrompt } from "../prompts";
 import type { Candidate } from "../../types/onboarding.types";
 import type { RepoCandidate } from "../../types/user.type";
@@ -51,11 +53,14 @@ export function setReposRunner(next: ReposRunner): void {
 async function labelFor(candidate: Candidate): Promise<RepoCandidate> {
   const logoDataUrl = detectRepoLogo(candidate.path);
   const language = detectRepoLanguage(candidate.path);
+  // Gather the repo context in Node and run the label LLM in a throwaway tmp cwd
+  // (NEVER the repo) so it can't leak a `.jsonl` transcript into a scanned project.
+  const context = buildRepoLabelContext(candidate.path);
   try {
     const label = await runner({
       command: REPOS_COMMAND,
-      cwd: candidate.path,
-      prompt: renderPrompt(repoLabelPrompt, undefined),
+      cwd: os.tmpdir(),
+      prompt: renderPrompt(repoLabelPrompt, { context }),
     });
     return { ...candidate, label: label.length > 0 ? label : null, logoDataUrl, language };
   } catch {

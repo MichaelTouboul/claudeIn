@@ -18,6 +18,7 @@ export type { Prompt } from "./prompt.types";
 export { renderPrompt } from "./render";
 
 export { repoLabelPrompt } from "./repo-label.prompt";
+export type { RepoLabelInput } from "./repo-label.prompt";
 export { userProfilePrompt } from "./user-profile.prompt";
 export { scopeProfilePrompt } from "./scope-profile.prompt";
 export { panelTransformPrompt } from "./panel-transform.prompt";
