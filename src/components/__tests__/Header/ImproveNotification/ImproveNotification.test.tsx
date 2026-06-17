@@ -117,6 +117,29 @@ describe("ImproveNotification", () => {
     expect(update).not.toHaveTextContent("→ v");
   });
 
+  it("re-clicking the trigger closes the open popover", () => {
+    render(<ImproveNotification />);
+    openPopover();
+    expect(screen.getByText(/no updates yet/i)).toBeInTheDocument();
+
+    // Second click toggles the popover back closed.
+    fireEvent.click(
+      screen.getByRole("button", { name: /updates|improvements? ready/i }),
+    );
+    expect(screen.queryByText(/no updates yet/i)).not.toBeInTheDocument();
+  });
+
+  it("closes on Escape", () => {
+    render(<ImproveNotification />);
+    openPopover();
+    expect(screen.getByText(/no updates yet/i)).toBeInTheDocument();
+
+    fireEvent.keyDown(document.activeElement ?? document.body, {
+      key: "Escape",
+    });
+    expect(screen.queryByText(/no updates yet/i)).not.toBeInTheDocument();
+  });
+
   it("Dismiss acknowledges without reloading", () => {
     act(() => {
       useImproveStore.getState().ingest(makeRequest());

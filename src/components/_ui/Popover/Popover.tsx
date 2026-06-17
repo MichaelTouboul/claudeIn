@@ -19,7 +19,11 @@ export function Popover({ trigger, children, align = 'start', className, sideOff
         <RadixPopover.Content
           align={align}
           sideOffset={sideOffset}
-          className={cn('z-50 rounded-lg overflow-hidden outline-none', className)}
+          // Portalled to <body>: only z-index decides paint order. App-root
+          // overlays (the fixed top-right notification bar that hosts the
+          // ImproveNotification trigger) sit at z-60, so the panel must
+          // out-stack them or it opens *behind* its own overlay and is unseen.
+          className={cn('z-[70] rounded-lg overflow-hidden outline-none', className)}
           style={{
             background: 'var(--color-surface-2)',
             border: '1px solid var(--color-border)',

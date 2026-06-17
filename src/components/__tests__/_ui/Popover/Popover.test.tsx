@@ -28,4 +28,23 @@ describe('Popover', () => {
     fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
     expect(screen.queryByText('panel content')).toBeNull();
   });
+
+  // The Content is portalled to <body>, so its own z-index — not its DOM
+  // position — decides what paints over it. App-root overlays (the fixed
+  // top-right notification bar that mounts ImproveNotification) sit at z-60, so
+  // a Content at z-50 opens but renders *behind* that overlay and is never
+  // seen. The popover layer must out-stack app overlays.
+  it('stacks its content above app-overlay chrome (z >= 60)', () => {
+    render(
+      <Popover trigger={<button>open</button>}>
+        <div>panel content</div>
+      </Popover>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'open' }));
+
+    const content = screen.getByText('panel content').closest('[class*="z-"]');
+    const zClass = content?.className.match(/z-(?:\[(\d+)\]|(\d+))/);
+    const zValue = Number(zClass?.[1] ?? zClass?.[2] ?? 0);
+    expect(zValue).toBeGreaterThanOrEqual(60);
+  });
 });

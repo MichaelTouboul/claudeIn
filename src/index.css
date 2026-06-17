@@ -105,6 +105,10 @@
     /* Focus ring — skill-named aliases (match tokens/colors.css naming) */
     --focus-ring: var(--color-focus-ring);
     --focus-ring-offset: var(--color-focus-ring-offset);
+
+    /* Elevation — popover/menu shadow (skill tokens/elevation.css). The _ui
+       Popover references var(--shadow-popover); without this it rendered flat. */
+    --shadow-popover: 0 10px 30px rgba(0, 0, 0, 0.52);
   }
 
   * {

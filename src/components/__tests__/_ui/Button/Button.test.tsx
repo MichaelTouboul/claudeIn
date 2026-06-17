@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { createRef } from "react";
 import { describe, expect, it } from "vitest";
 
 import { Button } from "@/components/_ui/Button";
@@ -33,5 +34,33 @@ describe("Button", () => {
     // asChild forwards to the anchor; leftIcon is intentionally not injected
     expect(screen.getByRole("link", { name: "link" })).toBeInTheDocument();
     expect(screen.queryByTestId("lead")).not.toBeInTheDocument();
+  });
+
+  // Radix `Trigger asChild`/`Slot` composes a ref onto its child to anchor the
+  // floating layer; a Button that swallows the ref leaves the Popover Content
+  // un-anchored (it never opens in a real browser). Guard the contract here.
+  it("forwards a ref to the underlying <button> element", () => {
+    const ref = createRef<HTMLButtonElement>();
+    render(<Button ref={ref}>Click</Button>);
+    expect(ref.current).toBeInstanceOf(HTMLButtonElement);
+    expect(ref.current).toBe(screen.getByRole("button", { name: "Click" }));
+  });
+
+  it("forwards a ref to the slotted child through asChild", () => {
+    // asChild slots an anchor: a callback ref (typed at the button's own
+    // HTMLButtonElement contract) still receives the actual rendered node.
+    let node: HTMLElement | null = null;
+    render(
+      <Button
+        asChild
+        ref={(el) => {
+          node = el;
+        }}
+      >
+        <a href="/x">link</a>
+      </Button>,
+    );
+    expect(node).toBeInstanceOf(HTMLAnchorElement);
+    expect(node).toBe(screen.getByRole("link", { name: "link" }));
   });
 });
