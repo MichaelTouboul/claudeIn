@@ -7,7 +7,6 @@ import { useSessions } from '@/hooks/useSessions';
 import { useDashboardStore } from '@/store/dashboard/useDashboardStore';
 import { SidebarView, useDashboardUIStore } from '@/store/dashboard/useDashboardUIStore';
 import { useFavoritesStore, useInitFavorites } from '@/store/dashboard/useFavoritesStore';
-import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
 import { ConversationList } from './ConversationList/ConversationList';
 import { LibraryNav } from './LibraryNav/LibraryNav';
@@ -28,7 +27,6 @@ export function Sidebar() {
 
   const view = useDashboardUIStore((s) => s.sidebarView);
   const setView = useDashboardUIStore((s) => s.setSidebarView);
-  const addTab = useWorkspaceStore((s) => s.addTab);
 
   useEffect(() => {
     useDashboardUIStore.getState().setSelectedAgent(null);
@@ -67,9 +65,6 @@ export function Sidebar() {
     }
   };
 
-  // "+ New session" opens a fresh chat tab — the existing new-conversation entry
-  // point (same tab the WorkspaceBar "+" creates).
-  const onNewSession = () => addTab({ kind: 'chat', title: 'Chat' });
   // No plugin-install flow exists yet; flag the affordance so it is wired (not
   // silently omitted) until that flow lands.
   const onInstallPlugin = () => alert('Install from plugin — coming soon');
@@ -102,7 +97,7 @@ export function Sidebar() {
         <LibraryNav onAgentAction={handleAgentAction} onNewAgent={() => handleAgentAction("create", "")} />
       )}
 
-      <SidebarFooter view={view} onNewSession={onNewSession} onInstallPlugin={onInstallPlugin} />
+      <SidebarFooter onInstallPlugin={onInstallPlugin} />
 
       <ResizeHandle onMouseDown={handleResizeDragStart} />
     </div>
