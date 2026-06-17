@@ -47,14 +47,17 @@ beforeEach(() => {
 });
 
 describe("ingestScope", () => {
-  it("invokes claude --print with cwd=scopePath and a prompt mentioning .claude + plugins", async () => {
+  it("invokes claude --print in tmpdir with an injected .claude + plugins context", async () => {
     await profile.ingestScope(scopeRoot, "project", ["babysitter"]);
 
     expect(calls).toHaveLength(1);
     const call = calls[0];
     expect(call.command).toContain("claude");
     expect(call.command).toContain("--print");
-    expect(call.cwd).toBe(scopeRoot);
+    // Runs in tmpdir (NOT the scope) so it can't leak a transcript into the scan.
+    expect(call.cwd).toBe(os.tmpdir());
+    // `.claude` + the plugin name come from the Node-gathered injected context,
+    // not from a filesystem-explore instruction.
     expect(call.prompt).toContain(".claude");
     expect(call.prompt.toLowerCase()).toContain("babysitter");
   });

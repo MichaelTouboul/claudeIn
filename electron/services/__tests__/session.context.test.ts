@@ -55,7 +55,10 @@ function assistantLine(usage: Record<string, number>): string {
 function writeTranscript(id: string, lines: string[]): void {
   const dir = sessionsDir();
   fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(path.join(dir, `${id}.jsonl`), lines.join("\n") + "\n", "utf-8");
+  // Prepend an interactive-metadata line so the fixture is treated as a real
+  // session, not a one-shot `--print` helper transcript (which would be filtered).
+  const metaLine = JSON.stringify({ type: "last-prompt", value: "hello" });
+  fs.writeFileSync(path.join(dir, `${id}.jsonl`), [metaLine, ...lines].join("\n") + "\n", "utf-8");
 }
 
 describe("listSessions contextPercent", () => {

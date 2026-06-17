@@ -25,8 +25,11 @@ function writeSession(id: string, mtimeMsAgo: number): void {
   const dir = sessionsDir();
   fs.mkdirSync(dir, { recursive: true });
   const file = path.join(dir, `${id}.jsonl`);
+  // A real interactive session begins with interactive-metadata lines (so it is
+  // not mistaken for a one-shot `--print` helper transcript and filtered out).
+  const meta = JSON.stringify({ type: "last-prompt", value: "hi" });
   const line = JSON.stringify({ type: "user", promptId: "p1", timestamp: new Date().toISOString(), message: { content: "hi" } });
-  fs.writeFileSync(file, line + "\n", "utf-8");
+  fs.writeFileSync(file, meta + "\n" + line + "\n", "utf-8");
   const when = new Date(Date.now() - mtimeMsAgo);
   fs.utimesSync(file, when, when);
 }

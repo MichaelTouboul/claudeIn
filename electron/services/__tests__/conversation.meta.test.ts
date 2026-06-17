@@ -87,7 +87,9 @@ describe("listSessions coalesces the persisted ai_title", () => {
 
   function writeTranscript(sessionId: string, opts: { aiTitle?: string; firstPrompt: string }): void {
     fs.mkdirSync(sessionsDir, { recursive: true });
-    const lines: string[] = [];
+    // Real interactive session: begins with an interactive-metadata line so it
+    // is not mistaken for a one-shot `--print` helper transcript and filtered.
+    const lines: string[] = [JSON.stringify({ type: "last-prompt", value: opts.firstPrompt })];
     if (opts.aiTitle) lines.push(JSON.stringify({ type: "ai-title", aiTitle: opts.aiTitle }));
     lines.push(
       JSON.stringify({
