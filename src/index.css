@@ -61,6 +61,8 @@
   --color-active: #45d483;      /* was #4ade80 */
   --color-danger: #ff8585;      /* was #f87171 */
   --color-warning: #f0c14b;     /* was #facc15 */
+  --color-warning-subtle: rgba(240, 193, 75, 0.10); /* warning-tinted card fill (skill --warning-subtle) */
+  --color-warning-border: rgba(240, 193, 75, 0.30); /* warning-tinted hairline (auth card / shield avatar) */
   --color-info: #6db4ff;        /* was #60a5fa */
   --color-history: #b794f6;     /* was #c084fc */
 

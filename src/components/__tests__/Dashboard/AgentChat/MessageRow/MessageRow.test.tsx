@@ -31,7 +31,7 @@ const authBlock =
 describe('MessageRow', () => {
   it('shows the authorization header for an accept/deny choice prompt', () => {
     render(<MessageRow msg={assistant(authBlock)} isLast onAnswer={vi.fn()} />);
-    expect(screen.getByText('Authorization')).toBeInTheDocument();
+    expect(screen.getByText('Authorization requise')).toBeInTheDocument();
     expect(screen.queryByText('Claude')).not.toBeInTheDocument();
     expect(screen.getByRole('listbox')).toBeInTheDocument();
   });
@@ -39,8 +39,28 @@ describe('MessageRow', () => {
   it('shows the agent header and no picker for a plain assistant message', () => {
     render(<MessageRow msg={assistant('All done.')} isLast onAnswer={vi.fn()} />);
     expect(screen.getByText('Claude')).toBeInTheDocument();
-    expect(screen.queryByText('Authorization')).not.toBeInTheDocument();
+    expect(screen.queryByText('Authorization requise')).not.toBeInTheDocument();
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+  });
+
+  it('renders a You bubble with header and timestamp for a user message', () => {
+    render(<MessageRow msg={user('hello there')} isLast={false} onAnswer={vi.fn()} />);
+    expect(screen.getByText('You')).toBeInTheDocument();
+    // HH:MM:SS timestamp is rendered alongside the name.
+    expect(screen.getByText(/^\d{2}:\d{2}:\d{2}$/)).toBeInTheDocument();
+    expect(screen.getByText('hello there')).toBeInTheDocument();
+  });
+
+  it('wraps an @agent mention and an MCP permission in mono chips', () => {
+    render(
+      <MessageRow
+        msg={user('ask @slack-assistant to use slack_send_message please')}
+        isLast={false}
+        onAnswer={vi.fn()}
+      />,
+    );
+    expect(screen.getByText('@slack-assistant')).toBeInTheDocument();
+    expect(screen.getByText('slack_send_message')).toBeInTheDocument();
   });
 
   it('renders a slash-command invocation as a chip, not raw XML', () => {

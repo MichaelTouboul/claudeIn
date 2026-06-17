@@ -1,6 +1,6 @@
-import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
-
 import { type AskOption, type AskPrompt as AskPromptType, replyStyles } from '../askPrompt';
+import { AuthorizationCard } from './AuthorizationCard/AuthorizationCard';
+import { useRovingChoice } from './useRovingChoice';
 
 type AskPromptProps = {
   prompt: AskPromptType;
@@ -8,50 +8,39 @@ type AskPromptProps = {
   onAnswer: (value: string) => void;
 };
 
-/** Keyboard-navigable picker for a structured `cam-ask` prompt. `choice` renders a roving
- *  listbox (↑/↓ + Enter, 1–9 shortcuts, hover/click); `text` renders nothing (the chat input
- *  is the text affordance). Interactive only when `isActive`; otherwise inert + dimmed. */
+/** True when a choice prompt is an authorization request (carries accept/deny
+ *  options) — the case the design renders as a warning-tinted card. */
+function isAuthorization(prompt: AskPromptType): boolean {
+  return (
+    prompt.type === 'choice' &&
+    prompt.options.some((o) => o.variant === 'accept' || o.variant === 'deny')
+  );
+}
+
+/** Renders a structured `cam-ask` prompt. An authorization choice becomes the
+ *  `AuthorizationCard`; any other choice renders a keyboard-navigable roving
+ *  listbox (↑/↓ + Enter, 1–9 shortcuts, hover/click). `text` renders nothing
+ *  (the chat input is the text affordance). Interactive only when `isActive`. */
 export function AskPrompt({ prompt, isActive, onAnswer }: AskPromptProps) {
-  const [highlighted, setHighlighted] = useState(0);
-  const listRef = useRef<HTMLDivElement>(null);
+  if (prompt.type === 'choice' && isAuthorization(prompt)) {
+    return <AuthorizationCard prompt={prompt} isActive={isActive} onAnswer={onAnswer} />;
+  }
+  if (prompt.type !== 'choice') return null;
+  return <ChoicePicker prompt={prompt} isActive={isActive} onAnswer={onAnswer} />;
+}
 
-  const options = prompt.type === 'choice' ? prompt.options : null;
+type ChoicePickerProps = {
+  prompt: Extract<AskPromptType, { type: 'choice' }>;
+  isActive: boolean;
+  onAnswer: (value: string) => void;
+};
 
-  useEffect(() => {
-    if (isActive && listRef.current) {
-      const node = listRef.current;
-      const id = setTimeout(() => node.focus(), 0);
-      return () => clearTimeout(id);
-    }
-    return undefined;
-  }, [isActive]);
-
-  if (prompt.type === 'text' || options === null) return null;
-
-  const submit = (index: number) => {
-    const option = options[index];
-    if (option) onAnswer(option.value);
-  };
-
-  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (!isActive) return;
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      setHighlighted((h) => Math.min(h + 1, options.length - 1));
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      setHighlighted((h) => Math.max(h - 1, 0));
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      submit(highlighted);
-    } else if (/^[1-9]$/.test(e.key)) {
-      const index = Number(e.key) - 1;
-      if (index < options.length) {
-        e.preventDefault();
-        submit(index);
-      }
-    }
-  };
+function ChoicePicker({ prompt, isActive, onAnswer }: ChoicePickerProps) {
+  const { highlighted, setHighlighted, listRef, onKeyDown, submit } = useRovingChoice(
+    prompt.options,
+    isActive,
+    onAnswer,
+  );
 
   return (
     <div className="ml-5 mt-2 flex flex-col gap-2">
@@ -68,7 +57,7 @@ export function AskPrompt({ prompt, isActive, onAnswer }: AskPromptProps) {
         className="flex flex-col gap-1 outline-none"
         style={{ opacity: isActive ? 1 : 0.5 }}
       >
-        {options.map((option, i) => (
+        {prompt.options.map((option, i) => (
           <Option
             key={option.value}
             id={`ask-option-${i}`}
