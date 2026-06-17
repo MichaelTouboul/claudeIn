@@ -81,3 +81,46 @@ describe('AskPrompt', () => {
     expect(container).toBeEmptyDOMElement();
   });
 });
+
+const authPrompt: AskPromptType = {
+  type: 'choice',
+  question:
+    'The mcp__claude_ai_Slack__slack_send_message permission was denied. Approve?',
+  options: [
+    { label: 'Approuver', value: 'yes', variant: 'accept' },
+    { label: 'Toujours autoriser', value: 'always', variant: 'accept' },
+    { label: 'Refuser', value: 'no', variant: 'deny' },
+  ],
+};
+
+describe('AskPrompt — authorization card', () => {
+  it('renders the server badge and the full MCP tool chip', () => {
+    render(<AskPrompt prompt={authPrompt} isActive onAnswer={vi.fn()} />);
+    expect(screen.getByText('slack')).toBeInTheDocument();
+    expect(
+      screen.getByText('mcp__claude_ai_Slack__slack_send_message'),
+    ).toBeInTheDocument();
+  });
+
+  it('exposes the options as a roving listbox with action buttons', () => {
+    render(<AskPrompt prompt={authPrompt} isActive onAnswer={vi.fn()} />);
+    expect(screen.getByRole('listbox')).toBeInTheDocument();
+    expect(screen.getAllByRole('option')).toHaveLength(3);
+    expect(screen.getByRole('option', { name: 'Approuver' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Refuser' })).toBeInTheDocument();
+  });
+
+  it('calls onAnswer when an action button is clicked', () => {
+    const onAnswer = vi.fn();
+    render(<AskPrompt prompt={authPrompt} isActive onAnswer={onAnswer} />);
+    fireEvent.click(screen.getByRole('option', { name: 'Refuser' }));
+    expect(onAnswer).toHaveBeenCalledWith('no');
+  });
+
+  it('submits via keyboard like the plain picker', () => {
+    const onAnswer = vi.fn();
+    render(<AskPrompt prompt={authPrompt} isActive onAnswer={onAnswer} />);
+    fireEvent.keyDown(screen.getByRole('listbox'), { key: '2' });
+    expect(onAnswer).toHaveBeenCalledWith('always');
+  });
+});
