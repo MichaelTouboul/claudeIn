@@ -5,6 +5,7 @@ import {
   codeTabId,
   type PanelTab,
   PanelTabKind,
+  promptEditorTabId,
   type TablePayload,
   tableTabId,
   textTabId,
@@ -203,6 +204,40 @@ describe('usePanelStore', () => {
     if (cur?.kind !== PanelTabKind.Workflow) throw new Error('not a workflow object');
     expect(cur.payload.claudeSessionId).toBe('sess-1');
     expect(usePanelStore.getState().isOpen).toBe(true);
+  });
+
+  it('opens a PromptEditor object and keeps its payload', () => {
+    const { open } = usePanelStore.getState();
+    open({
+      id: promptEditorTabId('comp-1'),
+      kind: PanelTabKind.PromptEditor,
+      title: 'Éditeur de prompt',
+      payload: { composerId: 'comp-1', text: '# Draft' },
+    });
+    const cur = usePanelStore.getState().current;
+    expect(cur?.kind).toBe(PanelTabKind.PromptEditor);
+    if (cur?.kind !== PanelTabKind.PromptEditor) throw new Error('not a prompt-editor object');
+    expect(cur.payload).toEqual({ composerId: 'comp-1', text: '# Draft' });
+    expect(usePanelStore.getState().isOpen).toBe(true);
+  });
+
+  it('update patches a PromptEditor draft text in place', () => {
+    const { open, update } = usePanelStore.getState();
+    open({
+      id: promptEditorTabId('comp-1'),
+      kind: PanelTabKind.PromptEditor,
+      title: 'Éditeur de prompt',
+      payload: { composerId: 'comp-1', text: 'a' },
+    });
+    update({ kind: PanelTabKind.PromptEditor, payload: { composerId: 'comp-1', text: 'a b' } });
+    const cur = usePanelStore.getState().current;
+    if (cur?.kind !== PanelTabKind.PromptEditor) throw new Error('not a prompt-editor object');
+    expect(cur.payload.text).toBe('a b');
+  });
+
+  it('promptEditorTabId is stable per composer and differs across composers', () => {
+    expect(promptEditorTabId('comp-1')).toBe(promptEditorTabId('comp-1'));
+    expect(promptEditorTabId('comp-1')).not.toBe(promptEditorTabId('comp-2'));
   });
 
   it('width defaults to 480', () => {

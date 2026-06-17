@@ -13,6 +13,7 @@ export const PanelTabKind = {
   Agent: 'agent',
   Workflow: 'workflow',
   Toon: 'toon',
+  PromptEditor: 'prompt-editor',
 } as const;
 export type PanelTabKind = (typeof PanelTabKind)[keyof typeof PanelTabKind];
 
@@ -37,6 +38,15 @@ export type WorkflowPayload = { claudeSessionId: string | null };
  * and panel edits stay in sync. Identity is the attachment, not its content.
  */
 export type ToonPayload = { attachmentId: string };
+/**
+ * A long-form prompt-editor view, opened from a chat composer's maximize button.
+ * Unlike the live views it DOES carry a snapshot — `text` is the editable
+ * markdown draft, seeded from the composer and patched in place as the user types
+ * (so close/reopen preserves the draft). `composerId` is the bridge key the
+ * Save/Send actions use to write the draft back into the originating composer
+ * (see `useComposerBridgeStore`); identity is the composer, not the content.
+ */
+export type PromptEditorPayload = { composerId: string; text: string };
 
 /**
  * A panel object — discriminated by `kind`, so `payload` is narrowed per kind.
@@ -50,7 +60,8 @@ export type PanelTab =
   | { id: string; kind: typeof PanelTabKind.Text; title: string; payload: TextPayload }
   | { id: string; kind: typeof PanelTabKind.Agent; title: string; payload: AgentPayload }
   | { id: string; kind: typeof PanelTabKind.Workflow; title: string; payload: WorkflowPayload }
-  | { id: string; kind: typeof PanelTabKind.Toon; title: string; payload: ToonPayload };
+  | { id: string; kind: typeof PanelTabKind.Toon; title: string; payload: ToonPayload }
+  | { id: string; kind: typeof PanelTabKind.PromptEditor; title: string; payload: PromptEditorPayload };
 
 /** Payload type for a given object kind — single source for kind→payload mapping. */
 export type PayloadByKind = {
@@ -60,6 +71,7 @@ export type PayloadByKind = {
   [PanelTabKind.Agent]: AgentPayload;
   [PanelTabKind.Workflow]: WorkflowPayload;
   [PanelTabKind.Toon]: ToonPayload;
+  [PanelTabKind.PromptEditor]: PromptEditorPayload;
 };
 
 /**
@@ -73,7 +85,8 @@ export type TabPatch =
   | { title?: string; kind?: undefined; payload?: undefined }
   | { title?: string; kind: typeof PanelTabKind.Table; payload: TablePayload }
   | { title?: string; kind: typeof PanelTabKind.Code; payload: CodePayload }
-  | { title?: string; kind: typeof PanelTabKind.Text; payload: TextPayload };
+  | { title?: string; kind: typeof PanelTabKind.Text; payload: TextPayload }
+  | { title?: string; kind: typeof PanelTabKind.PromptEditor; payload: PromptEditorPayload };
 
 /** Panel width clamp bounds (px floor; ceiling is 90% of the viewport). */
 export const MIN_PANEL_WIDTH = 320;
@@ -156,6 +169,9 @@ function applyPatch(object: PanelTab, patch: TabPatch): PanelTab {
     if (object.kind === PanelTabKind.Text && patch.kind === PanelTabKind.Text) {
       return { ...object, title, payload: patch.payload };
     }
+    if (object.kind === PanelTabKind.PromptEditor && patch.kind === PanelTabKind.PromptEditor) {
+      return { ...object, title, payload: patch.payload };
+    }
   }
   return { ...object, title };
 }
@@ -209,4 +225,14 @@ export function workflowTabId(claudeSessionId: string | null): string {
  */
 export function toonTabId(attachmentId: string): string {
   return `toon:${attachmentId}`;
+}
+
+/**
+ * Stable id for a prompt-editor object. Identity is the originating composer —
+ * re-opening the editor for the SAME composer reuses the same panel object (and
+ * its in-flight draft) rather than spawning a duplicate. The draft `text` lives
+ * in the payload and is patched in place, so the id stays stable as the user types.
+ */
+export function promptEditorTabId(composerId: string): string {
+  return `prompt-editor:${composerId}`;
 }

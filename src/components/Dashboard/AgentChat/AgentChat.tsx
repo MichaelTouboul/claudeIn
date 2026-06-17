@@ -5,6 +5,7 @@ import { useChatDropzone } from '@/hooks/useChatDropzone';
 import { useCompactOnResume } from '@/hooks/useCompactOnResume';
 import { usePromptHistory } from '@/hooks/usePromptHistory';
 import type { ChatMessage,SpawnSession } from '@/lib/types';
+import { useComposerBridgeStore } from '@/store/dashboard/useComposerBridgeStore';
 import { ConversationStatus, useConversationStatusStore } from '@/store/dashboard/useConversationStatusStore';
 import { useConversationTitlesStore } from '@/store/dashboard/useConversationTitlesStore';
 import { useDashboardUIStore } from '@/store/dashboard/useDashboardUIStore';
@@ -134,6 +135,25 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
     setInput, setAttachedFiles, setQueue, setMessages,
     setAwaitingResponse, setWaitingInput, setSession, setClaudeSessionId,
   });
+
+  // Keep the latest send closure reachable from the once-registered bridge
+  // handler (handleSend is rebuilt every render; the bridge registration is not).
+  const handleSendRef = useRef<() => void>(() => {});
+  handleSendRef.current = handleSend;
+
+  // Publish this composer's write-back handlers so the out-of-tree prompt-editor
+  // panel can Save (set the editor markdown) / Send (set + fire send) into it.
+  // Registered once per composerId; setMarkdown drives the editor's onChange,
+  // which updates `input`/`plainText` state, so no separate setInput is needed.
+  const register = useComposerBridgeStore((s) => s.register);
+  useEffect(
+    () =>
+      register(conversationKey, {
+        setInput: (markdown) => editorRef.current?.setMarkdown(markdown),
+        send: () => handleSendRef.current(),
+      }),
+    [register, conversationKey],
+  );
 
   useEffect(() => {
     if (scrollRef.current) {

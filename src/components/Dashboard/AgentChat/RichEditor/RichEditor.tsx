@@ -1,4 +1,5 @@
 import { ListItemNode, ListNode } from '@lexical/list';
+import { $convertFromMarkdownString } from '@lexical/markdown';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -24,6 +25,9 @@ export type RichEditorHandle = {
   /** Replace the leading `/token` with `/cmd ` — completes the command text WITHOUT
    *  launching it, leaving the caret after the trailing space for args. */
   insertSlashCommand: (cmd: string) => void;
+  /** Replace the entire editor content from a markdown string (prompt-editor
+   *  panel write-back: the panel edits markdown, this re-parses it into nodes). */
+  setMarkdown: (markdown: string) => void;
 };
 
 export type RichEditorProps = {
@@ -44,10 +48,6 @@ export type RichEditorProps = {
   onPasteText?: (text: string) => boolean;
   handleRef: Ref<RichEditorHandle>;
   placeholder: string;
-  /** Expanded (long-prompt) mode — grows the editor's scroll height so a long
-   *  prompt is comfortable to draft in place. Toggled by the composer's editor
-   *  button. */
-  expanded?: boolean;
 };
 
 function SubmitBridge({ onSubmit }: { onSubmit: () => void }) {
@@ -102,13 +102,18 @@ function HandlePlugin({ handleRef }: { handleRef: Ref<RichEditorHandle> }) {
           selection.setTextNodeRange(node, at, node, text.length);
           selection.insertText(`${cmd} `);
         }),
+      setMarkdown: (markdown: string) =>
+        editor.update(() => {
+          $getRoot().clear();
+          $convertFromMarkdownString(markdown, CHAT_TRANSFORMERS);
+        }),
     }),
     [editor]
   );
   return null;
 }
 
-export function RichEditor({ onChange, onSubmit, onEnter, onComplete, onNavKey, onHistoryNav, onPasteText, handleRef, placeholder, expanded = false }: RichEditorProps) {
+export function RichEditor({ onChange, onSubmit, onEnter, onComplete, onNavKey, onHistoryNav, onPasteText, handleRef, placeholder }: RichEditorProps) {
   return (
     <LexicalComposer
       initialConfig={{
@@ -125,7 +130,7 @@ export function RichEditor({ onChange, onSubmit, onEnter, onComplete, onNavKey, 
           <RichTextPlugin
             contentEditable={
               <ContentEditable
-                className={`text-sm font-mono leading-relaxed focus:outline-none min-h-[24px] overflow-y-auto ${expanded ? 'max-h-[360px]' : 'max-h-[120px]'}`}
+                className="text-sm font-mono leading-relaxed focus:outline-none min-h-[24px] overflow-y-auto max-h-[120px]"
                 style={{ color: 'var(--color-text-primary)' }}
                 aria-placeholder={placeholder}
                 placeholder={

@@ -4,6 +4,7 @@ import { type PanelTab, PanelTabKind } from '@/store/dashboard/usePanelStore';
 
 import { AgentTab } from './AgentTab/AgentTab';
 import { CodeTab } from './CodeTab/CodeTab';
+import { PromptEditorTab } from './PromptEditorTab/PromptEditorTab';
 import { TableTab } from './TableTab/TableTab';
 import { TextTab } from './TextTab/TextTab';
 import { ToonTab } from './ToonTab/ToonTab';
@@ -17,4 +18,5 @@ export const TAB_BODY: Record<PanelTabKind, ComponentType<{ tab: PanelTab }>> = 
   [PanelTabKind.Agent]: AgentTab,
   [PanelTabKind.Workflow]: WorkflowTab,
   [PanelTabKind.Toon]: ToonTab,
+  [PanelTabKind.PromptEditor]: PromptEditorTab,
 };
