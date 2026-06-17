@@ -7,6 +7,8 @@ import { StatsBar } from '@/components/Dashboard/StatsBar/StatsBar';
 import { Logo } from '@/components/Logo/Logo';
 import { cn, isMac  } from '@/lib/utils';
 
+import { HeaderChangesButton } from './HeaderChangesButton/HeaderChangesButton';
+
 export type HeaderProps = {
   activeCount: number;
   connected: boolean;
@@ -45,6 +47,7 @@ export function Header({ activeCount, connected, onOpenChat, onGoHome, onCustomi
         </Button>
       ) : null}
       <StatsBar activeCount={activeCount} connected={connected} />
+      <HeaderChangesButton />
       <Button intent="secondary" size="sm" onClick={onOpenChat} leftIcon={<MessageSquare size={15} aria-hidden="true" />}>
         Chat
       </Button>
