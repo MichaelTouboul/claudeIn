@@ -40,6 +40,8 @@ type UseAgentChatActionsParams = {
   openImprove: (target: ImproveContextTarget | null) => void;
   editorRef: RefObject<RichEditorHandle | null>;
   pendingUserMsgs: RefObject<Set<string>>;
+  // Append a freshly submitted prompt to this chat's in-memory ↑/↓ history.
+  recordHistory: (prompt: string) => void;
   setInput: SetState<string>;
   setAttachedFiles: SetState<AttachedFile[]>;
   setQueue: SetState<QueueItem[]>;
@@ -67,6 +69,7 @@ export function useAgentChatActions({
   openImprove,
   editorRef,
   pendingUserMsgs,
+  recordHistory,
   setInput,
   setAttachedFiles,
   setQueue,
@@ -147,6 +150,9 @@ export function useAgentChatActions({
     const jsonAttachments = byComposer(useToonStore.getState().attachments, composerId);
     if (!input.trim() && attachedFiles.length === 0 && jsonAttachments.length === 0) return;
     const text = input.trim();
+    // Record the typed prompt as the newest ↑/↓ history entry (terminal-style: every
+    // submitted line, slash commands included). Attachment-only sends have no text.
+    if (text) recordHistory(text);
 
     // A bare registered slash command (no attachments of any kind) goes through the
     // single dispatcher: `local` runs in-app (e.g. /clear), `cli` forwards to claude.
@@ -169,7 +175,7 @@ export function useAgentChatActions({
     editorRef.current?.focus();
 
     await sendMessage(fullText);
-  }, [input, attachedFiles, composerId, dispatchSlash, sendMessage, editorRef, setInput, setAttachedFiles]);
+  }, [input, attachedFiles, composerId, dispatchSlash, sendMessage, editorRef, recordHistory, setInput, setAttachedFiles]);
 
   const handleAttach = useCallback(async (kind: FilePickerKind = FilePickerKind.All) => {
     const paths = await window.api.openFilePicker(kind);

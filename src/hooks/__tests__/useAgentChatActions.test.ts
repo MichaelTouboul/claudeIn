@@ -35,6 +35,7 @@ function makeParams(overrides: Partial<Parameters<typeof useAgentChatActions>[0]
     openImprove: vi.fn(),
     editorRef,
     pendingUserMsgs,
+    recordHistory: vi.fn(),
     setInput: vi.fn(),
     setAttachedFiles: vi.fn(),
     setQueue: vi.fn(),

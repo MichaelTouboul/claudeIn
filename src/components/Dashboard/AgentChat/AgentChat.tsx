@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useAgentChatActions } from '@/hooks/useAgentChatActions';
 import { useChatDropzone } from '@/hooks/useChatDropzone';
 import { useCompactOnResume } from '@/hooks/useCompactOnResume';
+import { usePromptHistory } from '@/hooks/usePromptHistory';
 import type { ChatMessage,SpawnSession } from '@/lib/types';
 import { ConversationStatus, useConversationStatusStore } from '@/store/dashboard/useConversationStatusStore';
 import { useConversationTitlesStore } from '@/store/dashboard/useConversationTitlesStore';
@@ -14,6 +15,7 @@ import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
 import { AgentChatHeader } from './AgentChatHeader/AgentChatHeader';
 import { AgentChatInput } from './AgentChatInput/AgentChatInput';
+import { resolveHistoryNav } from './AgentChatInput/historyNav';
 import { AgentChatMessages } from './AgentChatMessages/AgentChatMessages';
 import { parseAskPrompt } from './askPrompt';
 import { ChatDropOverlay } from './ChatDropOverlay/ChatDropOverlay';
@@ -80,6 +82,9 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<RichEditorHandle | null>(null);
+  // Terminal-style prompt history, scoped to THIS chat instance (in-memory only —
+  // cleared on app restart). Fed by `handleSend`, read by the editor's ↑/↓ handler.
+  const promptHistory = usePromptHistory();
   const sessionRef = useRef<SpawnSession | null>(null);
   sessionRef.current = session;
   const claudeSessionIdRef = useRef<string | null>(null);
@@ -125,7 +130,7 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
     openModelPicker: () => setModelPickerOpen(true),
     openView: (view) => useDashboardUIStore.getState().openPanel(VIEW_PANEL_KEY[view]),
     openImprove: (target) => useImproveModalStore.getState().openImprove(target),
-    editorRef, pendingUserMsgs,
+    editorRef, pendingUserMsgs, recordHistory: promptHistory.record,
     setInput, setAttachedFiles, setQueue, setMessages,
     setAwaitingResponse, setWaitingInput, setSession, setClaudeSessionId,
   });
@@ -327,6 +332,7 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
         onCloseModelPicker={() => setModelPickerOpen(false)}
         onRemoveAttachment={(i) => setAttachedFiles((prev) => prev.filter((_, j) => j !== i))}
         onAttach={handleAttach} onSend={handleSend}
+        onHistoryNav={(key, ctx) => resolveHistoryNav(promptHistory, key, ctx)}
       />
     </div>
   );

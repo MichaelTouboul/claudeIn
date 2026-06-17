@@ -6,6 +6,7 @@ import type { FilePickerKind, SpawnSession  } from '@/lib/types';
 import { buildJsonAttachment } from '@/lib/utils';
 import { byComposer, useToonStore } from '@/store/useToonStore';
 
+import type { HistoryNavContext } from '../RichEditor/plugins/SubmitPlugin';
 import { RichEditor, type RichEditorHandle } from '../RichEditor/RichEditor';
 import { AgentTabs } from './AgentTabs/AgentTabs';
 import { AttachMenu } from './AttachMenu/AttachMenu';
@@ -45,6 +46,8 @@ export type AgentChatInputProps = {
   /** Open the native file picker for the chosen kind and attach the result. */
   onAttach: (kind: FilePickerKind) => void;
   onSend: () => void;
+  /** Session prompt-history navigation for ↑/↓ at the content edges (menu closed). */
+  onHistoryNav: (key: 'ArrowUp' | 'ArrowDown', ctx: HistoryNavContext) => string | null;
 };
 
 export function AgentChatInput({
@@ -67,6 +70,7 @@ export function AgentChatInput({
   onRemoveAttachment,
   onAttach,
   onSend,
+  onHistoryNav,
 }: AgentChatInputProps) {
   const [plainText, setPlainText] = useState('');
   const menus = useInputMenus(plainText, modelPickerOpen);
@@ -247,6 +251,7 @@ export function AgentChatInput({
           onEnter={handleEnter}
           onComplete={handleComplete}
           onNavKey={handleNavKey}
+          onHistoryNav={onHistoryNav}
           onPasteText={handlePasteText}
         />
         <AttachMenu onAttach={onAttach} />
