@@ -3,7 +3,10 @@ import { create } from "zustand";
 
 import type { AgentContext, LiveEvent } from "@/lib/types";
 
-const DEFAULT_LIMIT = 200_000;
+// NB: the agent → backend-percent selector `contextPercentForAgent` lives in the
+// sibling `sessionContext.ts` (keeps this file under the 300-line limit). Import
+// it from there.
+
 const ACTIVE_TIMEOUT_MS = 5000;
 // A sub-agent that asked for input but never resolved (no `spawn_usage`,
 // `session_activity`, or `spawn_exit`) — e.g. its process was killed — would
@@ -45,13 +48,20 @@ type IPCEvent =
   | { type: "spawn_usage"; agentName: string; tokensIn?: number; tokensOut?: number }
   | { type: "session_activity"; agentName?: string; tokensIn?: number; tokensOut?: number }
   | { type: "spawn_input_request"; agentName?: string }
-  | { type: "spawn_exit"; agentName?: string; claudeSessionId?: string };
+  | { type: "spawn_exit"; agentName?: string; claudeSessionId?: string }
+  // Backend-computed context %, keyed by claudeSessionId. This is the ONE source
+  // of the bar percentage — the renderer never computes it (no token limit here).
+  | { type: "session_context"; claudeSessionId: string; percent: number };
 
 type EventsState = {
   events: LiveEvent[];
   connected: boolean;
   activeAgents: Set<string>;
   agentContexts: Map<string, AgentContext>;
+  // Backend-computed context % per claudeSessionId (the `session_context` event).
+  // The SINGLE source of every live bar's percentage — consumed directly by the
+  // sidebar row (keyed by claudeSessionId) and, via `presence`, by the agent row.
+  sessionContexts: Map<string, number>;
   currentTools: Map<string, string>;
   waitingAgents: Set<string>;
   // Durable, session-scoped sub-agent presence (see SessionPresence). Survives
@@ -124,6 +134,7 @@ export const useEventsStore = create<EventsState>((set, get) => ({
   connected: false,
   activeAgents: new Set(),
   agentContexts: new Map(),
+  sessionContexts: new Map(),
   currentTools: new Map(),
   waitingAgents: new Set(),
   presence: new Map(),
@@ -191,19 +202,18 @@ export const useEventsStore = create<EventsState>((set, get) => ({
       clearWaitingWatchdog(agentName);
       const nextActive = new Set(s.activeAgents).add(agentName);
 
+      // Accumulate tokens/cost for the live tooltip ONLY. The context PERCENT is
+      // NOT derived here — it comes from the backend per claudeSessionId via the
+      // `session_context` event (the single source of truth).
       let nextContexts = s.agentContexts;
       if (tokensIn > 0 || tokensOut > 0) {
         nextContexts = new Map(s.agentContexts);
         const existing =
-          nextContexts.get(agentName) || { tokensIn: 0, tokensOut: 0, costUsd: 0, percent: 0 };
-        const newIn = existing.tokensIn + tokensIn;
-        const newOut = existing.tokensOut + tokensOut;
-        const total = newIn + newOut;
+          nextContexts.get(agentName) || { tokensIn: 0, tokensOut: 0, costUsd: 0 };
         nextContexts.set(agentName, {
-          tokensIn: newIn,
-          tokensOut: newOut,
+          tokensIn: existing.tokensIn + tokensIn,
+          tokensOut: existing.tokensOut + tokensOut,
           costUsd: existing.costUsd + costUsd,
-          percent: Math.min((total / DEFAULT_LIMIT) * 100, 100),
         });
       }
 
@@ -226,6 +236,16 @@ export const useEventsStore = create<EventsState>((set, get) => ({
       );
     };
 
+    if (data.type === "session_context") {
+      const { claudeSessionId, percent } = data;
+      set((s) => {
+        if (s.sessionContexts.get(claudeSessionId) === percent) return {};
+        const next = new Map(s.sessionContexts);
+        next.set(claudeSessionId, percent);
+        return { sessionContexts: next };
+      });
+      return;
+    }
     if (data.type === "event") {
       const sessionId = data.session_id;
       set((s) => ({

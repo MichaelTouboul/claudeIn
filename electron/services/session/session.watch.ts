@@ -1,13 +1,26 @@
 import fs from "fs";
 import path from "path";
 import { broadcast } from "../core/broadcast";
-import { extractAssistantUsage, getProjectsBase } from "./session.transcript";
+import {
+  contextFillToPercent,
+  extractAssistantUsage,
+  extractContextFill,
+  extractResolvedModel,
+  getProjectsBase,
+} from "./session.transcript";
 
 /**
  * Real-time session-activity watching. Tails each project's transcript files
  * and broadcasts `session_activity` as new assistant/user lines arrive. Split
  * out of `session.service` to keep both files under the 300-line limit; shares
  * the transcript helpers (`getProjectsBase`, `extractAssistantUsage`).
+ *
+ * It is ALSO the single live source of the per-session context %: as new
+ * assistant turns arrive it recomputes the LAST-turn fill + window through the
+ * SAME consolidated `session.transcript` math the persisted sidebar uses, and
+ * broadcasts `session_context` keyed by `claudeSessionId`. The renderer never
+ * computes a percent — both bars read this one backend value, so the live agent
+ * bar and the sidebar row for a session render the identical number.
  */
 
 function getSessionsDir(projectPath: string): string {
@@ -18,6 +31,10 @@ function getSessionsDir(projectPath: string): string {
 const watchers = new Map<string, fs.FSWatcher>();
 const fileOffsets = new Map<string, number>();
 const sessionAgentCache = new Map<string, string>();
+// A `[1m]` resolvedModel marker seen on ANY earlier line keeps pinning the
+// window for later assistant turns (the marker and the usage live on different
+// lines). Keyed by filePath (1:1 with claudeSessionId / the .jsonl name).
+const fileResolvedModel = new Map<string, string>();
 
 function getAgentForFile(filePath: string): string {
   if (sessionAgentCache.has(filePath)) return sessionAgentCache.get(filePath)!;
@@ -108,6 +125,21 @@ function processNewLine(obj: Record<string, unknown>, filePath: string): void {
     });
   }
 
+  // Recompute the per-session context % from the SAME consolidated math the
+  // sidebar uses, and push it keyed by claudeSessionId. A `[1m]` marker on any
+  // line pins the window; the last assistant turn's fill drives the percent.
+  const resolved = extractResolvedModel(obj);
+  if (resolved !== null) fileResolvedModel.set(filePath, resolved);
+  const fill = extractContextFill(obj);
+  if (fill !== null) {
+    if (sessionId) {
+      const percent = contextFillToPercent(fill, fileResolvedModel.get(filePath) ?? null);
+      if (percent !== null) {
+        broadcast({ type: "session_context", claudeSessionId: sessionId, percent });
+      }
+    }
+  }
+
   if (obj.type === "user" && obj.promptId) {
     broadcast({
       type: "session_activity",
@@ -131,5 +163,8 @@ export function stopWatching(projectPath: string): void {
   }
   for (const key of sessionAgentCache.keys()) {
     if (key.startsWith(dir)) sessionAgentCache.delete(key);
+  }
+  for (const key of fileResolvedModel.keys()) {
+    if (key.startsWith(dir)) fileResolvedModel.delete(key);
   }
 }

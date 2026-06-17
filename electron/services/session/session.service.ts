@@ -5,6 +5,7 @@ import {
   contextFillToPercent,
   extractAssistantUsage,
   extractContextFill,
+  extractResolvedModel,
   getProjectsBase,
 } from "./session.transcript";
 import { getMeta, listMeta, type ConversationMeta } from "../conversation/conversation.meta";
@@ -41,6 +42,10 @@ async function extractMetadata(filePath: string): Promise<Partial<SessionSummary
   const meta: Partial<SessionSummary> = {};
   let lineCount = 0;
   let lastContextFill: number | null = null;
+  // Track the most recent `[1m]`-bearing resolvedModel across the whole
+  // transcript so a session that ever resolved to the 1M window is pinned to it
+  // (the marker appears only incidentally on some lines).
+  let lastResolvedModel: string | null = null;
 
   return new Promise((resolve) => {
     const stream = fs.createReadStream(filePath, { encoding: "utf-8" });
@@ -67,15 +72,17 @@ async function extractMetadata(filePath: string): Promise<Partial<SessionSummary
         }
         const fill = extractContextFill(obj);
         if (fill !== null) lastContextFill = fill;
+        const resolved = extractResolvedModel(obj);
+        if (resolved !== null) lastResolvedModel = resolved;
       } catch {}
     });
 
     rl.on("close", () => {
-      meta.contextPercent = contextFillToPercent(lastContextFill);
+      meta.contextPercent = contextFillToPercent(lastContextFill, lastResolvedModel);
       resolve(meta);
     });
     rl.on("error", () => {
-      meta.contextPercent = contextFillToPercent(lastContextFill);
+      meta.contextPercent = contextFillToPercent(lastContextFill, lastResolvedModel);
       resolve(meta);
     });
   });

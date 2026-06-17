@@ -47,7 +47,7 @@ beforeEach(() => {
   useConversationTitlesStore.setState({ conversationTitles: {} });
   usePinnedStore.setState({ overrides: {} });
   useConversationStatusStore.setState({ statuses: {} });
-  useEventsStore.setState({ agentContexts: new Map() });
+  useEventsStore.setState({ agentContexts: new Map(), sessionContexts: new Map(), presence: new Map() });
   useWorkspaceStore.setState({
     dashboards: [dashboard()],
     activeDashboardId: "d1",
@@ -191,10 +191,11 @@ describe("ConversationList — redesigned Sessions list", () => {
     expect(screen.getByText("Session 14")).toBeInTheDocument();
   });
 
-  it("prefers the live agent context percent over the transcript value", () => {
-    useEventsStore.setState({
-      agentContexts: new Map([["coder", { tokensIn: 100, tokensOut: 50, costUsd: 0, percent: 73 }]]),
-    });
+  it("prefers the backend live context percent (per claudeSessionId) over the transcript value", () => {
+    // The backend pushes `session_context` keyed by claudeSessionId; the sidebar
+    // row reads that one value, never re-deriving from tokens. Same number the
+    // live agent bar shows for this conversation.
+    useEventsStore.setState({ sessionContexts: new Map([["live", 73]]) });
     render(
       <ConversationList
         sessions={[session("live", { title: "Live row", agentName: "coder", contextPercent: 10 })]}

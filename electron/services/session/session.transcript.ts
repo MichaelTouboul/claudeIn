@@ -77,12 +77,27 @@ export function extractContextFill(obj: Record<string, unknown>): number | null 
 }
 
 /**
- * Pick the effective context window for an observed fill: the smallest standard
- * Claude window that still contains it. A 173k prefix reads against 200k; a 786k
- * prefix is unambiguously a 1M-tier session and reads against 1M (instead of
- * blowing past a hard-coded 200k and clamping to an aberrant 100%).
+ * THE single source of truth for a session's context window.
+ *
+ * A model id alone does not tell us which window a session ran on
+ * (`claude-opus-4-8` is the SAME id on the 200k and the 1M tier). Two signals,
+ * in priority order:
+ *
+ * 1. An explicit `[1m]` marker, when the transcript happens to persist one in
+ *    `toolUseResult.resolvedModel` (e.g. `"claude-opus-4-8[1m]"`) — authoritative
+ *    → 1M. This is rare (~1 in 60 sessions) but unambiguous when present.
+ * 2. Otherwise tier by *observed* fill: the smallest standard window that still
+ *    contains the measured prompt size. A 173k prefix reads against 200k; a 786k
+ *    prefix is unambiguously a 1M-tier session (instead of blowing past a
+ *    hard-coded 200k and clamping to an aberrant 100%).
  */
-function effectiveWindow(fill: number): number {
+export function resolveContextWindow(
+  fill: number,
+  resolvedModel?: string | null,
+): number {
+  if (typeof resolvedModel === "string" && resolvedModel.endsWith("[1m]")) {
+    return 1_000_000;
+  }
   for (const tier of CONTEXT_WINDOW_TIERS) {
     if (fill <= tier) return tier;
   }
@@ -90,15 +105,39 @@ function effectiveWindow(fill: number): number {
 }
 
 /**
- * Convert a context-fill token count into a clamped 0–100 percentage of the
- * session's effective context window. `null` fill → `null` (unknown, omit the
- * bar). The 100 cap is reserved for a genuinely over-full window, never reached
- * by a mis-sized denominator.
+ * Convert a context-fill token count into a clamped 0–100 percentage of a given
+ * context window. The 100 cap is reserved for a genuinely over-full window,
+ * never reached by a mis-sized denominator.
  */
-export function contextFillToPercent(fill: number | null): number | null {
-  if (fill === null) return null;
-  const window = effectiveWindow(fill);
+export function contextPercent(fill: number, window: number): number {
   return Math.min(Math.round((fill / window) * 100), 100);
+}
+
+/**
+ * Convenience wrapper for callers that have a (possibly null) fill and an
+ * optional `[1m]` marker: resolves the window and computes the percent in one
+ * step, routing through the single `resolveContextWindow` + `contextPercent`
+ * implementation. `null` fill → `null` (unknown, omit the bar).
+ */
+export function contextFillToPercent(
+  fill: number | null,
+  resolvedModel?: string | null,
+): number | null {
+  if (fill === null) return null;
+  return contextPercent(fill, resolveContextWindow(fill, resolvedModel));
+}
+
+/**
+ * Best-effort extraction of an explicit resolved model id from a transcript
+ * line. Claude occasionally records the *window-qualified* model
+ * (`"claude-opus-4-8[1m]"`) under `toolUseResult.resolvedModel`; when present it
+ * pins the session's window (see `resolveContextWindow`). Returns `null` when
+ * absent or not a string.
+ */
+export function extractResolvedModel(obj: Record<string, unknown>): string | null {
+  const toolUseResult = obj.toolUseResult as Record<string, unknown> | undefined;
+  const resolved = toolUseResult?.resolvedModel;
+  return typeof resolved === "string" ? resolved : null;
 }
 
 /**
