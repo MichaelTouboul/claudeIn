@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer, webUtils } from "electron";
 
 import { createPushBus } from "./pushBus";
+import type { DiffMode } from "./types/git.types";
 
 // Single multiplexer over the one real-time IPC channel (`push-event`). Every
 // `onXxx`/`onEvent` subscription below routes through `pushBus.subscribe`, so
@@ -45,6 +46,8 @@ contextBridge.exposeInMainWorld("api", {
   getProjects: (forceRefresh?: boolean) => ipcRenderer.invoke("projects:list", forceRefresh),
   getProject: (id: string) => ipcRenderer.invoke("projects:get", id),
   getDashboard: (id: string) => ipcRenderer.invoke("projects:dashboard", id),
+
+  gitDiff: (repoPath: string, mode: DiffMode) => ipcRenderer.invoke("git:diff", repoPath, mode),
 
   spawn: (opts: { agent_name?: string; mission: string; cwd?: string; resume_session_id?: string; model?: string }) =>
     ipcRenderer.invoke("spawn:start", opts),
