@@ -3,7 +3,7 @@ import { useState } from "react";
 
 import { Input } from "@/components/_ui/Input";
 import type { SessionSummary } from "@/hooks/useSessions";
-import { sessionTimeLabel } from "@/lib/utils";
+import { deriveSessionTitle, sessionTimeLabel } from "@/lib/utils";
 import { ConversationStatus, useConversationStatusStore } from "@/store/dashboard/useConversationStatusStore";
 import { useConversationTitlesStore } from "@/store/dashboard/useConversationTitlesStore";
 import { useEventsStore } from "@/store/dashboard/useEventsStore";
@@ -89,8 +89,13 @@ export function ConversationList({ sessions, onChanged }: ConversationListProps)
       return;
     }
     const liveTitle = useConversationTitlesStore.getState().conversationTitles[s.sessionId];
-    const title =
-      liveTitle?.userTitle ?? liveTitle?.aiTitle ?? s.title ?? s.firstPrompt ?? s.sessionId.slice(0, 8);
+    const title = deriveSessionTitle({
+      sessionId: s.sessionId,
+      title: s.title,
+      firstPrompt: s.firstPrompt,
+      userTitle: liveTitle?.userTitle,
+      aiTitle: liveTitle?.aiTitle,
+    });
     addTab({ kind: "session", title, sessionFilePath: s.filePath, sessionId: s.sessionId });
   };
 

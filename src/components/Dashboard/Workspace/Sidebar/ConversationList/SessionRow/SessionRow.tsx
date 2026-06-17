@@ -6,6 +6,7 @@ import { StatusDot } from "@/components/_ui/StatusDot";
 import { RenameDialog } from "@/components/Dashboard/Workspace/Sidebar/SessionsPanel/SessionRowMenu/RenameDialog";
 import { buildSessionMenuItems } from "@/components/Dashboard/Workspace/Sidebar/SessionsPanel/SessionRowMenu/sessionMenuItems";
 import type { SessionSummary } from "@/hooks/useSessions";
+import { deriveSessionTitle } from "@/lib/utils";
 import { type ConversationStatus, STATUS_DOT } from "@/store/dashboard/useConversationStatusStore";
 import { useConversationTitlesStore } from "@/store/dashboard/useConversationTitlesStore";
 
@@ -44,12 +45,13 @@ export function SessionRow({
   // Overlay the shared titles store so a rename shows live, falling back to the
   // coalesced session title → first prompt → short id.
   const stored = useConversationTitlesStore((s) => s.conversationTitles[session.sessionId]);
-  const label =
-    stored?.userTitle ??
-    stored?.aiTitle ??
-    session.title ??
-    session.firstPrompt ??
-    session.sessionId.slice(0, 8);
+  const label = deriveSessionTitle({
+    sessionId: session.sessionId,
+    title: session.title,
+    firstPrompt: session.firstPrompt,
+    userTitle: stored?.userTitle,
+    aiTitle: stored?.aiTitle,
+  });
 
   const items = buildSessionMenuItems({
     sessionId: session.sessionId,

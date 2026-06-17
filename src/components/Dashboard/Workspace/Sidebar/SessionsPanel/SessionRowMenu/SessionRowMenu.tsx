@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { ContextMenu } from "@/components/_ui/ContextMenu";
 import type { SessionSummary } from "@/hooks/useSessions";
+import { sanitizeCommandEnvelope } from "@/lib/utils";
 import { usePinnedStore } from "@/store/dashboard/usePinnedStore";
 
 import { RenameDialog } from "./RenameDialog";
@@ -25,7 +26,8 @@ export function SessionRowMenu({ session, piloted = false, onChanged }: SessionR
   const override = usePinnedStore((s) => s.overrides[sessionId]);
   const isPinned = override ?? session.pinned;
 
-  const currentTitle = session.title ?? session.firstPrompt ?? "";
+  const rawTitle = session.title ?? session.firstPrompt ?? "";
+  const currentTitle = sanitizeCommandEnvelope(rawTitle);
 
   const items = buildSessionMenuItems({
     sessionId,
