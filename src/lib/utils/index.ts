@@ -1,6 +1,7 @@
 export * from './buildJsonAttachment';
 export * from './cn';
 export * from './contentHash';
+export * from './deriveSessionTitle';
 export * from './detectJson';
 export * from './elementToComponent';
 export * from './encodeToon';
