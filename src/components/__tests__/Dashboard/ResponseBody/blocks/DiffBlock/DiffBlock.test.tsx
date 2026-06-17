@@ -31,4 +31,18 @@ describe('DiffBlock', () => {
     render(<DiffBlock diff={diff} toolName="Edit" />);
     expect(screen.getByRole('button', { name: 'Copy' })).toBeInTheDocument();
   });
+
+  it('renders a hunk separator without line numbers or ask button', () => {
+    const hunkDiff = {
+      filePath: 'a.ts',
+      lines: [
+        { id: 'h', kind: LineKind.Hunk, oldNo: null, newNo: null, text: '@@ -1,2 +1,2 @@' },
+      ],
+    };
+    render(<DiffBlock diff={hunkDiff} toolName="Diff" />);
+    expect(screen.getByText('@@ -1,2 +1,2 @@')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /ask claude about this line/i }),
+    ).not.toBeInTheDocument();
+  });
 });

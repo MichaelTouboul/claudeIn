@@ -1,5 +1,5 @@
-/** A single line's role in a unified diff. */
-export const LineKind = { Add: 'add', Del: 'del', Context: 'context' } as const;
+/** A single line's role in a unified diff. `Hunk` is the `@@ … @@` separator row. */
+export const LineKind = { Add: 'add', Del: 'del', Context: 'context', Hunk: 'hunk' } as const;
 export type LineKind = (typeof LineKind)[keyof typeof LineKind];
 
 /** One rendered line of a unified diff. */
