@@ -12,6 +12,8 @@ export function registerConversationMetaHandlers(): void {
   ipcMain.handle("conversation:softDelete", (_e, sessionId: string) => meta.softDelete(sessionId));
   ipcMain.handle("conversation:restore", (_e, sessionId: string) => meta.restore(sessionId));
   ipcMain.handle("conversation:set-title", (_e, sessionId: string, title: string) => meta.setUserTitle(sessionId, title));
+  // Per-conversation accent color (an AvatarHue value, or null for Default).
+  ipcMain.handle("conversation:set-color", (_e, sessionId: string, color: string | null) => meta.setColor(sessionId, color));
   // Durable `/clear`: records the cleared boundary; the transcript stays on disk.
   ipcMain.handle("conversation:clear", (_e, sessionId: string) => meta.clearConversation(sessionId));
 }

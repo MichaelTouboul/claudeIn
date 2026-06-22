@@ -19,6 +19,9 @@ export type SessionSummary = {
   pinned: boolean;
   archived: boolean;
   pinnedAt: string | null;
+  // Per-conversation accent color (one of the `AvatarHue` values), or null for
+  // "Default"/no color. App-owned, persisted in conversation_meta.
+  color: string | null;
 };
 
 export type SessionConversation = {

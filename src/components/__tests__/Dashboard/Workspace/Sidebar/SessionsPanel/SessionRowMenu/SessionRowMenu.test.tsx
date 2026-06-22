@@ -11,6 +11,7 @@ const ipc = {
   unarchiveConversation: vi.fn().mockResolvedValue(undefined),
   softDeleteConversation: vi.fn().mockResolvedValue(undefined),
   restoreConversation: vi.fn().mockResolvedValue(undefined),
+  setConversationColor: vi.fn().mockResolvedValue(undefined),
 };
 
 function makeSession(over: Partial<SessionSummary> = {}): SessionSummary {
@@ -18,7 +19,7 @@ function makeSession(over: Partial<SessionSummary> = {}): SessionSummary {
     sessionId: "s1", filePath: "/sessions/s1.jsonl", agentName: null, title: "My session",
     firstPrompt: null, messageCount: 2, branch: null, startedAt: null, lastActiveAt: null,
     model: null, contextPercent: null, projectDirName: "proj", status: "recent",
-    pinned: false, archived: false, pinnedAt: null, ...over,
+    pinned: false, archived: false, pinnedAt: null, color: null, ...over,
   };
 }
 
@@ -93,6 +94,34 @@ describe("SessionRowMenu", () => {
     openMenu();
     expect(await screen.findByText("Clear (soon)")).toBeInTheDocument();
     expect(screen.getByText("Compact (soon)")).toBeInTheDocument();
+  });
+
+  it("offers a Color submenu with Default + the 8 hues", async () => {
+    render(<SessionRowMenu session={makeSession()} onChanged={vi.fn()} />);
+    openMenu();
+    const colorTrigger = await screen.findByText("Color");
+    fireEvent.keyDown(colorTrigger, { key: "ArrowRight" });
+    for (const label of ["Default", "Red", "Blue", "Green", "Yellow", "Purple", "Orange", "Pink", "Cyan"]) {
+      expect(await screen.findByText(label)).toBeInTheDocument();
+    }
+  });
+
+  it("persists the chosen color (null for Default) and refreshes", async () => {
+    const onChanged = vi.fn();
+    render(<SessionRowMenu session={makeSession()} onChanged={onChanged} />);
+    openMenu();
+    fireEvent.keyDown(await screen.findByText("Color"), { key: "ArrowRight" });
+    fireEvent.click(await screen.findByText("Red"));
+    await waitFor(() => expect(ipc.setConversationColor).toHaveBeenCalledWith("s1", "red"));
+    await waitFor(() => expect(onChanged).toHaveBeenCalled());
+  });
+
+  it("selecting Default persists null", async () => {
+    render(<SessionRowMenu session={makeSession({ color: "blue" })} onChanged={vi.fn()} />);
+    openMenu();
+    fireEvent.keyDown(await screen.findByText("Color"), { key: "ArrowRight" });
+    fireEvent.click(await screen.findByText("Default"));
+    await waitFor(() => expect(ipc.setConversationColor).toHaveBeenCalledWith("s1", null));
   });
 
   it("copies the session's claudeSessionId to the clipboard", async () => {

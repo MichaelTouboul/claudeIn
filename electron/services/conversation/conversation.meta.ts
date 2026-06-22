@@ -14,6 +14,7 @@ export type ConversationMeta = {
   aiTitle: string | null;
   userTitle: string | null;
   clearedAt: string | null;
+  color: string | null;
 };
 
 // sql.js is synchronous — wrap in try/catch, never .then()/.catch().
@@ -21,7 +22,7 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
-function upsertColumn(sessionId: string, column: "pinned_at" | "archived_at" | "deleted_at" | "ai_title" | "user_title" | "cleared_at", value: string | null): void {
+function upsertColumn(sessionId: string, column: "pinned_at" | "archived_at" | "deleted_at" | "ai_title" | "user_title" | "cleared_at" | "color", value: string | null): void {
   try {
     const db = getDb();
     db.prepare(
@@ -68,6 +69,13 @@ export function setUserTitle(sessionId: string, title: string): void {
   upsertColumn(sessionId, "user_title", trimmed === "" ? null : trimmed);
 }
 
+// Per-conversation accent color. `color` is one of the `AvatarHue` values
+// ("red", "blue", …) or NULL for "Default" (no color → no dot). App-owned;
+// never written to ~/.claude. Passing null clears it.
+export function setColor(sessionId: string, color: string | null): void {
+  upsertColumn(sessionId, "color", color);
+}
+
 // Durable `/clear`: records a "cleared boundary" timestamp keyed by the
 // claudeSessionId (= the .jsonl transcript name). `loadConversation` then
 // returns only messages strictly after this timestamp, so the conversation
@@ -89,7 +97,7 @@ export function getMeta(sessionId: string): ConversationMeta | null {
   try {
     const db = getDb();
     const row = db
-      .prepare("SELECT session_id, pinned_at, archived_at, deleted_at, note, ai_title, user_title, cleared_at FROM conversation_meta WHERE session_id = ?")
+      .prepare("SELECT session_id, pinned_at, archived_at, deleted_at, note, ai_title, user_title, cleared_at, color FROM conversation_meta WHERE session_id = ?")
       .get(sessionId);
     if (!row) return null;
     return {
@@ -101,6 +109,7 @@ export function getMeta(sessionId: string): ConversationMeta | null {
       aiTitle: (row.ai_title as string | null) ?? null,
       userTitle: (row.user_title as string | null) ?? null,
       clearedAt: (row.cleared_at as string | null) ?? null,
+      color: (row.color as string | null) ?? null,
     };
   } catch {
     return null;
@@ -111,7 +120,7 @@ export function listMeta(): ConversationMeta[] {
   try {
     const db = getDb();
     const rows = db
-      .prepare("SELECT session_id, pinned_at, archived_at, deleted_at, note, ai_title, user_title, cleared_at FROM conversation_meta")
+      .prepare("SELECT session_id, pinned_at, archived_at, deleted_at, note, ai_title, user_title, cleared_at, color FROM conversation_meta")
       .all();
     return rows.map((row) => ({
       sessionId: row.session_id as string,
@@ -122,6 +131,7 @@ export function listMeta(): ConversationMeta[] {
       aiTitle: (row.ai_title as string | null) ?? null,
       userTitle: (row.user_title as string | null) ?? null,
       clearedAt: (row.cleared_at as string | null) ?? null,
+      color: (row.color as string | null) ?? null,
     }));
   } catch {
     return [];

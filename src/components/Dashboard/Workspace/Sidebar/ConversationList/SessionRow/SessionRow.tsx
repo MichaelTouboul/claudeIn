@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { ContextMenu } from "@/components/_ui/ContextMenu";
 import { StatusDot } from "@/components/_ui/StatusDot";
+import { hueClass, toAvatarHue } from "@/components/Dashboard/Workspace/Sidebar/SessionsPanel/SessionRowMenu/conversationColors";
 import { RenameDialog } from "@/components/Dashboard/Workspace/Sidebar/SessionsPanel/SessionRowMenu/RenameDialog";
 import { buildSessionMenuItems } from "@/components/Dashboard/Workspace/Sidebar/SessionsPanel/SessionRowMenu/sessionMenuItems";
 import type { SessionSummary } from "@/hooks/useSessions";
@@ -40,6 +41,7 @@ export function SessionRow({
   onChanged,
 }: SessionRowProps) {
   const dot = STATUS_DOT[status];
+  const colorHue = toAvatarHue(session.color);
   const [renameOpen, setRenameOpen] = useState(false);
 
   // Overlay the shared titles store so a rename shows live, falling back to the
@@ -57,6 +59,7 @@ export function SessionRow({
     sessionId: session.sessionId,
     pinned,
     archived: session.archived,
+    color: colorHue,
     onRename: () => setRenameOpen(true),
     onChanged,
   });
@@ -80,6 +83,13 @@ export function SessionRow({
       >
         <div className="flex items-baseline gap-2">
           <StatusDot size="xs" pulse={dot.pulse} style={{ backgroundColor: dot.color }} title={status} />
+          {colorHue ? (
+            <span
+              aria-label={`color ${colorHue}`}
+              className={`inline-block h-2 w-2 shrink-0 self-center rounded-full ${hueClass(colorHue)}`}
+              style={{ background: "var(--agent-color)" }}
+            />
+          ) : null}
           <span
             className="flex-1 min-w-0 truncate text-sm font-medium"
             style={{ color: isActive ? "var(--color-accent)" : "var(--color-text-primary)" }}

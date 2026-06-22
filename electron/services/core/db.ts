@@ -140,7 +140,8 @@ export async function initDb(): Promise<void> {
       note        TEXT,
       ai_title    TEXT,
       user_title  TEXT,
-      cleared_at  TEXT
+      cleared_at  TEXT,
+      color       TEXT
     );
     CREATE TABLE IF NOT EXISTS scope_profiles (
       scope_path   TEXT PRIMARY KEY,
@@ -215,6 +216,13 @@ function runMigrations(): void {
   // empty/fresh while the on-disk transcript is left untouched.
   if (!conversationMetaColumns.includes("cleared_at")) {
     wrapper.exec("ALTER TABLE conversation_meta ADD COLUMN cleared_at TEXT");
+  }
+
+  // color — a per-conversation accent (one of the `AvatarHue` values, or NULL
+  // for "Default"/no color). App-owned; never written to ~/.claude. Existing
+  // rows have a NULL color (no dot), so this is non-destructive.
+  if (!conversationMetaColumns.includes("color")) {
+    wrapper.exec("ALTER TABLE conversation_meta ADD COLUMN color TEXT");
   }
 
   // logo_data_url — the repo logo detected at scan time, inlined as a base64

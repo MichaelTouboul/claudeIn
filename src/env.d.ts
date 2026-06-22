@@ -67,6 +67,7 @@ interface Window {
     softDeleteConversation: (sessionId: string) => Promise<void>;
     restoreConversation: (sessionId: string) => Promise<void>;
     setConversationTitle: (claudeSessionId: string, title: string) => Promise<void>;
+    setConversationColor: (claudeSessionId: string, color: string | null) => Promise<void>;
     clearConversation: (claudeSessionId: string) => Promise<void>;
     onConversationAppended: (
       cb: (data: {

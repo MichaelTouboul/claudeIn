@@ -25,8 +25,42 @@ describe("conversation_meta migration", () => {
       .all()
       .map((r) => r.name);
     expect(cols).toEqual(
-      expect.arrayContaining(["session_id", "pinned_at", "archived_at", "deleted_at", "note", "ai_title", "user_title"])
+      expect.arrayContaining(["session_id", "pinned_at", "archived_at", "deleted_at", "note", "ai_title", "user_title", "color"])
     );
+  });
+
+  it("the color column is added to an existing DB without data loss", () => {
+    // A pre-existing annotated row keeps its data after the color migration.
+    meta.setUserTitle("s-color-migrate", "Keep me");
+    expect(meta.getMeta("s-color-migrate")?.userTitle).toBe("Keep me");
+    expect(meta.getMeta("s-color-migrate")?.color).toBeNull();
+  });
+});
+
+describe("setColor persistence", () => {
+  it("round-trips through getMeta and listMeta", () => {
+    meta.setColor("s-color", "red");
+    expect(meta.getMeta("s-color")?.color).toBe("red");
+    const row = meta.listMeta().find((m) => m.sessionId === "s-color");
+    expect(row?.color).toBe("red");
+  });
+
+  it("null clears the color back to Default", () => {
+    meta.setColor("s-color-clear", "blue");
+    expect(meta.getMeta("s-color-clear")?.color).toBe("blue");
+    meta.setColor("s-color-clear", null);
+    expect(meta.getMeta("s-color-clear")?.color).toBeNull();
+  });
+
+  it("color is null when never set", () => {
+    meta.pin("s-color-none");
+    expect(meta.getMeta("s-color-none")?.color).toBeNull();
+  });
+
+  it("overwrites a prior color", () => {
+    meta.setColor("s-color-over", "green");
+    meta.setColor("s-color-over", "purple");
+    expect(meta.getMeta("s-color-over")?.color).toBe("purple");
   });
 });
 
@@ -142,6 +176,21 @@ describe("listSessions coalesces the persisted ai_title", () => {
     const sessions = await listSessions(projectPath);
     const s = sessions.find((x) => x.sessionId === "sess-user-cleared");
     expect(s?.title).toBe("ai title");
+  });
+
+  it("threads the persisted color onto the summary", async () => {
+    writeTranscript("sess-colored", { firstPrompt: "do the thing" });
+    meta.setColor("sess-colored", "orange");
+    const sessions = await listSessions(projectPath);
+    const s = sessions.find((x) => x.sessionId === "sess-colored");
+    expect(s?.color).toBe("orange");
+  });
+
+  it("color is null on the summary when none was set", async () => {
+    writeTranscript("sess-uncolored", { firstPrompt: "do the thing" });
+    const sessions = await listSessions(projectPath);
+    const s = sessions.find((x) => x.sessionId === "sess-uncolored");
+    expect(s?.color).toBeNull();
   });
 });
 
