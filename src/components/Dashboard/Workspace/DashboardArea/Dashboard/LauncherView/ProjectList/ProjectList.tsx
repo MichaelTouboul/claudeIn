@@ -3,7 +3,7 @@ import { FolderOpen } from 'lucide-react';
 import { useFavoriteRepos } from '@/hooks/useFavoriteRepos';
 import { useProjects } from '@/hooks/useProjects';
 import type { Project } from '@/lib/types';
-import { projectForFavorite, repoLabel } from '@/lib/utils';
+import { projectForFavorite, repoBasename } from '@/lib/utils';
 
 export type ProjectListProps = {
   onSelect: (project: Project) => void;
@@ -57,7 +57,7 @@ export function ProjectList({ onSelect, openIds }: ProjectListProps) {
                   onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-surface-3)')}
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                 >
-                  <span className="text-[13px] truncate block">{repoLabel(repo)}</span>
+                  <span className="text-[13px] truncate block">{repoBasename(repo.path)}</span>
                   <span
                     className="text-[10px] truncate block"
                     style={{ color: alreadyOpen ? 'var(--color-accent)' : 'var(--color-text-muted)' }}

@@ -17,9 +17,12 @@ vi.mock('@/hooks/useProjects', () => ({
 
 // ProjectList now lists the user's favorite repos (not all scanned projects).
 // 'alpha' is both a favorite and a scanned project, so it resolves to /p/alpha.
+// Its `label` is an LLM description distinct from the folder name ('alpha'),
+// so the row title must show the basename, not the description.
+const FAVORITE_DESCRIPTION = 'Alpha is a Nx monorepo for the alpha service';
 vi.mock('@/hooks/useFavoriteRepos', () => ({
   useFavoriteRepos: () => ({
-    repos: [{ path: '/p/alpha', label: 'alpha', addedAt: '2026-01-01T00:00:00Z' }],
+    repos: [{ path: '/p/alpha', label: 'Alpha is a Nx monorepo for the alpha service', addedAt: '2026-01-01T00:00:00Z' }],
     loading: false,
     refresh: vi.fn(),
     add: vi.fn(),
@@ -59,6 +62,18 @@ describe('LauncherView', () => {
     const d = useWorkspaceStore.getState().dashboards.find((x) => x.id === id)!;
     expect(d.scope.kind).toBe('project');
     expect(d.cwd).toBe('/p/alpha');
+  });
+
+  it('Project row title shows the repo name (basename), not the LLM description', () => {
+    const id = openLauncherDashboard();
+    render(<LauncherView dashboardId={id} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Open a project/i }));
+
+    // The folder name is shown as the title…
+    expect(screen.getByText('alpha')).toBeInTheDocument();
+    // …and the LLM description is never rendered.
+    expect(screen.queryByText(FAVORITE_DESCRIPTION)).toBeNull();
   });
 
   it('New discussion card resolves immediately to a user-scope chat', () => {
