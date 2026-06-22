@@ -30,6 +30,24 @@ describe("parseWorktrees", () => {
     ]);
   });
 
+  it("skips a prunable (missing-dir) worktree while keeping valid ones", () => {
+    const porcelain = [
+      "worktree /repo",
+      "HEAD abc123",
+      "branch refs/heads/main",
+      "",
+      "worktree /repo/.wt/stale",
+      "HEAD def456",
+      "branch refs/heads/stale",
+      "prunable gitdir file points to non-existent location",
+      "",
+    ].join("\n");
+
+    expect(parseWorktrees(porcelain)).toEqual([
+      { path: "/repo", branch: "main", detached: false },
+    ]);
+  });
+
   it("returns an empty list for empty output", () => {
     expect(parseWorktrees("")).toEqual([]);
   });
