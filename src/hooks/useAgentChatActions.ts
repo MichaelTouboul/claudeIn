@@ -32,6 +32,12 @@ type UseAgentChatActionsParams = {
   // The model id selected for THIS conversation (from useModelStore), or
   // undefined for claude's default. Passed on every spawn/resume turn.
   model: string | undefined;
+  // The per-conversation permission mode (from useComposerSettingsStore). Forwarded
+  // as the spawn's `permission_mode` on every spawn turn; the backend allowlists it.
+  permissionMode: string;
+  // The per-conversation Think toggle (from useComposerSettingsStore). Forwarded as
+  // the spawn's `think`; the backend maps think → `--effort high`.
+  think: boolean;
   // Open the in-app model picker submenu (the `/model` slash command).
   openModelPicker: () => void;
   // Open the in-app screen a `view` slash command targets (`/agents`, `/skills`).
@@ -64,6 +70,8 @@ export function useAgentChatActions({
   claudeSessionId,
   composerId,
   model,
+  permissionMode,
+  think,
   openModelPicker,
   openView,
   openImprove,
@@ -128,14 +136,14 @@ export function useAgentChatActions({
     } else {
       pendingUserMsgs.current.add(fullText);
       try {
-        const data = await window.api.spawn({ agent_name: agentName, mission: fullText, cwd: projectPath, resume_session_id: claudeSessionId || undefined, model });
+        const data = await window.api.spawn({ agent_name: agentName, mission: fullText, cwd: projectPath, resume_session_id: claudeSessionId || undefined, model, permission_mode: permissionMode, think });
         setSession(data);
         if (data.claudeSessionId) setClaudeSessionId(data.claudeSessionId);
       } catch {
         setAwaitingResponse(false);
       }
     }
-  }, [awaitingResponse, compacting, session, isRunning, agentName, projectPath, claudeSessionId, model, pendingUserMsgs, setQueue, setMessages, setAwaitingResponse, setWaitingInput, setSession, setClaudeSessionId]);
+  }, [awaitingResponse, compacting, session, isRunning, agentName, projectPath, claudeSessionId, model, permissionMode, think, pendingUserMsgs, setQueue, setMessages, setAwaitingResponse, setWaitingInput, setSession, setClaudeSessionId]);
 
   // The ONE slash dispatcher. Both entry points (typed send + slash menu) route
   // through it: registry-driven, `local` → its handler, `cli` → `sendMessage`.
@@ -216,14 +224,14 @@ export function useAgentChatActions({
       await window.api.sendInput(session.localSessionId, value);
     } else {
       try {
-        const data = await window.api.spawn({ agent_name: agentName, mission: value, cwd: projectPath, resume_session_id: claudeSessionId || undefined, model });
+        const data = await window.api.spawn({ agent_name: agentName, mission: value, cwd: projectPath, resume_session_id: claudeSessionId || undefined, model, permission_mode: permissionMode, think });
         setSession(data);
         if (data.claudeSessionId) setClaudeSessionId(data.claudeSessionId);
       } catch {
         setAwaitingResponse(false);
       }
     }
-  }, [compacting, session, isRunning, agentName, projectPath, claudeSessionId, model, pendingUserMsgs, setQueue, setMessages, setWaitingInput, setAttachedFiles, setAwaitingResponse, setSession, setClaudeSessionId]);
+  }, [compacting, session, isRunning, agentName, projectPath, claudeSessionId, model, permissionMode, think, pendingUserMsgs, setQueue, setMessages, setWaitingInput, setAttachedFiles, setAwaitingResponse, setSession, setClaudeSessionId]);
 
   const handleKill = useCallback(async () => {
     if (!session) return;

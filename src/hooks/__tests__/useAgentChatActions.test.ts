@@ -30,6 +30,8 @@ function makeParams(overrides: Partial<Parameters<typeof useAgentChatActions>[0]
     claudeSessionId: 'claude-1',
     composerId: 'test-composer',
     model: undefined as string | undefined,
+    permissionMode: 'default',
+    think: false,
     openModelPicker: vi.fn(),
     openView: vi.fn(),
     openImprove: vi.fn(),
@@ -126,6 +128,17 @@ describe('useAgentChatActions handleSend — normal message (regression guard)',
 
     expect(spawnMock).toHaveBeenCalledWith(
       expect.objectContaining({ mission: 'do the thing', model: 'claude-opus-4-8' }),
+    );
+  });
+
+  it('forwards the permission mode and think toggle on spawn', async () => {
+    const params = makeParams({ input: 'do the thing', permissionMode: 'acceptEdits', think: true });
+    const { result } = renderHook(() => useAgentChatActions(params));
+
+    await result.current.handleSend();
+
+    expect(spawnMock).toHaveBeenCalledWith(
+      expect.objectContaining({ mission: 'do the thing', permission_mode: 'acceptEdits', think: true }),
     );
   });
 

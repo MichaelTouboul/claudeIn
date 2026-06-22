@@ -1,4 +1,4 @@
-import { Activity, Brain, GitBranch, Plus, Shield, Sparkles } from 'lucide-react';
+import { Activity, Brain, GitBranch, Shield, Sparkles } from 'lucide-react';
 
 import { Tooltip } from '@/components/_ui/Tooltip';
 import type { GitBranchInfo } from '@/lib/types';
@@ -27,9 +27,11 @@ export type ComposerStatusBarProps = {
 };
 
 /**
- * The composer's bottom status strip. Left→right: git branch (menu), context
- * usage (bar + %), model (menu); a spacer; then session cost, permission mode
- * (menu), and the Think toggle. Each discrete item is separated by a thin
+ * The composer's bottom status strip. Left→right: git branch (a LIVE read-out —
+ * no dropdown; it reflects the repo's current branch and updates whenever HEAD
+ * moves, whether by the user or by Claude switching/creating a worktree mid-run),
+ * context usage (bar + %), model (menu); a spacer; then session cost, permission
+ * mode (menu), and the Think toggle. Each discrete item is separated by a thin
  * divider — see the `Sep` helper below.
  */
 export function ComposerStatusBar({
@@ -51,11 +53,10 @@ export function ComposerStatusBar({
 
   return (
     <div className="flex items-center gap-1 px-2.5 py-1.5 border-t border-border-subtle bg-surface-0 text-xs">
-      {/* Git branch */}
+      {/* Git branch — a live read-out (no dropdown). Updates whenever HEAD moves. */}
       <StatusItem
         icon={<GitBranch size={13} aria-hidden="true" />}
-        tip="Worktree actif — cliquer pour changer"
-        menu={branchMenu(branchInfo)}
+        tip={branch ? `Branche active : ${branch}` : 'Aucune branche'}
       >
         <span className="font-mono text-fg-muted">{branch ?? '—'}</span>
       </StatusItem>
@@ -131,32 +132,4 @@ export function ComposerStatusBar({
 /** A thin vertical divider between status items. */
 function Sep() {
   return <span aria-hidden="true" className="mx-0.5 h-4 w-px shrink-0 bg-border-subtle" />;
-}
-
-/**
- * The branch menu: each worktree's branch as a (display-only) entry, then a
- * disabled "Nouveau worktree…" scaffold. Switching/creating a worktree is not
- * yet supported by the backend, so these entries surface the real branch list
- * read-only rather than dropping the element (see feature notes).
- */
-function branchMenu(info: GitBranchInfo | null) {
-  const entries = (info?.worktrees ?? [])
-    .filter((w) => w.branch)
-    .map((w) => ({
-      label: w.branch as string,
-      icon: <GitBranch size={14} aria-hidden="true" />,
-      tone: w.branch === info?.current ? ('accent' as const) : ('default' as const),
-      // Switching worktrees isn't wired yet — the entry is informational.
-      disabled: true,
-      onSelect: () => {},
-    }));
-  return [
-    ...entries,
-    {
-      label: 'Nouveau worktree…',
-      icon: <Plus size={14} aria-hidden="true" />,
-      disabled: true,
-      onSelect: () => {},
-    },
-  ];
 }

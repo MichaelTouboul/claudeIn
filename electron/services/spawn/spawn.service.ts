@@ -10,12 +10,20 @@ import type { SpawnSession, ChatMessage, StreamEvent } from "../../types/spawn.t
 
 const sessions = new Map<string, { session: SpawnSession; process: ChildProcess }>();
 
-export function spawnAgent(agentName: string, mission: string, cwd?: string, resumeSessionId?: string, model?: string): SpawnSession {
+export function spawnAgent(
+  agentName: string,
+  mission: string,
+  cwd?: string,
+  resumeSessionId?: string,
+  model?: string,
+  permissionMode?: string,
+  think?: boolean,
+): SpawnSession {
   const localSessionId = randomUUID();
 
-  // Flag assembly (including the optional `--model`) lives in the pure
-  // `buildSpawnArgs` helper so it stays unit-testable.
-  const args = buildSpawnArgs({ agentName, mission, resumeSessionId, model });
+  // Flag assembly (including the optional `--model`, `--permission-mode` and
+  // `--effort`) lives in the pure `buildSpawnArgs` helper so it stays unit-testable.
+  const args = buildSpawnArgs({ agentName, mission, resumeSessionId, model, permissionMode, think });
 
   const proc = spawn("claude", args, {
     stdio: ["pipe", "pipe", "pipe"],

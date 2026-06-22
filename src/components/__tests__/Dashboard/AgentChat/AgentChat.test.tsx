@@ -100,8 +100,11 @@ beforeEach(() => {
       return () => { eventCb = null; };
     },
     spawn: spawnMock,
-    // The composer status strip reads the repo's branch/worktrees on mount.
+    // The composer status strip reads the repo's branch/worktrees on mount, then
+    // starts/stops a live HEAD watch (best-effort — broadcasts come via onEvent).
     gitBranches: vi.fn().mockResolvedValue({ current: null, worktrees: [] }),
+    watchGitBranch: vi.fn().mockResolvedValue(undefined),
+    unwatchGitBranch: vi.fn().mockResolvedValue(undefined),
   } as unknown as typeof window.api;
 });
 
