@@ -7,6 +7,7 @@ import {
   extractContextFill,
   extractResolvedModel,
   getProjectsBase,
+  resolveProjectModel,
 } from "./session.transcript";
 
 /**
@@ -35,6 +36,12 @@ const sessionAgentCache = new Map<string, string>();
 // window for later assistant turns (the marker and the usage live on different
 // lines). Keyed by filePath (1:1 with claudeSessionId / the .jsonl name).
 const fileResolvedModel = new Map<string, string>();
+// The project's `.claude` model (window source of truth) resolved ONCE per
+// watched project, keyed by the encoded sessions dir. Used as the per-session
+// resolved-model fallback when a transcript carries no `[1m]` marker, so the
+// live bar matches the persisted sidebar bar (both route through
+// `resolveContextWindow`). A `null` resolve is stored too so we don't re-read.
+const dirProjectModel = new Map<string, string | null>();
 
 function getAgentForFile(filePath: string): string {
   if (sessionAgentCache.has(filePath)) return sessionAgentCache.get(filePath)!;
@@ -62,6 +69,9 @@ export function startWatching(projectPath: string): void {
   const dir = getSessionsDir(projectPath);
   if (!fs.existsSync(dir)) return;
   if (watchers.has(dir)) return;
+
+  // Resolve the project's window-source-of-truth model once for this watch.
+  dirProjectModel.set(dir, resolveProjectModel(projectPath));
 
   const files = fs.readdirSync(dir).filter((f) => f.endsWith(".jsonl"));
   for (const f of files) {
@@ -127,13 +137,17 @@ function processNewLine(obj: Record<string, unknown>, filePath: string): void {
 
   // Recompute the per-session context % from the SAME consolidated math the
   // sidebar uses, and push it keyed by claudeSessionId. A `[1m]` marker on any
-  // line pins the window; the last assistant turn's fill drives the percent.
+  // line pins the window; otherwise the project's `.claude` model is the window
+  // source of truth (a `[1m]` model pins the 1M window). The last assistant
+  // turn's fill drives the percent.
   const resolved = extractResolvedModel(obj);
   if (resolved !== null) fileResolvedModel.set(filePath, resolved);
   const fill = extractContextFill(obj);
   if (fill !== null) {
     if (sessionId) {
-      const percent = contextFillToPercent(fill, fileResolvedModel.get(filePath) ?? null);
+      const projectModel = dirProjectModel.get(path.dirname(filePath)) ?? null;
+      const effectiveModel = fileResolvedModel.get(filePath) ?? projectModel;
+      const percent = contextFillToPercent(fill, effectiveModel);
       if (percent !== null) {
         broadcast({ type: "session_context", claudeSessionId: sessionId, percent });
       }
@@ -158,13 +172,27 @@ export function stopWatching(projectPath: string): void {
     watchers.delete(dir);
   }
 
+  // Evict ONLY keys inside `dir`. A bare `startsWith(dir)` has no path boundary,
+  // so stopping `…-tastewise` would also wipe the sibling `…-tastewise-teams-*`
+  // caches. Match the dir exactly or a path strictly under it.
+  const inDir = (key: string): boolean => key === dir || key.startsWith(dir + path.sep);
   for (const key of fileOffsets.keys()) {
-    if (key.startsWith(dir)) fileOffsets.delete(key);
+    if (inDir(key)) fileOffsets.delete(key);
   }
   for (const key of sessionAgentCache.keys()) {
-    if (key.startsWith(dir)) sessionAgentCache.delete(key);
+    if (inDir(key)) sessionAgentCache.delete(key);
   }
   for (const key of fileResolvedModel.keys()) {
-    if (key.startsWith(dir)) fileResolvedModel.delete(key);
+    if (inDir(key)) fileResolvedModel.delete(key);
   }
+  dirProjectModel.delete(dir);
+}
+
+/**
+ * Test-only inspector: the current keys of the live `fileOffsets` cache. Lets a
+ * regression test assert the `stopWatching` prefix boundary without exporting
+ * the mutable Map itself. Not part of the runtime contract.
+ */
+export function __peekOffsetKeys(): string[] {
+  return Array.from(fileOffsets.keys());
 }

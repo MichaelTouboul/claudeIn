@@ -2,11 +2,13 @@ import fs from "fs";
 import path from "path";
 import readline from "readline";
 import {
+  compareSessionsForList,
   contextFillToPercent,
   extractAssistantUsage,
   extractContextFill,
   extractResolvedModel,
   getProjectsBase,
+  resolveProjectModel,
 } from "./session.transcript";
 import { isPhantomHelperTranscript, type PhantomSignals } from "./session.phantom";
 import { getMeta, listMeta, type ConversationMeta } from "../conversation/conversation.meta";
@@ -48,7 +50,8 @@ function getSessionsDir(projectPath: string): string {
 // turn count, untruncated first user prompt) so phantom helper transcripts can
 // be filtered without a second read.
 async function extractMetadata(
-  filePath: string
+  filePath: string,
+  projectModel: string | null = null
 ): Promise<{ meta: Partial<SessionSummary>; phantomSignals: PhantomSignals }> {
   const meta: Partial<SessionSummary> = {};
   const phantomSignals: PhantomSignals = {
@@ -101,12 +104,16 @@ async function extractMetadata(
       } catch {}
     });
 
+    // The transcript marker (rarely present) wins; otherwise the project's
+    // `.claude` model is the source of truth for the window (a `[1m]` model pins
+    // the session to the 1M window). See `resolveProjectModel`.
+    const effectiveModel = lastResolvedModel ?? projectModel;
     rl.on("close", () => {
-      meta.contextPercent = contextFillToPercent(lastContextFill, lastResolvedModel);
+      meta.contextPercent = contextFillToPercent(lastContextFill, effectiveModel);
       resolve({ meta, phantomSignals });
     });
     rl.on("error", () => {
-      meta.contextPercent = contextFillToPercent(lastContextFill, lastResolvedModel);
+      meta.contextPercent = contextFillToPercent(lastContextFill, effectiveModel);
       resolve({ meta, phantomSignals });
     });
   });
@@ -118,6 +125,11 @@ export async function listSessions(projectPath: string): Promise<SessionSummary[
 
   const entries = fs.readdirSync(dir).filter((f) => f.endsWith(".jsonl"));
   const summaries: SessionSummary[] = [];
+
+  // The project's `.claude` model is the window source of truth for every
+  // session in it (resolved once per listing). A model ending in `[1m]` pins the
+  // 1M window when a transcript carries no explicit marker.
+  const projectModel = resolveProjectModel(projectPath);
 
   // LEFT-JOIN equivalent: app-owned annotations from the DB, keyed by sessionId.
   // sql.js is synchronous; listMeta() already try/catches a missing/corrupt table.
@@ -139,7 +151,7 @@ export async function listSessions(projectPath: string): Promise<SessionSummary[
       continue;
     }
 
-    const { meta, phantomSignals } = await extractMetadata(filePath);
+    const { meta, phantomSignals } = await extractMetadata(filePath, projectModel);
 
     // Skip phantom one-shot `--print` helper transcripts (e.g. repo-label /
     // scope-profile runs that landed in a scanned project's dir). A real
@@ -171,12 +183,7 @@ export async function listSessions(projectPath: string): Promise<SessionSummary[
 
   // Pinned first (oldest pin first within the pinned group so order is stable),
   // then everything else by most-recent activity.
-  return summaries.sort((a, b) => {
-    if (a.pinned && b.pinned) return (a.pinnedAt || "").localeCompare(b.pinnedAt || "");
-    if (a.pinned) return -1;
-    if (b.pinned) return 1;
-    return (b.lastActiveAt || "").localeCompare(a.lastActiveAt || "");
-  });
+  return summaries.sort(compareSessionsForList);
 }
 
 // --- Conversation loading (on demand) ---

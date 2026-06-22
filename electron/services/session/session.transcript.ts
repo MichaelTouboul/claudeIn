@@ -1,5 +1,6 @@
+import fs from "fs";
 import path from "path";
-import type { SessionMessage } from "../../types/session.types";
+import type { SessionMessage, SessionSummary } from "../../types/session.types";
 
 /**
  * Shared transcript-parsing helpers for Claude Code session JSONL
@@ -11,6 +12,69 @@ import type { SessionMessage } from "../../types/session.types";
 export function getProjectsBase(): string {
   const home = process.env.HOME || require("os").homedir();
   return path.join(home, ".claude", "projects");
+}
+
+/**
+ * Read the `.model` string from a single Claude Code settings JSON file.
+ * Defensive: a missing file, unreadable file, malformed JSON, a non-string or
+ * empty `model` all yield `null` (never throws) so the caller can fall through
+ * to the next precedence layer.
+ */
+function readModelFromSettings(filePath: string): string | null {
+  let raw: string;
+  try {
+    raw = fs.readFileSync(filePath, "utf-8");
+  } catch {
+    return null;
+  }
+  try {
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    const model = parsed.model;
+    return typeof model === "string" && model.length > 0 ? model : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Resolve the model configured for a project from its `.claude` settings — the
+ * source of truth for the context window when a transcript carries no `[1m]`
+ * marker (that marker is virtually never persisted in practice). Precedence
+ * (first non-empty wins, mirroring Claude Code):
+ *
+ *   1. `<projectPath>/.claude/settings.local.json` → `.model`
+ *   2. `<projectPath>/.claude/settings.json`       → `.model`
+ *   3. `~/.claude/settings.json`                   → `.model`  (global user)
+ *
+ * HOME is resolved at call time (`getProjectsBase`'s convention) so tests can
+ * redirect the user layer via `process.env.HOME`. Returns `null` when no layer
+ * carries a usable model string. When the returned string ends with `"[1m]"`,
+ * `resolveContextWindow` pins the session to the 1M window.
+ */
+export function resolveProjectModel(projectPath: string): string | null {
+  const home = process.env.HOME || require("os").homedir();
+  const candidates = [
+    path.join(projectPath, ".claude", "settings.local.json"),
+    path.join(projectPath, ".claude", "settings.json"),
+    path.join(home, ".claude", "settings.json"),
+  ];
+  for (const candidate of candidates) {
+    const model = readModelFromSettings(candidate);
+    if (model !== null) return model;
+  }
+  return null;
+}
+
+/**
+ * Stable ordering for the sidebar session list: pinned sessions first (oldest
+ * pin first within the pinned group so the order is stable), then everything
+ * else by most-recent activity. Used by `listSessions`.
+ */
+export function compareSessionsForList(a: SessionSummary, b: SessionSummary): number {
+  if (a.pinned && b.pinned) return (a.pinnedAt || "").localeCompare(b.pinnedAt || "");
+  if (a.pinned) return -1;
+  if (b.pinned) return 1;
+  return (b.lastActiveAt || "").localeCompare(a.lastActiveAt || "");
 }
 
 /** Normalized usage extracted from an assistant transcript line. */
