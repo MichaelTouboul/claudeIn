@@ -7,6 +7,7 @@ import {
   filterWorktrees,
   hueForName,
   WorktreeFilter,
+  WorktreeKind,
   WorktreeStatus,
   worktreeStatus,
 } from '@/components/Dashboard/Workspace/DashboardArea/Dashboard/WorktreesPanel/worktreeModel';
@@ -84,6 +85,7 @@ describe('deriveWorktrees', () => {
     const rows = deriveWorktrees({
       worktrees: [wt('/repo', 'main'), wt('/repo/wt', 'feature/x')],
       current: 'feature/x',
+      repoPath: '/repo',
       stats: [
         { path: '/repo', additions: 0, deletions: 0, ahead: 0, base: 'main' },
         { path: '/repo/wt', additions: 10, deletions: 3, ahead: 2, base: 'main' },
@@ -104,16 +106,46 @@ describe('deriveWorktrees', () => {
     expect(base.agent).toBeNull();
   });
 
+  it('tags the repo-root row as Main and the rest as Linked', () => {
+    const rows = deriveWorktrees({
+      worktrees: [wt('/repo', 'main'), wt('/repo/.worktrees/feature-x', 'feature/x')],
+      current: 'feature/x',
+      repoPath: '/repo',
+      stats: [],
+      dashboards: [],
+      presence: new Map(),
+    });
+
+    const root = rows.find((r) => r.path === '/repo')!;
+    expect(root.kind).toBe(WorktreeKind.Main);
+    const linked = rows.find((r) => r.path === '/repo/.worktrees/feature-x')!;
+    expect(linked.kind).toBe(WorktreeKind.Linked);
+  });
+
+  it('matches the main worktree ignoring a trailing path separator', () => {
+    const [root] = deriveWorktrees({
+      worktrees: [wt('/repo', 'main')],
+      current: 'main',
+      repoPath: '/repo/',
+      stats: [],
+      dashboards: [],
+      presence: new Map(),
+    });
+    expect(root.kind).toBe(WorktreeKind.Main);
+  });
+
   it('labels a detached worktree branch as (detached)', () => {
     const [row] = deriveWorktrees({
       worktrees: [wt('/repo/det', null)],
       current: null,
+      repoPath: '/repo',
       stats: [],
       dashboards: [],
       presence: new Map(),
     });
     expect(row.branch).toBe('(detached)');
     expect(row.current).toBe(false);
+    expect(row.kind).toBe(WorktreeKind.Linked);
   });
 });
 
@@ -121,6 +153,7 @@ describe('filterWorktrees + activeCount', () => {
   const rows = deriveWorktrees({
     worktrees: [wt('/a', 'a'), wt('/b', 'b')],
     current: null,
+    repoPath: '/a',
     stats: [{ path: '/b', additions: 1, deletions: 0, ahead: 1, base: 'main' }],
     dashboards: [dash('/b', 'sess-b')],
     presence: presenceWith('sess-b', 'bot', AgentPresenceStatus.Active),

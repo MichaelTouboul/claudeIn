@@ -2,12 +2,13 @@ import { describe, expect, it } from 'vitest';
 
 import type { RepoWorktreeGroup } from '@/components/Dashboard/Workspace/DashboardArea/Dashboard/AllWorktreesPanel/allWorktreesModel';
 import { flattenActiveWorktrees } from '@/components/Dashboard/Workspace/DashboardArea/Dashboard/LauncherView/WorktreeReentry/reentryModel';
-import { type WorktreeRow,WorktreeStatus } from '@/components/Dashboard/Workspace/DashboardArea/Dashboard/WorktreesPanel/worktreeModel';
+import { WorktreeKind,type WorktreeRow,WorktreeStatus } from '@/components/Dashboard/Workspace/DashboardArea/Dashboard/WorktreesPanel/worktreeModel';
 
 const row = (over: Partial<WorktreeRow>): WorktreeRow => ({
   path: '/p',
   branch: 'b',
   current: false,
+  kind: WorktreeKind.Linked,
   status: WorktreeStatus.Idle,
   agent: null,
   hue: 'blue',

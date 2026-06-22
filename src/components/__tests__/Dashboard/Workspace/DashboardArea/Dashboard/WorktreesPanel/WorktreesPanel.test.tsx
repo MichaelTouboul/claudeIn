@@ -83,8 +83,20 @@ describe('WorktreesPanel', () => {
     expect(await screen.findByText('refactorer')).toBeInTheDocument();
     expect(screen.getByText('+12')).toBeInTheDocument();
     expect(screen.getByText('−4')).toBeInTheDocument();
-    // "current" badge on the current worktree.
+    // "current" badge on the current (linked feature) worktree.
     expect(screen.getByText('current')).toBeInTheDocument();
+  });
+
+  it('labels the repo-root worktree as the main worktree, not the linked ones', async () => {
+    render(<WorktreesPanel repoPath={REPO} />);
+    await screen.findByText('_main');
+
+    // The repo-root worktree (path === REPO) carries a "root" tag and the
+    // repo-root subtitle; the linked feature worktree carries neither.
+    expect(screen.getByText('root')).toBeInTheDocument();
+    expect(screen.getByText('repo root (main worktree)')).toBeInTheDocument();
+    // It is NOT marked as just-another-current branch worktree.
+    expect(screen.queryByText('Current worktree')).not.toBeInTheDocument();
   });
 
   it('filters to Idle hiding the running worktree', async () => {

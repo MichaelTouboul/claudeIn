@@ -50,6 +50,7 @@ export function deriveRepoGroups(args: {
     rows: deriveWorktrees({
       worktrees: repo.branchInfo.worktrees,
       current: repo.branchInfo.current,
+      repoPath: repo.repoPath,
       stats: repo.stats,
       dashboards: args.dashboards,
       presence: args.presence,
