@@ -1,17 +1,20 @@
-import { ChevronRight, Loader2, Maximize2, Minimize2, Paperclip, Send, X } from 'lucide-react';
+import { ChevronRight, Loader2, Maximize2, Minimize2, Send } from 'lucide-react';
 import { type RefObject, useMemo, useState } from 'react';
 
 import { Button } from '@/components/_ui/Button';
 import { IconButton } from '@/components/_ui/IconButton';
+import { Kbd } from '@/components/_ui/Kbd';
 import type { FilePickerKind, SpawnSession  } from '@/lib/types';
-import { buildJsonAttachment } from '@/lib/utils';
+import { buildJsonAttachment, cn } from '@/lib/utils';
 import { PanelTabKind, promptEditorTabId, usePanelStore } from '@/store/dashboard/usePanelStore';
 import { byComposer, useToonStore } from '@/store/useToonStore';
 
 import type { HistoryNavContext } from '../RichEditor/plugins/SubmitPlugin';
 import { RichEditor, type RichEditorHandle } from '../RichEditor/RichEditor';
 import { AgentTabs } from './AgentTabs/AgentTabs';
+import { AttachmentStrip } from './AttachmentStrip/AttachmentStrip';
 import { AttachMenu } from './AttachMenu/AttachMenu';
+import { ComposerStatusBarContainer } from './ComposerStatusBar/ComposerStatusBarContainer';
 import { InputMenu } from './InputMenu';
 import { JsonChip } from './JsonChip/JsonChip';
 import { useInputMenus } from './useInputMenus';
@@ -32,6 +35,8 @@ export type AgentChatInputProps = {
   // Identifies this chat's composer — scopes the pasted-JSON attachments in
   // `useToonStore` (one composer per chat tab). Same value AgentChat sends from.
   composerId: string;
+  // The spawn directory (the repo) — drives the status strip's branch/worktrees.
+  projectPath?: string;
   editorRef: RefObject<RichEditorHandle | null>;
   onInputChange: (val: string) => void;
   /** Execute a chosen slash command (e.g. `/compact`). */
@@ -62,6 +67,7 @@ export function AgentChatInput({
   claudeSessionId,
   agentName,
   composerId,
+  projectPath,
   editorRef,
   onInputChange,
   onSelectSlash,
@@ -75,6 +81,8 @@ export function AgentChatInput({
   onHistoryNav,
 }: AgentChatInputProps) {
   const [plainText, setPlainText] = useState('');
+  // Drives the composer focus ring (accent border + accent-subtle glow).
+  const [focused, setFocused] = useState(false);
   const menus = useInputMenus(plainText, modelPickerOpen);
 
   // The prompt-editor panel: the maximize button OPENS a real workspace editor
@@ -188,60 +196,9 @@ export function AgentChatInput({
   };
 
   return (
-    <div className={`relative border-t p-3 ${waitingInput ? "border-yellow-500/50 bg-yellow-500/5" : "border-border"}`}>
-      {/* Pasted-JSON (TOON) attachments */}
-      {jsonAttachments.length > 0 ? (
-        <div className="flex flex-wrap gap-2 px-3 pt-2 pb-1">
-          {jsonAttachments.map((att) => (
-            <JsonChip key={att.id} attachment={att} />
-          ))}
-        </div>
-      ) : null}
-
-      {/* Attached files preview */}
-      {attachedFiles.length > 0 ? (
-        <div className="flex flex-wrap gap-2 px-3 pt-2 pb-1">
-          {attachedFiles.map((file, i) => (
-            <div key={file.path} className="relative group/attach">
-              {file.dataUrl ? (
-                <img
-                  src={file.dataUrl}
-                  alt={file.path.split("/").pop() || ""}
-                  className="rounded-lg"
-                  style={{
-                    maxWidth: "80px",
-                    maxHeight: "80px",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                  }}
-                />
-              ) : (
-                <div
-                  className="flex items-center gap-1 text-[11px] px-2 py-1 rounded-lg"
-                  style={{
-                    background: "rgba(255,255,255,0.05)",
-                    color: "var(--color-neutral-fg)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                  }}
-                >
-                  <Paperclip size={10} />
-                  <span className="truncate max-w-[120px]">{file.path.split("/").pop()}</span>
-                </div>
-              )}
-              <button
-                onClick={() => onRemoveAttachment(i)}
-                title="Remove attachment"
-                aria-label="Remove attachment"
-                className="absolute -top-1.5 -right-1.5 p-0.5 rounded-full opacity-0 group-hover/attach:opacity-100 transition-opacity"
-                style={{ background: "var(--color-neutral-bg)", color: "var(--color-neutral-fg-strong)" }}
-              >
-                <X size={10} />
-              </button>
-            </div>
-          ))}
-        </div>
-      ) : null}
-
-      {/* Slash / mention command menu (mutually exclusive). */}
+    <div className="p-3">
+      {/* Slash / mention command menu (mutually exclusive). Outside the composer
+          card so its popover isn't clipped by the card's overflow. */}
       {menus.kind ? (
         <InputMenu
           groups={menus.groups}
@@ -252,60 +209,94 @@ export function AgentChatInput({
         />
       ) : null}
 
-      {/* Sub-agent presence for THIS conversation, above the editor. */}
-      <AgentTabs claudeSessionId={claudeSessionId} orchestratorName={agentName} />
+      <div
+        onFocusCapture={() => setFocused(true)}
+        onBlurCapture={() => setFocused(false)}
+        className={cn(
+          'relative overflow-hidden rounded-xl border bg-surface-1 transition-colors',
+          waitingInput
+            ? 'border-[var(--color-warning)]/50'
+            : focused
+              ? 'border-accent'
+              : 'border-border-strong',
+        )}
+        style={focused && !waitingInput ? { boxShadow: '0 0 0 3px var(--color-accent-subtle)' } : undefined}
+      >
+        {/* Pasted-JSON (TOON) attachments */}
+        {jsonAttachments.length > 0 ? (
+          <div className="flex flex-wrap gap-2 px-3 pt-2 pb-1">
+            {jsonAttachments.map((att) => (
+              <JsonChip key={att.id} attachment={att} />
+            ))}
+          </div>
+        ) : null}
 
-      <div className="flex gap-2 items-end">
-        <div className={`flex items-center text-sm shrink-0 pt-1.5 ${waitingInput ? "text-[var(--color-warning)]" : "text-accent"}`}>
-          <ChevronRight size={14} />
+        <AttachmentStrip files={attachedFiles} onRemove={onRemoveAttachment} />
+
+        {/* Sub-agent presence for THIS conversation, above the editor. */}
+        <AgentTabs claudeSessionId={claudeSessionId} orchestratorName={agentName} />
+
+        <div className="flex gap-2 items-end px-3 pt-2 pb-1">
+          <div className={`flex items-center text-sm shrink-0 pt-1.5 ${waitingInput ? "text-[var(--color-warning)]" : "text-accent"}`}>
+            <ChevronRight size={14} />
+          </div>
+          <RichEditor
+            handleRef={editorRef}
+            placeholder={
+              waitingInput
+                ? "Type your response (yes / no / ...)..."
+                : session && isRunning
+                  ? "Send a message..."
+                  : selectedModelLabel
+                    ? `${selectedModelLabel} · type, / for commands or @ to mention...`
+                    : "Type a prompt, / for commands or @ to mention..."
+            }
+            onChange={(markdown, plain) => {
+              onInputChange(markdown);
+              setPlainText(plain);
+            }}
+            onSubmit={onSend}
+            onEnter={handleEnter}
+            onComplete={handleComplete}
+            onNavKey={handleNavKey}
+            onHistoryNav={onHistoryNav}
+            onPasteText={handlePasteText}
+          />
+          <div className="flex items-center gap-1 pb-0.5">
+            <Kbd className="mr-1 hidden sm:inline-flex" title="Envoyer">⌘⏎</Kbd>
+            <IconButton
+              size="sm"
+              onClick={togglePromptEditor}
+              active={editorPanelOpen}
+              aria-label={editorPanelOpen ? 'Collapse prompt editor' : 'Open prompt editor'}
+              title={editorPanelOpen ? 'Collapse prompt editor' : 'Open prompt editor'}
+            >
+              {editorPanelOpen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+            </IconButton>
+            <AttachMenu onAttach={onAttach} />
+            <Button
+              intent="ghost"
+              size="icon"
+              onClick={onSend}
+              disabled={(!input.trim() && attachedFiles.length === 0 && jsonAttachments.length === 0) || spawning}
+              title="Send"
+            >
+              {spawning ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <Send size={16} />
+              )}
+            </Button>
+          </div>
         </div>
-        <RichEditor
-          handleRef={editorRef}
-          placeholder={
-            waitingInput
-              ? "Type your response (yes / no / ...)..."
-              : session && isRunning
-                ? "Send a message..."
-                : selectedModelLabel
-                  ? `${selectedModelLabel} · type, / for commands or @ to mention...`
-                  : "Type a prompt, / for commands or @ to mention..."
-          }
-          onChange={(markdown, plain) => {
-            onInputChange(markdown);
-            setPlainText(plain);
-          }}
-          onSubmit={onSend}
-          onEnter={handleEnter}
-          onComplete={handleComplete}
-          onNavKey={handleNavKey}
-          onHistoryNav={onHistoryNav}
-          onPasteText={handlePasteText}
+
+        {/* Status strip along the composer's bottom edge. */}
+        <ComposerStatusBarContainer
+          conversationKey={composerId}
+          agentName={agentName}
+          claudeSessionId={claudeSessionId}
+          projectPath={projectPath}
         />
-        <div className="flex items-center gap-1 pb-0.5">
-          <IconButton
-            size="sm"
-            onClick={togglePromptEditor}
-            active={editorPanelOpen}
-            aria-label={editorPanelOpen ? 'Collapse prompt editor' : 'Open prompt editor'}
-            title={editorPanelOpen ? 'Collapse prompt editor' : 'Open prompt editor'}
-          >
-            {editorPanelOpen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-          </IconButton>
-          <AttachMenu onAttach={onAttach} />
-          <Button
-            intent="ghost"
-            size="icon"
-            onClick={onSend}
-            disabled={(!input.trim() && attachedFiles.length === 0 && jsonAttachments.length === 0) || spawning}
-            title="Send"
-          >
-            {spawning ? (
-              <Loader2 size={16} className="animate-spin" />
-            ) : (
-              <Send size={16} />
-            )}
-          </Button>
-        </div>
       </div>
     </div>
   );

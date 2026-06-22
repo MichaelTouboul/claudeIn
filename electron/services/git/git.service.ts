@@ -6,11 +6,12 @@ import { promisify } from "node:util";
 import {
   DiffMode,
   FileStatus,
+  type GitBranchInfo,
   GitLineKind,
   type RepoDiff,
   type RepoFileDiff,
 } from "../../types/git.types";
-import { parseUnifiedDiff } from "./git.parse";
+import { parseUnifiedDiff, parseWorktrees } from "./git.parse";
 
 const run = promisify(execFile);
 const TIMEOUT = 10_000;
@@ -112,6 +113,32 @@ export async function loadRepoDiff(repoPath: string, mode: DiffMode): Promise<Re
       mode,
       files: [],
       truncated: false,
+      error: err instanceof Error ? err.message : "git failed",
+    };
+  }
+}
+
+/**
+ * The branch + worktree state for a repo (read-only): the current branch and the
+ * full set of linked worktrees. Feeds the composer status strip's branch item and
+ * its switch-worktree menu. Switching/creating a worktree is NOT performed here —
+ * the renderer offers it as scaffold only (see ComposerStatusBar).
+ */
+export async function loadGitBranchInfo(repoPath: string): Promise<GitBranchInfo> {
+  if (!(await isGitRepo(repoPath))) {
+    return { current: null, worktrees: [], error: "Not a git repository" };
+  }
+  try {
+    const current = (await git(repoPath, ["rev-parse", "--abbrev-ref", "HEAD"])).trim();
+    const porcelain = await git(repoPath, ["worktree", "list", "--porcelain"]);
+    return {
+      current: current === "HEAD" ? null : current,
+      worktrees: parseWorktrees(porcelain),
+    };
+  } catch (err) {
+    return {
+      current: null,
+      worktrees: [],
       error: err instanceof Error ? err.message : "git failed",
     };
   }

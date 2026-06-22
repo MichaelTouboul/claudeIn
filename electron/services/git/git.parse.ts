@@ -3,8 +3,46 @@ import {
   type GitDiffHunk,
   type GitDiffLine,
   GitLineKind,
+  type GitWorktree,
   type RepoFileDiff,
 } from "../../types/git.types";
+
+/**
+ * Parse `git worktree list --porcelain` output into structured entries. Pure so
+ * the porcelain-record handling is unit-testable. Each record is a block of
+ * lines separated by a blank line: `worktree <path>`, `HEAD <sha>`, then either
+ * `branch refs/heads/<name>` or `detached`.
+ */
+export function parseWorktrees(porcelain: string): GitWorktree[] {
+  const worktrees: GitWorktree[] = [];
+  let path: string | null = null;
+  let branch: string | null = null;
+  let detached = false;
+
+  const flush = () => {
+    if (path !== null) worktrees.push({ path, branch, detached });
+    path = null;
+    branch = null;
+    detached = false;
+  };
+
+  for (const line of porcelain.split("\n")) {
+    if (line === "") {
+      flush();
+      continue;
+    }
+    if (line.startsWith("worktree ")) {
+      flush();
+      path = line.slice("worktree ".length);
+    } else if (line.startsWith("branch ")) {
+      branch = line.slice("branch ".length).replace(/^refs\/heads\//, "");
+    } else if (line === "detached") {
+      detached = true;
+    }
+  }
+  flush();
+  return worktrees;
+}
 
 export interface ParseResult {
   files: RepoFileDiff[];

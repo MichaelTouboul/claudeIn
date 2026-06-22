@@ -49,6 +49,8 @@ contextBridge.exposeInMainWorld("api", {
 
   gitDiff: (repoPath: string, mode: DiffMode) => ipcRenderer.invoke("git:diff", repoPath, mode),
 
+  gitBranches: (repoPath: string) => ipcRenderer.invoke("git:branches", repoPath),
+
   spawn: (opts: { agent_name?: string; mission: string; cwd?: string; resume_session_id?: string; model?: string }) =>
     ipcRenderer.invoke("spawn:start", opts),
   getSession: (localSessionId: string) => ipcRenderer.invoke("spawn:get", localSessionId),

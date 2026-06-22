@@ -50,3 +50,19 @@ export interface RepoDiff {
   truncated: boolean;
   error?: string;
 }
+
+/** One git worktree as reported by `git worktree list --porcelain`. */
+export interface GitWorktree {
+  path: string;
+  /** The checked-out branch (short name), or null when detached. */
+  branch: string | null;
+  detached: boolean;
+}
+
+/** The branch/worktree state for a repo, fed to the composer status strip. */
+export interface GitBranchInfo {
+  /** The repo's current branch (short name), or null when detached/unknown. */
+  current: string | null;
+  worktrees: GitWorktree[];
+  error?: string;
+}
