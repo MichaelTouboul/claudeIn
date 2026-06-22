@@ -40,6 +40,13 @@ vi.mock('@/services/api', () => ({
   api: { getAgents: () => Promise.resolve([agent('tw-dev'), agent('researcher')]) },
 }));
 
+// The new "Active worktrees · all repos" section reads the all-repos aggregation;
+// stub the two window.api methods it touches (no active worktrees here).
+window.api = {
+  gitWorktreesAllRepos: () => Promise.resolve([]),
+  onEvent: () => () => {},
+} as unknown as typeof window.api;
+
 const initial = useWorkspaceStore.getState();
 beforeEach(() => {
   useWorkspaceStore.setState(initial, true);
@@ -52,11 +59,11 @@ function openLauncherDashboard(): string {
 }
 
 describe('LauncherView', () => {
-  it('Open a project card expands a list and resolves to a project dashboard', () => {
+  it('Open a project dropdown lists repos and resolves to a project dashboard', () => {
     const id = openLauncherDashboard();
     render(<LauncherView dashboardId={id} />);
 
-    fireEvent.click(screen.getByRole('button', { name: /Open a project/i }));
+    // The "Open a project" dropdown is expanded by default (matches the design).
     fireEvent.click(screen.getByRole('button', { name: /alpha/i }));
 
     const d = useWorkspaceStore.getState().dashboards.find((x) => x.id === id)!;
@@ -64,14 +71,13 @@ describe('LauncherView', () => {
     expect(d.cwd).toBe('/p/alpha');
   });
 
-  it('Project row title shows the repo name (basename), not the LLM description', () => {
+  it('Project row shows the repo name (basename) + path, not the LLM description', () => {
     const id = openLauncherDashboard();
     render(<LauncherView dashboardId={id} />);
 
-    fireEvent.click(screen.getByRole('button', { name: /Open a project/i }));
-
-    // The folder name is shown as the title…
+    // The folder name is shown as the title and the path in mono…
     expect(screen.getByText('alpha')).toBeInTheDocument();
+    expect(screen.getByText('/p/alpha')).toBeInTheDocument();
     // …and the LLM description is never rendered.
     expect(screen.queryByText(FAVORITE_DESCRIPTION)).toBeNull();
   });

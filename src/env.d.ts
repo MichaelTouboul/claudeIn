@@ -44,6 +44,10 @@ interface Window {
     gitWorktreeStats: (
       repoPath: string,
     ) => Promise<import("../electron/types/git.types").WorktreeStat[]>;
+    /** All-repos (user-scope) worktree aggregation: per-repo branch info + stats. */
+    gitWorktreesAllRepos: (
+      repoPaths: string[],
+    ) => Promise<import("../electron/types/git.types").RepoWorktrees[]>;
     /** Create a worktree for `branch` under `<repo>/.worktrees/<branch>`. */
     gitWorktreeAdd: (
       repoPath: string,

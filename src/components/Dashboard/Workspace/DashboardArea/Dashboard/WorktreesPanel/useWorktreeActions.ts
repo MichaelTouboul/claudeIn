@@ -1,20 +1,12 @@
 import { useCallback, useState } from 'react';
 
 import type { WorktreeOpResult } from '@/lib/types';
-import { diffTabId, PanelTabKind, usePanelStore } from '@/store/dashboard/usePanelStore';
-import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
+import { buildCardActions, type PendingConfirm } from './worktreeActions';
 import type { WorktreeCardAction } from './WorktreeCard';
 import type { WorktreeRow } from './worktreeModel';
 
-/** A pending confirm-guarded op (merge/remove) the panel renders a dialog for. */
-export interface PendingConfirm {
-  title: string;
-  body: string;
-  confirmLabel: string;
-  danger?: boolean;
-  run: () => Promise<WorktreeOpResult>;
-}
+export type { PendingConfirm };
 
 export interface WorktreeActions {
   /** Create a worktree for a branch (real `git worktree add`), then refresh stats. */
@@ -27,40 +19,14 @@ export interface WorktreeActions {
 }
 
 /**
- * Wires the Worktrees panel's REAL actions to git + the workspace:
- * - Ouvrir: activate the dashboard already open on that worktree's cwd; if none
- *   is open, fall back to opening the diff surface for it (always a real, visible
- *   result — never a silent no-op).
- * - Comparer: open the existing repo-diff panel (`PanelTabKind.Diff`) for the path.
- * - Merger / Supprimer: stage a confirm; on confirm run the real git op and
- *   refresh stats. The result (incl. a conflict's stderr) is surfaced by the dialog.
+ * Wires the per-repo Worktrees panel's REAL actions to git + the workspace. The
+ * row handlers (open / diff / merge / remove) come from the shared
+ * `buildCardActions` factory — the SAME wiring the all-repos panel reuses; this
+ * hook only adds the repo-scoped `create` and the confirm-dialog state.
  */
 export function useWorktreeActions(repoPath: string, refreshStats: () => void): WorktreeActions {
   const [confirm, setConfirm] = useState<PendingConfirm | null>(null);
   const closeConfirm = useCallback(() => setConfirm(null), []);
-
-  const openDiff = useCallback((path: string) => {
-    usePanelStore.getState().open({
-      id: diffTabId(path),
-      kind: PanelTabKind.Diff,
-      title: `Diff — ${path.split(/[/\\]/).pop() ?? path}`,
-      payload: { repoPath: path },
-    });
-  }, []);
-
-  const open = useCallback(
-    (row: WorktreeRow) => {
-      const dash = useWorkspaceStore.getState().dashboards.find((d) => d.cwd === row.path);
-      if (dash) {
-        useWorkspaceStore.getState().setActiveDashboard(dash.id);
-        return;
-      }
-      // No dashboard is open on this worktree (it has no Project object to spawn a
-      // full dashboard from) — open its diff so the action is real and visible.
-      openDiff(row.path);
-    },
-    [openDiff],
-  );
 
   const create = useCallback(
     async (branch: string) => {
@@ -72,34 +38,9 @@ export function useWorktreeActions(repoPath: string, refreshStats: () => void): 
   );
 
   const cardActions = useCallback(
-    (row: WorktreeRow): WorktreeCardAction => ({
-      open: () => open(row),
-      diff: () => openDiff(row.path),
-      merge: () =>
-        setConfirm({
-          title: `Merger ${row.branch}`,
-          body: `Merge la branche ${row.branch} dans la base du repo (git merge --no-edit). En cas de conflit, l’erreur git est affichée — rien n’est validé automatiquement.`,
-          confirmLabel: 'Merger',
-          run: async () => {
-            const result = await window.api.gitWorktreeMerge(repoPath, row.branch);
-            if (result.ok) refreshStats();
-            return result;
-          },
-        }),
-      remove: () =>
-        setConfirm({
-          title: `Supprimer le worktree`,
-          body: `Supprime le worktree ${row.path}. La branche ${row.branch} est conservée. Cette action est forcée (changements non commités perdus).`,
-          confirmLabel: 'Supprimer',
-          danger: true,
-          run: async () => {
-            const result = await window.api.gitWorktreeRemove(repoPath, row.path, true);
-            if (result.ok) refreshStats();
-            return result;
-          },
-        }),
-    }),
-    [open, openDiff, repoPath, refreshStats],
+    (row: WorktreeRow): WorktreeCardAction =>
+      buildCardActions({ repoPath, row, setConfirm, refresh: refreshStats }),
+    [repoPath, refreshStats],
   );
 
   return { create, cardActions, confirm, closeConfirm };
