@@ -17,6 +17,7 @@ export const PanelTabKind = {
   Diff: 'diff',
   Worktrees: 'worktrees',
   Activity: 'activity',
+  AllWorktrees: 'all-worktrees',
 } as const;
 export type PanelTabKind = (typeof PanelTabKind)[keyof typeof PanelTabKind];
 
@@ -71,6 +72,12 @@ export type WorktreesPayload = { repoPath: string };
  * re-opening the same discussion reuses the SAME panel object.
  */
 export type ActivityPayload = { claudeSessionId: string | null; projectPath: string };
+/**
+ * The all-repos (user-scope) Worktrees panel. It is NOT scoped to a repo — the
+ * body reads the user's known repos and aggregates their live worktrees itself —
+ * so it carries no payload. There is one such panel (a fixed id).
+ */
+export type AllWorktreesPayload = Record<string, never>;
 
 /**
  * A panel object — discriminated by `kind`, so `payload` is narrowed per kind.
@@ -88,7 +95,8 @@ export type PanelTab =
   | { id: string; kind: typeof PanelTabKind.PromptEditor; title: string; payload: PromptEditorPayload }
   | { id: string; kind: typeof PanelTabKind.Diff; title: string; payload: DiffPayload }
   | { id: string; kind: typeof PanelTabKind.Worktrees; title: string; payload: WorktreesPayload }
-  | { id: string; kind: typeof PanelTabKind.Activity; title: string; payload: ActivityPayload };
+  | { id: string; kind: typeof PanelTabKind.Activity; title: string; payload: ActivityPayload }
+  | { id: string; kind: typeof PanelTabKind.AllWorktrees; title: string; payload: AllWorktreesPayload };
 
 /** Payload type for a given object kind — single source for kind→payload mapping. */
 export type PayloadByKind = {
@@ -102,6 +110,7 @@ export type PayloadByKind = {
   [PanelTabKind.Diff]: DiffPayload;
   [PanelTabKind.Worktrees]: WorktreesPayload;
   [PanelTabKind.Activity]: ActivityPayload;
+  [PanelTabKind.AllWorktrees]: AllWorktreesPayload;
 };
 
 /**
@@ -293,3 +302,5 @@ export function worktreesTabId(repoPath: string): string {
 export function activityTabId(claudeSessionId: string | null): string {
   return `activity:${contentHash(claudeSessionId ?? '')}`;
 }
+/** The single all-repos Worktrees panel id (user-scope; not keyed by a repo). */
+export const ALL_WORKTREES_TAB_ID = 'all-worktrees';

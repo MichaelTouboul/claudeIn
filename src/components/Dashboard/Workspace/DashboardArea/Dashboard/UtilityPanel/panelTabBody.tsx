@@ -1,5 +1,6 @@
 import { type ComponentType } from 'react';
 
+import { AllWorktreesTab } from '@/components/Dashboard/Workspace/DashboardArea/Dashboard/AllWorktreesPanel/AllWorktreesTab';
 import { WorktreesTab } from '@/components/Dashboard/Workspace/DashboardArea/Dashboard/WorktreesPanel/WorktreesTab';
 import { type PanelTab, PanelTabKind } from '@/store/dashboard/usePanelStore';
 
@@ -25,4 +26,5 @@ export const TAB_BODY: Record<PanelTabKind, ComponentType<{ tab: PanelTab }>> = 
   [PanelTabKind.Diff]: DiffTab,
   [PanelTabKind.Worktrees]: WorktreesTab,
   [PanelTabKind.Activity]: ActivityTab,
+  [PanelTabKind.AllWorktrees]: AllWorktreesTab,
 };

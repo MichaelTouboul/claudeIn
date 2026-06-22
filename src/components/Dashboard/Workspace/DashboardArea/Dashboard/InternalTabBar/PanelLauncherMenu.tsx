@@ -1,8 +1,9 @@
-import { GitBranch, Menu, Network, Trees } from 'lucide-react';
+import { Boxes, GitBranch, Menu, Network, Trees } from 'lucide-react';
 
 import { ContextMenu, type ContextMenuItem } from '@/components/_ui/ContextMenu/ContextMenu';
 import { Flex } from '@/components/_ui/Flex';
 import {
+  ALL_WORKTREES_TAB_ID,
   diffTabId,
   PanelTabKind,
   usePanelStore,
@@ -49,6 +50,17 @@ export function PanelLauncherMenu({ repoPath, claudeSessionId }: PanelLauncherMe
           kind: PanelTabKind.Worktrees,
           title: 'Worktrees',
           payload: { repoPath },
+        }),
+    },
+    {
+      label: 'Worktrees · all repos',
+      icon: <Boxes size={14} />,
+      onSelect: () =>
+        open({
+          id: ALL_WORKTREES_TAB_ID,
+          kind: PanelTabKind.AllWorktrees,
+          title: 'Worktrees · all repos',
+          payload: {},
         }),
     },
     {

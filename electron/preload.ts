@@ -53,6 +53,8 @@ contextBridge.exposeInMainWorld("api", {
   watchGitBranch: (repoPath: string) => ipcRenderer.invoke("git:watch-branch", repoPath),
   unwatchGitBranch: (repoPath: string) => ipcRenderer.invoke("git:unwatch-branch", repoPath),
   gitWorktreeStats: (repoPath: string) => ipcRenderer.invoke("git:worktree-stats", repoPath),
+  gitWorktreesAllRepos: (repoPaths: string[]) =>
+    ipcRenderer.invoke("git:worktrees-all-repos", repoPaths),
   gitWorktreeAdd: (repoPath: string, branch: string) =>
     ipcRenderer.invoke("git:worktree-add", repoPath, branch),
   gitWorktreeRemove: (repoPath: string, worktreeTarget: string, force: boolean) =>
