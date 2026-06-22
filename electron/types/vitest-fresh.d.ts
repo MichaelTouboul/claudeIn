@@ -48,3 +48,15 @@ declare module "*?fresh=ctx-none" {
   const mod: any;
   export = mod;
 }
+declare module "*?fresh=pw-1m" {
+  const mod: any;
+  export = mod;
+}
+declare module "*?fresh=pw-200k" {
+  const mod: any;
+  export = mod;
+}
+declare module "*?fresh=stop-boundary" {
+  const mod: any;
+  export = mod;
+}
