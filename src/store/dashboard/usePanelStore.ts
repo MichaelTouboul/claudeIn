@@ -15,6 +15,7 @@ export const PanelTabKind = {
   Toon: 'toon',
   PromptEditor: 'prompt-editor',
   Diff: 'diff',
+  Worktrees: 'worktrees',
 } as const;
 export type PanelTabKind = (typeof PanelTabKind)[keyof typeof PanelTabKind];
 
@@ -55,6 +56,12 @@ export type PromptEditorPayload = { composerId: string; text: string };
  * view reuses the SAME panel object while the body re-fetches its current state.
  */
 export type DiffPayload = { repoPath: string };
+/**
+ * The Worktrees panel — scoped to ONE repo. Like the live views it carries no
+ * snapshot: the body reads the live worktree list/stats/presence keyed by
+ * `repoPath`. Identity is the repo, so re-opening reuses the SAME panel object.
+ */
+export type WorktreesPayload = { repoPath: string };
 
 /**
  * A panel object — discriminated by `kind`, so `payload` is narrowed per kind.
@@ -70,7 +77,8 @@ export type PanelTab =
   | { id: string; kind: typeof PanelTabKind.Workflow; title: string; payload: WorkflowPayload }
   | { id: string; kind: typeof PanelTabKind.Toon; title: string; payload: ToonPayload }
   | { id: string; kind: typeof PanelTabKind.PromptEditor; title: string; payload: PromptEditorPayload }
-  | { id: string; kind: typeof PanelTabKind.Diff; title: string; payload: DiffPayload };
+  | { id: string; kind: typeof PanelTabKind.Diff; title: string; payload: DiffPayload }
+  | { id: string; kind: typeof PanelTabKind.Worktrees; title: string; payload: WorktreesPayload };
 
 /** Payload type for a given object kind — single source for kind→payload mapping. */
 export type PayloadByKind = {
@@ -82,6 +90,7 @@ export type PayloadByKind = {
   [PanelTabKind.Toon]: ToonPayload;
   [PanelTabKind.PromptEditor]: PromptEditorPayload;
   [PanelTabKind.Diff]: DiffPayload;
+  [PanelTabKind.Worktrees]: WorktreesPayload;
 };
 
 /**
@@ -254,4 +263,13 @@ export function promptEditorTabId(composerId: string): string {
  */
 export function diffTabId(repoPath: string): string {
   return `diff:${repoPath}`;
+}
+
+/**
+ * Stable id for a repo's Worktrees panel. Identity is the repo path — re-opening
+ * the same repo's Worktrees view reuses the SAME panel object while the body keeps
+ * reading its live worktree list/stats/presence.
+ */
+export function worktreesTabId(repoPath: string): string {
+  return `worktrees:${repoPath}`;
 }

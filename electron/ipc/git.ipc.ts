@@ -2,6 +2,12 @@ import { ipcMain } from "electron";
 
 import { loadGitBranchInfo, loadRepoDiff } from "../services/git/git.service";
 import { unwatchGitBranch, watchGitBranch } from "../services/git/git.watch";
+import {
+  addWorktree,
+  loadWorktreeStats,
+  mergeWorktree,
+  removeWorktree,
+} from "../services/git/git.worktree";
 import type { DiffMode } from "../types/git.types";
 
 export function registerGitHandlers(): void {
@@ -13,4 +19,15 @@ export function registerGitHandlers(): void {
     watchGitBranch(repoPath));
   ipcMain.handle("git:unwatch-branch", (_e, repoPath: string) =>
     unwatchGitBranch(repoPath));
+  ipcMain.handle("git:worktree-stats", (_e, repoPath: string) =>
+    loadWorktreeStats(repoPath));
+  ipcMain.handle("git:worktree-add", (_e, repoPath: string, branch: string) =>
+    addWorktree(repoPath, branch));
+  ipcMain.handle(
+    "git:worktree-remove",
+    (_e, repoPath: string, worktreeTarget: string, force: boolean) =>
+      removeWorktree(repoPath, worktreeTarget, force),
+  );
+  ipcMain.handle("git:worktree-merge", (_e, repoPath: string, branch: string) =>
+    mergeWorktree(repoPath, branch));
 }

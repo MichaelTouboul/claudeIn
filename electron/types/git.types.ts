@@ -66,3 +66,28 @@ export interface GitBranchInfo {
   worktrees: GitWorktree[];
   error?: string;
 }
+
+/**
+ * Diff/commit stats for ONE worktree vs the repo's default base (`_main`/`main`/
+ * `master`), computed for the Worktrees panel cards. `additions`/`deletions` are
+ * the summed line counts of `git diff --numstat <mergeBase>...HEAD`; `ahead` is
+ * the commit count `git rev-list --count <base>..<branch>`. All zero when the
+ * worktree IS the base, or on any failure (`error` set, never thrown).
+ */
+export interface WorktreeStat {
+  /** The worktree path this stat belongs to (the join key on the renderer side). */
+  path: string;
+  additions: number;
+  deletions: number;
+  ahead: number;
+  /** The base branch the stats were computed against, or null when none found. */
+  base: string | null;
+  error?: string;
+}
+
+/** Result of a worktree mutation (add/remove/merge). Never throws — `ok` + message. */
+export interface WorktreeOpResult {
+  ok: boolean;
+  /** Combined stdout/stderr from git, surfaced verbatim on failure (no faking). */
+  message: string;
+}
