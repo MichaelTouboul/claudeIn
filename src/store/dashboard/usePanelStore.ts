@@ -16,6 +16,7 @@ export const PanelTabKind = {
   PromptEditor: 'prompt-editor',
   Diff: 'diff',
   Worktrees: 'worktrees',
+  Activity: 'activity',
   AllWorktrees: 'all-worktrees',
 } as const;
 export type PanelTabKind = (typeof PanelTabKind)[keyof typeof PanelTabKind];
@@ -64,6 +65,14 @@ export type DiffPayload = { repoPath: string };
  */
 export type WorktreesPayload = { repoPath: string };
 /**
+ * The discussion-workflow panel — the chronological tool-use steps of ONE main
+ * conversation thread. Like the other live views it carries no snapshot: the body
+ * fetches `window.api.getConversationSteps(projectPath, claudeSessionId)` on mount
+ * and re-fetches live while the session streams. Identity is the conversation, so
+ * re-opening the same discussion reuses the SAME panel object.
+ */
+export type ActivityPayload = { claudeSessionId: string | null; projectPath: string };
+/**
  * The all-repos (user-scope) Worktrees panel. It is NOT scoped to a repo — the
  * body reads the user's known repos and aggregates their live worktrees itself —
  * so it carries no payload. There is one such panel (a fixed id).
@@ -86,6 +95,7 @@ export type PanelTab =
   | { id: string; kind: typeof PanelTabKind.PromptEditor; title: string; payload: PromptEditorPayload }
   | { id: string; kind: typeof PanelTabKind.Diff; title: string; payload: DiffPayload }
   | { id: string; kind: typeof PanelTabKind.Worktrees; title: string; payload: WorktreesPayload }
+  | { id: string; kind: typeof PanelTabKind.Activity; title: string; payload: ActivityPayload }
   | { id: string; kind: typeof PanelTabKind.AllWorktrees; title: string; payload: AllWorktreesPayload };
 
 /** Payload type for a given object kind — single source for kind→payload mapping. */
@@ -99,6 +109,7 @@ export type PayloadByKind = {
   [PanelTabKind.PromptEditor]: PromptEditorPayload;
   [PanelTabKind.Diff]: DiffPayload;
   [PanelTabKind.Worktrees]: WorktreesPayload;
+  [PanelTabKind.Activity]: ActivityPayload;
   [PanelTabKind.AllWorktrees]: AllWorktreesPayload;
 };
 
@@ -283,5 +294,13 @@ export function worktreesTabId(repoPath: string): string {
   return `worktrees:${repoPath}`;
 }
 
+/**
+ * Stable id for a discussion's workflow object. Identity is the conversation
+ * itself — re-opening the same discussion's workflow reuses the SAME panel object
+ * while the body re-fetches its live steps. A null session shares one id.
+ */
+export function activityTabId(claudeSessionId: string | null): string {
+  return `activity:${contentHash(claudeSessionId ?? '')}`;
+}
 /** The single all-repos Worktrees panel id (user-scope; not keyed by a repo). */
 export const ALL_WORKTREES_TAB_ID = 'all-worktrees';

@@ -84,6 +84,10 @@ interface Window {
 
     getSessionList: (projectPath: string) => Promise<import("./types/session.types").SessionSummary[]>;
     getSessionConversation: (filePath: string) => Promise<import("./types/session.types").SessionConversation>;
+    getConversationSteps: (
+      projectPath: string,
+      sessionId: string,
+    ) => Promise<import("./types/session.types").ConversationStep[]>;
     watchSessions: (projectPath: string) => Promise<void>;
     unwatchSessions: (projectPath: string) => Promise<void>;
     watchConversation: (filePath: string) => Promise<void>;

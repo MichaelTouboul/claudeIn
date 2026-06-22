@@ -4,6 +4,7 @@ import { AllWorktreesTab } from '@/components/Dashboard/Workspace/DashboardArea/
 import { WorktreesTab } from '@/components/Dashboard/Workspace/DashboardArea/Dashboard/WorktreesPanel/WorktreesTab';
 import { type PanelTab, PanelTabKind } from '@/store/dashboard/usePanelStore';
 
+import { ActivityTab } from './ActivityTab/ActivityTab';
 import { AgentTab } from './AgentTab/AgentTab';
 import { CodeTab } from './CodeTab/CodeTab';
 import { DiffTab } from './DiffTab/DiffTab';
@@ -24,5 +25,6 @@ export const TAB_BODY: Record<PanelTabKind, ComponentType<{ tab: PanelTab }>> = 
   [PanelTabKind.PromptEditor]: PromptEditorTab,
   [PanelTabKind.Diff]: DiffTab,
   [PanelTabKind.Worktrees]: WorktreesTab,
+  [PanelTabKind.Activity]: ActivityTab,
   [PanelTabKind.AllWorktrees]: AllWorktreesTab,
 };

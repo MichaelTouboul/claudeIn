@@ -89,6 +89,8 @@ contextBridge.exposeInMainWorld("api", {
 
   getSessionList: (projectPath: string) => ipcRenderer.invoke("sessions:list", projectPath),
   getSessionConversation: (filePath: string) => ipcRenderer.invoke("sessions:conversation", filePath),
+  getConversationSteps: (projectPath: string, sessionId: string) =>
+    ipcRenderer.invoke("sessions:steps", projectPath, sessionId),
   watchSessions: (projectPath: string) => ipcRenderer.invoke("sessions:watch-start", projectPath),
   unwatchSessions: (projectPath: string) => ipcRenderer.invoke("sessions:watch-stop", projectPath),
   watchConversation: (filePath: string) => ipcRenderer.invoke("conversation:watch", filePath),
