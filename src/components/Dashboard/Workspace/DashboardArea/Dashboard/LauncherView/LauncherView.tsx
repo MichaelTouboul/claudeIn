@@ -40,8 +40,8 @@ export function LauncherView({ dashboardId }: LauncherViewProps) {
   }, [expanded, dashboardId, resolveLauncher]);
 
   return (
-    <div className="flex h-full min-h-0 flex-1 items-center justify-center overflow-y-auto p-8">
-      <div className="flex w-full max-w-[760px] flex-col gap-2.5">
+    <div className="flex h-full min-h-0 flex-1 justify-center overflow-y-auto px-10 py-8">
+      <div className="flex w-full max-w-[1080px] flex-col gap-2.5">
         <h2 className="text-xl font-semibold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>
           New tab
         </h2>

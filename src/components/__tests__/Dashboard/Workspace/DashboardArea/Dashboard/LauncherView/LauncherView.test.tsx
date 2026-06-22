@@ -20,9 +20,15 @@ vi.mock('@/hooks/useProjects', () => ({
 // Its `label` is an LLM description distinct from the folder name ('alpha'),
 // so the row title must show the basename, not the description.
 const FAVORITE_DESCRIPTION = 'Alpha is a Nx monorepo for the alpha service';
+// 'alpha' has no logo (→ falls back to the hued folder chip); 'gamma' carries a
+// `logoDataUrl` (→ renders the logo image in place of the chip).
+const GAMMA_LOGO = 'data:image/png;base64,iVBORw0KGgo=';
 vi.mock('@/hooks/useFavoriteRepos', () => ({
   useFavoriteRepos: () => ({
-    repos: [{ path: '/p/alpha', label: 'Alpha is a Nx monorepo for the alpha service', addedAt: '2026-01-01T00:00:00Z' }],
+    repos: [
+      { path: '/p/alpha', label: 'Alpha is a Nx monorepo for the alpha service', addedAt: '2026-01-01T00:00:00Z' },
+      { path: '/p/gamma', label: null, addedAt: '2026-01-02T00:00:00Z', logoDataUrl: 'data:image/png;base64,iVBORw0KGgo=' },
+    ],
     loading: false,
     refresh: vi.fn(),
     add: vi.fn(),
@@ -80,6 +86,20 @@ describe('LauncherView', () => {
     expect(screen.getByText('/p/alpha')).toBeInTheDocument();
     // …and the LLM description is never rendered.
     expect(screen.queryByText(FAVORITE_DESCRIPTION)).toBeNull();
+  });
+
+  it('renders the repo logo when one exists, else falls back to the folder chip', () => {
+    const id = openLauncherDashboard();
+    render(<LauncherView dashboardId={id} />);
+
+    // 'gamma' has a logoDataUrl → its row shows the logo image (alt = repo name).
+    const logo = screen.getByRole('img', { name: 'gamma' });
+    expect(logo).toHaveAttribute('src', GAMMA_LOGO);
+
+    // 'alpha' has no logo → no image for it (the hued folder chip is an SVG icon,
+    // not an <img>), so 'gamma' is the ONLY repo image rendered.
+    expect(screen.queryByRole('img', { name: 'alpha' })).toBeNull();
+    expect(screen.getAllByRole('img')).toHaveLength(1);
   });
 
   it('New discussion card resolves immediately to a user-scope chat', () => {
