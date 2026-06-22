@@ -24,6 +24,53 @@ export function requestFilePath(id: string): string {
   return path.join(getInboxDir(), `${id}.json`);
 }
 
+/** Durable dir where a request's attached screenshots are copied + kept. */
+export function requestImagesDir(id: string): string {
+  return path.join(getInboxDir(), "images", id);
+}
+
+/**
+ * Copy each attached screenshot into the request's durable images dir and return
+ * the stable absolute paths (de-duplicated). Pasted images live in `os.tmpdir()`
+ * which can be cleaned up before the runner reads them, so we snapshot them here.
+ * A missing/already-gone source is skipped (never throws); name collisions from
+ * distinct sources are disambiguated with a numeric suffix.
+ */
+export async function copyImagesForRequest(id: string, sources: string[]): Promise<string[]> {
+  const unique = [...new Set(sources)];
+  if (unique.length === 0) return [];
+
+  const dir = requestImagesDir(id);
+  await fsp.mkdir(dir, { recursive: true });
+
+  const copied: string[] = [];
+  const usedNames = new Set<string>();
+  for (const src of unique) {
+    const dest = path.join(dir, uniqueDestName(src, usedNames));
+    try {
+      await fsp.copyFile(src, dest);
+      copied.push(dest);
+    } catch {
+      // Source gone (tmp cleaned) or unreadable → skip it, keep the rest.
+    }
+  }
+  return copied;
+}
+
+/** A collision-free filename within `used` derived from the source's basename. */
+function uniqueDestName(src: string, used: Set<string>): string {
+  const base = path.basename(src) || "image";
+  let name = base;
+  let n = 1;
+  while (used.has(name)) {
+    const ext = path.extname(base);
+    name = `${path.basename(base, ext)}-${n}${ext}`;
+    n += 1;
+  }
+  used.add(name);
+  return name;
+}
+
 /** Create the inbox dir if it doesn't exist yet (idempotent). */
 export async function ensureInboxDir(): Promise<void> {
   await fsp.mkdir(getInboxDir(), { recursive: true });

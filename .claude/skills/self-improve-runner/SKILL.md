@@ -29,7 +29,9 @@ field — not memory — decides what is open:
 
 Fields are split by owner. **App-owned, NEVER modify:** `id`, `createdAt`, `type`
 (`feature|bug|design|performance|copy`), `component?`, `sourcePath?`, `title`,
-`description`, `acceptance[]`, `transcript[]`. **Runner-owned, the only ones you write:**
+`description`, `acceptance[]`, `transcript[]`, `images[]` (durable absolute paths to
+attached screenshots, copied into `improve-inbox/images/<id>/` — primary visual context).
+**Runner-owned, the only ones you write:**
 `status`, `claimedAt`, `commit`, `summary`, `version`, `failureReason`, `attempts`
 (retry counter, see below). Always **read → shallow-merge your patch → write the whole
 object back** (preserve app-owned fields verbatim). The app's `fs.watch` re-reads the file
@@ -78,10 +80,36 @@ re-dispatching endlessly.
 For each freshly-claimed request, dispatch the **`feature-dev`** agent with the Agent tool:
 `subagent_type: "feature-dev"`, `isolation: "worktree"`, `run_in_background: true`. The
 prompt is the request as a spec — pass `title` (headline), `description`, every
-`acceptance[]` item (each becomes a TDD target), and `sourcePath`/`component` as the scope
-hint. feature-dev does strict TDD, self-verifies with the gate, and **commits to its
+`acceptance[]` item (each becomes a TDD target). For `component`/`sourcePath`, phrase them
+as a **best-guess hint, NOT ground truth** — the user pointed *near* a component in the UI,
+the picker may have guessed the wrong ancestor, or the user typed a free-text name. Word it
+like:
+
+> The user pointed near `<component>` (`<sourcePath>`) — a guess, not authoritative.
+> Verify and locate the real component from the description and the attached screenshots;
+> do not blindly edit that path.
+
+Never instruct "edit `sourcePath:line`" as fact. If `component`/`sourcePath` are
+absent/empty, just say the target is unspecified — derive it from the description and
+screenshots. feature-dev does strict TDD, self-verifies with the gate, and **commits to its
 branch — it must NOT land/push** (the runner lands). Remember each `id → branch`. Then
 return to polling immediately; do not block on workers.
+
+**Attached screenshots — make the worker Read them FIRST.** When the request has a
+non-empty `images[]`, these are the **primary context** for understanding what to change
+(the user pointed at the UI, not at prose). Include a section in the dispatched prompt that
+lists each path and instructs the worker to open it with the Read tool *before* writing any
+code:
+
+```
+## Attached screenshots (Read each with the Read tool BEFORE implementing)
+These are the primary context for what to change — look at them first.
+- /Users/.../.claude-agent-manager/improve-inbox/images/<id>/<file1>.png
+- /Users/.../.claude-agent-manager/improve-inbox/images/<id>/<file2>.png
+```
+
+If `images[]` is empty/absent, omit the section. The paths are stable absolute paths
+(already copied into the inbox), so the worker can Read them directly.
 
 ### 3. Land finished workers — SERIALIZED (one `land.sh` at a time)
 You are auto-re-invoked when a background worker completes. For each finished branch,

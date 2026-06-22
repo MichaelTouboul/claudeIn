@@ -9,6 +9,17 @@
  * `docs/self-improve/runner-contract.md`).
  */
 
+/**
+ * Maps a DOM element back to its React component + source file (from the dev-only
+ * `data-component` / `data-source` attributes). Lives here — the shared type home
+ * the renderer re-exports — because `ImproveContextTarget.chain` carries it across
+ * the IPC boundary.
+ */
+export interface ComponentSource {
+  component: string;
+  sourcePath: string;
+}
+
 /** The kind of improvement requested. Finite set; drives prompt/labelling. */
 export const ImproveType = {
   Feature: "feature",
@@ -55,6 +66,14 @@ export interface ImproveRequest {
   description: string;
   acceptance: string[];
   transcript: ImproveTranscriptTurn[];
+  /**
+   * Stable absolute paths to attached screenshots, copied alongside this request
+   * into `~/.claude-agent-manager/improve-inbox/images/<id>/` at submit time so
+   * they survive `os.tmpdir()` cleanup and the runner can `Read` them directly.
+   * De-duplicated; the durable source of truth for attachments (the markdown in
+   * `description` and `transcript[].images[]` reference the *original* paths).
+   */
+  images?: string[];
   status: ImproveStatus;
   /** ISO-8601 set by the runner when it claims the request (`in_progress`). */
   claimedAt?: string;
@@ -79,6 +98,12 @@ export interface ImproveRequestInput {
   component?: string;
   sourcePath?: string;
   transcript?: ImproveTranscriptTurn[];
+  /**
+   * Original absolute paths of attached screenshots (picked files or pasted
+   * images in `os.tmpdir()`). The inbox copies these into a durable location and
+   * records the stable paths on the persisted request's `images[]`.
+   */
+  images?: string[];
 }
 
 /**
@@ -114,6 +139,14 @@ export type ImproveStatusPatch = Partial<
 export interface ImproveContextTarget {
   component?: string;
   sourcePath?: string;
+  /**
+   * The render-tree ancestor chain (innermost → outermost) resolved from the
+   * clicked element, so the modal can offer a picker rather than forcing the
+   * single innermost guess (often a low-level `_ui/` primitive). Each entry is a
+   * `{ component, sourcePath }`. Optional: absent on production / un-instrumented
+   * subtrees and on the `/improve` command path (no DOM target).
+   */
+  chain?: ComponentSource[];
 }
 
 /**

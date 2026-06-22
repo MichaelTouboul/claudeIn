@@ -18,6 +18,26 @@ describe('buildImproveRequest — image threading', () => {
     expect(req.transcript?.[0].images).toEqual(['/tmp/a.png', '/tmp/b.png']);
     expect(req.description).toContain('/tmp/a.png');
     expect(req.description).toContain('/tmp/b.png');
+    // The durable source of truth: deduped image paths on the input itself.
+    expect(req.images).toEqual(['/tmp/a.png', '/tmp/b.png']);
+  });
+
+  it('de-dups image paths gathered across turns into input.images', () => {
+    const messages: ChatMessage[] = [
+      { id: 'u1', role: 'user', text: 'first', images: ['/tmp/a.png', '/tmp/b.png'] },
+      { id: 'u2', role: 'user', text: 'and this', images: ['/tmp/b.png', '/tmp/c.png'] },
+    ];
+    const req = buildImproveRequest({ type: ImproveType.Design, target: null, messages });
+    expect(req.images).toEqual(['/tmp/a.png', '/tmp/b.png', '/tmp/c.png']);
+  });
+
+  it('omits images when no turn has an attachment', () => {
+    const req = buildImproveRequest({
+      type: ImproveType.Feature,
+      target: null,
+      messages: [user('no images here')],
+    });
+    expect('images' in req).toBe(false);
   });
 });
 

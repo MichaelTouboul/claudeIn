@@ -78,6 +78,49 @@ describe("submitRequest", () => {
     const req = await submitRequest({ ...baseInput, transcript });
     expect(req.transcript).toEqual(transcript);
   });
+
+  it("copies attached images into a durable per-request dir and records stable paths", async () => {
+    const srcDir = fs.mkdtempSync(path.join(os.tmpdir(), "cam-src-"));
+    const a = path.join(srcDir, "shot-a.png");
+    const b = path.join(srcDir, "shot-b.png");
+    fs.writeFileSync(a, "AAA");
+    fs.writeFileSync(b, "BBB");
+
+    const req = await submitRequest({ ...baseInput, images: [a, b] });
+
+    expect(req.images).toBeDefined();
+    expect(req.images).toHaveLength(2);
+    const durableDir = path.join(getInboxDir(), "images", req.id);
+    for (const p of req.images ?? []) {
+      expect(p.startsWith(durableDir)).toBe(true);
+      expect(fs.existsSync(p)).toBe(true);
+    }
+    expect(fs.readFileSync(req.images?.[0] ?? "", "utf-8")).toBe("AAA");
+
+    // Survives deletion of the originals (the whole point — tmp cleanup).
+    fs.rmSync(srcDir, { recursive: true, force: true });
+    const reread = await getRequest(req.id);
+    expect(reread?.images).toEqual(req.images);
+    expect(fs.existsSync(reread?.images?.[0] ?? "")).toBe(true);
+  });
+
+  it("de-dups image sources and skips a missing source without crashing", async () => {
+    const srcDir = fs.mkdtempSync(path.join(os.tmpdir(), "cam-src-"));
+    const a = path.join(srcDir, "dup.png");
+    fs.writeFileSync(a, "AAA");
+    const gone = path.join(srcDir, "gone.png"); // never created
+
+    const req = await submitRequest({ ...baseInput, images: [a, a, gone] });
+
+    expect(req.images).toHaveLength(1);
+    expect(fs.existsSync(req.images?.[0] ?? "")).toBe(true);
+    fs.rmSync(srcDir, { recursive: true, force: true });
+  });
+
+  it("omits images when none are attached", async () => {
+    const req = await submitRequest(baseInput);
+    expect("images" in req).toBe(false);
+  });
 });
 
 describe("listRequests", () => {

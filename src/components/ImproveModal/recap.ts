@@ -168,6 +168,10 @@ export function buildImproveRequest({
     acceptance,
     transcript: toTranscript(messages),
   };
+  // Pass the attached screenshots through so the inbox can copy them to a durable
+  // location and record their stable paths on the persisted request (the source
+  // of truth the runner Reads). description/transcript still hold the originals.
+  if (images.length > 0) input.images = images;
   if (target?.component) input.component = target.component;
   if (target?.sourcePath) input.sourcePath = target.sourcePath;
   return input;
