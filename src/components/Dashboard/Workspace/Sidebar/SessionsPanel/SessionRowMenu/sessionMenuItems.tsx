@@ -1,7 +1,10 @@
 import { Archive, ArchiveRestore, Clipboard, Eraser, Minimize2, Pencil, Pin, PinOff, Trash2 } from 'lucide-react';
 
+import type { AvatarHue } from '@/components/_ui/Avatar/Avatar';
 import type { ContextMenuItem } from '@/components/_ui/ContextMenu';
 import { usePinnedStore } from '@/store/dashboard/usePinnedStore';
+
+import { buildColorMenuItem } from './colorMenu';
 
 // The single source of truth for a conversation/session row's context menu.
 // Both the full SessionsPanel row menu and the Activity-list ConversationItem
@@ -13,6 +16,9 @@ export type SessionMenuItemsArgs = {
   pinned: boolean;
   // Persisted archived state — flips the Archive/Unarchive label.
   archived: boolean;
+  // The conversation's current color (an AvatarHue) or null for Default —
+  // marks the selected swatch in the Color submenu.
+  color: AvatarHue | null;
   // True when ClaudeIn is currently driving this session (its agent is live).
   // clear/compact are in-session ops — surfaced only here, otherwise omitted.
   piloted?: boolean;
@@ -26,6 +32,7 @@ export function buildSessionMenuItems({
   sessionId,
   pinned,
   archived,
+  color,
   piloted = false,
   onRename,
   onChanged,
@@ -50,6 +57,7 @@ export function buildSessionMenuItems({
     archived
       ? { label: 'Unarchive', icon: <ArchiveRestore size={13} />, onSelect: () => void run(window.api.unarchiveConversation(sessionId)) }
       : { label: 'Archive', icon: <Archive size={13} />, onSelect: () => void run(window.api.archiveConversation(sessionId)) },
+    buildColorMenuItem({ sessionId, color, onChanged }),
   ];
 
   // clear/compact are native in-session commands (reserve 1): live/piloted only.

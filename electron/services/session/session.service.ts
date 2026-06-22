@@ -178,6 +178,7 @@ export async function listSessions(projectPath: string): Promise<SessionSummary[
       pinned: Boolean(cmeta?.pinnedAt),
       archived: Boolean(cmeta?.archivedAt),
       pinnedAt: cmeta?.pinnedAt ?? null,
+      color: cmeta?.color ?? null,
     });
   }
 

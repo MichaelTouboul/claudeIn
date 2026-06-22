@@ -27,6 +27,7 @@ function session(id: string, over: Partial<SessionSummary> = {}): SessionSummary
     pinned: false,
     archived: false,
     pinnedAt: null,
+    color: null,
     ...over,
   };
 }

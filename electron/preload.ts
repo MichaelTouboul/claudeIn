@@ -89,6 +89,7 @@ contextBridge.exposeInMainWorld("api", {
   softDeleteConversation: (sessionId: string) => ipcRenderer.invoke("conversation:softDelete", sessionId),
   restoreConversation: (sessionId: string) => ipcRenderer.invoke("conversation:restore", sessionId),
   setConversationTitle: (claudeSessionId: string, title: string) => ipcRenderer.invoke("conversation:set-title", claudeSessionId, title),
+  setConversationColor: (claudeSessionId: string, color: string | null) => ipcRenderer.invoke("conversation:set-color", claudeSessionId, color),
   clearConversation: (claudeSessionId: string) => ipcRenderer.invoke("conversation:clear", claudeSessionId),
   onConversationAppended: (
     cb: (data: {

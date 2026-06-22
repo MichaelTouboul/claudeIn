@@ -5,6 +5,7 @@ import type { SessionSummary } from "@/hooks/useSessions";
 import { sanitizeCommandEnvelope } from "@/lib/utils";
 import { usePinnedStore } from "@/store/dashboard/usePinnedStore";
 
+import { toAvatarHue } from "./conversationColors";
 import { RenameDialog } from "./RenameDialog";
 import { buildSessionMenuItems } from "./sessionMenuItems";
 
@@ -33,6 +34,7 @@ export function SessionRowMenu({ session, piloted = false, onChanged }: SessionR
     sessionId,
     pinned: isPinned,
     archived: session.archived,
+    color: toAvatarHue(session.color),
     piloted,
     onRename: () => setRenameOpen(true),
     onChanged,

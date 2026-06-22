@@ -27,7 +27,7 @@ function session(id: string, over: Partial<SessionSummary> = {}): SessionSummary
     sessionId: id, filePath: `/sessions/${id}.jsonl`, agentName: null, title: `Title ${id}`,
     firstPrompt: null, messageCount: 3, branch: null, startedAt: null,
     lastActiveAt: new Date().toISOString(), model: null, contextPercent: null,
-    projectDirName: "proj", status, pinned: false, archived: false, pinnedAt: null, ...over,
+    projectDirName: "proj", status, pinned: false, archived: false, pinnedAt: null, color: null, ...over,
   };
 }
 
