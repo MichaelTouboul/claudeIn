@@ -1,13 +1,14 @@
 import { fireEvent, render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { elementToComponent } from '@/lib/utils';
+import { elementToComponent, elementToComponentChain } from '@/lib/utils';
 import { useImproveModalStore } from '@/store/useImproveModalStore';
 
 import { useImproveContextMenu } from '../useImproveContextMenu';
 
 vi.mock('@/lib/utils', () => ({
   elementToComponent: vi.fn(),
+  elementToComponentChain: vi.fn(),
 }));
 
 const openContextMenu = vi.fn();
@@ -28,6 +29,7 @@ beforeEach(() => {
   onSelected.mockClear();
   selectedCb = null;
   vi.mocked(elementToComponent).mockReset();
+  vi.mocked(elementToComponentChain).mockReset().mockReturnValue([]);
   vi.stubEnv('DEV', true);
   window.api = {
     openContextMenu,
@@ -45,12 +47,21 @@ describe('useImproveContextMenu — capture + native menu request', () => {
       component: 'AgentChat',
       sourcePath: 'src/components/AgentChat/AgentChat.tsx:42',
     });
+    const chain = [
+      { component: 'Button', sourcePath: 'src/components/_ui/Button/Button.tsx:9' },
+      { component: 'AgentChat', sourcePath: 'src/components/AgentChat/AgentChat.tsx:42' },
+    ];
+    vi.mocked(elementToComponentChain).mockReturnValue(chain);
     const { getByTestId } = render(<Harness />);
 
     fireEvent.contextMenu(getByTestId('el'));
 
     expect(openContextMenu).toHaveBeenCalledWith({
-      target: { component: 'AgentChat', sourcePath: 'src/components/AgentChat/AgentChat.tsx:42' },
+      target: {
+        component: 'AgentChat',
+        sourcePath: 'src/components/AgentChat/AgentChat.tsx:42',
+        chain,
+      },
       isDev: true,
     });
   });

@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { Button } from '@/components/_ui/Button/Button';
 import { Dialog } from '@/components/_ui/Dialog/Dialog';
+import type { ImproveContextTarget } from '@/lib/types';
 import { ImproveType } from '@/lib/types';
 import { api } from '@/services/api';
 import { useImproveModalStore } from '@/store/useImproveModalStore';
 
+import { ComponentTargetSelect } from './ComponentTargetSelect/ComponentTargetSelect';
 import { ImproveChat } from './ImproveChat/ImproveChat';
 import { ImproveModalHeader } from './ImproveModalHeader/ImproveModalHeader';
 import { buildImproveRequest } from './recap';
@@ -21,15 +23,31 @@ import { useImproveModalChat } from './useImproveModalChat';
 function ImproveModalContent({ onClose }: { onClose: () => void }) {
   const target = useImproveModalStore((s) => s.target);
   const [type, setType] = useState<ImproveType>(ImproveType.Feature);
-  const { messages, loading, send } = useImproveModalChat(type, target);
+  // The user-chosen target from the chain picker (defaults to the smart pick).
+  const [picked, setPicked] = useState<Pick<ImproveContextTarget, 'component' | 'sourcePath'>>({});
   const [submitting, setSubmitting] = useState(false);
+
+  // The effective target is exactly what the picker resolved — the chosen chain
+  // entry, a free-text name, or nothing ("Aucun / je décris"). It deliberately
+  // does NOT inherit the captured target's component, so "none" truly clears it.
+  const effectiveTarget = useMemo<ImproveContextTarget | null>(
+    () => (picked.component || picked.sourcePath ? picked : null),
+    [picked],
+  );
+
+  const { messages, loading, send } = useImproveModalChat(type, effectiveTarget);
+  const onPick = useCallback((p: Pick<ImproveContextTarget, 'component' | 'sourcePath'>) => {
+    setPicked(p);
+  }, []);
 
   const canSubmit = messages.some((m) => m.role === 'user') && !loading && !submitting;
 
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
-      await api.submitImproveRequest(buildImproveRequest({ type, target, messages }));
+      await api.submitImproveRequest(
+        buildImproveRequest({ type, target: effectiveTarget, messages }),
+      );
       onClose();
     } finally {
       setSubmitting(false);
@@ -44,7 +62,12 @@ function ImproveModalContent({ onClose }: { onClose: () => void }) {
       <ImproveModalHeader
         type={type}
         onTypeChange={setType}
+        target={effectiveTarget}
+        disabled={loading || submitting}
+      />
+      <ComponentTargetSelect
         target={target}
+        onChange={onPick}
         disabled={loading || submitting}
       />
       <ImproveChat messages={messages} loading={loading} onSend={(t, imgs) => void send(t, imgs)} />

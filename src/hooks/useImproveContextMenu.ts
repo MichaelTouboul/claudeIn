@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 
-import { elementToComponent } from '@/lib/utils';
+import type { ImproveContextTarget } from '@/lib/types';
+import { elementToComponent, elementToComponentChain } from '@/lib/utils';
 import { useImproveModalStore } from '@/store/useImproveModalStore';
 
 /**
@@ -23,10 +24,17 @@ import { useImproveModalStore } from '@/store/useImproveModalStore';
 export function useImproveContextMenu(): void {
   useEffect(() => {
     const onContextMenu = (e: MouseEvent) => {
-      const resolved = elementToComponent(e.target as Element | null);
+      const el = e.target as Element | null;
+      const best = elementToComponent(el);
+      const chain = elementToComponentChain(el);
+      // Carry the full ancestor chain so the modal can offer a picker; `best` is
+      // the single innermost guess kept for the header summary / null case.
+      const target: ImproveContextTarget | null = best
+        ? { ...best, chain }
+        : null;
       // Take over the native browser menu; the Electron menu replaces it.
       e.preventDefault();
-      window.api.openContextMenu({ target: resolved, isDev: import.meta.env.DEV });
+      window.api.openContextMenu({ target, isDev: import.meta.env.DEV });
     };
     document.addEventListener('contextmenu', onContextMenu);
     return () => document.removeEventListener('contextmenu', onContextMenu);

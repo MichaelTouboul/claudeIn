@@ -9,6 +9,17 @@
  * `docs/self-improve/runner-contract.md`).
  */
 
+/**
+ * Maps a DOM element back to its React component + source file (from the dev-only
+ * `data-component` / `data-source` attributes). Lives here — the shared type home
+ * the renderer re-exports — because `ImproveContextTarget.chain` carries it across
+ * the IPC boundary.
+ */
+export interface ComponentSource {
+  component: string;
+  sourcePath: string;
+}
+
 /** The kind of improvement requested. Finite set; drives prompt/labelling. */
 export const ImproveType = {
   Feature: "feature",
@@ -128,6 +139,14 @@ export type ImproveStatusPatch = Partial<
 export interface ImproveContextTarget {
   component?: string;
   sourcePath?: string;
+  /**
+   * The render-tree ancestor chain (innermost → outermost) resolved from the
+   * clicked element, so the modal can offer a picker rather than forcing the
+   * single innermost guess (often a low-level `_ui/` primitive). Each entry is a
+   * `{ component, sourcePath }`. Optional: absent on production / un-instrumented
+   * subtrees and on the `/improve` command path (no DOM target).
+   */
+  chain?: ComponentSource[];
 }
 
 /**

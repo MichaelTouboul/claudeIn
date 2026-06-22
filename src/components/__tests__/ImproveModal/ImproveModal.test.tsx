@@ -96,6 +96,56 @@ describe('ImproveModal', () => {
     await waitFor(() => expect(useImproveModalStore.getState().open).toBe(false));
   });
 
+  it('defaults the target picker to the first non-_ui ancestor and submits it', async () => {
+    improveChat.mockResolvedValue(['Title: Fix it', 'Description: do the thing'].join('\n'));
+    useImproveModalStore.setState({
+      open: true,
+      target: {
+        component: 'Button',
+        sourcePath: 'src/components/_ui/Button/Button.tsx:9',
+        chain: [
+          { component: 'Button', sourcePath: 'src/components/_ui/Button/Button.tsx:9' },
+          { component: 'AgentChat', sourcePath: 'src/components/Dashboard/AgentChat.tsx:3' },
+        ],
+      },
+    });
+    render(<ImproveModal />);
+
+    // Smart default selected the feature component, not the _ui primitive.
+    const select = screen.getByLabelText('Composant ciblé') as HTMLSelectElement;
+    expect(select.value).toBe('1');
+
+    fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'broken' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Send' }));
+    await screen.findByText(/Fix it/);
+    fireEvent.click(screen.getByRole('button', { name: 'Send to Claude' }));
+
+    await waitFor(() => expect(submitImproveRequest).toHaveBeenCalledTimes(1));
+    expect(submitImproveRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        component: 'AgentChat',
+        sourcePath: 'src/components/Dashboard/AgentChat.tsx:3',
+      }),
+    );
+  });
+
+  it('the "Aucun / je décris" escape hatch submits without a component', async () => {
+    improveChat.mockResolvedValue(['Title: General', 'Description: somewhere'].join('\n'));
+    openWith({ component: 'AgentChatInput', sourcePath: 'src/x.tsx:1' });
+    render(<ImproveModal />);
+
+    fireEvent.change(screen.getByLabelText('Composant ciblé'), { target: { value: '__none__' } });
+    fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'general thing' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Send' }));
+    await screen.findByText(/General/);
+    fireEvent.click(screen.getByRole('button', { name: 'Send to Claude' }));
+
+    await waitFor(() => expect(submitImproveRequest).toHaveBeenCalledTimes(1));
+    const arg = submitImproveRequest.mock.calls[0][0];
+    expect('component' in arg).toBe(false);
+    expect('sourcePath' in arg).toBe(false);
+  });
+
   it('"Send to Claude" is disabled until at least one user message exists', () => {
     openWith(null);
     render(<ImproveModal />);
