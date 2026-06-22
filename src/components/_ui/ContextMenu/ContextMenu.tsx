@@ -10,6 +10,7 @@ export type ContextMenuItem = {
   label: string;
   icon?: ReactNode;
   tone?: ContextMenuTone;
+  disabled?: boolean;
   onSelect: () => void;
 };
 
@@ -66,10 +67,12 @@ export function ContextMenu({ items, trigger, align = 'end', triggerLabel = 'Mor
           {items.map((item) => (
             <DropdownMenu.Item
               key={item.label}
+              disabled={item.disabled}
               onSelect={(event) => handleSelect(event, item)}
               className={cn(
                 'w-full flex items-center gap-2.5 px-3 py-2 text-xs cursor-pointer outline-none transition-colors',
                 'data-[highlighted]:bg-surface-2',
+                'data-[disabled]:opacity-40 data-[disabled]:cursor-default data-[disabled]:pointer-events-none',
                 toneClasses[item.tone ?? 'default'],
               )}
             >
