@@ -77,4 +77,71 @@ describe("buildSpawnArgs", () => {
     const args = buildSpawnArgs({ agentName: "_main", mission: "go", model: "" });
     expect(args).not.toContain("--model");
   });
+
+  // --- Change 1: permission mode ---
+  it("pushes --permission-mode <mode> for an allowlisted mode, before the mission", () => {
+    const args = buildSpawnArgs({ agentName: "_main", mission: "go", permissionMode: "acceptEdits" });
+    const i = args.indexOf("--permission-mode");
+    expect(i).toBeGreaterThan(-1);
+    expect(args[i + 1]).toBe("acceptEdits");
+    expect(i + 1).toBeLessThan(args.length - 1);
+    expect(args[args.length - 1]).toBe("go");
+  });
+
+  it("accepts every allowlisted permission mode the composer can emit", () => {
+    for (const mode of ["acceptEdits", "plan"]) {
+      const args = buildSpawnArgs({ agentName: "_main", mission: "go", permissionMode: mode });
+      const i = args.indexOf("--permission-mode");
+      expect(args[i + 1]).toBe(mode);
+    }
+  });
+
+  it("omits --permission-mode for the 'default' mode (CLI uses its own default)", () => {
+    const args = buildSpawnArgs({ agentName: "_main", mission: "go", permissionMode: "default" });
+    expect(args).not.toContain("--permission-mode");
+  });
+
+  it("omits --permission-mode entirely when none is provided", () => {
+    const args = buildSpawnArgs({ agentName: "_main", mission: "go" });
+    expect(args).not.toContain("--permission-mode");
+  });
+
+  it("drops a permission mode that is NOT on the allowlist (no flag forwarded)", () => {
+    const args = buildSpawnArgs({ agentName: "_main", mission: "go", permissionMode: "evil; rm -rf /" });
+    expect(args).not.toContain("--permission-mode");
+    expect(args[args.length - 1]).toBe("go");
+  });
+
+  it("threads --permission-mode alongside --resume and --model", () => {
+    const args = buildSpawnArgs({
+      agentName: "_main",
+      mission: "go",
+      resumeSessionId: "sess-1",
+      model: "claude-sonnet-4-6",
+      permissionMode: "plan",
+    });
+    expect(args).toContain("--resume");
+    expect(args[args.indexOf("--model") + 1]).toBe("claude-sonnet-4-6");
+    expect(args[args.indexOf("--permission-mode") + 1]).toBe("plan");
+  });
+
+  // --- Change 2: think → --effort ---
+  it("maps think=true to --effort high, before the mission", () => {
+    const args = buildSpawnArgs({ agentName: "_main", mission: "go", think: true });
+    const i = args.indexOf("--effort");
+    expect(i).toBeGreaterThan(-1);
+    expect(args[i + 1]).toBe("high");
+    expect(i + 1).toBeLessThan(args.length - 1);
+    expect(args[args.length - 1]).toBe("go");
+  });
+
+  it("omits --effort when think is false", () => {
+    const args = buildSpawnArgs({ agentName: "_main", mission: "go", think: false });
+    expect(args).not.toContain("--effort");
+  });
+
+  it("omits --effort when think is not provided", () => {
+    const args = buildSpawnArgs({ agentName: "_main", mission: "go" });
+    expect(args).not.toContain("--effort");
+  });
 });

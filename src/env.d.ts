@@ -36,8 +36,12 @@ interface Window {
     gitBranches: (
       repoPath: string,
     ) => Promise<import("../electron/types/git.types").GitBranchInfo>;
+    /** Start watching a repo's HEAD; the back broadcasts `git:branch-changed` on each branch switch. */
+    watchGitBranch: (repoPath: string) => Promise<void>;
+    /** Stop watching a repo's HEAD. */
+    unwatchGitBranch: (repoPath: string) => Promise<void>;
 
-    spawn: (opts: { agent_name?: string; mission: string; cwd?: string; resume_session_id?: string; model?: string }) => Promise<import("./types/spawn.types").SpawnSession>;
+    spawn: (opts: { agent_name?: string; mission: string; cwd?: string; resume_session_id?: string; model?: string; permission_mode?: string; think?: boolean }) => Promise<import("./types/spawn.types").SpawnSession>;
     getSession: (localSessionId: string) => Promise<import("./types/spawn.types").SpawnSession | null>;
     sendInput: (localSessionId: string, text: string) => Promise<boolean>;
     killSession: (localSessionId: string) => Promise<boolean>;

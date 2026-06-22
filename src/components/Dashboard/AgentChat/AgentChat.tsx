@@ -6,6 +6,7 @@ import { useCompactOnResume } from '@/hooks/useCompactOnResume';
 import { usePromptHistory } from '@/hooks/usePromptHistory';
 import type { ChatMessage,SpawnSession } from '@/lib/types';
 import { useComposerBridgeStore } from '@/store/dashboard/useComposerBridgeStore';
+import { useComposerSettingsStore } from '@/store/dashboard/useComposerSettingsStore';
 import { ConversationStatus, useConversationStatusStore } from '@/store/dashboard/useConversationStatusStore';
 import { useConversationTitlesStore } from '@/store/dashboard/useConversationTitlesStore';
 import { useDashboardUIStore } from '@/store/dashboard/useDashboardUIStore';
@@ -16,6 +17,7 @@ import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
 import { AgentChatHeader } from './AgentChatHeader/AgentChatHeader';
 import { AgentChatInput } from './AgentChatInput/AgentChatInput';
+import { PermissionMode } from './AgentChatInput/ComposerStatusBar/statusBar';
 import { resolveHistoryNav } from './AgentChatInput/historyNav';
 import { AgentChatMessages } from './AgentChatMessages/AgentChatMessages';
 import { parseAskPrompt } from './askPrompt';
@@ -81,6 +83,13 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
   const setModel = useModelStore((s) => s.setModel);
   const selectedModelLabel = MODELS.find((m) => m.id === selectedModel)?.label;
 
+  // Per-conversation composer settings, keyed by the same stable conversationKey.
+  // These are forwarded on every spawn turn: permissionMode → `--permission-mode`
+  // (allowlisted in the backend), think → `--effort high`. Absent keys read as
+  // their safe defaults (Ask / off), never undefined.
+  const permissionMode = useComposerSettingsStore((s) => s.permissionModes[conversationKey] ?? PermissionMode.Ask);
+  const think = useComposerSettingsStore((s) => Boolean(s.think[conversationKey]));
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<RichEditorHandle | null>(null);
   // Terminal-style prompt history, scoped to THIS chat instance (in-memory only —
@@ -128,6 +137,7 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
   const { handleSend, handleAttach, onAnswer, handleKill, dispatchSlash } = useAgentChatActions({
     input, attachedFiles, awaitingResponse, compacting, session, isRunning: isRunning ?? false,
     agentName, projectPath, claudeSessionId, composerId: conversationKey, model: selectedModel,
+    permissionMode, think,
     openModelPicker: () => setModelPickerOpen(true),
     openView: (view) => useDashboardUIStore.getState().openPanel(VIEW_PANEL_KEY[view]),
     openImprove: (target) => useImproveModalStore.getState().openImprove(target),
@@ -192,7 +202,7 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
       pendingUserMsgs.current.add(next.text);
       setAwaitingResponse(true);
       const resumeId = claudeSessionIdRef.current;
-      window.api.spawn({ agent_name: agentName, mission: next.text, cwd: projectPath, resume_session_id: resumeId || undefined, model: selectedModel })
+      window.api.spawn({ agent_name: agentName, mission: next.text, cwd: projectPath, resume_session_id: resumeId || undefined, model: selectedModel, permission_mode: permissionMode, think })
         .then((data: SpawnSession) => {
           setSession(data);
           if (data.claudeSessionId) setClaudeSessionId(data.claudeSessionId);
@@ -266,12 +276,12 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
     setMessages([msg]);
     pendingUserMsgs.current.add(initialMessage);
     setAwaitingResponse(true);
-    window.api.spawn({ agent_name: agentName || undefined, mission: initialMessage, cwd: projectPath, resume_session_id: resumeSessionId, model: selectedModel })
+    window.api.spawn({ agent_name: agentName || undefined, mission: initialMessage, cwd: projectPath, resume_session_id: resumeSessionId, model: selectedModel, permission_mode: permissionMode, think })
       .then((data: SpawnSession) => {
         setSession(data);
         if (data.claudeSessionId) setClaudeSessionId(data.claudeSessionId);
       }).catch(() => setAwaitingResponse(false));
-  }, [initialMessage, resumeSessionId, projectPath, agentName, selectedModel]);
+  }, [initialMessage, resumeSessionId, projectPath, agentName, selectedModel, permissionMode, think]);
 
   useEffect(() => {
     // The main/global chat spawns with an empty agentName; retitleChatTab +

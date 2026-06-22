@@ -50,8 +50,10 @@ contextBridge.exposeInMainWorld("api", {
   gitDiff: (repoPath: string, mode: DiffMode) => ipcRenderer.invoke("git:diff", repoPath, mode),
 
   gitBranches: (repoPath: string) => ipcRenderer.invoke("git:branches", repoPath),
+  watchGitBranch: (repoPath: string) => ipcRenderer.invoke("git:watch-branch", repoPath),
+  unwatchGitBranch: (repoPath: string) => ipcRenderer.invoke("git:unwatch-branch", repoPath),
 
-  spawn: (opts: { agent_name?: string; mission: string; cwd?: string; resume_session_id?: string; model?: string }) =>
+  spawn: (opts: { agent_name?: string; mission: string; cwd?: string; resume_session_id?: string; model?: string; permission_mode?: string; think?: boolean }) =>
     ipcRenderer.invoke("spawn:start", opts),
   getSession: (localSessionId: string) => ipcRenderer.invoke("spawn:get", localSessionId),
   sendInput: (localSessionId: string, text: string) => ipcRenderer.invoke("spawn:input", localSessionId, text),
