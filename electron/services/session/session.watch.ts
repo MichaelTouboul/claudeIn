@@ -6,6 +6,7 @@ import {
   extractAssistantUsage,
   extractContextFill,
   extractResolvedModel,
+  findResolvedModelInFile,
   getProjectsBase,
   resolveProjectModel,
 } from "./session.transcript";
@@ -80,6 +81,12 @@ export function startWatching(projectPath: string): void {
       const stat = fs.statSync(fp);
       fileOffsets.set(fp, stat.size);
     } catch {}
+    // One-time seed of the per-file window from any `[1m]` marker already on
+    // disk. The tail below only re-reads APPENDED lines, so a marker written
+    // before this watch started would otherwise never pin the 1M window and a
+    // 1M session would mis-tier to 200k. Defensive: returns null, never throws.
+    const seeded = findResolvedModelInFile(fp);
+    if (seeded !== null) fileResolvedModel.set(fp, seeded);
   }
 
   const watcher = fs.watch(dir, (_, filename) => {
@@ -195,4 +202,13 @@ export function stopWatching(projectPath: string): void {
  */
 export function __peekOffsetKeys(): string[] {
   return Array.from(fileOffsets.keys());
+}
+
+/**
+ * Test-only inspector: a snapshot of the live `fileResolvedModel` cache (filePath
+ * → resolvedModel). Lets a regression test assert `startWatching` seeded the
+ * per-file `[1m]` marker from a pre-existing transcript. Not a runtime contract.
+ */
+export function __peekResolvedModel(): Record<string, string> {
+  return Object.fromEntries(fileResolvedModel);
 }
