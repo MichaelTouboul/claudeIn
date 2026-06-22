@@ -1,7 +1,7 @@
 import { FolderOpen } from 'lucide-react';
 
 import { Badge } from '@/components/_ui/Badge';
-import { RepoChip } from '@/components/Dashboard/Workspace/DashboardArea/Dashboard/AllWorktreesPanel/RepoChip';
+import { RepoAvatar } from '@/components/Dashboard/Workspace/DashboardArea/Dashboard/AllWorktreesPanel/RepoAvatar';
 import { hueForName } from '@/components/Dashboard/Workspace/DashboardArea/Dashboard/WorktreesPanel/worktreeModel';
 import { useFavoriteRepos } from '@/hooks/useFavoriteRepos';
 import { useProjects } from '@/hooks/useProjects';
@@ -48,7 +48,7 @@ export function ProjectList({ onSelect, openIds }: ProjectListProps) {
             No favorite repos yet — use “Open another folder…”.
           </p>
         ) : (
-          <div className="max-h-[60vh] overflow-y-auto">
+          <div>
             {repos.map((repo) => {
               const project = projectForFavorite(repo, projects);
               const name = repoBasename(repo.path);
@@ -61,7 +61,7 @@ export function ProjectList({ onSelect, openIds }: ProjectListProps) {
                   onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-surface-2)')}
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                 >
-                  <RepoChip hue={hueForName(name)} size={26} icon={14} />
+                  <RepoAvatar logoDataUrl={repo.logoDataUrl} name={name} hue={hueForName(name)} size={26} icon={14} />
                   <span className="min-w-0 flex-1">
                     <span className="block text-[13.5px] font-medium" style={{ color: 'var(--color-text-primary)' }}>
                       {name}
