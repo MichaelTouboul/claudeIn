@@ -100,6 +100,8 @@ beforeEach(() => {
       return () => { eventCb = null; };
     },
     spawn: spawnMock,
+    // The composer status strip reads the repo's branch/worktrees on mount.
+    gitBranches: vi.fn().mockResolvedValue({ current: null, worktrees: [] }),
   } as unknown as typeof window.api;
 });
 
