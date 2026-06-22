@@ -1,4 +1,5 @@
 export type {
+  ConversationStep,
   SessionConversation,
   SessionMessage,
   SessionStatus,

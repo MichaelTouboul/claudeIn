@@ -42,3 +42,14 @@ export type SessionMessage = {
   tokensOut?: number;
   toolNames?: string[];
 };
+
+/**
+ * One chronological tool-use step extracted from a conversation transcript.
+ * `target` is a concise human label derived from the tool input (basename, command
+ * head, pattern, host, …) or `null` when nothing sensible can be summarized.
+ */
+export type ConversationStep = {
+  tool: string;
+  target: string | null;
+  ts: string;
+};
