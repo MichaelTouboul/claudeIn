@@ -172,14 +172,27 @@ export function stopWatching(projectPath: string): void {
     watchers.delete(dir);
   }
 
+  // Evict ONLY keys inside `dir`. A bare `startsWith(dir)` has no path boundary,
+  // so stopping `…-tastewise` would also wipe the sibling `…-tastewise-teams-*`
+  // caches. Match the dir exactly or a path strictly under it.
+  const inDir = (key: string): boolean => key === dir || key.startsWith(dir + path.sep);
   for (const key of fileOffsets.keys()) {
-    if (key.startsWith(dir)) fileOffsets.delete(key);
+    if (inDir(key)) fileOffsets.delete(key);
   }
   for (const key of sessionAgentCache.keys()) {
-    if (key.startsWith(dir)) sessionAgentCache.delete(key);
+    if (inDir(key)) sessionAgentCache.delete(key);
   }
   for (const key of fileResolvedModel.keys()) {
-    if (key.startsWith(dir)) fileResolvedModel.delete(key);
+    if (inDir(key)) fileResolvedModel.delete(key);
   }
   dirProjectModel.delete(dir);
+}
+
+/**
+ * Test-only inspector: the current keys of the live `fileOffsets` cache. Lets a
+ * regression test assert the `stopWatching` prefix boundary without exporting
+ * the mutable Map itself. Not part of the runtime contract.
+ */
+export function __peekOffsetKeys(): string[] {
+  return Array.from(fileOffsets.keys());
 }
