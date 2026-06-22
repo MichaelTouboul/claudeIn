@@ -71,6 +71,12 @@ type EventsState = {
   presenceSeq: SessionPresenceSeq;
   setConnected: (connected: boolean) => void;
   ingest: (raw: unknown) => void;
+  // Seed the persisted context % for a conversation (keyed by claudeSessionId)
+  // the instant it is displayed, so the header + composer bar show the real
+  // usage immediately — before any live `session_context` event arrives (those
+  // only fire for a currently-running session). Never clobbers an existing value:
+  // a live percent already in the map wins over a persisted snapshot.
+  seedSessionContext: (claudeSessionId: string, percent: number | null) => void;
   expireActive: (agentName: string) => void;
   // Watchdog: demote a still-`Waiting` agent to Idle (see WAITING_TIMEOUT_MS).
   expireWaiting: (agentName: string) => void;
@@ -141,6 +147,17 @@ export const useEventsStore = create<EventsState>((set, get) => ({
   presenceSeq: new Map(),
 
   setConnected: (connected) => set({ connected }),
+
+  seedSessionContext: (claudeSessionId, percent) =>
+    set((s) => {
+      // null = unknown (brand-new/empty conversation) → nothing to seed.
+      if (percent === null) return {};
+      // A live `session_context` value is authoritative; never overwrite it.
+      if (s.sessionContexts.has(claudeSessionId)) return {};
+      const next = new Map(s.sessionContexts);
+      next.set(claudeSessionId, percent);
+      return { sessionContexts: next };
+    }),
 
   expireActive: (agentName) =>
     set((s) => {

@@ -32,6 +32,12 @@ export function ComposerStatusBarContainer({
   projectPath,
 }: ComposerStatusBarContainerProps) {
   const context = useEventsStore((s) => s.agentContexts.get(agentName));
+  // The bar's percent, in priority order: this conversation's value keyed by its
+  // claudeSessionId (seeded from the persisted snapshot on select, then updated
+  // live by `session_context`), else the agent's live session(s). All come from
+  // the one backend computation — the renderer never computes a percent. The
+  // trailing `?? 0` is the genuine empty state (a brand-new conversation with no
+  // usage yet → an empty 0% bar), not a primary derivation.
   const percent = useEventsStore((s) =>
     (claudeSessionId ? s.sessionContexts.get(claudeSessionId) : undefined) ??
     contextPercentForAgent(s.presence, s.sessionContexts, agentName) ??
