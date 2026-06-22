@@ -60,3 +60,7 @@ declare module "*?fresh=stop-boundary" {
   const mod: any;
   export = mod;
 }
+declare module "*?fresh=seed-resolved" {
+  const mod: any;
+  export = mod;
+}

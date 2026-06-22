@@ -102,107 +102,20 @@ export function extractAssistantUsage(obj: Record<string, unknown>): TranscriptU
 }
 
 /**
- * The standard Claude context-window sizes, smallest first. A model id alone
- * does not tell us which window a session ran on — `claude-opus-4-8` reports the
- * SAME id whether the conversation used the 200k window or the 1M (`[1m]`) tier.
- * So we tier by *observed* fill: pick the smallest standard window that actually
- * contains the measured prompt size (see `contextFillToPercent`).
+ * Context-window math lives in `session.context` (split out to keep both files
+ * under the 300-line limit). Re-exported here so existing importers of
+ * `./session.transcript` keep working unchanged.
  */
-export const CONTEXT_WINDOW_TIERS = [200_000, 1_000_000] as const;
-
-/** Back-compat: the smallest (default) Claude context window, in tokens. */
-export const CONTEXT_WINDOW_TOKENS = CONTEXT_WINDOW_TIERS[0];
-
-/**
- * Prompt-side context fill (tokens) carried by ONE assistant turn's usage:
- * `input + cache_read + cache_creation`. Claude reports these per-turn
- * cumulatively (the cache tokens are the live conversation prefix), so the LAST
- * assistant turn's prompt total best approximates current context fill.
- *
- * `output_tokens` is deliberately EXCLUDED: it is the model's *response*, not
- * part of the context window at the moment usage is reported (it only enters the
- * context as input on the *next* turn, where it is already counted in the cache
- * read). Including it overshoots the real fill by the last response's size.
- *
- * Returns `null` for a non-assistant / usage-less line, or when the prompt-side
- * fill is zero.
- */
-export function extractContextFill(obj: Record<string, unknown>): number | null {
-  if (obj.type !== "assistant") return null;
-  const message = obj.message as Record<string, unknown> | undefined;
-  const usage = message?.usage as Record<string, unknown> | undefined;
-  if (!usage) return null;
-  const num = (k: string): number => (typeof usage[k] === "number" ? (usage[k] as number) : 0);
-  const total =
-    num("input_tokens") +
-    num("cache_read_input_tokens") +
-    num("cache_creation_input_tokens");
-  return total > 0 ? total : null;
-}
-
-/**
- * THE single source of truth for a session's context window.
- *
- * A model id alone does not tell us which window a session ran on
- * (`claude-opus-4-8` is the SAME id on the 200k and the 1M tier). Two signals,
- * in priority order:
- *
- * 1. An explicit `[1m]` marker, when the transcript happens to persist one in
- *    `toolUseResult.resolvedModel` (e.g. `"claude-opus-4-8[1m]"`) — authoritative
- *    → 1M. This is rare (~1 in 60 sessions) but unambiguous when present.
- * 2. Otherwise tier by *observed* fill: the smallest standard window that still
- *    contains the measured prompt size. A 173k prefix reads against 200k; a 786k
- *    prefix is unambiguously a 1M-tier session (instead of blowing past a
- *    hard-coded 200k and clamping to an aberrant 100%).
- */
-export function resolveContextWindow(
-  fill: number,
-  resolvedModel?: string | null,
-): number {
-  if (typeof resolvedModel === "string" && resolvedModel.endsWith("[1m]")) {
-    return 1_000_000;
-  }
-  for (const tier of CONTEXT_WINDOW_TIERS) {
-    if (fill <= tier) return tier;
-  }
-  return CONTEXT_WINDOW_TIERS[CONTEXT_WINDOW_TIERS.length - 1];
-}
-
-/**
- * Convert a context-fill token count into a clamped 0–100 percentage of a given
- * context window. The 100 cap is reserved for a genuinely over-full window,
- * never reached by a mis-sized denominator.
- */
-export function contextPercent(fill: number, window: number): number {
-  return Math.min(Math.round((fill / window) * 100), 100);
-}
-
-/**
- * Convenience wrapper for callers that have a (possibly null) fill and an
- * optional `[1m]` marker: resolves the window and computes the percent in one
- * step, routing through the single `resolveContextWindow` + `contextPercent`
- * implementation. `null` fill → `null` (unknown, omit the bar).
- */
-export function contextFillToPercent(
-  fill: number | null,
-  resolvedModel?: string | null,
-): number | null {
-  if (fill === null) return null;
-  return contextPercent(fill, resolveContextWindow(fill, resolvedModel));
-}
-
-/**
- * Best-effort extraction of an explicit resolved model id from a transcript
- * line. Claude occasionally records the *window-qualified* model
- * (`"claude-opus-4-8[1m]"`) under `toolUseResult.resolvedModel`; when present it
- * pins the session's window (see `resolveContextWindow`). Returns `null` when
- * absent or not a string.
- */
-export function extractResolvedModel(obj: Record<string, unknown>): string | null {
-  const toolUseResult = obj.toolUseResult as Record<string, unknown> | undefined;
-  const resolved = toolUseResult?.resolvedModel;
-  return typeof resolved === "string" ? resolved : null;
-}
+export {
+  CONTEXT_WINDOW_TIERS,
+  CONTEXT_WINDOW_TOKENS,
+  contextFillToPercent,
+  contextPercent,
+  extractContextFill,
+  extractResolvedModel,
+  findResolvedModelInFile,
+  resolveContextWindow,
+} from "./session.context";
 
 /**
  * Mutable cross-line parse state. Tool-only assistant turns accumulate their
