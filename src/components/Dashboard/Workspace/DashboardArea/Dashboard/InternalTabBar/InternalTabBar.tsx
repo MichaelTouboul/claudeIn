@@ -1,17 +1,18 @@
-import { Menu } from 'lucide-react';
-
-import { Flex } from '@/components/_ui/Flex';
 import { type TabItem,Tabs } from '@/components/_ui/Tabs';
 import { useConversationTitlesStore } from '@/store/dashboard/useConversationTitlesStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
 import { AddTabMenu } from './AddTabMenu';
+import { PanelLauncherMenu } from './PanelLauncherMenu';
 
 export type InternalTabBarProps = {
-  onOpenPanel: () => void;
+  /** Repo path of the active dashboard; empty when there is no project repo. */
+  repoPath: string;
+  /** Active tab's conversation id; null when the tab has no conversation. */
+  claudeSessionId: string | null;
 };
 
-export function InternalTabBar({ onOpenPanel }: InternalTabBarProps) {
+export function InternalTabBar({ repoPath, claudeSessionId }: InternalTabBarProps) {
   const dashboards = useWorkspaceStore((s) => s.dashboards);
   const activeDashboardId = useWorkspaceStore((s) => s.activeDashboardId);
   const setActiveTab = useWorkspaceStore((s) => s.setActiveTab);
@@ -40,19 +41,7 @@ export function InternalTabBar({ onOpenPanel }: InternalTabBarProps) {
         <Tabs tabs={tabs} active={active.activeTabId} onChange={setActiveTab} className="min-w-0 overflow-x-auto" />
         <AddTabMenu />
       </div>
-      <Flex
-        as="button"
-        align="center"
-        justify="center"
-        onClick={onOpenPanel}
-        title="Context · Task · Plan"
-        className="w-7 h-7 rounded-md mr-2 shrink-0"
-        style={{ color: 'var(--color-text-muted)' }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-surface-2)')}
-        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-      >
-        <Menu size={16} />
-      </Flex>
+      <PanelLauncherMenu repoPath={repoPath} claudeSessionId={claudeSessionId} />
     </div>
   );
 }

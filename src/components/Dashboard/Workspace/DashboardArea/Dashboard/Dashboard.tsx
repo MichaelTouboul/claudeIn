@@ -1,4 +1,3 @@
-import { usePanelStore } from '@/store/dashboard/usePanelStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
 
 import { DashboardSurface } from './DashboardSurface/DashboardSurface';
@@ -7,16 +6,21 @@ import { LauncherView } from './LauncherView/LauncherView';
 import { UtilityPanel } from './UtilityPanel/UtilityPanel';
 
 export function Dashboard() {
-  const setPanelOpen = usePanelStore((s) => s.setOpen);
   const dashboards = useWorkspaceStore((s) => s.dashboards);
   const activeDashboardId = useWorkspaceStore((s) => s.activeDashboardId);
 
   const active = dashboards.find((d) => d.id === activeDashboardId) ?? null;
   const isLauncher = active?.scope.kind === 'launcher';
+  const activeTab = active?.tabs.find((t) => t.id === active.activeTabId);
 
   return (
     <div className="flex-1 flex flex-col h-full">
-      {isLauncher ? null : <InternalTabBar onOpenPanel={() => setPanelOpen(true)} />}
+      {isLauncher ? null : (
+        <InternalTabBar
+          repoPath={active?.cwd ?? ''}
+          claudeSessionId={activeTab?.claudeSessionId ?? null}
+        />
+      )}
 
       {/* Content row: chat (flex-1) on the left, the inline panel on the right.
           The panel lives INSIDE the Dashboard content area, so it shrinks the

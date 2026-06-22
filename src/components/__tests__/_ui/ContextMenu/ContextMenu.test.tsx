@@ -33,6 +33,19 @@ describe("ContextMenu", () => {
     expect(screen.getByRole("button", { name: "Agent actions" })).toBeInTheDocument();
   });
 
+  it("does not run onSelect for a disabled item", async () => {
+    const onSelect = vi.fn();
+    const items: ContextMenuItem[] = [{ label: "Plan", onSelect, disabled: true }];
+    render(<ContextMenu items={items} trigger={<button aria-label="menu">⋯</button>} />);
+
+    openMenu();
+    fireEvent.click(await screen.findByText("Plan"));
+
+    // Radix blocks selection on a disabled item — onSelect never fires.
+    await new Promise((r) => setTimeout(r, 0));
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
   it("does not let an item-select click fall through to a sibling beneath the menu", async () => {
     // Mirrors the sidebar row layout: a full-size clickable surface with the
     // menu overlaid on top. Selecting a menu item must NOT trigger the row's
