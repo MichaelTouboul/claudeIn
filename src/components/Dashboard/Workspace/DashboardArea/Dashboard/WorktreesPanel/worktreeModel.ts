@@ -18,6 +18,20 @@ export const WorktreeStatus = {
 } as const;
 export type WorktreeStatus = (typeof WorktreeStatus)[keyof typeof WorktreeStatus];
 
+/**
+ * The kind of a worktree row (CLAUDE.md: enum + behavior map, never a fallback
+ * chain). The repo ROOT dir is the MAIN worktree — it is NOT a managed/linked
+ * worktree and is rendered demoted (a "root" tag, no remove affordance). Every
+ * other entry is a Linked worktree (the managed `.worktrees/<branch>` dirs).
+ */
+export const WorktreeKind = {
+  /** The repo root dir — the main worktree git was initialised in. */
+  Main: 'main',
+  /** A managed linked worktree (`git worktree add`). */
+  Linked: 'linked',
+} as const;
+export type WorktreeKind = (typeof WorktreeKind)[keyof typeof WorktreeKind];
+
 /** The Worktrees panel filter — finite set, mapped to a predicate by the panel. */
 export const WorktreeFilter = {
   All: 'all',
@@ -33,6 +47,8 @@ export interface WorktreeRow {
   branch: string;
   /** This row is the repo's CURRENT checked-out worktree. */
   current: boolean;
+  /** Main (repo root) vs Linked (managed `.worktrees/<branch>`). */
+  kind: WorktreeKind;
   status: WorktreeStatus;
   /** The sub-agent actively running here, or null when none. */
   agent: string | null;
@@ -111,14 +127,23 @@ export function worktreeStatus(
   return WorktreeStatus.Idle;
 }
 
+/** Trailing-separator-insensitive path equality (the repo-root vs worktree match). */
+function samePath(a: string, b: string): boolean {
+  const norm = (p: string) => p.replace(/[/\\]+$/, '');
+  return norm(a) === norm(b);
+}
+
 /**
  * Build the panel's card rows from the live worktree list, per-worktree stats,
- * the open dashboards (cwd↔worktree match), and session presence. Pure so the
- * derivation is unit-testable without React.
+ * the open dashboards (cwd↔worktree match), and session presence. `repoPath` is
+ * the repo ROOT dir — the row whose path equals it is the MAIN worktree (tagged
+ * `WorktreeKind.Main`); every other row is `Linked`. Pure so the derivation is
+ * unit-testable without React.
  */
 export function deriveWorktrees(args: {
   worktrees: GitWorktree[];
   current: string | null;
+  repoPath: string;
   stats: WorktreeStat[];
   dashboards: Dashboard[];
   presence: SessionPresence;
@@ -134,6 +159,7 @@ export function deriveWorktrees(args: {
       path: wt.path,
       branch,
       current: wt.branch !== null && wt.branch === args.current,
+      kind: samePath(wt.path, args.repoPath) ? WorktreeKind.Main : WorktreeKind.Linked,
       status,
       agent,
       hue: hueForName(agent ?? branch),

@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ComposerStatusBar } from '@/components/Dashboard/AgentChat/AgentChatInput/ComposerStatusBar/ComposerStatusBar';
 import { PermissionMode } from '@/components/Dashboard/AgentChat/AgentChatInput/ComposerStatusBar/statusBar';
@@ -62,4 +62,16 @@ describe('ComposerStatusBar', () => {
     renderBar({ branchInfo: null });
     expect(screen.getByText('—')).toBeInTheDocument();
   });
+
+  it('copies the branch name when the branch chip is clicked', () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+    renderBar();
+    fireEvent.click(screen.getByRole('button', { name: 'Copy branch name' }));
+    expect(writeText).toHaveBeenCalledWith('main');
+  });
+});
+
+afterEach(() => {
+  vi.clearAllMocks();
 });

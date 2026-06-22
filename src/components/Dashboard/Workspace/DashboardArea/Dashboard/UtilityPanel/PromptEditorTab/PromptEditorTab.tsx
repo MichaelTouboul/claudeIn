@@ -9,10 +9,10 @@ import { applyFormat, countWordsChars, type PromptFormat } from './markdownForma
 import { PromptEditorToolbar } from './PromptEditorToolbar';
 
 /**
- * The "Éditeur de prompt (workspace)" panel body (design card #9, block 3). A
+ * The "Prompt editor (workspace)" panel body (design card #9, block 3). A
  * long-form markdown draft surface opened from a chat composer's maximize button:
  * a format toolbar, an editable body, and a footer with a live word/char count +
- * Enregistrer (write the draft back into the composer) and Envoyer (write + fire
+ * Save (write the draft back into the composer) and Send (write + fire
  * the composer's send, then close). The draft lives in the panel payload and is
  * patched in place so close/reopen preserves it. Composer write-back goes through
  * `useComposerBridgeStore`, keyed by the payload's `composerId`.
@@ -63,7 +63,7 @@ export function PromptEditorTab({ tab }: { tab: PanelTab }) {
     const el = textareaRef.current;
     const start = el?.selectionStart ?? text.length;
     const end = el?.selectionEnd ?? text.length;
-    const label = text.slice(start, end) || 'texte';
+    const label = text.slice(start, end) || 'text';
     const next = `${text.slice(0, start)}[${label}](url)${text.slice(end)}`;
     setText(next);
   }, [text, setText]);
@@ -89,7 +89,7 @@ export function PromptEditorTab({ tab }: { tab: PanelTab }) {
         value={text}
         onChange={(e) => setText(e.target.value)}
         spellCheck={false}
-        placeholder="Rédige ou colle un prompt long…"
+        placeholder="Write or paste a long prompt…"
         className="min-h-0 flex-1 resize-none bg-transparent p-4 text-sm leading-relaxed outline-none"
         style={{ color: 'var(--color-text-primary)', fontFamily: 'var(--font-sans)' }}
       />
@@ -98,11 +98,11 @@ export function PromptEditorTab({ tab }: { tab: PanelTab }) {
         style={{ borderTop: '1px solid var(--color-border)', background: 'var(--color-surface-0)' }}
       >
         <span className="text-[11.5px]" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-muted)' }}>
-          {words} mots · {chars} caractères
+          {words} words · {chars} characters
         </span>
         <div className="flex-1" />
         <Button intent="ghost" size="sm" onClick={handleSave} disabled={text.trim() === ''}>
-          Enregistrer
+          Save
         </Button>
         <Button
           intent="primary"
@@ -111,7 +111,7 @@ export function PromptEditorTab({ tab }: { tab: PanelTab }) {
           onClick={handleSend}
           disabled={text.trim() === ''}
         >
-          Envoyer
+          Send
         </Button>
       </div>
     </div>

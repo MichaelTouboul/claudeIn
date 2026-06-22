@@ -9,11 +9,11 @@ type ToolButton = { format: PromptFormat; Icon: ComponentType<{ size?: number }>
 
 // Format buttons, in the design's order; separators are positioned by index.
 const FORMAT_BUTTONS: ToolButton[] = [
-  { format: PromptFormat.Bold, Icon: Bold, label: 'Gras' },
-  { format: PromptFormat.Italic, Icon: Italic, label: 'Italique' },
-  { format: PromptFormat.Heading, Icon: Heading, label: 'Titre' },
-  { format: PromptFormat.List, Icon: List, label: 'Liste' },
-  { format: PromptFormat.OrderedList, Icon: ListOrdered, label: 'Liste ordonnée' },
+  { format: PromptFormat.Bold, Icon: Bold, label: 'Bold' },
+  { format: PromptFormat.Italic, Icon: Italic, label: 'Italic' },
+  { format: PromptFormat.Heading, Icon: Heading, label: 'Heading' },
+  { format: PromptFormat.List, Icon: List, label: 'List' },
+  { format: PromptFormat.OrderedList, Icon: ListOrdered, label: 'Ordered list' },
   { format: PromptFormat.Code, Icon: Code, label: 'Code' },
 ];
 // Separators sit AFTER these zero-based button indices (matches the mock).
@@ -66,11 +66,11 @@ export function PromptEditorToolbar({ active, onFormat, onLink, onInsertAgent }:
           ) : null}
         </span>
       ))}
-      <button type="button" title="Lien" aria-label="Lien" onClick={onLink} className={tbtn}>
+      <button type="button" title="Link" aria-label="Link" onClick={onLink} className={tbtn}>
         <Link size={15} />
       </button>
       <div className="flex-1" />
-      <button type="button" title="Insérer un agent" aria-label="Insérer un agent" onClick={onInsertAgent} className={tbtn}>
+      <button type="button" title="Insert an agent" aria-label="Insert an agent" onClick={onInsertAgent} className={tbtn}>
         <Bot size={15} />
       </button>
     </div>

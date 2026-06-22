@@ -56,6 +56,7 @@ export function useWorktrees(repoPath: string | undefined): UseWorktreesResult {
   const rows = deriveWorktrees({
     worktrees: branchInfo?.worktrees ?? [],
     current: branchInfo?.current ?? null,
+    repoPath: repoPath ?? '',
     stats,
     dashboards,
     presence,

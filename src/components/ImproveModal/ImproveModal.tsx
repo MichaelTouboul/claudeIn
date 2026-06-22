@@ -28,7 +28,7 @@ function ImproveModalContent({ onClose }: { onClose: () => void }) {
   const [submitting, setSubmitting] = useState(false);
 
   // The effective target is exactly what the picker resolved — the chosen chain
-  // entry, a free-text name, or nothing ("Aucun / je décris"). It deliberately
+  // entry, a free-text name, or nothing ("None / I'll describe"). It deliberately
   // does NOT inherit the captured target's component, so "none" truly clears it.
   const effectiveTarget = useMemo<ImproveContextTarget | null>(
     () => (picked.component || picked.sourcePath ? picked : null),

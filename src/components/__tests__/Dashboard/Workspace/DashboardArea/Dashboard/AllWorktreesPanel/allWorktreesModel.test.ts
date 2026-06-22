@@ -7,7 +7,7 @@ import {
   totalActive,
   totalWorktrees,
 } from '@/components/Dashboard/Workspace/DashboardArea/Dashboard/AllWorktreesPanel/allWorktreesModel';
-import { WorktreeFilter } from '@/components/Dashboard/Workspace/DashboardArea/Dashboard/WorktreesPanel/worktreeModel';
+import { WorktreeFilter, WorktreeKind } from '@/components/Dashboard/Workspace/DashboardArea/Dashboard/WorktreesPanel/worktreeModel';
 import type { RepoWorktrees } from '@/lib/types';
 import { AgentPresenceStatus, type SessionPresence } from '@/store/dashboard/useEventsStore';
 import type { Dashboard } from '@/store/useWorkspaceStore';
@@ -64,7 +64,12 @@ describe('deriveRepoGroups', () => {
     expect(feat.status).toBe('running');
     expect(feat.agent).toBe('refactorer');
     expect(feat).toMatchObject({ additions: 120, deletions: 9, ahead: 3 });
-    expect(groups[0].rows.find((r) => r.branch === 'main')!.current).toBe(false);
+
+    // The repo-root row (path === repoPath) is the Main worktree; the linked one is Linked.
+    const root = groups[0].rows.find((r) => r.path === '/work/api-gateway')!;
+    expect(root.current).toBe(false);
+    expect(root.kind).toBe(WorktreeKind.Main);
+    expect(feat.kind).toBe(WorktreeKind.Linked);
   });
 
   it('carries a repo enumeration error and yields no rows for it', () => {

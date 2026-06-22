@@ -9,7 +9,7 @@ export interface WorktreeConfirmDialogProps {
   onOpenChange: (open: boolean) => void;
   title: string;
   body: string;
-  /** Label + intent of the confirm button (danger for Supprimer, primary for Merger). */
+  /** Label + intent of the confirm button (danger for Remove, primary for Merge). */
   confirmLabel: string;
   danger?: boolean;
   /** The real git op; its verbatim message is surfaced on failure (never faked). */
@@ -83,7 +83,7 @@ export function WorktreeConfirmDialog({
         </div>
         <div className="mt-3 flex justify-end gap-2 px-4 py-3" style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
           <Button type="button" intent="outline" size="sm" onClick={() => onOpenChange(false)}>
-            Annuler
+            Cancel
           </Button>
           <Button
             type="button"

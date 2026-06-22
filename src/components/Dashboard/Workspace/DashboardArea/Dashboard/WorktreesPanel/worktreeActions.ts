@@ -64,9 +64,9 @@ export function buildCardActions(args: {
     diff: () => openWorktreeDiff(row.path),
     merge: () =>
       setConfirm({
-        title: `Merger ${row.branch}`,
-        body: `Merge la branche ${row.branch} dans la base du repo (git merge --no-edit). En cas de conflit, l’erreur git est affichée — rien n’est validé automatiquement.`,
-        confirmLabel: 'Merger',
+        title: `Merge ${row.branch}`,
+        body: `Merge the branch ${row.branch} into the repo's base (git merge --no-edit). On conflict, git's error is shown — nothing is committed automatically.`,
+        confirmLabel: 'Merge',
         run: async () => {
           const result = await window.api.gitWorktreeMerge(repoPath, row.branch);
           if (result.ok) refresh();
@@ -75,9 +75,9 @@ export function buildCardActions(args: {
       }),
     remove: () =>
       setConfirm({
-        title: `Supprimer le worktree`,
-        body: `Supprime le worktree ${row.path}. La branche ${row.branch} est conservée. Cette action est forcée (changements non commités perdus).`,
-        confirmLabel: 'Supprimer',
+        title: `Remove worktree`,
+        body: `Removes the worktree ${row.path}. The branch ${row.branch} is kept. This action is forced (uncommitted changes are lost).`,
+        confirmLabel: 'Remove',
         danger: true,
         run: async () => {
           const result = await window.api.gitWorktreeRemove(repoPath, row.path, true);

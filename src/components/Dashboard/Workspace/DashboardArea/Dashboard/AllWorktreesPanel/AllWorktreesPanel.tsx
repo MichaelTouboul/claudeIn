@@ -67,7 +67,7 @@ export function AllWorktreesPanel() {
       <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-2 pb-2.5 pt-1">
         {visible.length === 0 ? (
           <p className="px-2 py-6 text-center text-xs" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
-            {groups.length === 0 ? 'Aucun repo favori' : 'Aucun worktree'}
+            {groups.length === 0 ? 'No favorite repo' : 'No worktree'}
           </p>
         ) : (
           visible.map((group) => (

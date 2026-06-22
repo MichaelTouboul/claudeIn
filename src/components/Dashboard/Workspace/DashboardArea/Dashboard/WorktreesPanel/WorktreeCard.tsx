@@ -8,7 +8,7 @@ import { Tooltip } from '@/components/_ui/Tooltip';
 import { cn } from '@/lib/utils';
 
 import type { WorktreeRow } from './worktreeModel';
-import { STATUS_PRESENTATION } from './worktreePresentation';
+import { KIND_PRESENTATION, STATUS_PRESENTATION } from './worktreePresentation';
 
 export interface WorktreeCardAction {
   open: () => void;
@@ -18,10 +18,13 @@ export interface WorktreeCardAction {
 }
 
 /**
- * One worktree card: color dot + branch (mono) + "actuel" badge + status dot/label,
+ * One worktree card: color dot + branch (mono) + a kind/state tag ("root" for the
+ * repo-root main worktree, "current" for the checked-out one) + status dot/label,
  * then the running agent (hued tile) or a description, the +/− diff stats, ahead
  * commits, and the More menu. The hue is applied via the `.agent-color-<hue>`
  * class (sets `--agent-color`) so all tints reference a token, never a raw value.
+ * The MAIN (repo-root) worktree is visually demoted and is never removable — its
+ * behavior is read from {@link KIND_PRESENTATION} (enum map, not a fallback chain).
  */
 export function WorktreeCard({
   row,
@@ -33,11 +36,14 @@ export function WorktreeCard({
   actions: WorktreeCardAction;
 }) {
   const dot = STATUS_PRESENTATION[row.status];
+  const kind = KIND_PRESENTATION[row.kind];
   const items: ContextMenuItem[] = [
-    { label: 'Ouvrir', icon: <FolderOpen size={14} />, onSelect: actions.open },
-    { label: 'Comparer (diff)', icon: <Code2 size={14} />, onSelect: actions.diff },
-    { label: `Merger dans ${baseBranch}`, separatorBefore: true, onSelect: actions.merge },
-    { label: 'Supprimer', tone: 'danger', onSelect: actions.remove },
+    { label: 'Open', icon: <FolderOpen size={14} />, onSelect: actions.open },
+    { label: 'Compare (diff)', icon: <Code2 size={14} />, onSelect: actions.diff },
+    { label: `Merge into ${baseBranch}`, separatorBefore: true, onSelect: actions.merge },
+    ...(kind.removable
+      ? [{ label: 'Remove', tone: 'danger', onSelect: actions.remove } as ContextMenuItem]
+      : []),
   ];
 
   return (
@@ -45,7 +51,8 @@ export function WorktreeCard({
       className={cn('group relative rounded-md', `agent-color-${row.hue}`)}
       style={{
         background: 'var(--color-surface-2)',
-        border: `1px solid ${row.current ? 'var(--color-accent)' : 'var(--color-border)'}`,
+        border: `1px solid ${row.current && !kind.demoted ? 'var(--color-accent)' : 'var(--color-border)'}`,
+        opacity: kind.demoted ? 0.78 : 1,
       }}
     >
       {/* The More menu floats top-right as a sibling of the click button, so the
@@ -76,14 +83,18 @@ export function WorktreeCard({
             className="min-w-0 flex-1 truncate text-[13px] font-medium"
             style={{
               fontFamily: 'var(--font-mono)',
-              color: row.current ? 'var(--color-accent)' : 'var(--color-text-primary)',
+              color: row.current && !kind.demoted ? 'var(--color-accent)' : 'var(--color-text-primary)',
             }}
           >
             {row.branch}
           </span>
-          {row.current ? (
+          {kind.tag ? (
+            <Badge variant="gray" shape="pill">
+              {kind.tag}
+            </Badge>
+          ) : row.current ? (
             <Badge variant="cyan" shape="pill">
-              actuel
+              current
             </Badge>
           ) : null}
           <span className="inline-flex shrink-0 items-center gap-1.5 text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
@@ -109,7 +120,7 @@ export function WorktreeCard({
             </span>
           ) : (
             <span className="truncate text-xs" style={{ color: 'var(--color-text-muted)' }}>
-              {row.current ? 'Worktree courant' : 'Aucun agent'}
+              {kind.idleSubtitle}
             </span>
           )}
 
@@ -126,7 +137,7 @@ export function WorktreeCard({
             </span>
           ) : null}
           {row.ahead ? (
-            <Tooltip label={`${row.ahead} commits d’avance`}>
+            <Tooltip label={`${row.ahead} commits ahead`}>
               <span
                 className="inline-flex items-center gap-0.5 text-[11px] tabular-nums"
                 style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-muted)' }}

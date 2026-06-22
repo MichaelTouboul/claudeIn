@@ -21,8 +21,8 @@ function repoName(repoPath: string): string {
 
 /**
  * The Worktrees panel — a card panel scoped to the ACTIVE repo. Header (repo chip
- * + name + "{N} worktrees · {M} actifs" + new-worktree button), a Tous/Actifs/Au
- * repos filter, the live worktree cards, and a "scope : {repo}" footer. All data
+ * + name + "{N} worktrees · {M} active" + new-worktree button), an All/Active/Idle
+ * filter, the live worktree cards, and a "scope: {repo}" footer. All data
  * is real: list via `useGitBranches` (live), diff/ahead stats via
  * `gitWorktreeStats`, status+agent derived from session presence. Mutations run
  * real git ops behind confirms (see `useWorktreeActions`).
@@ -59,7 +59,7 @@ export function WorktreesPanel({ repoPath }: { repoPath: string }) {
       <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-2">
         {visible.length === 0 ? (
           <p className="px-2 py-6 text-center text-xs" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
-            {branchInfo?.error ? branchInfo.error : 'Aucun worktree'}
+            {branchInfo?.error ? branchInfo.error : 'No worktree'}
           </p>
         ) : (
           visible.map((row) => (
@@ -123,11 +123,11 @@ function Header({
           {name}
         </span>
         <span className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
-          {error ? error : `${total} worktrees · ${active} actifs`}
+          {error ? error : `${total} worktrees · ${active} active`}
         </span>
       </div>
-      <Tooltip label="Nouveau worktree">
-        <IconButton aria-label="Nouveau worktree" size="sm" onClick={onNew}>
+      <Tooltip label="New worktree">
+        <IconButton aria-label="New worktree" size="sm" onClick={onNew}>
           <Plus size={16} />
         </IconButton>
       </Tooltip>
@@ -142,11 +142,11 @@ function Footer({ name, active }: { name: string; active: number }) {
       style={{ borderTop: '1px solid var(--color-border-subtle)', background: 'var(--color-surface-0)' }}
     >
       <span className="text-[11.5px]" style={{ color: 'var(--color-text-muted)', fontFamily: 'var(--font-mono)' }}>
-        scope : {name}
+        scope: {name}
       </span>
       <div className="flex-1" />
       <span className="inline-flex items-center gap-1.5 text-xs" style={{ color: 'var(--color-accent)' }}>
-        <Activity size={13} /> {active} actifs
+        <Activity size={13} /> {active} active
       </span>
     </div>
   );
