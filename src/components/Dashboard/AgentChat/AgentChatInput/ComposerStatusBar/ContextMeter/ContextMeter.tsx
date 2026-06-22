@@ -21,7 +21,7 @@ export function ContextMeter({ percent, tokensIn, tokensOut }: ContextMeterProps
   const used = tokensIn + tokensOut;
   const total = percent > 0 ? Math.round(used / (percent / 100)) : 0;
   const color = contextLevelColorVar(contextLevel(percent));
-  const tip = total > 0 ? `Contexte utilisé — ${formatTokens(used)} / ${formatTokens(total)} tokens` : 'Contexte utilisé';
+  const tip = total > 0 ? `Context used — ${formatTokens(used)} / ${formatTokens(total)} tokens` : 'Context used';
 
   return (
     <Tooltip label={tip}>

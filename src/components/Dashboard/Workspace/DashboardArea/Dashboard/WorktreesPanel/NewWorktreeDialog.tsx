@@ -42,7 +42,7 @@ export function NewWorktreeDialog({ open, onOpenChange, onCreate }: NewWorktreeD
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} title="Nouveau worktree" contentClassName="w-[min(92vw,420px)]">
+    <Dialog open={open} onOpenChange={onOpenChange} title="New worktree" contentClassName="w-[min(92vw,420px)]">
       <div
         className="flex flex-col overflow-hidden rounded-[var(--radius-lg)]"
         style={{
@@ -53,16 +53,16 @@ export function NewWorktreeDialog({ open, onOpenChange, onCreate }: NewWorktreeD
       >
         <div className="flex flex-col gap-2 px-4 pt-4">
           <h2 className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-            Nouveau worktree
+            New worktree
           </h2>
           <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-            Crée un worktree lié pour une branche (nouvelle ou existante), sous{' '}
+            Creates a linked worktree for a branch (new or existing), under{' '}
             <span style={{ fontFamily: 'var(--font-mono)' }}>.worktrees/</span>.
           </p>
           <Input
             autoFocus
             value={branch}
-            placeholder="feature/ma-branche"
+            placeholder="feature/my-branch"
             onChange={(e) => setBranch(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') void submit();
@@ -81,10 +81,10 @@ export function NewWorktreeDialog({ open, onOpenChange, onCreate }: NewWorktreeD
         </div>
         <div className="mt-3 flex justify-end gap-2 px-4 py-3" style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
           <Button type="button" intent="outline" size="sm" onClick={() => onOpenChange(false)}>
-            Annuler
+            Cancel
           </Button>
           <Button type="button" intent="primary" size="sm" disabled={busy || !branch.trim()} onClick={() => void submit()}>
-            Créer
+            Create
           </Button>
         </div>
       </div>

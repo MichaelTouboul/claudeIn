@@ -56,7 +56,7 @@ export function ComposerStatusBar({
       {/* Git branch — a live read-out (no dropdown). Updates whenever HEAD moves. */}
       <StatusItem
         icon={<GitBranch size={13} aria-hidden="true" />}
-        tip={branch ? `Branche active : ${branch}` : 'Aucune branche'}
+        tip={branch ? `Active branch: ${branch}` : 'No branch'}
       >
         <span className="font-mono text-fg-muted">{branch ?? '—'}</span>
       </StatusItem>
@@ -71,16 +71,16 @@ export function ComposerStatusBar({
       {/* Model */}
       <StatusItem
         icon={<Sparkles size={13} aria-hidden="true" />}
-        tip="Modèle"
+        tip="Model"
         menu={models.map((m) => ({ label: m.label, onSelect: () => onSelectModel(m.id) }))}
       >
-        <span className="font-medium text-fg-muted">{selectedModelLabel ?? 'Par défaut'}</span>
+        <span className="font-medium text-fg-muted">{selectedModelLabel ?? 'Default'}</span>
       </StatusItem>
 
       <span className="flex-1" />
 
       {/* Session cost */}
-      <Tooltip label="Coût de la session">
+      <Tooltip label="Session cost">
         <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded text-fg-subtle whitespace-nowrap">
           <Activity size={13} aria-hidden="true" />
           <span className="font-mono text-fg-muted tabular-nums">{formatCost(costUsd)}</span>
@@ -92,7 +92,7 @@ export function ComposerStatusBar({
       {/* Permission mode */}
       <StatusItem
         icon={<Shield size={13} aria-hidden="true" />}
-        tip="Mode de permission"
+        tip="Permission mode"
         menu={PERMISSION_ORDER.map((mode) => ({
           label: permissionModeLabel(mode),
           tone: mode === permissionMode ? 'accent' : 'default',
@@ -105,7 +105,7 @@ export function ComposerStatusBar({
       <Sep />
 
       {/* Think toggle */}
-      <Tooltip label="Réflexion étendue (think)">
+      <Tooltip label="Extended thinking (think)">
         <button
           type="button"
           aria-pressed={think}

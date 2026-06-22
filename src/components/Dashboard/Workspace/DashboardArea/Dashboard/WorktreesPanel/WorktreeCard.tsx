@@ -18,7 +18,7 @@ export interface WorktreeCardAction {
 }
 
 /**
- * One worktree card: color dot + branch (mono) + "actuel" badge + status dot/label,
+ * One worktree card: color dot + branch (mono) + "current" badge + status dot/label,
  * then the running agent (hued tile) or a description, the +/− diff stats, ahead
  * commits, and the More menu. The hue is applied via the `.agent-color-<hue>`
  * class (sets `--agent-color`) so all tints reference a token, never a raw value.
@@ -34,10 +34,10 @@ export function WorktreeCard({
 }) {
   const dot = STATUS_PRESENTATION[row.status];
   const items: ContextMenuItem[] = [
-    { label: 'Ouvrir', icon: <FolderOpen size={14} />, onSelect: actions.open },
-    { label: 'Comparer (diff)', icon: <Code2 size={14} />, onSelect: actions.diff },
-    { label: `Merger dans ${baseBranch}`, separatorBefore: true, onSelect: actions.merge },
-    { label: 'Supprimer', tone: 'danger', onSelect: actions.remove },
+    { label: 'Open', icon: <FolderOpen size={14} />, onSelect: actions.open },
+    { label: 'Compare (diff)', icon: <Code2 size={14} />, onSelect: actions.diff },
+    { label: `Merge into ${baseBranch}`, separatorBefore: true, onSelect: actions.merge },
+    { label: 'Remove', tone: 'danger', onSelect: actions.remove },
   ];
 
   return (
@@ -83,7 +83,7 @@ export function WorktreeCard({
           </span>
           {row.current ? (
             <Badge variant="cyan" shape="pill">
-              actuel
+              current
             </Badge>
           ) : null}
           <span className="inline-flex shrink-0 items-center gap-1.5 text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
@@ -109,7 +109,7 @@ export function WorktreeCard({
             </span>
           ) : (
             <span className="truncate text-xs" style={{ color: 'var(--color-text-muted)' }}>
-              {row.current ? 'Worktree courant' : 'Aucun agent'}
+              {row.current ? 'Current worktree' : 'No agent'}
             </span>
           )}
 
@@ -126,7 +126,7 @@ export function WorktreeCard({
             </span>
           ) : null}
           {row.ahead ? (
-            <Tooltip label={`${row.ahead} commits d’avance`}>
+            <Tooltip label={`${row.ahead} commits ahead`}>
               <span
                 className="inline-flex items-center gap-0.5 text-[11px] tabular-nums"
                 style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-muted)' }}

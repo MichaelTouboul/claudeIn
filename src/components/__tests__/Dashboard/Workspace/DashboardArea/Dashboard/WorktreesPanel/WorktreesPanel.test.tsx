@@ -73,7 +73,7 @@ describe('WorktreesPanel', () => {
     render(<WorktreesPanel repoPath={REPO} />);
     await waitFor(() => expect(gitWorktreeStats).toHaveBeenCalledWith(REPO));
     // 2 worktrees, 1 active (the feature worktree with the running agent).
-    expect(await screen.findByText('2 worktrees · 1 actifs')).toBeInTheDocument();
+    expect(await screen.findByText('2 worktrees · 1 active')).toBeInTheDocument();
   });
 
   it('shows each worktree card with branch, agent and diff stats', async () => {
@@ -83,15 +83,15 @@ describe('WorktreesPanel', () => {
     expect(await screen.findByText('refactorer')).toBeInTheDocument();
     expect(screen.getByText('+12')).toBeInTheDocument();
     expect(screen.getByText('−4')).toBeInTheDocument();
-    // "actuel" badge on the current worktree.
-    expect(screen.getByText('actuel')).toBeInTheDocument();
+    // "current" badge on the current worktree.
+    expect(screen.getByText('current')).toBeInTheDocument();
   });
 
-  it('filters to Au repos (idle) hiding the running worktree', async () => {
+  it('filters to Idle hiding the running worktree', async () => {
     render(<WorktreesPanel repoPath={REPO} />);
     await screen.findByText('feature/x');
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Au repos' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Idle' }));
     // The idle base worktree stays; the running feature worktree is filtered out.
     expect(screen.getByText('_main')).toBeInTheDocument();
     expect(screen.queryByText('feature/x')).not.toBeInTheDocument();
@@ -101,7 +101,7 @@ describe('WorktreesPanel', () => {
     render(<WorktreesPanel repoPath={REPO} />);
     await screen.findByText('feature/x');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Nouveau worktree' }));
-    expect(await screen.findByPlaceholderText('feature/ma-branche')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'New worktree' }));
+    expect(await screen.findByPlaceholderText('feature/my-branch')).toBeInTheDocument();
   });
 });

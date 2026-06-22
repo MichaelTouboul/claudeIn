@@ -22,10 +22,10 @@ type ComponentTargetSelectProps = {
 };
 
 /**
- * "Composant ciblé" picker: pick which component in the click's ancestor chain
+ * "Target component" picker: pick which component in the click's ancestor chain
  * the request targets, instead of being stuck with the innermost `_ui/`
  * primitive. Defaults to the smart pick (first non-`_ui/` entry). Adds two
- * escape hatches — a free-text component name and "Aucun / je décris" — so the
+ * escape hatches — a free-text component name and "None / I'll describe" — so the
  * user is never forced into a wrong value. The resolved target is reported up via
  * `onChange`; the modal submits it as the existing `component`/`sourcePath`.
  */
@@ -47,10 +47,10 @@ export function ComponentTargetSelect({ target, onChange, disabled }: ComponentT
   return (
     <Stack gap={1.5} className="px-4 py-3 border-b" style={{ borderColor: 'var(--color-border)' }}>
       <span className="text-xs uppercase tracking-wide" style={{ color: 'var(--color-text-muted)' }}>
-        Composant ciblé
+        Target component
       </span>
       <Select
-        aria-label="Composant ciblé"
+        aria-label="Target component"
         value={selectValue}
         disabled={disabled}
         onChange={(e) => setSelectValue(e.target.value)}
@@ -62,15 +62,15 @@ export function ComponentTargetSelect({ target, onChange, disabled }: ComponentT
             {o.sourcePath ? ` — ${o.sourcePath}` : ''}
           </option>
         ))}
-        <option value={FREE_TEXT_VALUE}>Autre (saisir un nom)…</option>
-        <option value={NONE_VALUE}>Aucun / je décris</option>
+        <option value={FREE_TEXT_VALUE}>Other (enter a name)…</option>
+        <option value={NONE_VALUE}>None / I'll describe</option>
       </Select>
 
       {selectValue === FREE_TEXT_VALUE ? (
         <Input
-          aria-label="Nom du composant"
+          aria-label="Component name"
           font="mono"
-          placeholder="Nom du composant"
+          placeholder="Component name"
           value={freeText}
           disabled={disabled}
           onChange={(e) => setFreeText(e.target.value)}

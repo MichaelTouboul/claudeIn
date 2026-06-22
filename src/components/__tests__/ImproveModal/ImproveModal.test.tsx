@@ -112,7 +112,7 @@ describe('ImproveModal', () => {
     render(<ImproveModal />);
 
     // Smart default selected the feature component, not the _ui primitive.
-    const select = screen.getByLabelText('Composant ciblé') as HTMLSelectElement;
+    const select = screen.getByLabelText('Target component') as HTMLSelectElement;
     expect(select.value).toBe('1');
 
     fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'broken' } });
@@ -129,12 +129,12 @@ describe('ImproveModal', () => {
     );
   });
 
-  it('the "Aucun / je décris" escape hatch submits without a component', async () => {
+  it('the "None / I\'ll describe" escape hatch submits without a component', async () => {
     improveChat.mockResolvedValue(['Title: General', 'Description: somewhere'].join('\n'));
     openWith({ component: 'AgentChatInput', sourcePath: 'src/x.tsx:1' });
     render(<ImproveModal />);
 
-    fireEvent.change(screen.getByLabelText('Composant ciblé'), { target: { value: '__none__' } });
+    fireEvent.change(screen.getByLabelText('Target component'), { target: { value: '__none__' } });
     fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'general thing' } });
     fireEvent.click(screen.getByRole('button', { name: 'Send' }));
     await screen.findByText(/General/);
