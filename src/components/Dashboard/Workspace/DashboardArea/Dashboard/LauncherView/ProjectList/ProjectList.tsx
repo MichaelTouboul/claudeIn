@@ -48,7 +48,7 @@ export function ProjectList({ onSelect, openIds }: ProjectListProps) {
             No favorite repos yet — use “Open another folder…”.
           </p>
         ) : (
-          <div className="max-h-60 overflow-y-auto">
+          <div className="max-h-[60vh] overflow-y-auto">
             {repos.map((repo) => {
               const project = projectForFavorite(repo, projects);
               const name = repoBasename(repo.path);
