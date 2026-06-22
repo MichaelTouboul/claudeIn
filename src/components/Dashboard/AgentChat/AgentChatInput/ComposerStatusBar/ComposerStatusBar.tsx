@@ -1,10 +1,11 @@
-import { Activity, Brain, GitBranch, Shield, Sparkles } from 'lucide-react';
+import { Activity, Brain, Shield, Sparkles } from 'lucide-react';
 
 import { Tooltip } from '@/components/_ui/Tooltip';
 import type { GitBranchInfo } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import type { ModelOption } from '@/store/dashboard/useModelStore';
 
+import { BranchChip } from './BranchChip/BranchChip';
 import { ContextMeter } from './ContextMeter/ContextMeter';
 import { formatCost, PermissionMode, permissionModeLabel } from './statusBar';
 import { StatusItem } from './StatusItem/StatusItem';
@@ -53,13 +54,9 @@ export function ComposerStatusBar({
 
   return (
     <div className="flex items-center gap-1 px-2.5 py-1.5 border-t border-border-subtle bg-surface-0 text-xs">
-      {/* Git branch — a live read-out (no dropdown). Updates whenever HEAD moves. */}
-      <StatusItem
-        icon={<GitBranch size={13} aria-hidden="true" />}
-        tip={branch ? `Active branch: ${branch}` : 'No branch'}
-      >
-        <span className="font-mono text-fg-muted">{branch ?? '—'}</span>
-      </StatusItem>
+      {/* Git branch — a live read-out, click to copy the branch name (GitHub-style).
+          Updates whenever HEAD moves. */}
+      <BranchChip branch={branch} />
 
       <Sep />
 
