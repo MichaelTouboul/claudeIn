@@ -205,4 +205,22 @@ describe("ConversationList — redesigned Sessions list", () => {
     const bar = screen.getByTestId("session-context-bar");
     expect(within(bar).getByText("73%")).toBeInTheDocument();
   });
+
+  it("seeds the events store with the persisted context % when a conversation is opened", () => {
+    // Regression: opening a conversation must populate `sessionContexts` (keyed by
+    // claudeSessionId) from the persisted snapshot, so the chat header + composer
+    // bar show the real usage immediately instead of 0% — without waiting for a
+    // live `session_context` event (which only fires for a running session).
+    render(
+      <ConversationList
+        sessions={[session("conv-9", { title: "Persisted row", contextPercent: 58 })]}
+        onChanged={vi.fn()}
+      />,
+    );
+    expect(useEventsStore.getState().sessionContexts.get("conv-9")).toBeUndefined();
+
+    fireEvent.click(screen.getByText("Persisted row"));
+
+    expect(useEventsStore.getState().sessionContexts.get("conv-9")).toBe(58);
+  });
 });

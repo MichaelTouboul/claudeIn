@@ -34,6 +34,7 @@ beforeEach(() => {
     activeAgents: new Set(),
     waitingAgents: new Set(),
     agentContexts: new Map(),
+    sessionContexts: new Map(),
     currentTools: new Map(),
     presence: new Map(),
   });
@@ -99,5 +100,39 @@ describe("useEventsStore presence expiry", () => {
     vi.advanceTimersByTime(60_000);
     // Still idle — the watchdog must not resurrect or re-demote anything.
     expect(presenceOf("sess-1", "done")).toBe(AgentPresenceStatus.Idle);
+  });
+});
+
+describe("useEventsStore seedSessionContext", () => {
+  // Regression: the composer/header context bar showed 0% on conversation select
+  // because `sessionContexts` was only ever fed by the LIVE `session_context`
+  // event. Seeding the persisted percent the instant a conversation is displayed
+  // populates it immediately, so the bar reflects the real usage — not 0%.
+  it("seeds the persisted percent for a just-selected conversation", () => {
+    expect(useEventsStore.getState().sessionContexts.get("conv-1")).toBeUndefined();
+
+    useEventsStore.getState().seedSessionContext("conv-1", 42);
+
+    expect(useEventsStore.getState().sessionContexts.get("conv-1")).toBe(42);
+  });
+
+  it("never overwrites an existing (live) value with a stale seed", () => {
+    // A live `session_context` event arrived first.
+    useEventsStore
+      .getState()
+      .ingest({ type: "session_context", claudeSessionId: "conv-1", percent: 71 });
+
+    // Re-selecting the conversation must NOT clobber the fresher live value.
+    useEventsStore.getState().seedSessionContext("conv-1", 42);
+
+    expect(useEventsStore.getState().sessionContexts.get("conv-1")).toBe(71);
+  });
+
+  it("treats a null persisted percent as unknown — leaves the map empty", () => {
+    // A brand-new/empty conversation has no usage yet → nothing to seed, the bar
+    // correctly stays at its empty state rather than a fabricated value.
+    useEventsStore.getState().seedSessionContext("conv-new", null);
+
+    expect(useEventsStore.getState().sessionContexts.has("conv-new")).toBe(false);
   });
 });

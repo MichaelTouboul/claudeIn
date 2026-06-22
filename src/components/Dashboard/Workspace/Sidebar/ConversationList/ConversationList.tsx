@@ -84,6 +84,12 @@ export function ConversationList({ sessions, onChanged }: ConversationListProps)
   // Open the conversation in the active dashboard as a `session` tab (deduped by
   // filePath in the store). Activate the existing tab if already open.
   const openSession = (s: SessionSummary) => {
+    // Seed this conversation's persisted context % into the events store keyed by
+    // its claudeSessionId, so the header + composer bar show the real usage the
+    // instant the conversation is displayed — without waiting for a live
+    // `session_context` event (which only fires for a running session). A live
+    // value, if already present, is never overwritten (see seedSessionContext).
+    useEventsStore.getState().seedSessionContext(s.sessionId, s.contextPercent);
     const open = active?.tabs.find((t) => tabMatchesSession(t, s));
     if (open) {
       setActiveTab(open.id);
