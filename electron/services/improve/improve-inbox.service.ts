@@ -4,6 +4,7 @@ import path from "path";
 
 import { broadcast } from "../core/broadcast";
 import {
+  copyImagesForRequest,
   ensureInboxDir,
   getInboxDir,
   readAllRequests,
@@ -32,8 +33,12 @@ const CHANGE_EVENT = "improve_request_changed";
 
 /** Submit a new request: mint id + createdAt, persist as `pending`, return it. */
 export async function submitRequest(input: ImproveRequestInput): Promise<ImproveRequest> {
+  const id = randomUUID();
+  // Snapshot attached screenshots into a durable, request-scoped dir before
+  // persisting, so they outlive os.tmpdir() cleanup and the runner can Read them.
+  const images = await copyImagesForRequest(id, input.images ?? []);
   const request: ImproveRequest = {
-    id: randomUUID(),
+    id,
     createdAt: new Date().toISOString(),
     type: input.type,
     component: input.component,
@@ -42,6 +47,7 @@ export async function submitRequest(input: ImproveRequestInput): Promise<Improve
     description: input.description,
     acceptance: input.acceptance,
     transcript: input.transcript ?? [],
+    ...(images.length > 0 ? { images } : {}),
     status: ImproveStatus.Pending,
   };
 
