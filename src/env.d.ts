@@ -40,6 +40,26 @@ interface Window {
     watchGitBranch: (repoPath: string) => Promise<void>;
     /** Stop watching a repo's HEAD. */
     unwatchGitBranch: (repoPath: string) => Promise<void>;
+    /** Diff/commit stats per worktree (adds/dels vs base + ahead), keyed by path. */
+    gitWorktreeStats: (
+      repoPath: string,
+    ) => Promise<import("../electron/types/git.types").WorktreeStat[]>;
+    /** Create a worktree for `branch` under `<repo>/.worktrees/<branch>`. */
+    gitWorktreeAdd: (
+      repoPath: string,
+      branch: string,
+    ) => Promise<import("../electron/types/git.types").WorktreeOpResult>;
+    /** Remove a worktree dir (force drops the uncommitted-changes guard). */
+    gitWorktreeRemove: (
+      repoPath: string,
+      worktreeTarget: string,
+      force: boolean,
+    ) => Promise<import("../electron/types/git.types").WorktreeOpResult>;
+    /** Merge a worktree's branch into the repo's default base (no auto-conflict-resolve). */
+    gitWorktreeMerge: (
+      repoPath: string,
+      branch: string,
+    ) => Promise<import("../electron/types/git.types").WorktreeOpResult>;
 
     spawn: (opts: { agent_name?: string; mission: string; cwd?: string; resume_session_id?: string; model?: string; permission_mode?: string; think?: boolean }) => Promise<import("./types/spawn.types").SpawnSession>;
     getSession: (localSessionId: string) => Promise<import("./types/spawn.types").SpawnSession | null>;

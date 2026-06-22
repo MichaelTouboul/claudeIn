@@ -14,6 +14,8 @@ export type ContextMenuItem = {
   // Renders a trailing check ✓ on a leaf item (radio-style selection, e.g. the
   // current color). Ignored when `submenu` is set.
   selected?: boolean;
+  // Render a thin divider ABOVE this item (groups destructive/secondary actions).
+  separatorBefore?: boolean;
   // One level of nested items. When present the entry becomes a submenu trigger;
   // `onSelect` is then unused (the leaf children carry the actions).
   submenu?: ContextMenuItem[];

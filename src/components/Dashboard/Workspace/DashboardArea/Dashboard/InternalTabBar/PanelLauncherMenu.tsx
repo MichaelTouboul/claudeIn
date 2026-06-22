@@ -1,8 +1,14 @@
-import { GitBranch, Menu, Network } from 'lucide-react';
+import { GitBranch, Menu, Network, Trees } from 'lucide-react';
 
 import { ContextMenu, type ContextMenuItem } from '@/components/_ui/ContextMenu/ContextMenu';
 import { Flex } from '@/components/_ui/Flex';
-import { diffTabId, PanelTabKind, usePanelStore, workflowTabId } from '@/store/dashboard/usePanelStore';
+import {
+  diffTabId,
+  PanelTabKind,
+  usePanelStore,
+  workflowTabId,
+  worktreesTabId,
+} from '@/store/dashboard/usePanelStore';
 
 export type PanelLauncherMenuProps = {
   /** Repo path of the active dashboard; empty when there is no project repo. */
@@ -30,6 +36,18 @@ export function PanelLauncherMenu({ repoPath, claudeSessionId }: PanelLauncherMe
           id: diffTabId(repoPath),
           kind: PanelTabKind.Diff,
           title: 'Changes',
+          payload: { repoPath },
+        }),
+    },
+    {
+      label: 'Worktrees',
+      icon: <Trees size={14} />,
+      disabled: !repoPath,
+      onSelect: () =>
+        open({
+          id: worktreesTabId(repoPath),
+          kind: PanelTabKind.Worktrees,
+          title: 'Worktrees',
           payload: { repoPath },
         }),
     },

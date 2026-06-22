@@ -5,5 +5,7 @@ export type {
   GitWorktree,
   RepoDiff,
   RepoFileDiff,
+  WorktreeOpResult,
+  WorktreeStat,
 } from "../../../electron/types/git.types";
 export { DiffMode, FileStatus, GitLineKind } from "../../../electron/types/git.types";
