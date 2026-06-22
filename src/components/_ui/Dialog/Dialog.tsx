@@ -46,8 +46,6 @@ export function Dialog({
           className="fixed inset-0 z-40"
           style={{
             background: 'var(--color-surface-overlay)',
-            backdropFilter: 'blur(2px)',
-            WebkitBackdropFilter: 'blur(2px)',
           }}
         />
         <RadixDialog.Content
