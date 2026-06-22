@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { LineKind } from '@/components/Dashboard/ResponseBody/blocks/DiffBlock/diff.types';
@@ -30,6 +30,40 @@ describe('DiffBlock', () => {
   it('exposes a Copy action', () => {
     render(<DiffBlock diff={diff} toolName="Edit" />);
     expect(screen.getByRole('button', { name: 'Copy' })).toBeInTheDocument();
+  });
+
+  it('is expanded by default with the toggle reflecting that state', () => {
+    render(<DiffBlock diff={diff} toolName="Edit" />);
+    const toggle = screen.getByRole('button', { name: /collapse diff/i });
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText('old line')).toBeInTheDocument();
+  });
+
+  it('collapses the diff lines when the header toggle is clicked', () => {
+    render(<DiffBlock diff={diff} toolName="Edit" />);
+    fireEvent.click(screen.getByRole('button', { name: /collapse diff/i }));
+
+    const toggle = screen.getByRole('button', { name: /expand diff/i });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByText('old line')).not.toBeInTheDocument();
+    expect(screen.queryByText('new line')).not.toBeInTheDocument();
+    // Header content stays visible while collapsed.
+    expect(screen.getByText('/repo/a.ts')).toBeInTheDocument();
+    expect(screen.getByText('Edit')).toBeInTheDocument();
+  });
+
+  it('re-expands the diff lines on a second click', () => {
+    render(<DiffBlock diff={diff} toolName="Edit" />);
+    const header = screen.getByRole('button', { name: /collapse diff/i });
+    fireEvent.click(header);
+    fireEvent.click(screen.getByRole('button', { name: /expand diff/i }));
+    expect(screen.getByText('old line')).toBeInTheDocument();
+  });
+
+  it('keeps the Copy action working while expanded', () => {
+    render(<DiffBlock diff={diff} toolName="Edit" />);
+    expect(screen.getByRole('button', { name: 'Copy' })).toBeInTheDocument();
+    expect(screen.getByText('old line')).toBeInTheDocument();
   });
 
   it('renders a hunk separator without line numbers or ask button', () => {

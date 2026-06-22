@@ -1,3 +1,6 @@
+import { ChevronDown, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
+
 import { BlockShell } from '../../BlockShell/BlockShell';
 import type { BlockAction } from '../../responseBody.types';
 import type { FileDiff } from './diff.types';
@@ -13,6 +16,9 @@ export type DiffBlockProps = {
 
 export function DiffBlock({ diff, toolName }: DiffBlockProps) {
   const ask = useDiffAsk(diff.filePath, diff.lines);
+  // GitHub-style collapse: the diff body hides while the header stays visible.
+  // Expanded is the authoritative state; default open.
+  const [expanded, setExpanded] = useState(true);
 
   const copy: BlockAction = {
     id: 'copy',
@@ -27,10 +33,19 @@ export function DiffBlock({ diff, toolName }: DiffBlockProps) {
         register([copy]);
         return (
           <div>
-            <div
-              className="flex items-center gap-2 px-3 py-2 text-xs"
+            <button
+              type="button"
+              onClick={() => setExpanded((prev) => !prev)}
+              aria-expanded={expanded}
+              aria-label={expanded ? 'Collapse diff' : 'Expand diff'}
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs"
               style={{ borderBottom: '1px solid var(--color-border)' }}
             >
+              {expanded ? (
+                <ChevronDown size={12} className="shrink-0 text-fg-subtle" />
+              ) : (
+                <ChevronRight size={12} className="shrink-0 text-fg-subtle" />
+              )}
               <span
                 className="rounded px-1.5 py-0.5 font-medium"
                 style={{ background: 'var(--color-surface-3)', color: 'var(--color-text-secondary)' }}
@@ -44,23 +59,25 @@ export function DiffBlock({ diff, toolName }: DiffBlockProps) {
               >
                 {diff.filePath}
               </span>
-            </div>
-            <div className="py-1">
-              {diff.lines.map((line) => {
-                const active = ask.state.lineId === line.id;
-                return (
-                  <DiffLineRow
-                    key={line.id}
-                    line={line}
-                    askPhase={active ? ask.state.phase : AskPhase.Idle}
-                    answer={active ? ask.state.answer : ''}
-                    onAsk={ask.open}
-                    onSubmit={ask.submit}
-                    onClose={ask.close}
-                  />
-                );
-              })}
-            </div>
+            </button>
+            {expanded ? (
+              <div className="py-1">
+                {diff.lines.map((line) => {
+                  const active = ask.state.lineId === line.id;
+                  return (
+                    <DiffLineRow
+                      key={line.id}
+                      line={line}
+                      askPhase={active ? ask.state.phase : AskPhase.Idle}
+                      answer={active ? ask.state.answer : ''}
+                      onAsk={ask.open}
+                      onSubmit={ask.submit}
+                      onClose={ask.close}
+                    />
+                  );
+                })}
+              </div>
+            ) : null}
           </div>
         );
       }}
