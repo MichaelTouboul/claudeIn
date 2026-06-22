@@ -5,6 +5,8 @@ import type { ChatMessage, SpawnSession } from '@/lib/types';
 
 import { MessageRow } from '../MessageRow/MessageRow';
 import type { QueueItem } from '../types';
+import { ActivityLine } from './ActivityLine';
+import type { CurrentActivity } from './activityState';
 
 export type AgentChatMessagesProps = {
   agentName: string;
@@ -16,6 +18,10 @@ export type AgentChatMessagesProps = {
   queue: QueueItem[];
   onAnswer: (value: string) => void;
   scrollRef: RefObject<HTMLDivElement | null>;
+  /** Latest streamed tool of the live turn (null = reasoning). Drives the activity line. */
+  currentActivity: CurrentActivity;
+  /** Opens this discussion's workflow panel; absent ⇒ the activity line isn't clickable. */
+  onOpenWorkflow?: () => void;
 };
 
 export function AgentChatMessages({
@@ -28,6 +34,8 @@ export function AgentChatMessages({
   queue,
   onAnswer,
   scrollRef,
+  currentActivity,
+  onOpenWorkflow,
 }: AgentChatMessagesProps) {
   return (
     <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3 font-mono">
@@ -53,12 +61,11 @@ export function AgentChatMessages({
           onAnswer={onAnswer}
         />
       ))}
-      {isRunning && awaitingResponse && !waitingInput ? (
-        <div className="flex items-center gap-2 text-fg-subtle text-xs ml-5">
-          <Loader2 size={10} className="animate-spin" />
-          thinking...
-        </div>
-      ) : null}
+      <ActivityLine
+        active={Boolean(isRunning && awaitingResponse && !waitingInput)}
+        activity={currentActivity}
+        onOpenWorkflow={onOpenWorkflow}
+      />
       {queue.length > 0 ? (
         <div className="space-y-1 ml-5 mt-1">
           {queue.map((q) => (

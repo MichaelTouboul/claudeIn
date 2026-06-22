@@ -9,4 +9,5 @@ export * from './estimateTokens';
 export * from './openFavorite';
 export * from './platform';
 export * from './sessionTime';
+export * from './summarizeToolInput';
 export * from './tokenDelta';

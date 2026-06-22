@@ -11,6 +11,7 @@ import { ConversationStatus, useConversationStatusStore } from '@/store/dashboar
 import { useConversationTitlesStore } from '@/store/dashboard/useConversationTitlesStore';
 import { useDashboardUIStore } from '@/store/dashboard/useDashboardUIStore';
 import { MODELS, useModelStore } from '@/store/dashboard/useModelStore';
+import { activityTabId, PanelTabKind, usePanelStore } from '@/store/dashboard/usePanelStore';
 import { useAppStore } from '@/store/useAppStore';
 import { useImproveModalStore } from '@/store/useImproveModalStore';
 import { useWorkspaceStore } from '@/store/useWorkspaceStore';
@@ -19,6 +20,7 @@ import { AgentChatHeader } from './AgentChatHeader/AgentChatHeader';
 import { AgentChatInput } from './AgentChatInput/AgentChatInput';
 import { PermissionMode } from './AgentChatInput/ComposerStatusBar/statusBar';
 import { resolveHistoryNav } from './AgentChatInput/historyNav';
+import { activityFromToolMessage, type CurrentActivity } from './AgentChatMessages/activityState';
 import { AgentChatMessages } from './AgentChatMessages/AgentChatMessages';
 import { parseAskPrompt } from './askPrompt';
 import { ChatDropOverlay } from './ChatDropOverlay/ChatDropOverlay';
@@ -68,6 +70,10 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
   const [spawning] = useState(false);
   const [waitingInput, setWaitingInput] = useState(false);
   const [awaitingResponse, setAwaitingResponse] = useState(false);
+  // The latest streamed tool of the live turn (null = assistant reasoning). Set on
+  // a `role:"tool"` spawn_message, reset on a `role:"assistant"` message and on
+  // spawn_exit — drives the single replacing activity line in AgentChatMessages.
+  const [currentActivity, setCurrentActivity] = useState<CurrentActivity>(null);
   const [attachedFiles, setAttachedFiles] = useState<Array<{ path: string; dataUrl: string | null }>>([]);
   // The `/model` picker submenu open state (reuses the InputMenu mechanism).
   const [modelPickerOpen, setModelPickerOpen] = useState(false);
@@ -224,7 +230,14 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
         }
         setMessages((prev) => [...prev, msg]);
         setWaitingInput(false);
+        // Track the live turn's current activity for the replacing activity line:
+        // a tool message advances it; an assistant (reasoning/answer) message clears
+        // it back to "Thinking…".
+        if (msg.role === 'tool' && msg.toolName) {
+          setCurrentActivity(activityFromToolMessage(msg.toolName, msg.content));
+        }
         if (msg.role === 'assistant') {
+          setCurrentActivity(null);
           setAwaitingResponse(false);
           // Forward through the ref so we run the LATEST sendNextFromQueue closure
           // (capturing the current selectedModel), not this mount-once effect's.
@@ -249,6 +262,7 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
         if (data.claudeSessionId) setClaudeSessionId(data.claudeSessionId);
         setWaitingInput(false);
         setAwaitingResponse(false);
+        setCurrentActivity(null);
         focusInputOnTurnComplete();
       }
     });
@@ -321,6 +335,20 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
     setInput(val);
   };
 
+  // Open this discussion's workflow panel for the current conversation. Only wired
+  // when the conversation id AND its project cwd are both known (otherwise the
+  // activity line stays non-clickable).
+  const openWorkflow =
+    claudeSessionId && projectPath
+      ? () =>
+          usePanelStore.getState().open({
+            id: activityTabId(claudeSessionId),
+            kind: PanelTabKind.Activity,
+            title: 'Workflow',
+            payload: { claudeSessionId, projectPath },
+          })
+      : undefined;
+
   // Selecting a slash command from the autocomplete menu goes through the SAME
   // single dispatcher as the typed-send path (`dispatchSlash`): registry-driven,
   // `local` (e.g. `/clear`) runs in-app, `cli` forwards to claude. No hardcoded
@@ -348,6 +376,7 @@ export function AgentChat({ agentName, tabId, cwd, resumeSessionId, initialMessa
         agentName={agentName} messages={messages} session={session}
         isRunning={isRunning ?? false} waitingInput={waitingInput} awaitingResponse={awaitingResponse}
         queue={queue} onAnswer={onAnswer} scrollRef={scrollRef}
+        currentActivity={currentActivity} onOpenWorkflow={openWorkflow}
       />
       {compactStatus ? <CompactStatusBanner status={compactStatus} /> : null}
       <AgentChatInput
