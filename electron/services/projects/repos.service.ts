@@ -77,3 +77,25 @@ export async function scanRepos(root?: string): Promise<RepoCandidate[]> {
   const projects = candidates.filter((c) => c.scope === "project");
   return Promise.all(projects.map(labelFor));
 }
+
+/**
+ * Label a single, already-known repo path (used by the Home add flow so a
+ * manually-added repo gets the same logo + description as an onboarding-scanned
+ * one). Builds a project-scope `Candidate` for the path and reuses `labelFor`
+ * (logo detection + the LLM label run identically to `scanRepos`). Returns null
+ * only on an unexpected failure — the label/logo individually degrade to null
+ * inside `labelFor`, so a successful call always yields a usable candidate.
+ */
+export async function scanSingleRepo(repoPath: string): Promise<RepoCandidate | null> {
+  try {
+    const candidate: Candidate = {
+      path: repoPath,
+      scope: "project",
+      hasClaude: true,
+      plugins: [],
+    };
+    return await labelFor(candidate);
+  } catch {
+    return null;
+  }
+}

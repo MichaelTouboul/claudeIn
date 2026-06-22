@@ -75,3 +75,37 @@ describe("scanRepos", () => {
     expect(result).toEqual([]);
   });
 });
+
+describe("scanSingleRepo", () => {
+  it("labels a single repo via the runner seam, always running in os.tmpdir()", async () => {
+    const seenCwds: string[] = [];
+    repos.setReposRunner(async ({ cwd }) => {
+      seenCwds.push(cwd);
+      return "Single repo description.";
+    });
+
+    const result = await repos.scanSingleRepo("/work/a");
+
+    expect(result).not.toBeNull();
+    expect(result?.path).toBe("/work/a");
+    expect(result?.label).toBe("Single repo description.");
+    // Never runs the LLM in the repo itself — always the throwaway tmp cwd.
+    expect(seenCwds).toEqual([os.tmpdir()]);
+    expect(seenCwds).not.toContain("/work/a");
+    // No filesystem scan is needed for a single, already-known path.
+    expect(scanCandidatesMock).not.toHaveBeenCalled();
+  });
+
+  it("degrades label to null when the runner throws (never blocks the add)", async () => {
+    repos.setReposRunner(async () => {
+      throw new Error("boom");
+    });
+
+    const result = await repos.scanSingleRepo("/work/a");
+    expect(result).not.toBeNull();
+    expect(result?.label).toBeNull();
+    // Non-existent path → no logo, no language, but still a usable candidate.
+    expect(result?.logoDataUrl).toBeNull();
+    expect(result?.language).toBeNull();
+  });
+});

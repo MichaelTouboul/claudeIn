@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { FavoriteRepo, UserProfile } from "@/lib/types";
+import type { FavoriteRepo, RepoCandidate, UserProfile } from "@/lib/types";
 import { HomePage } from "@/pages/HomePage/HomePage";
 import { AppPage, useAppStore } from "@/store/useAppStore";
 import { useWorkspaceStore } from "@/store/useWorkspaceStore";
@@ -31,6 +31,7 @@ const saveUserProfile = vi.fn<(p: UserProfile) => Promise<UserProfile>>();
 const listFavoriteRepos = vi.fn<() => Promise<FavoriteRepo[]>>();
 const addFavoriteRepo = vi.fn<(p: string, l?: string) => Promise<FavoriteRepo>>();
 const removeFavoriteRepo = vi.fn<(p: string) => Promise<void>>();
+const scanSingleRepo = vi.fn<(p: string) => Promise<RepoCandidate | null>>();
 const openDirectoryPicker = vi.fn<() => Promise<string | null>>();
 const getProjects = vi.fn();
 
@@ -42,6 +43,7 @@ beforeEach(() => {
   listFavoriteRepos.mockReset().mockResolvedValue([]);
   addFavoriteRepo.mockReset();
   removeFavoriteRepo.mockReset().mockResolvedValue(undefined);
+  scanSingleRepo.mockReset().mockResolvedValue(null);
   openDirectoryPicker.mockReset();
   getProjects.mockReset().mockResolvedValue([]);
   window.api = {
@@ -50,6 +52,7 @@ beforeEach(() => {
     listFavoriteRepos,
     addFavoriteRepo,
     removeFavoriteRepo,
+    scanSingleRepo,
     openDirectoryPicker,
     getProjects,
   } as unknown as Window["api"];
@@ -92,9 +95,18 @@ describe("HomePage", () => {
     expect(useAppStore.getState().selectedProject?.path).toBe("/code/alpha");
   });
 
-  it("the + add card opens the folder picker and adds the chosen dir", async () => {
+  it("the + add card opens the folder picker, scans the dir, and forwards the detected label + logo", async () => {
     openDirectoryPicker.mockResolvedValue("/code/new");
-    addFavoriteRepo.mockResolvedValue(repo("/code/new"));
+    scanSingleRepo.mockResolvedValue({
+      path: "/code/new",
+      scope: "project",
+      hasClaude: true,
+      plugins: [],
+      label: "New repo description.",
+      logoDataUrl: "data:image/png;base64,AAAA",
+      language: null,
+    });
+    addFavoriteRepo.mockResolvedValue(repo("/code/new", "New repo description."));
     listFavoriteRepos.mockResolvedValueOnce([]).mockResolvedValueOnce([repo("/code/new")]);
     render(<HomePage />);
     const addCard = await screen.findByRole("button", { name: /add/i });
@@ -103,7 +115,14 @@ describe("HomePage", () => {
       fireEvent.click(addCard);
     });
 
-    await waitFor(() => expect(addFavoriteRepo).toHaveBeenCalledWith("/code/new", undefined));
+    await waitFor(() => expect(scanSingleRepo).toHaveBeenCalledWith("/code/new"));
+    await waitFor(() =>
+      expect(addFavoriteRepo).toHaveBeenCalledWith(
+        "/code/new",
+        "New repo description.",
+        "data:image/png;base64,AAAA",
+      ),
+    );
   });
 
   it("does not add a favorite when the picker is cancelled", async () => {

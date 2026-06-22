@@ -209,6 +209,7 @@ contextBridge.exposeInMainWorld("api", {
   completeOnboarding: () => ipcRenderer.invoke("user:complete"),
   resetUser: () => ipcRenderer.invoke("user:reset"),
   scanRepos: (root?: string) => ipcRenderer.invoke("repos:scan", root),
+  scanSingleRepo: (repoPath: string) => ipcRenderer.invoke("repos:scan-single", repoPath),
   listFavoriteRepos: () => ipcRenderer.invoke("favoriteRepos:list"),
   addFavoriteRepo: (repoPath: string, label?: string, logoDataUrl?: string | null) =>
     ipcRenderer.invoke("favoriteRepos:add", repoPath, label, logoDataUrl),

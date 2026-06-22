@@ -23,7 +23,7 @@ import { useWorkspaceStore } from "@/store/useWorkspaceStore";
  * profile in a right-side drawer. Real favorites/profile data via the hooks.
  */
 export function HomePage() {
-  const { repos, loading, add, remove } = useFavoriteRepos();
+  const { repos, loading, pending, add, remove } = useFavoriteRepos();
   const { profile, save } = useUserProfile();
   const { projects } = useProjects();
   const navigate = useAppStore((s) => s.navigate);
@@ -93,6 +93,7 @@ export function HomePage() {
             repos={filtered}
             total={repos.length}
             loading={loading}
+            pending={pending}
             filteredEmpty={filteredEmpty}
             onOpen={openFavorite}
             onRemove={(repo) => void remove(repo.path)}
