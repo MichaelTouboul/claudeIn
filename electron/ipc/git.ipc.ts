@@ -2,6 +2,7 @@ import { ipcMain } from "electron";
 
 import { loadGitBranchInfo, loadRepoDiff } from "../services/git/git.service";
 import { unwatchGitBranch, watchGitBranch } from "../services/git/git.watch";
+import { loadAllRepoWorktrees } from "../services/git/git.worktree.aggregate";
 import {
   addWorktree,
   loadWorktreeStats,
@@ -21,6 +22,8 @@ export function registerGitHandlers(): void {
     unwatchGitBranch(repoPath));
   ipcMain.handle("git:worktree-stats", (_e, repoPath: string) =>
     loadWorktreeStats(repoPath));
+  ipcMain.handle("git:worktrees-all-repos", (_e, repoPaths: string[]) =>
+    loadAllRepoWorktrees(repoPaths));
   ipcMain.handle("git:worktree-add", (_e, repoPath: string, branch: string) =>
     addWorktree(repoPath, branch));
   ipcMain.handle(

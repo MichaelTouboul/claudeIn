@@ -91,3 +91,17 @@ export interface WorktreeOpResult {
   /** Combined stdout/stderr from git, surfaced verbatim on failure (no faking). */
   message: string;
 }
+
+/**
+ * One repo's full worktree slice for the user-scope (all-repos) aggregation: its
+ * live branch/worktree list plus the per-worktree diff/ahead stats. The renderer
+ * joins `branchInfo.worktrees` with `stats` (by path) into rows exactly like the
+ * per-repo panel — this is the per-repo data, batched. A failed repo carries its
+ * `branchInfo.error` and an empty `stats` (never throws — one bad repo can't break
+ * the batch).
+ */
+export interface RepoWorktrees {
+  repoPath: string;
+  branchInfo: GitBranchInfo;
+  stats: WorktreeStat[];
+}

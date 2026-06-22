@@ -16,6 +16,7 @@ export const PanelTabKind = {
   PromptEditor: 'prompt-editor',
   Diff: 'diff',
   Worktrees: 'worktrees',
+  AllWorktrees: 'all-worktrees',
 } as const;
 export type PanelTabKind = (typeof PanelTabKind)[keyof typeof PanelTabKind];
 
@@ -62,6 +63,12 @@ export type DiffPayload = { repoPath: string };
  * `repoPath`. Identity is the repo, so re-opening reuses the SAME panel object.
  */
 export type WorktreesPayload = { repoPath: string };
+/**
+ * The all-repos (user-scope) Worktrees panel. It is NOT scoped to a repo — the
+ * body reads the user's known repos and aggregates their live worktrees itself —
+ * so it carries no payload. There is one such panel (a fixed id).
+ */
+export type AllWorktreesPayload = Record<string, never>;
 
 /**
  * A panel object — discriminated by `kind`, so `payload` is narrowed per kind.
@@ -78,7 +85,8 @@ export type PanelTab =
   | { id: string; kind: typeof PanelTabKind.Toon; title: string; payload: ToonPayload }
   | { id: string; kind: typeof PanelTabKind.PromptEditor; title: string; payload: PromptEditorPayload }
   | { id: string; kind: typeof PanelTabKind.Diff; title: string; payload: DiffPayload }
-  | { id: string; kind: typeof PanelTabKind.Worktrees; title: string; payload: WorktreesPayload };
+  | { id: string; kind: typeof PanelTabKind.Worktrees; title: string; payload: WorktreesPayload }
+  | { id: string; kind: typeof PanelTabKind.AllWorktrees; title: string; payload: AllWorktreesPayload };
 
 /** Payload type for a given object kind — single source for kind→payload mapping. */
 export type PayloadByKind = {
@@ -91,6 +99,7 @@ export type PayloadByKind = {
   [PanelTabKind.PromptEditor]: PromptEditorPayload;
   [PanelTabKind.Diff]: DiffPayload;
   [PanelTabKind.Worktrees]: WorktreesPayload;
+  [PanelTabKind.AllWorktrees]: AllWorktreesPayload;
 };
 
 /**
@@ -273,3 +282,6 @@ export function diffTabId(repoPath: string): string {
 export function worktreesTabId(repoPath: string): string {
   return `worktrees:${repoPath}`;
 }
+
+/** The single all-repos Worktrees panel id (user-scope; not keyed by a repo). */
+export const ALL_WORKTREES_TAB_ID = 'all-worktrees';

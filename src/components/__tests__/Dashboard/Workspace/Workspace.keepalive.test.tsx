@@ -35,6 +35,16 @@ vi.mock('@/components/Dashboard/Workspace/DashboardArea/Dashboard/DashboardSurfa
 vi.mock('@/components/Dashboard/Workspace/Sidebar/Sidebar', () => ({ Sidebar: () => <div data-testid="sidebar" /> }));
 vi.mock('@/components/Dashboard/Workspace/DashboardArea/Console/Console', () => ({ Console: () => <div data-testid="console" /> }));
 
+// Opening a launcher renders the real LauncherView, whose "Active worktrees"
+// section reads the favorites + all-repos aggregation; stub those window.api
+// methods so the keep-alive assertions stay focused on the Workspace gate.
+window.api = {
+  listFavoriteRepos: () => Promise.resolve([]),
+  gitWorktreesAllRepos: () => Promise.resolve([]),
+  getProjects: () => Promise.resolve([]),
+  onEvent: () => () => {},
+} as unknown as typeof window.api;
+
 const proj = (id: string): Project => ({
   id, name: id, path: `/p/${id}`, claudeDir: `/p/${id}/.claude`,
   hasAgents: false, hasSkills: false, hasSettings: false, agentCount: 0, skillCount: 0,
