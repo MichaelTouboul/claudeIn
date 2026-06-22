@@ -73,4 +73,74 @@ describe("ContextMenu", () => {
     // …and the row underneath is never clicked.
     expect(onRowClick).not.toHaveBeenCalled();
   });
+
+  it("renders a submenu trigger and reveals its nested options on open", async () => {
+    const onLeaf = vi.fn();
+    const items: ContextMenuItem[] = [
+      {
+        label: "Color",
+        onSelect: () => {},
+        submenu: [
+          { label: "Default", onSelect: () => {}, selected: true },
+          { label: "Red", onSelect: onLeaf },
+        ],
+      },
+    ];
+    render(<ContextMenu items={items} trigger={<button aria-label="menu">⋯</button>} />);
+
+    openMenu();
+    // The submenu trigger renders at the top level…
+    const trigger = await screen.findByText("Color");
+    // …its options are not visible until the submenu opens (ArrowRight).
+    expect(screen.queryByText("Red")).toBeNull();
+    fireEvent.keyDown(trigger, { key: "ArrowRight" });
+    expect(await screen.findByText("Red")).toBeInTheDocument();
+    expect(screen.getByText("Default")).toBeInTheDocument();
+  });
+
+  it("marks a selected leaf item (the current option) with a check", async () => {
+    const items: ContextMenuItem[] = [
+      {
+        label: "Color",
+        onSelect: () => {},
+        submenu: [
+          { label: "Default", onSelect: () => {} },
+          { label: "Blue", onSelect: () => {}, selected: true },
+        ],
+      },
+    ];
+    const { container } = render(<ContextMenu items={items} trigger={<button aria-label="menu">⋯</button>} />);
+
+    openMenu();
+    const trigger = await screen.findByText("Color");
+    fireEvent.keyDown(trigger, { key: "ArrowRight" });
+    await screen.findByText("Blue");
+
+    // lucide Check renders an <svg class="lucide-check …">; the selected leaf
+    // (Blue) carries it, the unselected one (Default) does not.
+    const blueRow = screen.getByText("Blue").closest("[role='menuitem']");
+    const defaultRow = screen.getByText("Default").closest("[role='menuitem']");
+    expect(blueRow?.querySelector(".lucide-check")).toBeTruthy();
+    expect(defaultRow?.querySelector(".lucide-check")).toBeFalsy();
+    expect(container).toBeTruthy();
+  });
+
+  it("runs a nested leaf's onSelect when selected", async () => {
+    const onLeaf = vi.fn();
+    const items: ContextMenuItem[] = [
+      {
+        label: "Color",
+        onSelect: () => {},
+        submenu: [{ label: "Red", onSelect: onLeaf }],
+      },
+    ];
+    render(<ContextMenu items={items} trigger={<button aria-label="menu">⋯</button>} />);
+
+    openMenu();
+    const trigger = await screen.findByText("Color");
+    fireEvent.keyDown(trigger, { key: "ArrowRight" });
+    fireEvent.click(await screen.findByText("Red"));
+
+    await waitFor(() => expect(onLeaf).toHaveBeenCalledTimes(1));
+  });
 });

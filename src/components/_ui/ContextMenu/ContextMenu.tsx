@@ -2,7 +2,7 @@ import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
 import { type ReactNode, useState } from 'react';
 
-import { cn } from '@/lib/utils';
+import { contentClass, renderContextMenuItem } from './ContextMenuItems';
 
 export type ContextMenuTone = 'default' | 'danger' | 'accent' | 'warning';
 
@@ -11,6 +11,12 @@ export type ContextMenuItem = {
   icon?: ReactNode;
   tone?: ContextMenuTone;
   disabled?: boolean;
+  // Renders a trailing check ✓ on a leaf item (radio-style selection, e.g. the
+  // current color). Ignored when `submenu` is set.
+  selected?: boolean;
+  // One level of nested items. When present the entry becomes a submenu trigger;
+  // `onSelect` is then unused (the leaf children carry the actions).
+  submenu?: ContextMenuItem[];
   onSelect: () => void;
 };
 
@@ -20,13 +26,6 @@ export type ContextMenuProps = {
   align?: 'start' | 'center' | 'end';
   /** Accessible name for the default icon-only trigger. */
   triggerLabel?: string;
-};
-
-const toneClasses: Record<ContextMenuTone, string> = {
-  default: 'text-fg-muted data-[highlighted]:text-fg',
-  danger: 'text-danger',
-  accent: 'text-accent',
-  warning: 'text-[var(--color-warning)]',
 };
 
 export function ContextMenu({ items, trigger, align = 'end', triggerLabel = 'More actions' }: ContextMenuProps) {
@@ -59,27 +58,8 @@ export function ContextMenu({ items, trigger, align = 'end', triggerLabel = 'Mor
         {trigger ? trigger : defaultTrigger}
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
-        <DropdownMenu.Content
-          align={align}
-          sideOffset={4}
-          className="min-w-[176px] py-1 rounded-lg shadow-2xl z-50 overflow-hidden bg-surface-1 border border-border"
-        >
-          {items.map((item) => (
-            <DropdownMenu.Item
-              key={item.label}
-              disabled={item.disabled}
-              onSelect={(event) => handleSelect(event, item)}
-              className={cn(
-                'w-full flex items-center gap-2.5 px-3 py-2 text-xs cursor-pointer outline-none transition-colors',
-                'data-[highlighted]:bg-surface-2',
-                'data-[disabled]:opacity-40 data-[disabled]:cursor-default data-[disabled]:pointer-events-none',
-                toneClasses[item.tone ?? 'default'],
-              )}
-            >
-              {item.icon ? item.icon : null}
-              {item.label}
-            </DropdownMenu.Item>
-          ))}
+        <DropdownMenu.Content align={align} sideOffset={4} className={contentClass}>
+          {items.map((item) => renderContextMenuItem({ item, onLeafSelect: handleSelect }))}
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>
