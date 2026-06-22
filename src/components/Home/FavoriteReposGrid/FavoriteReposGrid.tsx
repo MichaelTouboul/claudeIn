@@ -2,6 +2,7 @@ import type { FavoriteRepo } from "@/lib/types";
 
 import { AddRepoCard } from "./AddRepoCard";
 import { FavoriteRepoCard } from "./FavoriteRepoCard";
+import { PendingRepoCard } from "./PendingRepoCard";
 
 type FavoriteReposGridProps = {
   /** Repos to render (already filtered by the active search query). */
@@ -9,6 +10,11 @@ type FavoriteReposGridProps = {
   /** Total favorites before filtering — shown in the section count. */
   total: number;
   loading: boolean;
+  /**
+   * Path of a repo currently being scanned + added (null when idle); rendered as
+   * an optimistic pending card while its logo + description are detected.
+   */
+  pending: string | null;
   /** True when a search query is active but matched nothing. */
   filteredEmpty: boolean;
   onOpen: (repo: FavoriteRepo) => void;
@@ -25,6 +31,7 @@ export function FavoriteReposGrid({
   repos,
   total,
   loading,
+  pending,
   filteredEmpty,
   onOpen,
   onRemove,
@@ -56,6 +63,9 @@ export function FavoriteReposGrid({
             {repos.map((repo) => (
               <FavoriteRepoCard key={repo.path} repo={repo} onOpen={onOpen} onRemove={onRemove} />
             ))}
+            {pending !== null && !repos.some((r) => r.path === pending) ? (
+              <PendingRepoCard key={pending} path={pending} />
+            ) : null}
             <AddRepoCard onAdd={onAdd} />
           </div>
         </>

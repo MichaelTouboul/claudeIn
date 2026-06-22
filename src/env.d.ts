@@ -140,6 +140,9 @@ interface Window {
     completeOnboarding: () => Promise<import("./types/user.types").UserProfile>;
     resetUser: () => Promise<void>;
     scanRepos: (root?: string) => Promise<import("./types/user.types").RepoCandidate[]>;
+    scanSingleRepo: (
+      repoPath: string,
+    ) => Promise<import("./types/user.types").RepoCandidate | null>;
     listFavoriteRepos: () => Promise<import("./types/user.types").FavoriteRepo[]>;
     addFavoriteRepo: (
       repoPath: string,
