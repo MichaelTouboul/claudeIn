@@ -18,12 +18,14 @@ export function parseWorktrees(porcelain: string): GitWorktree[] {
   let path: string | null = null;
   let branch: string | null = null;
   let detached = false;
+  let prunable = false;
 
   const flush = () => {
-    if (path !== null) worktrees.push({ path, branch, detached });
+    if (path !== null && !prunable) worktrees.push({ path, branch, detached });
     path = null;
     branch = null;
     detached = false;
+    prunable = false;
   };
 
   for (const line of porcelain.split("\n")) {
@@ -38,6 +40,8 @@ export function parseWorktrees(porcelain: string): GitWorktree[] {
       branch = line.slice("branch ".length).replace(/^refs\/heads\//, "");
     } else if (line === "detached") {
       detached = true;
+    } else if (line.startsWith("prunable ")) {
+      prunable = true;
     }
   }
   flush();
