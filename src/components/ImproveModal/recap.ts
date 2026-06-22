@@ -49,7 +49,7 @@ function clampTitle(raw: string): string {
 }
 
 /** A parsed structured recap, or null when the text isn't one. */
-type ParsedRecap = { title: string; description: string; acceptance: string[] };
+export type ParsedRecap = { title: string; description: string; acceptance: string[] };
 
 /** Label aliases per recap field — `Title`/`Titre`, etc. (case-insensitive). */
 const LABEL_ALTERNATIVES = {
@@ -121,7 +121,7 @@ function parseAcceptance(scope: string): string[] {
   return acceptance;
 }
 
-function parseRecap(text: string): ParsedRecap | null {
+export function parseRecap(text: string): ParsedRecap | null {
   const scope = recapScope(text);
   const title = matchField(scope, LABEL_ALTERNATIVES.title);
   if (!title) return null;

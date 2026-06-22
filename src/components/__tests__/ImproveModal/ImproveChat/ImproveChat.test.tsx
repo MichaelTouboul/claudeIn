@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ImproveChat } from '@/components/ImproveModal/ImproveChat/ImproveChat';
+import type { ChatMessage } from '@/components/ImproveModal/types';
 
 const openFilePicker = vi.fn<(kind?: string) => Promise<string[]>>();
 const readImageAsDataUrl = vi.fn<(p: string) => Promise<string | null>>();
@@ -72,5 +73,51 @@ describe('ImproveChat composer', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Send' }));
 
     expect(onSend).toHaveBeenCalledWith('match this', ['/tmp/shot.png']);
+  });
+});
+
+describe('ImproveChat recap rendering', () => {
+  const recapText = [
+    'Sounds good, here is the recap:',
+    '',
+    '```recap',
+    'TITLE: Make the button pop',
+    'DESCRIPTION: Increase contrast and add a hover glow.',
+    'ACCEPTANCE:',
+    '- Button uses the accent token',
+    '- Hover state has a glow',
+    '```',
+  ].join('\n');
+
+  it('renders an assistant recap message as a formatted card (no raw fence/labels)', () => {
+    const messages: ChatMessage[] = [{ id: 'a1', role: 'assistant', text: recapText }];
+    render(<ImproveChat messages={messages} loading={false} onSend={vi.fn()} />);
+
+    // Card content is present…
+    expect(screen.getByText('Make the button pop')).toBeInTheDocument();
+    expect(screen.getByText('Button uses the accent token')).toBeInTheDocument();
+    // …but the raw fence and field labels are NOT shown.
+    expect(screen.queryByText(/```recap/)).toBeNull();
+    expect(screen.queryByText(/TITLE:/)).toBeNull();
+    expect(screen.queryByText(/ACCEPTANCE:/)).toBeNull();
+    // The conversational preamble before the fence is still rendered.
+    expect(screen.getByText('Sounds good, here is the recap:')).toBeInTheDocument();
+  });
+
+  it('renders a plain assistant message as text (no card)', () => {
+    const messages: ChatMessage[] = [
+      { id: 'a1', role: 'assistant', text: 'Could you tell me which button you mean?' },
+    ];
+    render(<ImproveChat messages={messages} loading={false} onSend={vi.fn()} />);
+
+    expect(screen.getByText('Could you tell me which button you mean?')).toBeInTheDocument();
+    expect(screen.queryByRole('list')).toBeNull();
+  });
+
+  it('renders a user message verbatim, even if it happens to contain recap-like text', () => {
+    const messages: ChatMessage[] = [{ id: 'u1', role: 'user', text: 'TITLE: this is mine' }];
+    render(<ImproveChat messages={messages} loading={false} onSend={vi.fn()} />);
+
+    expect(screen.getByText('TITLE: this is mine')).toBeInTheDocument();
   });
 });

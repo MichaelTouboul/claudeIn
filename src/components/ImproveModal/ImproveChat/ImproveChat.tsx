@@ -3,6 +3,9 @@ import { type FormEvent, type KeyboardEvent, useState } from 'react';
 
 import { Button } from '@/components/_ui/Button/Button';
 
+import { parseRecap } from '../recap';
+import { RecapCard } from '../RecapCard/RecapCard';
+import { recapPreamble } from '../RecapCard/recapSplit';
 import type { ChatMessage } from '../types';
 import { AttachedImages } from './AttachedImages';
 import { useImproveChatAttach } from './useImproveChatAttach';
@@ -55,24 +58,36 @@ export function ImproveChat({ messages, loading, onSend }: ImproveChatProps) {
             then propose a recap you can send to Claude.
           </p>
         ) : (
-          messages.map((m) => (
-            <div
-              key={m.id}
-              className={`max-w-[85%] rounded px-3 py-2 text-sm whitespace-pre-wrap ${roleStyle[m.role].align}`}
-              style={{ background: roleStyle[m.role].bg, color: 'var(--color-text-primary)' }}
-            >
-              {m.text}
-              {m.images && m.images.length > 0 ? (
-                <span
-                  className="flex items-center gap-1 mt-1 text-[11px]"
-                  style={{ color: 'var(--color-text-muted)' }}
-                >
-                  <ImagePlus size={11} />
-                  {m.images.length} image{m.images.length > 1 ? 's' : ''} attached
-                </span>
-              ) : null}
-            </div>
-          ))
+          messages.map((m) => {
+            const recap = m.role === 'assistant' ? parseRecap(m.text) : null;
+            const bubbleText = recap ? recapPreamble(m.text) : m.text;
+            const hasImages = m.images !== undefined && m.images.length > 0;
+            return (
+              <div
+                key={m.id}
+                className={`flex flex-col max-w-[85%] ${roleStyle[m.role].align}`}
+              >
+                {bubbleText !== '' || hasImages ? (
+                  <div
+                    className="rounded px-3 py-2 text-sm whitespace-pre-wrap"
+                    style={{ background: roleStyle[m.role].bg, color: 'var(--color-text-primary)' }}
+                  >
+                    {bubbleText}
+                    {hasImages ? (
+                      <span
+                        className="flex items-center gap-1 mt-1 text-[11px]"
+                        style={{ color: 'var(--color-text-muted)' }}
+                      >
+                        <ImagePlus size={11} />
+                        {m.images?.length} image{(m.images?.length ?? 0) > 1 ? 's' : ''} attached
+                      </span>
+                    ) : null}
+                  </div>
+                ) : null}
+                {recap ? <RecapCard recap={recap} /> : null}
+              </div>
+            );
+          })
         )}
         {loading ? (
           <div
