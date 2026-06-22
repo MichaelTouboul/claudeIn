@@ -1,7 +1,7 @@
 import { Avatar } from "@/components/_ui/Avatar";
 import { Button } from "@/components/_ui/Button";
 import type { FavoriteRepo } from "@/lib/types";
-import { repoLabel } from "@/lib/utils";
+import { repoBasename } from "@/lib/utils";
 
 import { repoHue } from "./utils";
 
@@ -12,11 +12,15 @@ type FavoriteRepoCardProps = {
 };
 
 /**
- * One favorite repo: a hued identity avatar, the label + mono path, and an
- * "Open" / "Remove" action pair. Matches the design-system home RepoCard.
+ * One favorite repo: a hued identity avatar, the repo NAME (folder basename) as
+ * the bold title, the LLM description as an optional subtitle, and an
+ * "Open" / "Remove" action pair. The full filesystem path is kept as a tooltip
+ * on the name rather than shown as its own line. Matches the design-system home
+ * RepoCard.
  */
 export function FavoriteRepoCard({ repo, onOpen, onRemove }: FavoriteRepoCardProps) {
-  const label = repoLabel(repo);
+  const name = repoBasename(repo.path);
+  const description = repo.label;
   return (
     <div
       data-repo-card
@@ -24,24 +28,28 @@ export function FavoriteRepoCard({ repo, onOpen, onRemove }: FavoriteRepoCardPro
     >
       <div className="flex items-center gap-3">
         <Avatar
-          name={label}
+          name={name}
           src={repo.logoDataUrl}
           hue={repoHue(repo.path)}
           shape="square"
           size="md"
         />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-fg">{label}</p>
-          <p className="truncate text-xs text-fg-subtle font-mono" title={repo.path}>
-            {repo.path}
+          <p className="truncate text-sm font-semibold text-fg" title={repo.path}>
+            {name}
           </p>
+          {description !== null ? (
+            <p data-repo-subtitle className="truncate text-xs text-fg-subtle">
+              {description}
+            </p>
+          ) : null}
         </div>
       </div>
       <div className="flex gap-2">
-        <Button intent="primary" size="sm" onClick={() => onOpen(repo)} aria-label={`Open ${label}`}>
+        <Button intent="primary" size="sm" onClick={() => onOpen(repo)} aria-label={`Open ${name}`}>
           Open
         </Button>
-        <Button intent="ghost" size="sm" onClick={() => onRemove(repo)} aria-label={`Remove ${label}`}>
+        <Button intent="ghost" size="sm" onClick={() => onRemove(repo)} aria-label={`Remove ${name}`}>
           Remove
         </Button>
       </div>
